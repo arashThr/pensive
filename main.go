@@ -3,61 +3,37 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
+
+	"github.com/arashthr/go-course/controllers"
+	"github.com/arashthr/go-course/views"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
-func handlerFunc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	fmt.Fprint(w, "<h1>Welcome dude!</h1>")
-}
-
-func contactHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `<h1>You can <a href="http://google.com">here</a> contact us here</h1>`)
-}
-
-func faqHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, `
-	<h1>FAQ Page</h1>
-	<ul>
-	<li>
-		<b>Is there a free version?</b>
-		Yes! We offer a free trial for 30 days on any paid plans.
-	</li>
-	<li>
-		<b>What are your support hours?</b>
-		We have support staff answering emails 24/7, though response
-		times may be a bit slower on weekends.
-	</li>
-	<li>
-		<b>How do I contact support?</b>
-		Email us - <a href="mailto:support@lenslocked.com">support@lenslocked.com</a>
-	</li>
-	</ul>
-	`)
-}
-
-func pathHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.URL.Path {
-	case "/contact":
-		contactHandler(w, r)
-	case "/faq":
-		faqHandler(w, r)
-	case "/":
-		handlerFunc(w, r)
-	default:
-		http.NotFound(w, r)
-	}
-}
-
-type MyHandler struct{}
-
-func (MyHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	pathHandler(w, r)
+func bookmarkHandler(w http.ResponseWriter, r *http.Request) {
+	bookmarkId := chi.URLParam(r, "bookmark_id")
+	fmt.Fprint(w, "Hello "+bookmarkId)
 }
 
 func main() {
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	tpl := views.Must(views.ParseTemplate(filepath.Join("templates", "home.gohtml")))
+	r.Get("/", controllers.StaticHandler(tpl))
+
+	tpl = views.Must(views.ParseTemplate(filepath.Join("templates", "contact.gohtml")))
+	r.Get("/contact", controllers.StaticHandler(tpl))
+
+	tpl = views.Must(views.ParseTemplate(filepath.Join("templates", "faq.gohtml")))
+	r.Get("/faq", controllers.StaticHandler(tpl))
+
+	r.Route("/bookmarks", func(r chi.Router) {
+		r.Get("/{bookmark_id}", bookmarkHandler)
+	})
 	fmt.Println("Starting server on port 8000")
 	// http.ListenAndServe("localhost:8000", http.HandlerFunc(pathHandler))
-	var handler MyHandler
-	http.ListenAndServe("localhost:8000", handler)
+	http.ListenAndServe("localhost:8000", r)
 }
