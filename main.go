@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"path/filepath"
 
 	"github.com/arashthr/go-course/controllers"
 	"github.com/arashthr/go-course/views"
@@ -21,13 +20,10 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	tpl := views.Must(views.ParseTemplate(filepath.Join("home.gohtml")))
+	tpl := views.Must(views.ParseTemplate("home.gohtml", "contact.gohtml", "faq.gohtml"))
+
 	r.Get("/", controllers.StaticHandler(tpl))
-
-	tpl = views.Must(views.ParseTemplate(filepath.Join("contact.gohtml")))
 	r.Get("/contact", controllers.StaticHandler(tpl))
-
-	tpl = views.Must(views.ParseTemplate(filepath.Join("faq.gohtml")))
 	r.Get("/faq", controllers.StaticHandler(tpl))
 
 	r.Route("/bookmarks", func(r chi.Router) {

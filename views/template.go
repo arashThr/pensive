@@ -20,8 +20,8 @@ func Must(tpl Template, err error) Template {
 	return tpl
 }
 
-func ParseTemplate(filePath string) (Template, error) {
-	template, err := template.ParseFS(templates.FS, filePath)
+func ParseTemplate(filePaths ...string) (Template, error) {
+	template, err := template.ParseFS(templates.FS, filePaths...)
 	if err != nil {
 		return Template{}, fmt.Errorf("parse fs template: %w", err)
 	}
