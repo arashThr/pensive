@@ -20,11 +20,15 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	tpl := views.Must(views.ParseTemplate("home.gohtml", "contact.gohtml", "faq.gohtml"))
-
+	// tpl := views.Must(views.ParseTemplate("home.gohtml", "contact.gohtml", "faq.gohtml"))
+	tpl := views.Must(views.ParseTemplate("home.gohtml"))
 	r.Get("/", controllers.StaticHandler(tpl))
+
+	tpl = views.Must(views.ParseTemplate("contact.gohtml"))
 	r.Get("/contact", controllers.StaticHandler(tpl))
-	r.Get("/faq", controllers.StaticHandler(tpl))
+
+	tpl = views.Must(views.ParseTemplate("faq.gohtml"))
+	r.Get("/faq", controllers.FAQ(tpl))
 
 	r.Route("/bookmarks", func(r chi.Router) {
 		r.Get("/{bookmark_id}", bookmarkHandler)
