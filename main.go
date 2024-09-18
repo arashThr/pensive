@@ -21,7 +21,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	// tpl := views.Must(views.ParseTemplate("home.gohtml", "contact.gohtml", "faq.gohtml"))
-	tpl := views.Must(views.ParseTemplate("home.gohtml"))
+	tpl := views.Must(views.ParseTemplate("home.gohtml", "layouts.gohtml"))
 	r.Get("/", controllers.StaticHandler(tpl))
 
 	tpl = views.Must(views.ParseTemplate("contact.gohtml"))
