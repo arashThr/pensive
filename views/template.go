@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/arashthr/go-course/templates"
 )
 
 type Template struct {
@@ -19,9 +21,9 @@ func Must(tpl Template, err error) Template {
 }
 
 func ParseTemplate(filePath string) (Template, error) {
-	template, err := template.ParseFiles(filePath)
+	template, err := template.ParseFS(templates.FS, filePath)
 	if err != nil {
-		return Template{}, fmt.Errorf("parsing template: %w", err)
+		return Template{}, fmt.Errorf("parse fs template: %w", err)
 	}
 	return Template{
 		htmlTemplate: template,

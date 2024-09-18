@@ -21,13 +21,13 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	tpl := views.Must(views.ParseTemplate(filepath.Join("templates", "home.gohtml")))
+	tpl := views.Must(views.ParseTemplate(filepath.Join("home.gohtml")))
 	r.Get("/", controllers.StaticHandler(tpl))
 
-	tpl = views.Must(views.ParseTemplate(filepath.Join("templates", "contact.gohtml")))
+	tpl = views.Must(views.ParseTemplate(filepath.Join("contact.gohtml")))
 	r.Get("/contact", controllers.StaticHandler(tpl))
 
-	tpl = views.Must(views.ParseTemplate(filepath.Join("templates", "faq.gohtml")))
+	tpl = views.Must(views.ParseTemplate(filepath.Join("faq.gohtml")))
 	r.Get("/faq", controllers.StaticHandler(tpl))
 
 	r.Route("/bookmarks", func(r chi.Router) {
