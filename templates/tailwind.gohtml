@@ -6,10 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col">
   <header class="bg-gradient-to-r from-blue-800 to-indigo-800">
     <nav class="px-8 py-6 flex items-center text-white">
-      <div class="text-4xl pr-12 font-serif">📖 Pensieve</div>
+      <div class="text-4xl pr-12 font-serif">
+        <a href="/">📖 Pensieve</a>
+      </div>
       <div class="flex-grow">
         <a class="text-lg font-semibold hover:text-blue-200 pr-8" href="/">Home</a>
         <a class="text-lg font-semibold hover:text-blue-200 pr-8" href="/faq">FAQ</a>
@@ -21,9 +23,22 @@
       </div>
     </nav>
   </header>
+
+  <!-- Main content should go here -->
+  <main class="flex-grow">
 {{end}}
 
 {{define "footer"}}
+  </main>
+  <footer class="bg-gray-500 text-white py-4">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2024 Pensieve. All rights reserved.</p>
+      <p>
+        <a href="/privacy" class="hover:text-gray-400">Privacy Policy</a> |
+        <a href="/terms" class="hover:text-gray-400">Terms of Service</a>
+      </p>
+    </div>
+  </footer>
 </body>
 </html>
 {{end}}
