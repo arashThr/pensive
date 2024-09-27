@@ -5,23 +5,48 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Basic transition for the nav menu */
+    .menu-hidden { display: none; }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen bg-gray-100 flex flex-col">
   <header class="bg-gradient-to-r from-blue-800 to-indigo-800">
-    <nav class="px-8 py-6 flex items-center text-white">
+    <nav class="px-8 py-6 flex items-center justify-between text-white">
       <div class="text-4xl pr-12 font-serif">
         <a href="/">📖 Pensieve</a>
       </div>
-      <div class="flex-grow">
-        <a class="text-lg font-semibold hover:text-blue-200 pr-8" href="/">Home</a>
-        <a class="text-lg font-semibold hover:text-blue-200 pr-8" href="/faq">FAQ</a>
-        <a class="text-lg font-semibold hover:text-blue-200 pr-8" href="/contact">Contact</a>
+
+      <!-- Hamburger button (hidden on larger screens) -->
+      <div class="md:hidden">
+        <button id="menu-btn" class="focus:outline-none">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+        </button>
       </div>
-      <div>
-          <a class="pr-4" href="#">Sign in</a>
-          <a class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded" href="#">Sign up</a>
+
+      <!-- Menu links (visible on medium+ screens, hidden on small screens) -->
+      <div id="menu" class="hidden md:flex space-x-8 items-center">
+        <a class="text-lg font-semibold hover:text-blue-200" href="/">Home</a>
+        <a class="text-lg font-semibold hover:text-blue-200" href="/faq">FAQ</a>
+        <a class="text-lg font-semibold hover:text-blue-200" href="/contact">Contact</a>
+        <a class="pr-4" href="#">Sign in</a>
+        <a class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded" href="/signup">Sign up</a>
       </div>
     </nav>
+
+    <!-- Mobile Menu (toggle visibility on smaller screens) -->
+    <div id="mobile-menu" class="menu-hidden md:hidden">
+      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/">Home</a>
+      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/faq">FAQ</a>
+      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/contact">Contact</a>
+      <div class="p-2 bg-blue-700 flex flex-col items-center">
+        <button class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300">Sign in</button>
+        <button class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300">Sign up</button>
+      </div>
+    </div>
+  
   </header>
 
   <!-- Main content should go here -->
@@ -39,6 +64,16 @@
       </p>
     </div>
   </footer>
+
+  <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+  
+    menuBtn.addEventListener('click', () => {
+      // Toggle visibility class for mobile menu
+      mobileMenu.classList.toggle('menu-hidden');
+    });
+  </script>
 </body>
 </html>
 {{end}}
