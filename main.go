@@ -31,8 +31,9 @@ func main() {
 	tpl = views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml"))
 	r.Get("/faq", controllers.FAQ(tpl))
 
-	tpl = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
-	r.Get("/signup", controllers.FAQ(tpl))
+	usersController := controllers.Users{}
+	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
+	r.Get("/signup", usersController.New)
 
 	r.Route("/bookmarks", func(r chi.Router) {
 		r.Get("/{bookmark_id}", bookmarkHandler)
