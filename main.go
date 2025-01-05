@@ -38,6 +38,5 @@ func main() {
 		r.Get("/{bookmark_id}", bookmarkHandler)
 	})
 	fmt.Println("Starting server on port 8000")
-	// http.ListenAndServe("localhost:8000", http.HandlerFunc(pathHandler))
 	http.ListenAndServe("localhost:8000", r)
 }
