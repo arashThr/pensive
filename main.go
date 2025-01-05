@@ -89,6 +89,7 @@ func main() {
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
 	r.Get("/signup", usersController.New)
 	r.Get("/signin", usersController.SignIn)
+	r.Post("/signin", usersController.ProcessSignIn)
 	r.Post("/users", usersController.Create)
 
 	r.Route("/bookmarks", func(r chi.Router) {

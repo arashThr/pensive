@@ -36,3 +36,15 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 	u.Templates.SignIn.Execute(w, nil)
 }
+
+func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	user, err := u.UserService.Authenticate(email, password)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Authentication failed", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, "Authenticated: : %+v", user)
+}
