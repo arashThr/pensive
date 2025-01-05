@@ -20,8 +20,6 @@ func main() {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	// tpl := views.Must(views.ParseTemplate("home.gohtml", "contact.gohtml", "faq.gohtml"))
-	// tpl := views.Must(views.ParseTemplate("home.gohtml", "layouts.gohtml"))
 	tpl := views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml"))
 	r.Get("/", controllers.StaticHandler(tpl))
 
@@ -34,6 +32,7 @@ func main() {
 	usersController := controllers.Users{}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	r.Get("/signup", usersController.New)
+	r.Post("/users", usersController.Create)
 
 	r.Route("/bookmarks", func(r chi.Router) {
 		r.Get("/{bookmark_id}", bookmarkHandler)
