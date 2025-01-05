@@ -1,0 +1,19 @@
+services:
+  db: # The service will be named db.
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASS}
+      POSTGRES_DB: pensieve
+    ports:
+      - 5432:5432 # format here is "port on our machine":"port on container"
+
+  # Adminer provides a nice little web UI to connect to databases
+  adminer:
+    image: adminer
+    restart: always
+    environment:
+      ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
+    ports:
+      - 3333:8080
