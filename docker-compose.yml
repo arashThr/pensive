@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
-      POSTGRES_DB: pensieve
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - 5432:5432 # format here is "port on our machine":"port on container"
 
