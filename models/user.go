@@ -16,7 +16,7 @@ type User struct {
 }
 
 type UserService struct {
-	pool *pgxpool.Pool
+	Pool *pgxpool.Pool
 }
 
 func (us *UserService) Create(email, password string) (*User, error) {

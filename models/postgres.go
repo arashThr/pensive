@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -37,6 +38,16 @@ type PostgresConfig struct {
 	User     string
 	Password string
 	DbName   string
+}
+
+func DefaultPostgresConfig() PostgresConfig {
+	return PostgresConfig{
+		Host:     os.Getenv("POSTGRES_HOST"),
+		Port:     os.Getenv("POSTGRES_PORT"),
+		User:     os.Getenv("POSTGRES_USER"),
+		Password: os.Getenv("POSTGRES_PASSWORD"),
+		DbName:   os.Getenv("POSTGRES_DB"),
+	}
 }
 
 func (cfg PostgresConfig) String() string {
