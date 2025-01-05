@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -40,14 +41,27 @@ type PostgresConfig struct {
 	DbName   string
 }
 
+// TODO: Move it to configs or utils
+func getEnvWithDefault(envName, defaultValue string) string {
+	if value := os.Getenv(envName); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
 func DefaultPostgresConfig() PostgresConfig {
 	return PostgresConfig{
-		Host:     os.Getenv("POSTGRES_HOST"),
-		Port:     os.Getenv("POSTGRES_PORT"),
-		User:     os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("POSTGRES_PASSWORD"),
-		DbName:   os.Getenv("POSTGRES_DB"),
+		Host:     getEnvWithDefault("POSTGRES_HOST", "localhost"),
+		Port:     getEnvWithDefault("POSTGRES_PORT", "5432"),
+		User:     getEnvWithDefault("POSTGRES_USER", "postgres"),
+		Password: getEnvWithDefault("POSTGRES_PASS", "postgres"),
+		DbName:   getEnvWithDefault("DB_NAME", "postgres"),
 	}
+}
+
+func (cfg PostgresConfig) PgConnectionString(options ...string) string {
+	options = append(options, "sslmode=disable")
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?%s", cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.DbName, strings.Join(options, "&"))
 }
 
 func (cfg PostgresConfig) String() string {

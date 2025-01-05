@@ -27,7 +27,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 	}
 	passwordHash := string(hashedBytes)
 
-	row := us.pool.QueryRow(context.Background(), `
+	row := us.Pool.QueryRow(context.Background(), `
 		INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id
 	`, email, passwordHash)
 
