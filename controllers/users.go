@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/arashthr/go-course/models"
@@ -19,11 +20,14 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	user, err := u.UserService.Create(email, password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("creating user: %v", err)
+		http.Error(w, "Creating user failed", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "Email: %v", r.PostForm.Get("email"))
-	fmt.Fprintf(w, "Password: %v", r.PostForm.Get("password"))
+	fmt.Fprintf(w, "User created: %+v", user)
 }
