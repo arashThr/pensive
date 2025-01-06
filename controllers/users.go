@@ -17,7 +17,7 @@ type Users struct {
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
-	u.Templates.New.Execute(w, nil)
+	u.Templates.New.Execute(w, r, nil)
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
-	u.Templates.SignIn.Execute(w, nil)
+	u.Templates.SignIn.Execute(w, r, nil)
 }
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
