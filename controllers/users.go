@@ -59,6 +59,10 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	email, err := r.Cookie("email")
 	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+			return
+		}
 		fmt.Fprintf(w, "The email cookie could not be read")
 		return
 	}
