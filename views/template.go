@@ -1,8 +1,10 @@
 package views
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 
@@ -52,9 +54,13 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 		},
 	)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	err = tpl.Execute(w, data)
+
+	var buf bytes.Buffer
+	err = tpl.Execute(&buf, data)
 	if err != nil {
 		log.Printf("executing template: %v", err)
 		http.Error(w, "There was an error executing the template", http.StatusInternalServerError)
+		return
 	}
+	io.Copy(w, &buf)
 }
