@@ -91,6 +91,7 @@ func main() {
 	r.Get("/signin", usersController.SignIn)
 	r.Post("/signin", usersController.ProcessSignIn)
 	r.Post("/users", usersController.Create)
+	r.Get("/users/me", usersController.CurrentUser)
 
 	r.Route("/bookmarks", func(r chi.Router) {
 		r.Get("/{bookmark_id}", bookmarkHandler)
