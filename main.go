@@ -86,8 +86,12 @@ func main() {
 	userService := models.UserService{
 		Pool: pool,
 	}
+	sessionService := models.SessionService{
+		Pool: pool,
+	}
 	usersController := controllers.Users{
-		UserService: &userService,
+		UserService:    &userService,
+		SessionService: &sessionService,
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
