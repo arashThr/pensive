@@ -2,11 +2,17 @@ package models
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/arashthr/go-course/db/migrations"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -67,4 +73,26 @@ func (cfg PostgresConfig) PgConnectionString(options ...string) string {
 func (cfg PostgresConfig) String() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DbName)
+}
+
+func Migrate(connString string) error {
+	driver, err := iofs.New(migrations.MigrationsFs, ".")
+	if err != nil {
+		return fmt.Errorf("migration fs: %w", err)
+	}
+	m, err := migrate.NewWithSourceInstance("iofs", driver, connString)
+	if err != nil {
+		return fmt.Errorf("creating migration instance: %v", err)
+	}
+	err = m.Up()
+	if err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			log.Println("no change")
+			return nil
+		}
+		return fmt.Errorf("applying migrations: %w", err)
+	} else {
+		log.Println("migrations applied")
+	}
+	return nil
 }

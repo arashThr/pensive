@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,9 +11,6 @@ import (
 	"github.com/arashthr/go-course/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -27,37 +23,16 @@ func bookmarkHandler(w http.ResponseWriter, r *http.Request) {
 
 func setupDb() *pgxpool.Pool {
 	cfg := models.DefaultPostgresConfig()
-	applyMigrations(cfg.PgConnectionString())
+	err := models.Migrate(cfg.PgConnectionString())
+	if err != nil {
+		panic(err)
+	}
 
 	pool, err := models.Open(cfg)
 	if err != nil {
 		log.Fatalf("connecting to db: %v", err)
 	}
 	return pool
-}
-
-//go:embed db/migrations/*.sql
-var fs embed.FS
-
-func applyMigrations(connString string) {
-	driver, err := iofs.New(fs, "db/migrations")
-	if err != nil {
-		log.Fatal(err)
-	}
-	m, err := migrate.NewWithSourceInstance("iofs", driver, connString)
-	if err != nil {
-		log.Fatalf("creating migration instance: %v", err)
-	}
-	err = m.Up()
-	if err != nil {
-		if err == migrate.ErrNoChange {
-			log.Println("no change")
-			return
-		}
-		log.Fatalf("applying migrations: %v", err)
-	} else {
-		log.Println("migrations applied")
-	}
 }
 
 func main() {
