@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/arashthr/go-course/rand"
@@ -44,7 +45,7 @@ func (ss *SessionService) Create(userId uint) (*Session, error) {
 		RETURNING id;`, session.TokenHash, userId)
 	err = row.Scan(&session.ID)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		row = ss.Pool.QueryRow(context.Background(), `
 			INSERT INTO sessions (user_id, token_hash)
 			VALUES ($1, $2)
@@ -60,7 +61,32 @@ func (ss *SessionService) Create(userId uint) (*Session, error) {
 }
 
 func (ss *SessionService) User(token string) (*User, error) {
-	return nil, nil
+	tokenHash := ss.hash(token)
+	row := ss.Pool.QueryRow(context.Background(), `
+		SELECT user_id FROM sessions WHERE token_hash = $1;`, tokenHash)
+	var user User
+	err := row.Scan(&user.ID)
+	if err != nil {
+		return nil, fmt.Errorf("session user: %w", err)
+	}
+	row = ss.Pool.QueryRow(context.Background(), `
+		SELECT email, password_hash from users WHERE id = $1;`, user.ID)
+	err = row.Scan(&user.Email, &user.PasswordHash)
+	if err != nil {
+		return nil, fmt.Errorf("session user: %w", err)
+	}
+	return &user, nil
+}
+
+func (ss *SessionService) Delete(token string) error {
+	tokenHash := ss.hash(token)
+	ex, err := ss.Pool.Exec(context.Background(), `
+		DELETE FROM sessions WHERE token_hash = $1;`, tokenHash)
+	if err != nil {
+		return fmt.Errorf("session delete: %w", err)
+	}
+	fmt.Printf("ex: %+v\n", ex)
+	return nil
 }
 
 func (ss *SessionService) hash(token string) string {

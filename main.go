@@ -98,6 +98,7 @@ func main() {
 	r.Get("/signup", usersController.New)
 	r.Get("/signin", usersController.SignIn)
 	r.Post("/signin", usersController.ProcessSignIn)
+	r.Post("/signout", usersController.ProcessSignOut)
 	r.Post("/users", usersController.Create)
 	r.Get("/users/me", usersController.CurrentUser)
 
