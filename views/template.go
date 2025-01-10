@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/arashthr/go-course/context"
+	"github.com/arashthr/go-course/models"
 	"github.com/arashthr/go-course/templates"
 	"github.com/gorilla/csrf"
 )
@@ -28,6 +30,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 	tpl.Funcs(template.FuncMap{
 		"csrfField": func() (template.HTML, error) {
 			return "", fmt.Errorf("csrfField not implemented")
+		},
+		"currentUser": func() (template.HTML, error) {
+			return "", fmt.Errorf("current user not implemented")
 		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)
@@ -50,6 +55,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 		template.FuncMap{
 			"csrfField": func() template.HTML {
 				return csrf.TemplateField(r)
+			},
+			"currentUser": func() *models.User {
+				return context.User(r.Context())
 			},
 		},
 	)

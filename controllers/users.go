@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
 )
 
@@ -84,20 +84,46 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	token, err := readCookie(r, CookieSession)
-	if err != nil {
-		if errors.Is(err, http.ErrNoCookie) {
-			http.Redirect(w, r, "/signin", http.StatusSeeOther)
+	user := context.User(r.Context())
+	fmt.Fprintf(w, "Welcome: %v", user.Email)
+}
+
+type UserMiddleware struct {
+	SessionService *models.SessionService
+}
+
+func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token, err := readCookie(r, CookieSession)
+		if err != nil {
+			log.Printf("read cookie: %v", err)
+			next.ServeHTTP(w, r)
 			return
 		}
-		fmt.Fprintf(w, "There is an error getting your credentials")
-		return
-	}
-	user, err := u.SessionService.User(token)
-	if err != nil {
-		log.Print(err)
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
-	fmt.Fprintf(w, "Welcome, :%v", user.Email)
+		if token == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		user, err := umw.SessionService.User(token)
+		if err != nil {
+			log.Printf("session user: %v", err)
+			next.ServeHTTP(w, r)
+			return
+		}
+		ctx := r.Context()
+		ctx = context.WithUser(ctx, user)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user == nil {
+			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }

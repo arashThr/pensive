@@ -31,14 +31,17 @@
         <a class="text-lg font-semibold hover:text-blue-200" href="/">Home</a>
         <a class="text-lg font-semibold hover:text-blue-200" href="/faq">FAQ</a>
         <a class="text-lg font-semibold hover:text-blue-200" href="/contact">Contact</a>
+        {{if currentUser}}
         <form action="/signout" method="post">
           <div class="hidden" class="pr-4 inline">
             {{csrfField}}
           </div>
           <button type="submit">Sign out</button>
         </form>
+        {{else}}
         <a class="pr-4" href="/signin">Sign in</a>
         <a class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded" href="/signup">Sign up</a>
+        {{end}}
       </div>
     </nav>
 
