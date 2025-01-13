@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
@@ -11,11 +12,15 @@ import (
 
 type Users struct {
 	Templates struct {
-		New    Template
-		SignIn Template
+		New            Template
+		SignIn         Template
+		ForgotPassword Template
+		CheckYourEmail Template
 	}
-	UserService    *models.UserService
-	SessionService *models.SessionService
+	UserService          *models.UserService
+	SessionService       *models.SessionService
+	PasswordResetService *models.PasswordResetService
+	EmailService         *models.EmailService
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -86,6 +91,39 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	fmt.Fprintf(w, "Welcome: %v", user.Email)
+}
+
+func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	u.Templates.ForgotPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Email string
+	}
+	data.Email = r.FormValue("email")
+	pwReset, err := u.PasswordResetService.Create(data.Email)
+	if err != nil {
+		// TODO: Handle other cases, like when the user does not exist
+		log.Println(err)
+		http.Error(w, "Password reset failed", http.StatusInternalServerError)
+		return
+	}
+	values := url.Values{
+		"token": {pwReset.Token},
+	}
+	resetUrl := "http://localhost:8000/reset-pw?" + values.Encode()
+	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Password reset failed", http.StatusInternalServerError)
+		return
+	}
+	u.Templates.CheckYourEmail.Execute(w, r, data)
 }
 
 type UserMiddleware struct {

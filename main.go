@@ -52,6 +52,9 @@ func main() {
 	sessionService := models.SessionService{
 		Pool: pool,
 	}
+	passwordResetService := models.PasswordResetService{
+		Pool: pool,
+	}
 
 	// Middlewares
 	umw := controllers.UserMiddleware{
@@ -62,8 +65,9 @@ func main() {
 
 	// Controllers
 	usersController := controllers.Users{
-		UserService:    &userService,
-		SessionService: &sessionService,
+		UserService:          &userService,
+		SessionService:       &sessionService,
+		PasswordResetService: &passwordResetService,
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
