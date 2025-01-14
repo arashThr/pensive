@@ -3,9 +3,12 @@
 <div class="py-12 flex justify-center">
   <div class="p-8 bg-white rounded-lg shadow">
     <h1 class="pt-4 pb-4 text-center text-2xl font-bold text-gray-900">
-        Welcome back
+        Forgot your password?
     </h1>
-    <form action="/signin" method="post">
+    <p class="text-sm text-gray-600 pb-4">
+      No problem. Enter your email addresse below and we will send you link to reset your password.
+    </p>
+    <form action="/forgot-pw" method="post">
       <div class="hidden">
         {{csrfField}}
       </div>
@@ -19,25 +22,16 @@
           placeholder="Email address"
           required
           autocomplete="email"
-        />
-      </div>
-      <div class="py-2">
-        <label class="text-sm font-semibold text-gray-800" for="password">Password</label>
-        <input
-          class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-          name="password"
-          id="password"
-          type="password"
-          placeholder="Password"
-          required
+          value="{{.Email}}"
+          autofocus
         />
       </div>
       <div class="py-4">
-        <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-lg" type="submit">Sign in</button>
+        <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-lg" type="submit">Reset password</button>
       </div>
       <div class="py-2 w-full flex justify-between text-xs text-gray-500">
         <p><a class="underline hover:text-indigo-600" href="/signup">Need an account?</a></p>
-        <p><a class="underline hover:text-indigo-600" href="/forgot-pw">Forgot your password?</a></p>
+        <p><a class="underline hover:text-indigo-600" href="/signin">Remember your password</a></p>
       </div>
     </form>
   </div>

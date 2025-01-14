@@ -16,11 +16,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func bookmarkHandler(w http.ResponseWriter, r *http.Request) {
-	bookmarkId := chi.URLParam(r, "bookmark_id")
-	fmt.Fprint(w, "Hello "+bookmarkId)
-}
-
 func setupDb() *pgxpool.Pool {
 	cfg := models.DefaultPostgresConfig()
 	err := models.Migrate(cfg.PgConnectionString())
@@ -71,6 +66,7 @@ func main() {
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
+	usersController.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -92,6 +88,8 @@ func main() {
 	r.Get("/signin", usersController.SignIn)
 	r.Post("/signin", usersController.ProcessSignIn)
 	r.Post("/signout", usersController.ProcessSignOut)
+	r.Get("/forgot-pw", usersController.ForgotPassword)
+	r.Post("/forgot-pw", usersController.ProcessForgotPassword)
 	r.Post("/users", usersController.Create)
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
