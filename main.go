@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/arashthr/go-course/controllers"
 	"github.com/arashthr/go-course/models"
@@ -16,8 +17,52 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func setupDb() *pgxpool.Pool {
-	cfg := models.DefaultPostgresConfig()
+type config struct {
+	PSQL models.PostgresConfig
+	SMTP models.SMTPConfig
+	CSRF struct {
+		Key    string
+		Secure bool
+	}
+	Server struct {
+		Address string
+	}
+}
+
+func loadEnvConfig() (config, error) {
+	var cfg config
+	err := godotenv.Load()
+	if err != nil {
+		return cfg, fmt.Errorf("loading .env file: %w", err)
+	}
+	// DB
+	cfg.PSQL = models.DefaultPostgresConfig()
+
+	// SMTP
+	port, err := strconv.Atoi(os.Getenv("MAIL_PORT"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Host: ", os.Getenv("MAIL_HOST"))
+
+	cfg.SMTP = models.SMTPConfig{
+		Host:     os.Getenv("MAIL_HOST"),
+		Port:     port,
+		Username: os.Getenv("MAIL_USER"),
+		Password: os.Getenv("MAIL_PASS"),
+	}
+
+	// CSRF
+	cfg.CSRF.Key = os.Getenv("CSRF_TOKEN")
+	cfg.CSRF.Secure = false
+
+	// Server
+	cfg.Server.Address = ":8080"
+
+	return cfg, nil
+}
+
+func setupDb(cfg models.PostgresConfig) *pgxpool.Pool {
 	err := models.Migrate(cfg.PgConnectionString())
 	if err != nil {
 		panic(err)
@@ -31,38 +76,39 @@ func setupDb() *pgxpool.Pool {
 }
 
 func main() {
-	err := godotenv.Load()
+	cfg, err := loadEnvConfig()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic(err)
 	}
 
 	// Database
-	pool := setupDb()
+	pool := setupDb(cfg.PSQL)
 	defer pool.Close()
 
 	// Services
-	userService := models.UserService{
+	userService := &models.UserService{
 		Pool: pool,
 	}
-	sessionService := models.SessionService{
+	sessionService := &models.SessionService{
 		Pool: pool,
 	}
-	passwordResetService := models.PasswordResetService{
+	passwordResetService := &models.PasswordResetService{
 		Pool: pool,
 	}
+	emailService := models.NewEmailService(cfg.SMTP)
 
 	// Middlewares
 	umw := controllers.UserMiddleware{
-		SessionService: &sessionService,
+		SessionService: sessionService,
 	}
-	csrfKey := os.Getenv("CSRF_TOKEN")
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false))
+	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure))
 
 	// Controllers
 	usersController := controllers.Users{
-		UserService:          &userService,
-		SessionService:       &sessionService,
-		PasswordResetService: &passwordResetService,
+		UserService:          userService,
+		SessionService:       sessionService,
+		PasswordResetService: passwordResetService,
+		EmailService:         emailService,
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
@@ -99,6 +145,9 @@ func main() {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
 
-	fmt.Println("Starting server on port 8000")
-	http.ListenAndServe("localhost:8000", r)
+	fmt.Printf("Starting server on %s...", cfg.Server.Address)
+	err = http.ListenAndServe(cfg.Server.Address, r)
+	if err != nil {
+		log.Fatalf("starting server: %v", err)
+	}
 }
