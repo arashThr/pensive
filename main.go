@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/arashthr/go-course/controllers"
 	"github.com/arashthr/go-course/models"
@@ -43,8 +44,6 @@ func loadEnvConfig() (config, error) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Host: ", os.Getenv("MAIL_HOST"))
-
 	cfg.SMTP = models.SMTPConfig{
 		Host:     os.Getenv("MAIL_HOST"),
 		Port:     port,
@@ -57,7 +56,7 @@ func loadEnvConfig() (config, error) {
 	cfg.CSRF.Secure = false
 
 	// Server
-	cfg.Server.Address = ":8080"
+	cfg.Server.Address = ":8000"
 
 	return cfg, nil
 }
@@ -94,6 +93,7 @@ func main() {
 	}
 	passwordResetService := &models.PasswordResetService{
 		Pool: pool,
+		Now:  func() time.Time { return time.Now() },
 	}
 	emailService := models.NewEmailService(cfg.SMTP)
 
@@ -114,6 +114,7 @@ func main() {
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
 	usersController.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
+	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -137,6 +138,8 @@ func main() {
 	r.Post("/signout", usersController.ProcessSignOut)
 	r.Get("/forgot-pw", usersController.ForgotPassword)
 	r.Post("/forgot-pw", usersController.ProcessForgotPassword)
+	r.Get("/reset-password", usersController.ResetPassword)
+	r.Post("/reset-password", usersController.ProcessResetPassword)
 	r.Post("/users", usersController.Create)
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)

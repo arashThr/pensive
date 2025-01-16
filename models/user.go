@@ -66,3 +66,16 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	}
 	return &user, nil
 }
+
+func (us *UserService) UpdatePassword(userId uint, password string) error {
+	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("update password: %w", err)
+	}
+	hashedPassword := string(hashedBytes)
+	_, err = us.Pool.Exec(context.Background(), `UPDATE users SET password_hash = $1 WHERE id = $2`, hashedPassword, userId)
+	if err != nil {
+		return fmt.Errorf("update password in db: %w", err)
+	}
+	return nil
+}

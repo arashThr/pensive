@@ -87,7 +87,7 @@ func Migrate(connString string) error {
 	err = m.Up()
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			log.Println("no change")
+			log.Println("no migrations")
 			return nil
 		}
 		return fmt.Errorf("applying migrations: %w", err)

@@ -1,1 +1,1 @@
-DROP TABLE IF NOT EXISTS password_reset;
+DROP TABLE IF NOT EXISTS password_resets;

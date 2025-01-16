@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS password_reset (
+CREATE TABLE IF NOT EXISTS password_resets (
     id SERIAL PRIMARY KEY,
     user_id INT UNIQUE REFERENCES users (id) ON DELETE CASCADE,
     token_hash TEXT UNIQUE NOT NULL,
