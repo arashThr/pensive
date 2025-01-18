@@ -11,6 +11,8 @@ require (
 	golang.org/x/crypto v0.31.0
 )
 
+require github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
+
 require (
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect

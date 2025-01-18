@@ -133,6 +133,7 @@ func main() {
 		views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 	))
 	r.Get("/signup", usersController.New)
+	r.Post("/users", usersController.Create)
 	r.Get("/signin", usersController.SignIn)
 	r.Post("/signin", usersController.ProcessSignIn)
 	r.Post("/signout", usersController.ProcessSignOut)
@@ -140,7 +141,6 @@ func main() {
 	r.Post("/forgot-pw", usersController.ProcessForgotPassword)
 	r.Get("/reset-password", usersController.ResetPassword)
 	r.Post("/reset-password", usersController.ProcessResetPassword)
-	r.Post("/users", usersController.Create)
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersController.CurrentUser)

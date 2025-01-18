@@ -34,6 +34,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
+		"errors": func() []string {
+			return nil
+		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)
 	if err != nil {
@@ -44,7 +47,7 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 	}, nil
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, errs ...error) {
 	tpl, err := t.htmlTemplate.Clone()
 	if err != nil {
 		log.Printf("cloning template failed: %v", err)
@@ -58,6 +61,13 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 			},
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
+			},
+			"errors": func() []string {
+				var errMessage []string
+				for _, err = range errs {
+					errMessage = append(errMessage, err.Error())
+				}
+				return errMessage
 			},
 		},
 	)

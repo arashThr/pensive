@@ -1,15 +1,19 @@
 {{define "header"}}
 <!doctype html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /* Basic transition for the nav menu */
-    .menu-hidden { display: none; }
+    .menu-hidden {
+      display: none;
+    }
   </style>
 </head>
+
 <body class="min-h-screen bg-gray-100 flex flex-col">
   <header class="bg-gradient-to-r from-slate-800 to-indigo-950">
     <nav class="px-8 py-6 flex items-center justify-between text-white">
@@ -51,12 +55,29 @@
       <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/faq">FAQ</a>
       <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/contact">Contact</a>
       <div class="p-2 bg-blue-700 flex flex-col items-center">
-        <a href="/signin" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign in</a>
-        <a href="/signup" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign up</a>
+        <a href="/signin" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign
+          in</a>
+        <a href="/signup" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign
+          up</a>
       </div>
     </div>
-  
   </header>
+
+  <!-- Alerts -->
+  <div class="py-4 px-2">
+  {{range errors}}
+    <div class="closable flex px-2 py-2 bg-red-200 text-red-700 rounded mb-2">
+      <div class="flex-grow">
+        {{ . }}
+      </div>
+      <a href="#" onclick="closeAlert(event)">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>
+      </a>
+    </div>
+  {{end}}
+  </div>
 
   <!-- Main content should go here -->
   <main class="flex-grow">
@@ -77,12 +98,18 @@
   <script>
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-  
+
     menuBtn.addEventListener('click', () => {
       // Toggle visibility class for mobile menu
       mobileMenu.classList.toggle('menu-hidden');
-    });
+    })
+
+    function closeAlert(alert) {
+      let closable = event.target.closest('.closable')
+      closable.remove()
+    }
   </script>
 </body>
+
 </html>
 {{end}}
