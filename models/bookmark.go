@@ -69,3 +69,12 @@ func (service *BookmarkService) ByUserId(userId uint) ([]Bookmark, error) {
 	}
 	return bookmarks, nil
 }
+
+func (service *BookmarkService) Delete(id uint) error {
+	_, err := service.Pool.Exec(context.Background(),
+		`DELETE FROM bookmarks WHERE id = $1;`, id)
+	if err != nil {
+		return fmt.Errorf("delete bookmark: %w", err)
+	}
+	return nil
+}
