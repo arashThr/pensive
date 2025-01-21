@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"path"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
@@ -26,7 +27,7 @@ func Must(tpl Template, err error) Template {
 }
 
 func ParseTemplate(filePaths ...string) (Template, error) {
-	tpl := template.New(filePaths[0])
+	tpl := template.New(path.Base(filePaths[0]))
 	tpl.Funcs(template.FuncMap{
 		"csrfField": func() (template.HTML, error) {
 			return "", fmt.Errorf("csrfField not implemented")
