@@ -108,6 +108,9 @@ func run(cfg *config) error {
 	apiService := &models.ApiService{
 		Pool: pool,
 	}
+	bookmarksService := &models.BookmarkService{
+		Pool: pool,
+	}
 
 	// Middlewares
 	umw := controllers.UserMiddleware{
@@ -136,6 +139,11 @@ func run(cfg *config) error {
 	usersController.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user-page.gohtml", "tailwind.gohtml"))
+
+	bookmarksController := controllers.Bookmarks{
+		BookmarkService: bookmarksService,
+	}
+	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -189,6 +197,7 @@ func run(cfg *config) error {
 	assetHandler := http.FileServer(http.Dir("assets"))
 	r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
 
+	r.Get("/bookmarks/new", bookmarksController.New)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})

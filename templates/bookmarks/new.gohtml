@@ -11,15 +11,12 @@
         <div class="py-2">
             <label class="text-sm font-semibold text-gray-800">Link address</label>
             <input class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-                name="link" id="link" type="url" placeholder="Link address" required />
+                name="link" id="link" type="url" placeholder="Link address" required
+                value="{{.Link}}" />
         </div>
         <div class="py-4">
-            <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-lg"
-                type="submit">Sign up</button>
-        </div>
-        <div class="py-2 w-full flex justify-between text-xs text-gray-500">
-            <p><a class="underline hover:text-indigo-600" href="/signin">Already have an account?</a></p>
-            <p><a class="underline hover:text-indigo-600" href="/forgot-pw">Forgot your password?</a></p>
+            <button class="px-8 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-lg"
+                type="submit">Add bookmark</button>
         </div>
     </form>
 </div>
