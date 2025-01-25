@@ -198,6 +198,13 @@ func run(cfg *config) error {
 	r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
 
 	r.Get("/bookmarks/new", bookmarksController.New)
+	r.Route("/bookmarks", func(r chi.Router) {
+		r.Group(func(r chi.Router) {
+			// For routes that are accessible by user
+			r.Use(umw.RequireUser)
+			r.Get("/new", bookmarksController.New)
+		})
+	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
