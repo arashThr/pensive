@@ -10,6 +10,7 @@ import (
 	"path"
 
 	"github.com/arashthr/go-course/context"
+	"github.com/arashthr/go-course/controllers"
 	"github.com/arashthr/go-course/models"
 	"github.com/arashthr/go-course/templates"
 	"github.com/gorilla/csrf"
@@ -35,7 +36,7 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
-		"errors": func() []string {
+		"messages": func() []controllers.NavbarMessage {
 			return nil
 		},
 	})
@@ -48,7 +49,7 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 	}, nil
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, errs ...error) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navMsgs ...controllers.NavbarMessage) {
 	tpl, err := t.htmlTemplate.Clone()
 	if err != nil {
 		log.Printf("cloning template failed: %v", err)
@@ -63,12 +64,8 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, errs
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
 			},
-			"errors": func() []string {
-				var errMessage []string
-				for _, err = range errs {
-					errMessage = append(errMessage, err.Error())
-				}
-				return errMessage
+			"messages": func() []controllers.NavbarMessage {
+				return navMsgs
 			},
 		},
 	)

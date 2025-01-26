@@ -144,6 +144,7 @@ func run(cfg *config) error {
 		BookmarkService: bookmarksService,
 	}
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
+	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -203,6 +204,9 @@ func run(cfg *config) error {
 			// For routes that are accessible by user
 			r.Use(umw.RequireUser)
 			r.Get("/new", bookmarksController.New)
+			r.Post("/", bookmarksController.Create)
+			r.Get("/{id}/edit", bookmarksController.Edit)
+			r.Post("/{id}", bookmarksController.Update)
 		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

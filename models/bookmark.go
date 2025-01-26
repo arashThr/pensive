@@ -23,16 +23,17 @@ type BookmarkService struct {
 
 // TODO: Add validation of the db query inputs (Like Id)
 
-func (service *BookmarkService) Create(title string, link string, userId uint) (*Bookmark, error) {
+func (service *BookmarkService) Create(link string, userId uint) (*Bookmark, error) {
 	bookmark := Bookmark{
 		UserId: userId,
-		Title:  title,
-		Link:   link,
+		// TODO: Get the title from the link
+		Title: "Not implemented",
+		Link:  link,
 	}
 
 	row := service.Pool.QueryRow(context.Background(),
 		`INSERT INTO bookmarks (user_id, title, link)
-		VALUES ($1, $2, $3) RETURNING id;`, userId, title, link)
+		VALUES ($1, $2, $3) RETURNING id;`, userId, bookmark.Title, link)
 	err := row.Scan(&bookmark.ID)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
@@ -68,6 +69,17 @@ func (service *BookmarkService) ByUserId(userId uint) ([]Bookmark, error) {
 		return nil, fmt.Errorf("collecting bookmark rows: %w", err)
 	}
 	return bookmarks, nil
+}
+
+func (service *BookmarkService) Update(bookmark *Bookmark) error {
+	_, err := service.Pool.Exec(context.Background(),
+		`UPDATE bookmarks SET link = $1, title = $2 WHERE id = $3`,
+		bookmark.Link, bookmark.Title, bookmark.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("update bookmark: %w", err)
+	}
+	return nil
 }
 
 func (service *BookmarkService) Delete(id uint) error {

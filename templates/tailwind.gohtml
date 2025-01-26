@@ -65,10 +65,14 @@
 
   <!-- Alerts -->
   <div class="py-4 px-2">
-  {{range errors}}
-    <div class="closable flex px-2 py-2 bg-red-200 text-red-700 rounded mb-2">
+  {{range messages}}
+    <div class="closable flex px-2 py-2 mb-2 rounded
+    {{if .IsError }}text-red-700 bg-red-200
+    {{else}}text-green-700 bg-green-200
+    {{end}}
+    ">
       <div class="flex-grow">
-        {{ . }}
+        {{ .Message }}
       </div>
       <a href="#" onclick="closeAlert(event)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">

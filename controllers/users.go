@@ -46,7 +46,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, models.ErrEmailTaken) {
 			err = errors.Public(err, "That email address is already taken")
 		}
-		u.Templates.New.Execute(w, r, data, err)
+		u.Templates.New.Execute(w, r, data, NavbarMessage{
+			Message: err.Error(),
+			IsError: true,
+		})
 		return
 	}
 
