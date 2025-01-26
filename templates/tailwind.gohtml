@@ -15,8 +15,8 @@
 </head>
 
 <body class="min-h-screen bg-gray-100 flex flex-col">
-  <header class="bg-gradient-to-r from-slate-800 to-indigo-950">
-    <nav class="px-8 py-6 flex items-center justify-between text-white">
+  <header class="bg-gradient-to-r from-slate-600 to-indigo-800">
+    <nav class="px-8 py-6 flex items-center text-white">
       <div class="text-4xl pr-12 font-serif">
         <a href="/">📖 Pensieve App</a>
       </div>
@@ -35,6 +35,17 @@
         <a class="text-lg font-semibold hover:text-blue-200" href="/">Home</a>
         <a class="text-lg font-semibold hover:text-blue-200" href="/faq">FAQ</a>
         <a class="text-lg font-semibold hover:text-blue-200" href="/contact">Contact</a>
+      </div>
+
+      {{if currentUser}}
+      <div class="flex-grow flex flex-row-reverse">
+        <a class="pr-8 text-lg font-semibold hover:text-blue-100" href="/bookmarks">Bookmarks</a>
+      </div>
+      {{else}}
+      <div class="flex-grow"></div>
+      {{end}}
+
+      <div>
         {{if currentUser}}
         <form action="/signout" method="post">
           <div class="hidden" class="pr-4 inline">

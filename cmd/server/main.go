@@ -145,6 +145,7 @@ func run(cfg *config) error {
 	}
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
+	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -203,8 +204,9 @@ func run(cfg *config) error {
 		r.Group(func(r chi.Router) {
 			// For routes that are accessible by user
 			r.Use(umw.RequireUser)
-			r.Get("/new", bookmarksController.New)
+			r.Get("/", bookmarksController.Index)
 			r.Post("/", bookmarksController.Create)
+			r.Get("/new", bookmarksController.New)
 			r.Get("/{id}/edit", bookmarksController.Edit)
 			r.Post("/{id}", bookmarksController.Update)
 		})

@@ -4,11 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"net/url"
-	"time"
 
 	"github.com/arashthr/go-course/errors"
-	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -25,42 +22,20 @@ type BookmarkService struct {
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-
-func (service *BookmarkService) Create(link string, userId uint) (*Bookmark, error) {
-	if !isURLValid(link) {
-		return nil, ErrInvalidUrl
-	}
-	// TODO: Check if the link already exists
-	article, err := readability.FromURL(link, 5*time.Second)
-	if err != nil {
-		return nil, fmt.Errorf("readability from url: %w", err)
-	}
-	fmt.Printf("Creating article: %v - Excerpt: %v\n", article.Title, article.Excerpt)
+func (service *BookmarkService) Create(link string, title string, userId uint) (*Bookmark, error) {
 	bookmark := Bookmark{
 		UserId: userId,
-		Title:  article.Title,
+		Title:  title,
 		Link:   link,
 	}
-
 	row := service.Pool.QueryRow(context.Background(),
 		`INSERT INTO bookmarks (user_id, title, link)
 		VALUES ($1, $2, $3) RETURNING id;`, userId, bookmark.Title, link)
-	err = row.Scan(&bookmark.ID)
+	err := row.Scan(&bookmark.ID)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 	return &bookmark, nil
-}
-
-func isURLValid(link string) bool {
-	if link == "" || len(link) > 2048 {
-		return false
-	}
-	u, err := url.Parse(link)
-	if err != nil {
-		return false
-	}
-	return u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
 }
 
 func (service *BookmarkService) ById(id uint) (*Bookmark, error) {
@@ -71,7 +46,6 @@ func (service *BookmarkService) ById(id uint) (*Bookmark, error) {
 		`SELECT user_id, title, link FROM bookmarks WHERE id = $1;`, id)
 	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link)
 	if err != nil {
-		// TODO: Test to make sure this works
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
