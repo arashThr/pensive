@@ -69,7 +69,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
-	bookmark, err := b.getBookmark(w, r)
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
 	}
@@ -86,7 +86,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
-	bookmark, err := b.getBookmark(w, r)
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
 	}
@@ -139,7 +139,20 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	b.Templates.Index.Execute(w, r, data)
 }
 
-func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request) (*models.Bookmark, error) {
+func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
+	if err != nil {
+		return
+	}
+	err = b.BookmarkService.Delete(bookmark.ID)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, r, "/bookmarks", http.StatusFound)
+}
+
+func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
@@ -155,12 +168,25 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request) (*models.
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return nil, err
 	}
+
+	for _, opt := range opts {
+		if err := opt(w, r, bookmark); err != nil {
+			return nil, err
+		}
+	}
+
+	return bookmark, nil
+}
+
+type bookmarkOpts func(http.ResponseWriter, *http.Request, *models.Bookmark) error
+
+func userMustOwnBookmark(w http.ResponseWriter, r *http.Request, bookmark *models.Bookmark) error {
 	user := context.User(r.Context())
 	if user.ID != bookmark.UserId {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
-		return nil, err
+		http.Error(w, "User does not have access to the bookmark", http.StatusForbidden)
+		return fmt.Errorf("user does not have access to the bookmark")
 	}
-	return bookmark, nil
+	return nil
 }
 
 func isURLValid(link string) bool {

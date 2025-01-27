@@ -209,6 +209,7 @@ func run(cfg *config) error {
 			r.Get("/new", bookmarksController.New)
 			r.Get("/{id}/edit", bookmarksController.Edit)
 			r.Post("/{id}", bookmarksController.Update)
+			r.Post("/{id}/delete", bookmarksController.Delete)
 		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
