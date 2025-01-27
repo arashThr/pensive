@@ -20,6 +20,7 @@ type Bookmarks struct {
 		New   Template
 		Edit  Template
 		Index Template
+		Show  Template
 	}
 	BookmarkService *models.BookmarkService
 }
@@ -68,24 +69,8 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	bookmark, err := b.getBookmark(w, r)
 	if err != nil {
-		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
-		return
-	}
-	bookmark, err := b.BookmarkService.ById(uint(id))
-	if err != nil {
-		if errors.Is(err, models.ErrNotFound) {
-			http.Error(w, "Bookmark not found", http.StatusNotFound)
-			return
-		}
-		log.Print(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-	user := context.User(r.Context())
-	if user.ID != bookmark.UserId {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
 
@@ -101,24 +86,8 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	bookmark, err := b.getBookmark(w, r)
 	if err != nil {
-		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
-		return
-	}
-	bookmark, err := b.BookmarkService.ById(uint(id))
-	if err != nil {
-		if errors.Is(err, models.ErrNotFound) {
-			http.Error(w, "Bookmark not found", http.StatusNotFound)
-			return
-		}
-		log.Print(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-	user := context.User(r.Context())
-	if user.ID != bookmark.UserId {
-		http.Error(w, "Unauthorized", http.StatusForbidden)
 		return
 	}
 
@@ -168,6 +137,30 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b.Templates.Index.Execute(w, r, data)
+}
+
+func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request) (*models.Bookmark, error) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
+		return nil, err
+	}
+	bookmark, err := b.BookmarkService.ById(uint(id))
+	if err != nil {
+		if errors.Is(err, models.ErrNotFound) {
+			http.Error(w, "Bookmark not found", http.StatusNotFound)
+			return nil, err
+		}
+		log.Print(err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return nil, err
+	}
+	user := context.User(r.Context())
+	if user.ID != bookmark.UserId {
+		http.Error(w, "Unauthorized", http.StatusForbidden)
+		return nil, err
+	}
+	return bookmark, nil
 }
 
 func isURLValid(link string) bool {
