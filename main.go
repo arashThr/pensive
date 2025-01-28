@@ -40,23 +40,23 @@ func loadEnvConfig() (config, error) {
 	cfg.PSQL = models.DefaultPostgresConfig()
 
 	// SMTP
-	port, err := strconv.Atoi(os.Getenv("MAIL_PORT"))
+	port, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	if err != nil {
 		panic(err)
 	}
 	cfg.SMTP = models.SMTPConfig{
-		Host:     os.Getenv("MAIL_HOST"),
+		Host:     os.Getenv("SMTP_HOST"),
 		Port:     port,
-		Username: os.Getenv("MAIL_USER"),
-		Password: os.Getenv("MAIL_PASS"),
+		Username: os.Getenv("SMTP_USER"),
+		Password: os.Getenv("SMTP_PASS"),
 	}
 
 	// CSRF
 	cfg.CSRF.Key = os.Getenv("CSRF_TOKEN")
-	cfg.CSRF.Secure = false
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
 	// Server
-	cfg.Server.Address = ":8000"
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 
 	return cfg, nil
 }
