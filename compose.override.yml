@@ -11,3 +11,15 @@ services:
       ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
     ports:
       - 3333:8080
+
+  tailwind:
+    build:
+      context: ./tailwind
+      dockerfile: Dockerfile
+    tty: true
+    stdin_open: true
+    restart: always
+    volumes:
+      - ./tailwind:/app/src:ro
+      - ./templates:/app/templates:ro
+      - ./assets:/app/dst:rw
