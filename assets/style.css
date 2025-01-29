@@ -2413,15 +2413,6 @@
     }
   }
 }
-.testing18 {
-  display: block;
-}
-.hello {
-  display: block;
-}
-.hello3 {
-  display: block;
-}
 @keyframes spin {
   to {
     transform: rotate(360deg);
