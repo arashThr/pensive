@@ -1,6 +1,5 @@
-FROM node:latest
+FROM node:alpine
 WORKDIR /app/tailwind
 RUN npm init -y && npm install tailwindcss @tailwindcss/cli
 
-RUN ls /app
-CMD npx @tailwindcss/cli --cwd ../ -i ./src/style.css -o ./dst/style.css --watch
+CMD npx @tailwindcss/cli --cwd ../templates -i ../src/style.css -o ../dst/style.css --watch
