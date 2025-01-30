@@ -145,6 +145,10 @@ func main() {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersController.CurrentUser)
 	})
+
+	assetHandler := http.FileServer(http.Dir("assets"))
+	r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
