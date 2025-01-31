@@ -1,4 +1,4 @@
 .idea
-my_binary
+server_binary
 cmd/exp
 .env
