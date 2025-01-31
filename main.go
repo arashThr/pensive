@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -30,11 +29,11 @@ type config struct {
 	}
 }
 
-func loadEnvConfig() (config, error) {
+func loadEnvConfig() (*config, error) {
 	var cfg config
 	err := godotenv.Load()
 	if err != nil {
-		return cfg, fmt.Errorf("loading .env file: %w", err)
+		return nil, fmt.Errorf("loading .env file: %w", err)
 	}
 	// DB
 	cfg.PSQL = models.DefaultPostgresConfig()
@@ -42,7 +41,7 @@ func loadEnvConfig() (config, error) {
 	// SMTP
 	port, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	cfg.SMTP = models.SMTPConfig{
 		Host:     os.Getenv("SMTP_HOST"),
@@ -58,10 +57,10 @@ func loadEnvConfig() (config, error) {
 	// Server
 	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 
-	return cfg, nil
+	return &cfg, nil
 }
 
-func setupDb(cfg models.PostgresConfig) *pgxpool.Pool {
+func setupDb(cfg models.PostgresConfig) (*pgxpool.Pool, error) {
 	err := models.Migrate(cfg.PgConnectionString())
 	if err != nil {
 		panic(err)
@@ -69,9 +68,9 @@ func setupDb(cfg models.PostgresConfig) *pgxpool.Pool {
 
 	pool, err := models.Open(cfg)
 	if err != nil {
-		log.Fatalf("connecting to db: %v", err)
+		return nil, fmt.Errorf("connecting to db: %v", err)
 	}
-	return pool
+	return pool, nil
 }
 
 func main() {
@@ -79,9 +78,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	err = run(cfg)
+	if err != nil {
+		panic(err)
+	}
+}
 
+func run(cfg *config) error {
 	// Database
-	pool := setupDb(cfg.PSQL)
+	pool, err := setupDb(cfg.PSQL)
+	if err != nil {
+		return err
+	}
 	defer pool.Close()
 
 	// Services
@@ -154,8 +162,5 @@ func main() {
 	})
 
 	fmt.Printf("Starting server on %s...", cfg.Server.Address)
-	err = http.ListenAndServe(cfg.Server.Address, r)
-	if err != nil {
-		log.Fatalf("starting server: %v", err)
-	}
+	return http.ListenAndServe(cfg.Server.Address, r)
 }
