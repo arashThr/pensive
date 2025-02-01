@@ -1,8 +1,18 @@
+x-logging:
+  &highlight-logging
+    driver: fluentd
+    options:
+      fluentd-address: "tls://otel.highlight.io:24284"
+      fluentd-async: "true"
+      fluentd-sub-second-precision: "true"
+      tag: "highlight.project_id=4d7yjjjd"
+
 services:
   server:
     build:
       context: ./
       dockerfile: Dockerfile
+    logging: *highlight-logging
     restart: always
     depends_on:
       - db
@@ -10,6 +20,7 @@ services:
   caddy:
     image: caddy:2.9-alpine
     restart: unless-stopped
+    logging: *highlight-logging
     cap_add:
       - NET_ADMIN
     ports:
@@ -22,6 +33,7 @@ services:
       - caddy_config:/config
   
   db:
+    logging: *highlight-logging
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
