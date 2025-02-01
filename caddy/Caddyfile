@@ -1,3 +1,2 @@
-:80
-
+apps.arashtaher.com
 reverse_proxy server:8000
