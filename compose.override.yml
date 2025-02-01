@@ -17,9 +17,8 @@ services:
       context: ./tailwind
       dockerfile: Dockerfile
     tty: true
-    stdin_open: true
     restart: always
     volumes:
-      - ./tailwind:/app/src:ro
-      - ./templates:/app/templates:ro
+      - ./tailwind:/tailwind/app/src:ro
+      - ./templates:/tailwind/app/templates:ro
       - ./assets:/app/dst:rw
