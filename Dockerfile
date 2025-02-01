@@ -1,3 +1,11 @@
+FROM node:alpine AS tailwind-builder
+WORKDIR /app
+RUN npm init -y && npm install tailwindcss @tailwindcss/cli
+
+COPY ./templates /app/templates
+COPY ./tailwind/style.css ./style.css
+RUN npx @tailwindcss/cli -i ./style.css -o /style.css --minify
+
 FROM golang:1.23-alpine AS build
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -7,7 +15,8 @@ RUN go build -v -o ./server ./cmd/server
 
 FROM scratch
 WORKDIR /app
+COPY ./assets ./assets
 COPY --from=build /app/server ./server
-COPY ./assets/style.css /app/assets/style.css
+COPY --from=tailwind-builder /style.css ./assets/style.css
 COPY .env .env
 CMD [ "./server" ]
