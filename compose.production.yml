@@ -20,6 +20,12 @@ services:
       - $PWD/caddy:/etc/caddy
       - caddy_data:/data
       - caddy_config:/config
+  
+  db:
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ~/data/apps.arashtaher.com/psql:/var/lib/postgresql/data/pgdata
 
 volumes:
   caddy_data:
