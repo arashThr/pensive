@@ -1,0 +1,17 @@
+#!/bin/bash
+while read oldrev newrev ref
+    do
+    if [[ $ref =~ .*/main$ ]];
+    then
+        echo "Deploying main branch to production..."
+        cd ~/Documents/repos/go-web
+        git --work-tree=$HOME/Documents/repos/go-web --git-dir=$HOME/Documents/repos/go-web.git checkout -f main
+        echo "Restarting service..."
+        docker compose -f compose.yml -f compose.production.yml up --build --force-recreate -d
+        echo "Service restarted"
+        docker compose -f compose.yml -f compose.production.yml ls
+        docker compose -f compose.yml -f compose.production.yml ps
+    else
+        echo "Ref $ref successfully received, but only the main branch will be deployed."
+    fi
+done
