@@ -154,14 +154,15 @@ func run(cfg *config) error {
 	r.Post("/forgot-pw", usersController.ProcessForgotPassword)
 	r.Get("/reset-password", usersController.ResetPassword)
 	r.Post("/reset-password", usersController.ProcessResetPassword)
-	r.Route("/users/me", func(r chi.Router) {
+	r.Route("/users", func(r chi.Router) {
 		r.Use(umw.RequireUser)
-		r.Get("/", usersController.CurrentUser)
+		r.Get("/me", usersController.CurrentUser)
+		r.Get("/generate-token", usersController.GenerateToken)
 	})
 
 	r.Route("/v1/api", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Get("/generate-token", usersController.GenerateToken)
+		// TODO: Put the API token middleware here
+		// r.Use(umw.RequireUser)
 	})
 
 	assetHandler := http.FileServer(http.Dir("assets"))
