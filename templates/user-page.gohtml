@@ -1,0 +1,31 @@
+{{template "header" .}}
+<div class="px-6">
+    <h class="text-4xl font-bold">
+        User Page
+    </h>
+    <div class="pt-6">
+        {{.Email}}
+    </div>
+    <div class="pt-6">
+        <button id="generate-api-token" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Generate API Token
+        </button>
+        <script>
+            document.getElementById('generate-api-token').addEventListener('click', async function() {
+                try {
+                    const response = await fetch('/v1/api/generate-token', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    const data = await response.json()
+                    alert('New API token: ' + data.apiToken);
+                } catch (err) {
+                    console.error('Error:', err);
+                }
+            })
+        </script>
+    </div>
+</div>
+{{template "footer" .}}

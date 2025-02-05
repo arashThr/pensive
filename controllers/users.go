@@ -18,11 +18,13 @@ type Users struct {
 		ForgotPassword Template
 		CheckYourEmail Template
 		ResetPassword  Template
+		UserPage       Template
 	}
 	UserService          *models.UserService
 	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
 	EmailService         *models.EmailService
+	ApiService           *models.ApiService
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +100,11 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	fmt.Fprintf(w, "Welcome: %v", user.Email)
+	var data struct {
+		Email string
+	}
+	data.Email = user.Email
+	u.Templates.UserPage.Execute(w, r, data)
 }
 
 func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
@@ -173,6 +179,12 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	setCookie(w, CookieSession, session.Token)
 	http.Redirect(w, r, "/signin", http.StatusFound)
+}
+
+func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	user := context.User(r.Context())
+	fmt.Fprintf(w, `{"apiToken": "%s"}`, u.ApiService.GenerateToken(user.ID))
 }
 
 type UserMiddleware struct {

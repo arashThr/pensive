@@ -104,6 +104,9 @@ func run(cfg *config) error {
 		Now:  func() time.Time { return time.Now() },
 	}
 	emailService := models.NewEmailService(cfg.SMTP)
+	apiService := &models.ApiService{
+		Pool: pool,
+	}
 
 	// Middlewares
 	umw := controllers.UserMiddleware{
@@ -117,12 +120,14 @@ func run(cfg *config) error {
 		SessionService:       sessionService,
 		PasswordResetService: passwordResetService,
 		EmailService:         emailService,
+		ApiService:           apiService,
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
 	usersController.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
+	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user-page.gohtml", "tailwind.gohtml"))
 
 	// Routes
 	r := chi.NewRouter()
@@ -152,6 +157,11 @@ func run(cfg *config) error {
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersController.CurrentUser)
+	})
+
+	r.Route("/v1/api", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/generate-token", usersController.GenerateToken)
 	})
 
 	assetHandler := http.FileServer(http.Dir("assets"))
