@@ -112,6 +112,9 @@ func run(cfg *config) error {
 	umw := controllers.UserMiddleware{
 		SessionService: sessionService,
 	}
+	amw := controllers.ApiMiddleware{
+		ApiService: apiService,
+	}
 	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure))
 
 	// Controllers
@@ -162,7 +165,7 @@ func run(cfg *config) error {
 
 	r.Route("/v1/api", func(r chi.Router) {
 		// TODO: Put the API token middleware here
-		// r.Use(umw.RequireUser)
+		r.Use(amw.RequireUser)
 	})
 
 	assetHandler := http.FileServer(http.Dir("assets"))

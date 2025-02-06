@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -221,6 +222,44 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 		user := context.User(r.Context())
 		if user == nil {
 			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+type ApiMiddleware struct {
+	ApiService *models.ApiService
+}
+
+func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var data struct {
+			Token string `json:"apiToken"`
+		}
+		err := json.NewDecoder(r.Body).Decode(&data)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		user, err := amw.ApiService.User(data.Token)
+		if err != nil {
+			log.Printf("api user: %v", err)
+			next.ServeHTTP(w, r)
+			return
+		}
+		ctx := r.Context()
+		ctx = context.WithUser(ctx, user)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user == nil {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 		next.ServeHTTP(w, r)
