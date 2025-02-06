@@ -185,7 +185,13 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	user := context.User(r.Context())
-	fmt.Fprintf(w, `{"apiToken": "%s"}`, u.ApiService.GenerateToken(user.ID))
+	token, err := u.ApiService.Create(user.ID)
+	if err != nil {
+		log.Printf("create api token: %v", err)
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, `{"apiToken": "%s"}`, token.Token)
 }
 
 type UserMiddleware struct {

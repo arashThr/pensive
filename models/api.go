@@ -5,8 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"strconv"
 
+	"github.com/arashthr/go-course/rand"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,13 +14,38 @@ type ApiService struct {
 	Pool *pgxpool.Pool
 }
 
-func (as *ApiService) GenerateToken(userId uint) string {
-	/*
-		1. generate a random token
-		2. saved the hashed version with user id in tokens table
-		3. return token to the user
-	*/
-	return "token-token" + strconv.Itoa(int(userId))
+const ApiTokenBytes = 32
+
+type ApiToken struct {
+	ID        uint
+	UserId    uint
+	TokenHash string
+	// Token is only set when creating a new session
+	// This is empty when we look up token in db
+	Token string
+}
+
+func (ss *ApiService) Create(userId uint) (*ApiToken, error) {
+	token, err := rand.String(ApiTokenBytes)
+	if err != nil {
+		return nil, fmt.Errorf("api token: %w", err)
+	}
+	apiToken := ApiToken{
+		UserId:    userId,
+		Token:     token,
+		TokenHash: ss.hash(token),
+	}
+	row := ss.Pool.QueryRow(context.Background(), `
+		INSERT INTO api_tokens (user_id, token_hash)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id) DO UPDATE
+		SET token_hash = $2
+		RETURNING id;`, userId, apiToken.TokenHash)
+	err = row.Scan(&apiToken.ID)
+	if err != nil {
+		return nil, fmt.Errorf("api token create: %w", err)
+	}
+	return &apiToken, nil
 }
 
 func (as *ApiService) User(token string) (*User, error) {
