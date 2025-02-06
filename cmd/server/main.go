@@ -115,7 +115,11 @@ func run(cfg *config) error {
 	amw := controllers.ApiMiddleware{
 		ApiService: apiService,
 	}
-	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure))
+	csrfMw := csrf.Protect(
+		[]byte(cfg.CSRF.Key),
+		csrf.Secure(cfg.CSRF.Secure),
+		csrf.Path("/"),
+	)
 
 	// Controllers
 	usersController := controllers.Users{
@@ -164,8 +168,10 @@ func run(cfg *config) error {
 	})
 
 	r.Route("/v1/api", func(r chi.Router) {
-		// TODO: Put the API token middleware here
 		r.Use(amw.RequireUser)
+		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("pong"))
+		})
 	})
 
 	assetHandler := http.FileServer(http.Dir("assets"))
