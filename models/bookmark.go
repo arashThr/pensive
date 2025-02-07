@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/arashthr/go-course/errors"
+	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -22,16 +24,21 @@ type BookmarkService struct {
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-func (service *BookmarkService) Create(link string, title string, userId uint) (*Bookmark, error) {
+func (service *BookmarkService) Create(link string, userId uint) (*Bookmark, error) {
+	// TODO: Check if the website exists
+	article, err := readability.FromURL(link, 5*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("readability: %w", err)
+	}
 	bookmark := Bookmark{
 		UserId: userId,
-		Title:  title,
+		Title:  article.Title,
 		Link:   link,
 	}
 	row := service.Pool.QueryRow(context.Background(),
 		`INSERT INTO bookmarks (user_id, title, link)
 		VALUES ($1, $2, $3) RETURNING id;`, userId, bookmark.Title, link)
-	err := row.Scan(&bookmark.ID)
+	err = row.Scan(&bookmark.ID)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}

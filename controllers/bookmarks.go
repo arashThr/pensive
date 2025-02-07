@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strconv"
-	"time"
 
 	"github.com/arashthr/go-course/context"
+	"github.com/arashthr/go-course/controllers/validations"
 	"github.com/arashthr/go-course/models"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-shiori/go-readability"
 )
 
 type Bookmarks struct {
@@ -41,20 +39,13 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	data.UserId = context.User(r.Context()).ID
 	data.Link = r.FormValue("link")
 
-	if !isURLValid(data.Link) {
+	if !validations.IsURLValid(data.Link) {
 		log.Printf("Invalid URL: %v", data.Link)
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
-	// TODO: Check if the link already exists
-	article, err := readability.FromURL(data.Link, 5*time.Second)
-	if err != nil {
-		log.Printf("readability from url: %v", err)
-		http.Error(w, "Could not read the article", http.StatusInternalServerError)
-		return
-	}
 
-	bookmark, err := b.BookmarkService.Create(data.Link, article.Title, data.UserId)
+	bookmark, err := b.BookmarkService.Create(data.Link, data.UserId)
 	if err != nil {
 		b.Templates.New.Execute(w, r, data, NavbarMessage{
 			Message: err.Error(),
@@ -187,15 +178,4 @@ func userMustOwnBookmark(w http.ResponseWriter, r *http.Request, bookmark *model
 		return fmt.Errorf("user does not have access to the bookmark")
 	}
 	return nil
-}
-
-func isURLValid(link string) bool {
-	if link == "" || len(link) > 2048 {
-		return false
-	}
-	u, err := url.Parse(link)
-	if err != nil {
-		return false
-	}
-	return u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
 }

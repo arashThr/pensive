@@ -147,6 +147,10 @@ func run(cfg *config) error {
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 
+	apiController := controllers.Api{
+		BookmarkService: bookmarksService,
+	}
+
 	// Routes
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -166,6 +170,13 @@ func run(cfg *config) error {
 		r.Use(amw.RequireUser)
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("pong"))
+		})
+		r.Route("/bookmarks", func(r chi.Router) {
+			r.Get("/", apiController.IndexAPI)
+			r.Post("/", apiController.CreateAPI)
+			r.Get("/{id}", apiController.GetAPI)
+			r.Put("/{id}", apiController.UpdateAPI)
+			r.Delete("/{id}", apiController.DeleteAPI)
 		})
 	})
 
