@@ -56,7 +56,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		log.Println(err)
-		u.Templates.New.Execute(w, r, data, errors.Public(err, "Creating session failed"))
+		u.Templates.New.Execute(w, r, data, NavbarMessage{
+			Message: "Creating session failed",
+			IsError: true,
+		})
 		return
 	}
 	setCookie(w, CookieSession, session.Token)

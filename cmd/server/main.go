@@ -155,8 +155,7 @@ func run(cfg *config) error {
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if !strings.HasPrefix(r.URL.Path, "/api") {
-				csrfMw(next).ServeHTTP(w, r)
-				umw.SetUser(next).ServeHTTP(w, r)
+				csrfMw(umw.SetUser(next)).ServeHTTP(w, r)
 			} else {
 				amw.SetUser(next).ServeHTTP(w, r)
 			}
