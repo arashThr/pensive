@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/errors"
@@ -33,6 +33,7 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
+	log.Println("create user request")
 	var data struct {
 		Email    string
 		Password string
@@ -52,11 +53,11 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		log.Println(err)
-		// TODO: Show a warning to the user
-		http.Redirect(w, r, "/signin", http.StatusFound)
+		u.Templates.New.Execute(w, r, data, errors.Public(err, "Creating session failed"))
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
+	log.Println("create user success")
 	http.Redirect(w, r, "/users/me", http.StatusFound)
 }
 
@@ -212,10 +213,10 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 		}
 		user, err := umw.SessionService.User(token)
 		if err != nil {
-			log.Printf("session user: %v", err)
 			next.ServeHTTP(w, r)
 			return
 		}
+		log.Printf("setting user in context: %v", user.ID)
 		ctx := r.Context()
 		ctx = context.WithUser(ctx, user)
 		r = r.WithContext(ctx)
@@ -240,15 +241,18 @@ type ApiMiddleware struct {
 
 func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var data struct {
-			Token string `json:"apiToken"`
-		}
-		err := json.NewDecoder(r.Body).Decode(&data)
-		if err != nil {
-			http.Error(w, "Invalid request body", http.StatusBadRequest)
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
 			return
 		}
-		user, err := amw.ApiService.User(data.Token)
+		tokenParts := strings.Split(authHeader, " ")
+		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+			return
+		}
+		token := tokenParts[1]
+		user, err := amw.ApiService.User(token)
 		if err != nil {
 			log.Printf("api user: %v", err)
 			next.ServeHTTP(w, r)

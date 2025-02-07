@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/arashthr/go-course/controllers"
@@ -140,8 +141,24 @@ func run(cfg *config) error {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(csrfMw)
-	r.Use(umw.SetUser)
+
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !strings.HasPrefix(r.URL.Path, "/api") {
+				csrfMw(next).ServeHTTP(w, r)
+				umw.SetUser(next).ServeHTTP(w, r)
+			} else {
+				amw.SetUser(next).ServeHTTP(w, r)
+			}
+		})
+	})
+
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(amw.RequireUser)
+		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("pong"))
+		})
+	})
 
 	r.Get("/", controllers.StaticHandler(
 		views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
@@ -153,7 +170,6 @@ func run(cfg *config) error {
 		views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 	))
 	r.Get("/signup", usersController.New)
-	r.Post("/users", usersController.Create)
 	r.Get("/signin", usersController.SignIn)
 	r.Post("/signin", usersController.ProcessSignIn)
 	r.Post("/signout", usersController.ProcessSignOut)
@@ -162,15 +178,11 @@ func run(cfg *config) error {
 	r.Get("/reset-password", usersController.ResetPassword)
 	r.Post("/reset-password", usersController.ProcessResetPassword)
 	r.Route("/users", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Get("/me", usersController.CurrentUser)
-		r.Get("/generate-token", usersController.GenerateToken)
-	})
-
-	r.Route("/v1/api", func(r chi.Router) {
-		r.Use(amw.RequireUser)
-		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("pong"))
+		r.Post("/", usersController.Create)
+		r.Group(func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/me", usersController.CurrentUser)
+			r.Get("/generate-token", usersController.GenerateToken)
 		})
 	})
 

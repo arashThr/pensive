@@ -60,7 +60,7 @@ func (as *ApiService) User(token string) (*User, error) {
 
 	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash)
 	if err != nil {
-		return nil, fmt.Errorf("session user: %w", err)
+		return nil, fmt.Errorf("api user: %w", err)
 	}
 	return &user, nil
 
