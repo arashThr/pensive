@@ -12,15 +12,13 @@ services:
     ports:
       - 3333:8080
 
-  # TODO: Bring back after this bug is fixed:
-  # https://github.com/tailwindlabs/tailwindcss/issues/15235
-  # tailwind:
-  #   build:
-  #     context: ./tailwind
-  #     dockerfile: Dockerfile
-  #   tty: true
-  #   restart: always
-  #   volumes:
-  #     - ./tailwind:/tailwind/app/src:ro
-  #     - ./templates:/tailwind/app/templates:ro
-  #     - ./assets:/app/dst:rw
+  tailwind:
+    build:
+      context: ./tailwind
+      dockerfile: Dockerfile
+    tty: true
+    restart: always
+    volumes:
+      - ./tailwind:/src:ro
+      - ./templates:/templates:ro
+      - ./assets:/dst:rw
