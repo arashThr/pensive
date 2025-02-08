@@ -672,14 +672,8 @@
   .bg-green-200 {
     background-color: var(--color-green-200);
   }
-  .bg-indigo-400 {
-    background-color: var(--color-indigo-400);
-  }
   .bg-indigo-600 {
     background-color: var(--color-indigo-600);
-  }
-  .bg-indigo-700 {
-    background-color: var(--color-indigo-700);
   }
   .bg-indigo-900 {
     background-color: var(--color-indigo-900);
