@@ -222,7 +222,6 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 			return
 		}
-		log.Printf("setting user in context: %v", user.ID)
 		ctx := r.Context()
 		ctx = context.WithUser(ctx, user)
 		r = r.WithContext(ctx)
@@ -249,12 +248,12 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
+			next.ServeHTTP(w, r)
 			return
 		}
 		tokenParts := strings.Split(authHeader, " ")
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+			next.ServeHTTP(w, r)
 			return
 		}
 		token := tokenParts[1]
