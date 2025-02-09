@@ -247,6 +247,10 @@ func run(cfg *config) error {
 
 	assetHandler := http.FileServer(http.Dir("assets"))
 	r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
+	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("favicon")
+		http.ServeFile(w, r, "./assets/favicon.ico")
+	})
 
 	r.Get("/bookmarks/new", bookmarksController.New)
 	r.Route("/bookmarks", func(r chi.Router) {
