@@ -16,18 +16,27 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go/v81"
 )
 
+type StripeConfig struct {
+	Key                 string
+	PriceId             string
+	StripeWebhookSecret string
+}
+
 type config struct {
-	PSQL models.PostgresConfig
-	SMTP models.SMTPConfig
-	CSRF struct {
+	Domain string
+	PSQL   models.PostgresConfig
+	SMTP   models.SMTPConfig
+	CSRF   struct {
 		Key    string
 		Secure bool
 	}
 	Server struct {
 		Address string
 	}
+	Stripe StripeConfig
 }
 
 func loadEnvConfig() (*config, error) {
@@ -36,6 +45,9 @@ func loadEnvConfig() (*config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("loading .env file: %w", err)
 	}
+
+	cfg.Domain = os.Getenv("DOMAIN")
+
 	// DB
 	cfg.PSQL = models.DefaultPostgresConfig()
 
@@ -57,6 +69,15 @@ func loadEnvConfig() (*config, error) {
 
 	// Server
 	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+
+	// Stripe
+	cfg.Stripe = StripeConfig{
+		Key:                 os.Getenv("STRIPE_KEY"),
+		PriceId:             os.Getenv("STRIPE_PRICE_ID"),
+		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
+	}
+	// Or set stripe.Key
+	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	return &cfg, nil
 }
@@ -151,6 +172,14 @@ func run(cfg *config) error {
 		BookmarkService: bookmarksService,
 	}
 
+	stripController := controllers.Stripe{
+		Domain:              cfg.Domain,
+		PriceId:             cfg.Stripe.PriceId,
+		StripeWebhookSecret: cfg.Stripe.StripeWebhookSecret,
+	}
+	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
+	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
+
 	// Routes
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -158,25 +187,28 @@ func run(cfg *config) error {
 
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if !strings.HasPrefix(r.URL.Path, "/api") {
-				csrfMw(umw.SetUser(next)).ServeHTTP(w, r)
-			} else {
+			if strings.HasPrefix(r.URL.Path, "/api") {
 				amw.SetUser(next).ServeHTTP(w, r)
+			} else {
+				csrfMw(umw.SetUser(next)).ServeHTTP(w, r)
 			}
 		})
 	})
 
-	r.Route("/api/v1", func(r chi.Router) {
-		r.Use(amw.RequireUser)
+	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("pong"))
 		})
-		r.Route("/bookmarks", func(r chi.Router) {
-			r.Get("/", apiController.IndexAPI)
-			r.Post("/", apiController.CreateAPI)
-			r.Get("/{id}", apiController.GetAPI)
-			r.Put("/{id}", apiController.UpdateAPI)
-			r.Delete("/{id}", apiController.DeleteAPI)
+		r.Post("/stripe-webhooks", stripController.Webhook)
+		r.Route("/v1", func(r chi.Router) {
+			r.Use(amw.RequireUser)
+			r.Route("/bookmarks", func(r chi.Router) {
+				r.Get("/", apiController.IndexAPI)
+				r.Post("/", apiController.CreateAPI)
+				r.Get("/{id}", apiController.GetAPI)
+				r.Put("/{id}", apiController.UpdateAPI)
+				r.Delete("/{id}", apiController.DeleteAPI)
+			})
 		})
 	})
 
@@ -204,6 +236,13 @@ func run(cfg *config) error {
 			r.Get("/me", usersController.CurrentUser)
 			r.Get("/generate-token", usersController.GenerateToken)
 		})
+	})
+	r.Route("/payments", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Post("/create-checkout-session", stripController.CreateCheckoutSession)
+		r.Post("/create-portal-session", stripController.CreatePortalSession)
+		r.Get("/success", stripController.Success)
+		r.Get("/cancel", stripController.Cancel)
 	})
 
 	assetHandler := http.FileServer(http.Dir("assets"))
