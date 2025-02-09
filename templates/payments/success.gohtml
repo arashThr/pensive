@@ -1,0 +1,19 @@
+{{template "header" .}}
+
+<div class="p-12 flex justify-center">
+  <div class="p-8 bg-white rounded shadow">
+    <div class="">
+      <h3 class="text-2xl pb-2">Subscription to Starter plan successful!</h3>
+      <p>Your subscription has been processed. You will receive an email confirmation shortly.</p>
+      <br>
+      <p>In case of any problems, please <a class="text-blue-700" href="/contact">contact support</a>.</p>
+    </div>
+    <form class="py-4" action="/payments/create-portal-session" method="POST">
+      <div class="hidden">{{ csrfField }}</div>
+      <input type="hidden" id="session-id" name="session_id" value="{{.SessionId}}" />
+      <button class="p-2 bg-indigo-600 hover:bg-indigo-700 border rounded text-white" id="checkout-and-portal-button" type="submit">Manage your billing information</button>
+    </form>
+  </div>
+</div>
+
+{{template "footer" .}}
