@@ -186,7 +186,15 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		// Continue to provision the subscription as payments continue to be made.
 		// Store the status in your database and check when a user accesses your service.
 		// This approach helps you avoid hitting rate limits.
+		// Parse the event data to get the subscription details
 		log.Printf("Invoice paid")
+		var invoice stripe.Invoice
+		err := json.Unmarshal(event.Data.Raw, &invoice)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the
