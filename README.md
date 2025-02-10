@@ -8,3 +8,11 @@ Go to `base-app` tag for the basic setup of a website with auth
 
 Run migrations locally:
 `migrate -path db/migrations -database 'postgres://postgres:postgres@localhost:5432/pensieve?sslmode=disable' up 1`
+
+### Stripe
+
+Run these for testing the payments locally:
+
+- Listen to events: `stripe listen`
+- Forward webhooks to local: `stripe listen --forward-to localhost:8000/api/stripe-webhooks`
+- Trigger a payment: `stripe trigger payment_intent.succeeded`
