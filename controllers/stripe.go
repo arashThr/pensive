@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/arashthr/go-course/context"
+	"github.com/arashthr/go-course/models"
 	"github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	"github.com/stripe/stripe-go/v81/checkout/session"
@@ -23,6 +24,7 @@ type Stripe struct {
 	Domain              string
 	PriceId             string
 	StripeWebhookSecret string
+	StripeService       *models.StripeService
 }
 
 func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +49,7 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Save session and customer ID in db
+	s.StripeService.SaveSession(user.ID, sess.ID, sess.Customer.ID)
 	fmt.Printf("checkout session: %v\n", sess.ID)
 	http.Redirect(w, r, sess.URL, http.StatusSeeOther)
 }

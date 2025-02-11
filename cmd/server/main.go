@@ -129,6 +129,9 @@ func run(cfg *config) error {
 	apiService := &models.ApiService{
 		Pool: pool,
 	}
+	stripeService := &models.StripeService{
+		Pool: pool,
+	}
 	bookmarksService := &models.BookmarkService{
 		Pool: pool,
 	}
@@ -176,6 +179,7 @@ func run(cfg *config) error {
 		Domain:              cfg.Domain,
 		PriceId:             cfg.Stripe.PriceId,
 		StripeWebhookSecret: cfg.Stripe.StripeWebhookSecret,
+		StripeService:       stripeService,
 	}
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
