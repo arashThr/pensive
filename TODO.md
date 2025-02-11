@@ -3,4 +3,7 @@
 - Get `recollectra.com` domain
 
 ## Updates
-- API token page instead of fetching it
+- Subscriptions:
+    - [ ] Listen to webhook events
+- [ ] Nano UUID for bookmarks
+- [ ] API token page instead of fetching it
