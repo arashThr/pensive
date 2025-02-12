@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS stripe_customers (
+    stripe_customer_id TEXT NOT NULL UNIQUE PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
