@@ -2,17 +2,20 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
 	"github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	"github.com/stripe/stripe-go/v81/checkout/session"
+	"github.com/stripe/stripe-go/v81/customer"
 	"github.com/stripe/stripe-go/v81/webhook"
 )
 
@@ -27,9 +30,53 @@ type Stripe struct {
 	StripeService       *models.StripeService
 }
 
+func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err error) {
+	customerId, err = s.StripeService.GetCustomerId(user.ID)
+	if err == nil {
+		return customerId, nil
+	}
+	if !errors.Is(err, models.ErrNoStripeCustomer) {
+		return "", fmt.Errorf("get stripe customer id: %w", err)
+	}
+	log.Printf("No stripe customer found for user %v", user.ID)
+	params := &stripe.CustomerListParams{Email: stripe.String(user.Email)}
+	params.Filters.AddFilter("limit", "", "1")
+	result := customer.List(params)
+	if result.Next() {
+		// Found customer
+		log.Printf("Found stripe customer for user %v", user.ID)
+		customer := result.Customer()
+		customerId = customer.ID
+	} else {
+		// Create a new customer
+		params := &stripe.CustomerParams{Email: stripe.String(user.Email)}
+		params.AddMetadata("user_id", strconv.Itoa(int(user.ID)))
+		// TODO: params.SetIdempotencyKey()
+		customer, err := customer.New(params)
+		if err != nil {
+			if stripeErr, ok := err.(*stripe.Error); ok {
+				log.Printf("Stripe error: %v", stripeErr.Error())
+			} else {
+				log.Printf("Create stripe customer error: %v", err)
+			}
+			return "", err
+		}
+		log.Printf("Created stripe customer for user %v with customer id %v", user.ID, customer.ID)
+		customerId = customer.ID
+	}
+	s.StripeService.InsertCustomerId(user.ID, customerId)
+	return customerId, nil
+}
+
 func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	log.Printf("create checkout session for user %v", user.ID)
+	customerId, err := s.getStripeCustomerId(user)
+	if err != nil {
+		log.Printf("getStripeCustomerId: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	checkoutParams := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
@@ -41,6 +88,7 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		},
 		SuccessURL: stripe.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
 		CancelURL:  stripe.String(s.Domain + "/payments/cancel"),
+		Customer:   &customerId,
 	}
 
 	sess, err := session.New(checkoutParams)
@@ -49,8 +97,13 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Save session and customer ID in db
-	s.StripeService.SaveSession(user.ID, sess.ID, sess.Customer.ID)
-	fmt.Printf("checkout session: %v\n", sess.ID)
+	// err = s.StripeService.SaveSession(user.ID, sess.ID)
+	// if err != nil {
+	// 	log.Printf("s.StripeService.SaveSession: %v", err)
+	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
+	// 	return
+	// }
+	log.Printf("checkout session: %v\n", sess.ID)
 	http.Redirect(w, r, sess.URL, http.StatusSeeOther)
 }
 
@@ -146,7 +199,6 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Subscription updated for %v.", subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionUpdated(subscription)
 	case "customer.subscription.created":
 		var subscription stripe.Subscription
@@ -157,7 +209,6 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Subscription created for %v.", subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
 		var subscription stripe.Subscription
@@ -168,7 +219,6 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Subscription trial will end for %v.", subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
 		var subscription stripe.Subscription
@@ -198,6 +248,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		s.StripeService.ProcessInvoice(&invoice)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the
