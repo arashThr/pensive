@@ -31,7 +31,7 @@ type Stripe struct {
 }
 
 func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err error) {
-	customerId, err = s.StripeService.GetCustomerId(user.ID)
+	customerId, err = s.StripeService.GetCustomerIdByUserId(user.ID)
 	if err == nil {
 		return customerId, nil
 	}
@@ -248,7 +248,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		s.StripeService.ProcessInvoice(&invoice)
+		go s.StripeService.ProcessInvoice(&invoice)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the

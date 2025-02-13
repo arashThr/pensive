@@ -32,6 +32,17 @@ func (s *StripeService) ProcessInvoice(invoice *stripe.Invoice) {
 		log.Printf("No subscription found in invoice")
 		return
 	}
+	if invoice.Status != stripe.InvoiceStatusPaid {
+		log.Printf("Invoice not paid (%s): %s", invoice.Status, invoice.ID)
+		return
+	}
+	customerId := invoice.Customer.ID
+	userId, err := s.GetUserIdByStripeCustomerId(customerId)
+	if err != nil {
+		log.Printf("Error getting user id for %v: %v", customerId, err)
+		return
+	}
+	log.Printf("Processing invoice for user %d: %s", userId, invoice.ID)
 	// Get id from
 
 	// Insert customer into database
@@ -40,7 +51,13 @@ func (s *StripeService) ProcessInvoice(invoice *stripe.Invoice) {
 	`)
 }
 
-func (s *StripeService) GetCustomerId(userId uint) (customerId string, err error) {
+func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId uint, err error) {
+	err = s.Pool.QueryRow(context.Background(),
+		`SELECT user_id FROM stripe_customers
+		WHERE stripe_customer_id = $1;`, userId).Scan(&userId)
+}
+
+func (s *StripeService) GetCustomerIdByUserId(userId uint) (customerId string, err error) {
 	err = s.Pool.QueryRow(context.Background(), `
 		SELECT stripe_customer_id FROM stripe_customers
 		WHERE user_id = $1;
