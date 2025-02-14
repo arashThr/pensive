@@ -37,10 +37,14 @@ func (s *StripeService) ProcessInvoice(invoice *stripe.Invoice) {
 		return
 	}
 	customerId := invoice.Customer.ID
-	userId, err := s.GetUserIdByStripeCustomerId(customerId)
+	var userId *uint
+	err := s.GetUserIdByStripeCustomerId(customerId, userId)
 	if err != nil {
 		log.Printf("Error getting user id for %v: %v", customerId, err)
 		return
+	}
+	if userId == nil {
+		// TODO: Log error
 	}
 	log.Printf("Processing invoice for user %d: %s", userId, invoice.ID)
 	// Get id from
@@ -51,10 +55,11 @@ func (s *StripeService) ProcessInvoice(invoice *stripe.Invoice) {
 	`)
 }
 
-func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId uint, err error) {
-	err = s.Pool.QueryRow(context.Background(),
+func (s *StripeService) GetUserIdByStripeCustomerId(customerId string, userId *uint) error {
+	err := s.Pool.QueryRow(context.Background(),
 		`SELECT user_id FROM stripe_customers
-		WHERE stripe_customer_id = $1;`, userId).Scan(&userId)
+		WHERE stripe_customer_id = $1;`, customerId).Scan(userId)
+	return err
 }
 
 func (s *StripeService) GetCustomerIdByUserId(userId uint) (customerId string, err error) {

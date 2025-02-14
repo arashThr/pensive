@@ -234,7 +234,23 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 	case "checkout.session.completed":
 		// Payment is successful and the subscription is created.
 		// You should provision the subscription and save the customer ID to your database.
-		log.Printf("Checkout session completed")
+		var session stripe.CheckoutSession
+		err := json.Unmarshal(event.Data.Raw, &session)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			return
+		}
+		log.Printf("Session completed: %s", session.ID)
+		// Get the customer ID from the session
+		customerId := session.Customer.ID
+		var userId *uint
+		err = s.StripeService.GetUserIdByStripeCustomerId(customerId, userId)
+		if err != nil {
+			log.Printf("Error getting user id for %v: %v", customerId, err)
+			return
+		}
+		log.Printf("Processing session for user %d: %s", *userId, session.ID)
+
 	case "invoice.paid":
 		// Continue to provision the subscription as payments continue to be made.
 		// Store the status in your database and check when a user accesses your service.
