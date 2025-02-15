@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/controllers"
+	"github.com/arashthr/go-course/logger"
 	"github.com/arashthr/go-course/models"
 	"github.com/arashthr/go-course/views"
 	"github.com/go-chi/chi/v5"
@@ -100,6 +102,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	log := logger.GetLogger()
+	slog.SetDefault(log)
 	err = run(cfg)
 	if err != nil {
 		panic(err)
