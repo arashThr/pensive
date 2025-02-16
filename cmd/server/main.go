@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/controllers"
-	"github.com/arashthr/go-course/logger"
+	"github.com/arashthr/go-course/logging"
 	"github.com/arashthr/go-course/models"
 	"github.com/arashthr/go-course/views"
 	"github.com/go-chi/chi/v5"
@@ -28,10 +28,11 @@ type StripeConfig struct {
 }
 
 type config struct {
-	Domain string
-	PSQL   models.PostgresConfig
-	SMTP   models.SMTPConfig
-	CSRF   struct {
+	Environment string
+	Domain      string
+	PSQL        models.PostgresConfig
+	SMTP        models.SMTPConfig
+	CSRF        struct {
 		Key    string
 		Secure bool
 	}
@@ -102,7 +103,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log := logger.GetLogger()
+	log := logging.GetLogger(cfg.Environment == "production")
 	slog.SetDefault(log)
 	err = run(cfg)
 	if err != nil {
@@ -188,7 +189,7 @@ func run(cfg *config) error {
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
 
-	// Routes
+	// Middlewares
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -202,7 +203,9 @@ func run(cfg *config) error {
 			}
 		})
 	})
+	r.Use(logging.LoggerMiddleware(cfg.Environment == "production"))
 
+	// Routes
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("pong"))
