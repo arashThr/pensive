@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
+	"time"
 
 	"github.com/arashthr/go-course/errors"
 	"github.com/jackc/pgx/v5"
@@ -13,6 +15,15 @@ import (
 
 type StripeService struct {
 	Pool *pgxpool.Pool
+}
+
+type Subscription struct {
+	ID                 string
+	UserID             uint
+	StripeCustomerID   string
+	Status             string
+	CurrentPeriodStart time.Time
+	CurrentPeriodEnd   time.Time
 }
 
 func (s *StripeService) SaveSession(userId uint, sessionId string) error {
@@ -26,40 +37,77 @@ func (s *StripeService) SaveSession(userId uint, sessionId string) error {
 	return nil
 }
 
-func (s *StripeService) ProcessInvoice(invoice *stripe.Invoice) {
+func (s *StripeService) HandleInvoicePaid(invoice *stripe.Invoice) {
 	// TODO: respond before processing
 	if invoice.Subscription == nil {
-		log.Printf("No subscription found in invoice")
+		slog.Error("No subscription found in invoice")
 		return
 	}
 	if invoice.Status != stripe.InvoiceStatusPaid {
-		log.Printf("Invoice not paid (%s): %s", invoice.Status, invoice.ID)
+		slog.Info("Invoice not paid", "status", invoice.Status, "invoiceID", invoice.ID)
 		return
 	}
 	customerId := invoice.Customer.ID
-	var userId *uint
-	err := s.GetUserIdByStripeCustomerId(customerId, userId)
+	userId, err := s.GetUserIdByStripeCustomerId(customerId)
 	if err != nil {
-		log.Printf("Error getting user id for %v: %v", customerId, err)
+		if errors.Is(err, ErrNoStripeCustomer) {
+			slog.Error("We expect to have userId for the customer", "customerId", customerId)
+			return
+		}
+		slog.Error("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	if userId == nil {
-		// TODO: Log error
-	}
-	log.Printf("Processing invoice for user %d: %s", userId, invoice.ID)
-	// Get id from
+	slog.Info("Processing invoice", "userId", userId, "invoiceID", invoice.ID)
 
-	// Insert customer into database
-	s.Pool.Exec(context.Background(), `
-		INSERT INTO customers (user_id, stripe_customer_id)
-	`)
+	subscription := &Subscription{
+		UserID:             userId,
+		StripeCustomerID:   customerId,
+		ID:                 invoice.Subscription.ID,
+		Status:             "active",
+		CurrentPeriodStart: time.Unix(invoice.PeriodStart, 0),
+		CurrentPeriodEnd:   time.Unix(invoice.PeriodEnd, 0),
+	}
+
+	_, err = s.Pool.Exec(context.Background(), `
+		INSERT INTO subscriptions (id, user_id, stripe_customer_id, status, current_period_start, current_period_end)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (id) DO UPDATE
+		SET status = $4, current_period_start = $5, current_period_end = $6`,
+		subscription.ID, subscription.UserID, subscription.StripeCustomerID, subscription.Status,
+		subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd)
+	if err != nil {
+		slog.Error("Error saving subscription", "error", err)
+		return
+	}
+
+	// TODO: Add to payment history
+	slog.Info("Saved subscription", "userId", userId, "subscriptionID", subscription.ID)
 }
 
-func (s *StripeService) GetUserIdByStripeCustomerId(customerId string, userId *uint) error {
-	err := s.Pool.QueryRow(context.Background(),
+func (s *StripeService) HandleSubscriptionUpdated(subscription *stripe.Subscription) {
+	_, err := s.Pool.Exec(context.Background(), `
+	UPDATE subscriptions
+	SET status = $1
+	WHERE id = $2;`, subscription.Status, subscription.ID)
+
+	if err != nil {
+		slog.Error("Error updating subscription", "error", err)
+		return
+	}
+	// TODO: Add to subscription history
+}
+
+func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId uint, err error) {
+	err = s.Pool.QueryRow(context.Background(),
 		`SELECT user_id FROM stripe_customers
-		WHERE stripe_customer_id = $1;`, customerId).Scan(userId)
-	return err
+		WHERE stripe_customer_id = $1;`, customerId).Scan(&userId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return userId, ErrNoStripeCustomer
+		}
+		return userId, fmt.Errorf("getting user id by stripe customer id: %w", err)
+	}
+	return userId, nil
 }
 
 func (s *StripeService) GetCustomerIdByUserId(userId uint) (customerId string, err error) {

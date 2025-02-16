@@ -199,7 +199,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Subscription updated for %v.", subscription.ID)
-		// handleSubscriptionUpdated(subscription)
+		s.StripeService.HandleSubscriptionUpdated(&subscription)
 	case "customer.subscription.created":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
@@ -243,13 +243,12 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Session completed: %s", session.ID)
 		// Get the customer ID from the session
 		customerId := session.Customer.ID
-		var userId *uint
-		err = s.StripeService.GetUserIdByStripeCustomerId(customerId, userId)
+		userId, err := s.StripeService.GetUserIdByStripeCustomerId(customerId)
 		if err != nil {
 			log.Printf("Error getting user id for %v: %v", customerId, err)
 			return
 		}
-		log.Printf("Processing session for user %d: %s", *userId, session.ID)
+		log.Printf("Processing session for user %d: %s", userId, session.ID)
 
 	case "invoice.paid":
 		// Continue to provision the subscription as payments continue to be made.
@@ -264,7 +263,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.ProcessInvoice(&invoice)
+		go s.StripeService.HandleInvoicePaid(&invoice)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the

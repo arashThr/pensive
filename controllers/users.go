@@ -109,9 +109,11 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	var data struct {
-		Email string
+		Email        string
+		IsSubscribed bool
 	}
 	data.Email = user.Email
+	data.IsSubscribed = user.SubscriptionStatus == "active"
 	u.Templates.UserPage.Execute(w, r, data)
 }
 

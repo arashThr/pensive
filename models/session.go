@@ -53,12 +53,13 @@ func (ss *SessionService) User(token string) (*User, error) {
 	var user User
 
 	row := ss.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash
+		SELECT users.id, email, password_hash, COALESCE(subscriptions.status, 'none')
 		FROM users
 		JOIN sessions ON users.id = sessions.user_id
+		LEFT JOIN subscriptions ON users.id = subscriptions.user_id
 		WHERE sessions.token_hash = $1`, tokenHash)
 
-	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash)
+	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.SubscriptionStatus)
 	if err != nil {
 		return nil, fmt.Errorf("session user: %w", err)
 	}

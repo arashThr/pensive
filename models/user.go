@@ -15,6 +15,15 @@ type User struct {
 	ID           uint
 	Email        string
 	PasswordHash string
+
+	// Possible status values:
+	// - 'none'        -> subscription was not created
+	// - 'active'      -> subscription is active and paid
+	// - 'past_due'    -> payment failed but still retrying
+	// - 'unpaid'      -> payment failed and stopped retrying
+	// - 'canceled'    -> subscription was canceled
+	// - 'incomplete'  -> initial payment failed
+	SubscriptionStatus string
 }
 
 type UserService struct {
