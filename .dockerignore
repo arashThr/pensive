@@ -5,3 +5,7 @@ node_modules/
 Dockerfile
 docker-compose*.yml
 .docker/
+
+.git
+node_modules/*
+*.log
