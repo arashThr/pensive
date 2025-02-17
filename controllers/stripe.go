@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -114,11 +116,11 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 	// Typically this is stored alongside the authenticated user in your database.
 	// TODO: Read session ID from db
 	sessionId := r.FormValue("session_id")
-	fmt.Println("session_id: ", sessionId)
+	slog.Info("create portal session", "sessionId", sessionId)
 	sess, err := session.Get(sessionId, nil)
 
 	if err != nil {
-		log.Printf("session.Get: %v", err)
+		slog.Error("session.Get", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -131,7 +133,36 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		log.Printf("ps.New: %v", err)
+		slog.Error("create portal session", "error", err)
+		return
+	}
+
+	http.Redirect(w, r, ps.URL, http.StatusSeeOther)
+}
+
+func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	customerId, err := s.StripeService.GetCustomerIdByUserId(user.ID)
+	if err != nil {
+		slog.Error("get stripe customer id", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	returnPath, err := url.JoinPath(s.Domain, "/users/me")
+	if err != nil {
+		slog.Error("url.JoinPath", "error", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+	params := &stripe.BillingPortalSessionParams{
+		Customer:  stripe.String(customerId),
+		ReturnURL: stripe.String(returnPath),
+	}
+
+	ps, err := portalsession.New(params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		slog.Error("Go to billing portal", "error", err)
 		return
 	}
 

@@ -29,6 +29,14 @@
             </script>
         </div>
 
+        {{if .IsSubscribed }}
+        Active
+        <div>
+            <a href="/payments/portal-session" class="text-blue-500 hover:underline">Manage Subscription</a>
+        </div>
+        {{else}}
+        Not Active
+        {{end}}
         <div>
             <h1 class="pt-4 pb-4 text-center text-2xl font-bold text-gray-900">
                 Buy cool new product

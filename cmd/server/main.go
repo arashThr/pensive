@@ -252,6 +252,7 @@ func run(cfg *config) error {
 		r.Use(umw.RequireUser)
 		r.Post("/create-checkout-session", stripController.CreateCheckoutSession)
 		r.Post("/create-portal-session", stripController.CreatePortalSession)
+		r.Get("/portal-session", stripController.GoToBillingPortal)
 		r.Get("/success", stripController.Success)
 		r.Get("/cancel", stripController.Cancel)
 	})
