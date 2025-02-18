@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/arashthr/go-course/controllers"
@@ -193,24 +192,15 @@ func run(cfg *config) error {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/api") {
-				amw.SetUser(next).ServeHTTP(w, r)
-			} else {
-				csrfMw(umw.SetUser(next)).ServeHTTP(w, r)
-			}
-		})
-	})
 	r.Use(logging.LoggerMiddleware(cfg.Environment == "production"))
 
 	// Routes
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("pong"))
-		})
+		r.Use(amw.SetUser)
+
+		r.Get("/ping", healthCheck)
 		r.Post("/stripe-webhooks", stripController.Webhook)
+
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)
 			r.Route("/bookmarks", func(r chi.Router) {
@@ -223,58 +213,62 @@ func run(cfg *config) error {
 		})
 	})
 
-	r.Get("/", controllers.StaticHandler(
-		views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-	))
-	r.Get("/contact", controllers.StaticHandler(
-		views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
-	))
-	r.Get("/faq", controllers.FAQ(
-		views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
-	))
-	r.Get("/signup", usersController.New)
-	r.Get("/signin", usersController.SignIn)
-	r.Post("/signin", usersController.ProcessSignIn)
-	r.Post("/signout", usersController.ProcessSignOut)
-	r.Get("/forgot-pw", usersController.ForgotPassword)
-	r.Post("/forgot-pw", usersController.ProcessForgotPassword)
-	r.Get("/reset-password", usersController.ResetPassword)
-	r.Post("/reset-password", usersController.ProcessResetPassword)
-	r.Route("/users", func(r chi.Router) {
-		r.Post("/", usersController.Create)
-		r.Group(func(r chi.Router) {
-			r.Use(umw.RequireUser)
-			r.Get("/me", usersController.CurrentUser)
-			r.Get("/generate-token", usersController.GenerateToken)
+	r.Group(func(r chi.Router) {
+		r.Use(csrfMw)
+		r.Use(umw.SetUser)
+
+		r.Get("/", controllers.StaticHandler(
+			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+		))
+		r.Get("/contact", controllers.StaticHandler(
+			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
+		))
+		r.Get("/faq", controllers.FAQ(
+			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
+		))
+		r.Get("/signup", usersController.New)
+		r.Get("/signin", usersController.SignIn)
+		r.Post("/signin", usersController.ProcessSignIn)
+		r.Post("/signout", usersController.ProcessSignOut)
+		r.Get("/forgot-pw", usersController.ForgotPassword)
+		r.Post("/forgot-pw", usersController.ProcessForgotPassword)
+		r.Get("/reset-password", usersController.ResetPassword)
+		r.Post("/reset-password", usersController.ProcessResetPassword)
+		r.Route("/users", func(r chi.Router) {
+			r.Post("/", usersController.Create)
+			r.Group(func(r chi.Router) {
+				r.Use(umw.RequireUser)
+				r.Get("/me", usersController.CurrentUser)
+				r.Get("/generate-token", usersController.GenerateToken)
+			})
 		})
-	})
-	r.Route("/payments", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Post("/create-checkout-session", stripController.CreateCheckoutSession)
-		r.Post("/create-portal-session", stripController.CreatePortalSession)
-		r.Get("/portal-session", stripController.GoToBillingPortal)
-		r.Get("/success", stripController.Success)
-		r.Get("/cancel", stripController.Cancel)
-	})
-
-	assetHandler := http.FileServer(http.Dir("assets"))
-	r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
-	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("favicon")
-		http.ServeFile(w, r, "./assets/favicon.ico")
-	})
-
-	r.Get("/bookmarks/new", bookmarksController.New)
-	r.Route("/bookmarks", func(r chi.Router) {
-		r.Group(func(r chi.Router) {
-			// For routes that are accessible by user
+		r.Route("/payments", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Get("/", bookmarksController.Index)
-			r.Post("/", bookmarksController.Create)
-			r.Get("/new", bookmarksController.New)
-			r.Get("/{id}/edit", bookmarksController.Edit)
-			r.Post("/{id}", bookmarksController.Update)
-			r.Post("/{id}/delete", bookmarksController.Delete)
+			r.Post("/create-checkout-session", stripController.CreateCheckoutSession)
+			r.Post("/create-portal-session", stripController.CreatePortalSession)
+			r.Get("/portal-session", stripController.GoToBillingPortal)
+			r.Get("/success", stripController.Success)
+			r.Get("/cancel", stripController.Cancel)
+		})
+
+		assetHandler := http.FileServer(http.Dir("assets"))
+		r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
+		r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("favicon")
+			http.ServeFile(w, r, "./assets/favicon.ico")
+		})
+
+		r.Route("/bookmarks", func(r chi.Router) {
+			r.Group(func(r chi.Router) {
+				// For routes that are accessible by user
+				r.Use(umw.RequireUser)
+				r.Get("/", bookmarksController.Index)
+				r.Post("/", bookmarksController.Create)
+				r.Get("/new", bookmarksController.New)
+				r.Get("/{id}/edit", bookmarksController.Edit)
+				r.Post("/{id}", bookmarksController.Update)
+				r.Post("/{id}/delete", bookmarksController.Delete)
+			})
 		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
@@ -284,3 +278,8 @@ func run(cfg *config) error {
 	fmt.Printf("Starting server on %s...", cfg.Server.Address)
 	return http.ListenAndServe(cfg.Server.Address, r)
 }
+
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("pong"))
+}
+
