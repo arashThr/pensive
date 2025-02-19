@@ -282,4 +282,3 @@ func run(cfg *config) error {
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
-
