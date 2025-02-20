@@ -220,6 +220,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		}
 		log.Printf("Subscription deleted for %v.", subscription.ID)
 		// Then define and call a func to handle the deleted subscription.
+		s.StripeService.HandleSubscriptionDeleted(&subscription)
 		// handleSubscriptionCanceled(subscription)
 	case "customer.subscription.updated":
 		var subscription stripe.Subscription
@@ -230,6 +231,8 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Printf("Subscription updated for %v.", subscription.ID)
+		// HERE: Pass prev attributes
+		slog.Info("Subscription updated", "prevAtt", event.Data.PreviousAttributes)
 		s.StripeService.HandleSubscriptionUpdated(&subscription)
 	case "customer.subscription.created":
 		var subscription stripe.Subscription

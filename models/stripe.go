@@ -85,6 +85,11 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripe.Invoice) {
 }
 
 func (s *StripeService) HandleSubscriptionUpdated(subscription *stripe.Subscription) {
+	// TODO: Add to subscription history
+}
+
+func (s *StripeService) HandleSubscriptionDeleted(subscription *stripe.Subscription) {
+	// HERE
 	_, err := s.Pool.Exec(context.Background(), `
 	UPDATE subscriptions
 	SET status = $1
@@ -95,6 +100,7 @@ func (s *StripeService) HandleSubscriptionUpdated(subscription *stripe.Subscript
 		return
 	}
 	// TODO: Add to subscription history
+	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
 }
 
 func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId uint, err error) {
