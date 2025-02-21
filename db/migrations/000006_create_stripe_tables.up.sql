@@ -17,17 +17,17 @@ CREATE TABLE subscriptions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- -- Track subscription history for auditing and analytics
--- CREATE TABLE subscription_history (
---     id SERIAL PRIMARY KEY,
---     user_id INTEGER NOT NULL,
---     stripe_subscription_id TEXT NOT NULL,
---     tier TEXT NOT NULL,
---     status TEXT NOT NULL,
---     started_at TIMESTAMPTZ NOT NULL,
---     ended_at TIMESTAMPTZ NOT NULL,
---     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
--- );
+-- Track subscription history for auditing and analytics
+CREATE TABLE subscription_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    stripe_subscription_id TEXT NOT NULL,
+    tier TEXT NOT NULL,
+    status TEXT NOT NULL,
+    started_at TIMESTAMPTZ NOT NULL,
+    ended_at TIMESTAMPTZ NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 
 -- -- Track payment attempts
 -- CREATE TABLE payment_history (

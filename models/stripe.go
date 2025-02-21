@@ -26,6 +26,15 @@ type Subscription struct {
 	CurrentPeriodEnd   time.Time
 }
 
+type SubscriptionHistory struct {
+	ID                   int
+	UserID               int
+	StripeSubscriptionID string
+	Status               string
+	StartedAt            time.Time
+	EndedAt              time.Time
+}
+
 func (s *StripeService) SaveSession(userId uint, sessionId string) error {
 	log.Printf("save session: userId: %d, sessionId: %s\n", userId, sessionId)
 	_, err := s.Pool.Exec(context.Background(), `
@@ -81,6 +90,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripe.Invoice) {
 	}
 
 	// TODO: Add to payment history
+	s.appendHistory(subscription)
 	slog.Info("Saved subscription", "userId", userId, "subscriptionID", subscription.ID)
 }
 
@@ -138,4 +148,14 @@ func (s *StripeService) InsertCustomerId(userId uint, customerId string) error {
 		SET stripe_customer_id = $2;
 	`, userId, customerId)
 	return err
+}
+
+func (s *StripeService) appendHistory(subscription *Subscription) {
+	_, err := s.Pool.Exec(context.Background(), `
+		INSERT INTO subscription_history (user_id, stripe_subscription_id, status, started_at, ended_at)
+		VALUES ($1, $2, $3, $4, $5);`,
+		subscription.UserID, subscription.ID, subscription.Status, subscription.CurrentPeriodStart, subscription.CurrentPeriodEnd)
+	if err != nil {
+		slog.Error("Error saving subscription history", "error", err)
+	}
 }
