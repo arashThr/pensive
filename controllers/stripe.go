@@ -14,7 +14,7 @@ import (
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
-	"github.com/stripe/stripe-go/v81"
+	stripeClient "github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	"github.com/stripe/stripe-go/v81/checkout/session"
 	"github.com/stripe/stripe-go/v81/customer"
@@ -41,7 +41,7 @@ func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err e
 		return "", fmt.Errorf("get stripe customer id: %w", err)
 	}
 	log.Printf("No stripe customer found for user %v", user.ID)
-	params := &stripe.CustomerListParams{Email: stripe.String(user.Email)}
+	params := &stripeClient.CustomerListParams{Email: stripeClient.String(user.Email)}
 	params.Filters.AddFilter("limit", "", "1")
 	result := customer.List(params)
 	if result.Next() {
@@ -51,12 +51,12 @@ func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err e
 		customerId = customer.ID
 	} else {
 		// Create a new customer
-		params := &stripe.CustomerParams{Email: stripe.String(user.Email)}
+		params := &stripeClient.CustomerParams{Email: stripeClient.String(user.Email)}
 		params.AddMetadata("user_id", strconv.Itoa(int(user.ID)))
 		// TODO: params.SetIdempotencyKey()
 		customer, err := customer.New(params)
 		if err != nil {
-			if stripeErr, ok := err.(*stripe.Error); ok {
+			if stripeErr, ok := err.(*stripeClient.Error); ok {
 				log.Printf("Stripe error: %v", stripeErr.Error())
 			} else {
 				log.Printf("Create stripe customer error: %v", err)
@@ -80,16 +80,16 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	checkoutParams := &stripe.CheckoutSessionParams{
-		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-		LineItems: []*stripe.CheckoutSessionLineItemParams{
+	checkoutParams := &stripeClient.CheckoutSessionParams{
+		Mode: stripeClient.String(string(stripeClient.CheckoutSessionModeSubscription)),
+		LineItems: []*stripeClient.CheckoutSessionLineItemParams{
 			{
-				Price:    stripe.String(s.PriceId),
-				Quantity: stripe.Int64(1),
+				Price:    stripeClient.String(s.PriceId),
+				Quantity: stripeClient.Int64(1),
 			},
 		},
-		SuccessURL: stripe.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:  stripe.String(s.Domain + "/payments/cancel"),
+		SuccessURL: stripeClient.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripeClient.String(s.Domain + "/payments/cancel"),
 		Customer:   &customerId,
 	}
 
@@ -125,9 +125,9 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := &stripe.BillingPortalSessionParams{
-		Customer:  stripe.String(sess.Customer.ID),
-		ReturnURL: stripe.String(s.Domain),
+	params := &stripeClient.BillingPortalSessionParams{
+		Customer:  stripeClient.String(sess.Customer.ID),
+		ReturnURL: stripeClient.String(s.Domain),
 	}
 	ps, err := portalsession.New(params)
 
@@ -154,9 +154,9 @@ func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 		slog.Error("url.JoinPath", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
-	params := &stripe.BillingPortalSessionParams{
-		Customer:  stripe.String(customerId),
-		ReturnURL: stripe.String(returnPath),
+	params := &stripeClient.BillingPortalSessionParams{
+		Customer:  stripeClient.String(customerId),
+		ReturnURL: stripeClient.String(returnPath),
 	}
 
 	ps, err := portalsession.New(params)
@@ -206,134 +206,68 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
+
 	// Unmarshal the event data into an appropriate struct depending on its Type
-	// TODO: Which events I need?
-	// TODO: Record in DB?
 	switch event.Type {
 	case "customer.subscription.deleted":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
+		subscription, err := getSubscriptionDeleted(&event)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription deleted for %v.", subscription.ID)
-		// Then define and call a func to handle the deleted subscription.
-		s.StripeService.HandleSubscriptionDeleted(&subscription)
-		// handleSubscriptionCanceled(subscription)
+		go s.StripeService.HandleSubscriptionDeleted(subscription)
 	case "customer.subscription.updated":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
+		err := handleSubscriptionUpdated(&event)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription updated for %v.", subscription.ID)
-		// HERE: Pass prev attributes
-		slog.Info("Subscription updated", "prevAtt", event.Data.PreviousAttributes)
-		s.StripeService.HandleSubscriptionUpdated(&subscription)
 	case "customer.subscription.created":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
+		err := handleSubscriptionCreated(&event)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Subscription created for %v.", subscription.ID)
-		// handleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		log.Printf("Subscription trial will end for %v.", subscription.ID)
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		log.Printf("Active entitlement summary updated for %v.", subscription.ID)
+		slog.Info("Active entitlement summary updated", "event_id", event.ID)
 		// Then define and call a func to handle active entitlement summary updated.
 		// handleEntitlementUpdated(subscription)
 	case "checkout.session.completed":
 		// Payment is successful and the subscription is created.
 		// You should provision the subscription and save the customer ID to your database.
-		var session stripe.CheckoutSession
-		err := json.Unmarshal(event.Data.Raw, &session)
+		err := handleCheckoutSessionCompleted(&event)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		log.Printf("Session completed: %s", session.ID)
-		// Get the customer ID from the session
-		customerId := session.Customer.ID
-		userId, err := s.StripeService.GetUserIdByStripeCustomerId(customerId)
-		if err != nil {
-			log.Printf("Error getting user id for %v: %v", customerId, err)
-			return
-		}
-		log.Printf("Processing session for user %d: %s", userId, session.ID)
-
 	case "invoice.paid":
 		// Continue to provision the subscription as payments continue to be made.
 		// Store the status in your database and check when a user accesses your service.
 		// This approach helps you avoid hitting rate limits.
 		// Parse the event data to get the subscription details
-		log.Printf("Invoice paid")
-		var invoice stripe.Invoice
-		err := json.Unmarshal(event.Data.Raw, &invoice)
+		invoice, err := getInvoicePaid(&event)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing webhook JSON: %v\n", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoicePaid(&invoice)
+		go s.StripeService.HandleInvoicePaid(invoice, &event.Data.Raw)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the
 		// customer portal to update their payment information.
-		log.Printf("Invoice payment failed")
+		invoice, err := getInvoiceFailed(&event)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		go s.StripeService.HandleInvoiceFailed(invoice)
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
-// SUCCESS
-/*
-func handleWebhook(w http.ResponseWriter, r *http.Request) {
-    var event stripe.Event
-    if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
-    switch event.Type {
-    case "invoice.paid":
-        // Parse the event data to get the subscription details
-        invoice := event.Data.Object.(*stripe.Invoice)
-        if invoice.Subscription != nil {
-            // Update user to premium
-            updateUserToPremium(*invoice.Subscription.ID)
-        }
-    }
-}
-
-func updateUserToPremium(subscriptionID string) {
-    // Here you would implement the logic to update your user's status
-    // Example: database update, API call to another service, etc.
-}
-*/
 
 // FAILURE
 /*
@@ -380,3 +314,67 @@ func downgradeUserFromPremium(customerID string) {
     // Implement logic to remove premium features or change user status
 }
 */
+
+func handleSubscriptionCreated(event *stripeClient.Event) error {
+	var subscription stripeClient.Subscription
+	err := json.Unmarshal(event.Data.Raw, &subscription)
+	if err != nil {
+		return fmt.Errorf("parsing webhook JSON: %w", err)
+	}
+	slog.Info("Subscription created", "subscriptionID", subscription.ID)
+	return nil
+}
+
+func handleSubscriptionUpdated(event *stripeClient.Event) error {
+	var subscription stripeClient.Subscription
+	err := json.Unmarshal(event.Data.Raw, &subscription)
+	if err != nil {
+		return fmt.Errorf("parsing webhook JSON: %w", err)
+	}
+	slog.Info("Subscription updated", "subscriptionID", subscription.ID)
+	slog.Info("Subscription updated with previous attributes", "prevAtt", event.Data.PreviousAttributes)
+	return nil
+}
+
+func handleCheckoutSessionCompleted(event *stripeClient.Event) error {
+	var session stripeClient.CheckoutSession
+	err := json.Unmarshal(event.Data.Raw, &session)
+	if err != nil {
+		slog.Error("Error parsing webhook JSON", "error", err)
+		return fmt.Errorf("parsing webhook JSON: %w", err)
+	}
+	// Get the customer ID from the session
+	customerId := session.Customer.ID
+	slog.Info("Session completed", "sessionID", session.ID, "customerID", customerId)
+	return nil
+}
+
+func getInvoicePaid(event *stripeClient.Event) (*stripeClient.Invoice, error) {
+	var invoice stripeClient.Invoice
+	err := json.Unmarshal(event.Data.Raw, &invoice)
+	if err != nil {
+		return nil, fmt.Errorf("parsing invoice.paid webhook JSON: %w", err)
+	}
+	slog.Info("Invoice paid", "invoiceID", invoice.ID)
+	return &invoice, nil
+}
+
+func getInvoiceFailed(event *stripeClient.Event) (*stripeClient.Invoice, error) {
+	var invoice stripeClient.Invoice
+	err := json.Unmarshal(event.Data.Raw, &invoice)
+	if err != nil {
+		return nil, fmt.Errorf("parsing invoice.failed webhook JSON: %w", err)
+	}
+	slog.Info("Invoice failed", "invoiceID", invoice.ID)
+	return &invoice, nil
+}
+
+func getSubscriptionDeleted(event *stripeClient.Event) (*stripeClient.Subscription, error) {
+	var subscription stripeClient.Subscription
+	err := json.Unmarshal(event.Data.Raw, &subscription)
+	if err != nil {
+		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)
+	}
+	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
+	return &subscription, nil
+}
