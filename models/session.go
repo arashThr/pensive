@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/arashthr/go-course/rand"
+	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -14,7 +15,7 @@ const SessionTokenBytes = 32
 
 type Session struct {
 	ID        uint
-	UserId    uint
+	UserId    types.UserId
 	TokenHash string
 	// Token is only set when creating a new session
 	// This is empty when we look up session in db
@@ -25,7 +26,7 @@ type SessionService struct {
 	Pool *pgxpool.Pool
 }
 
-func (ss *SessionService) Create(userId uint) (*Session, error) {
+func (ss *SessionService) Create(userId types.UserId) (*Session, error) {
 	token, err := rand.String(SessionTokenBytes)
 	if err != nil {
 		return nil, fmt.Errorf("session token: %w", err)

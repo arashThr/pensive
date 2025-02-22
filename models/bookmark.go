@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/errors"
+	"github.com/arashthr/go-course/types"
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Bookmark struct {
-	ID     uint
-	UserId uint
+	ID     types.BookmarkId
+	UserId types.UserId
 	Title  string
 	Link   string
 }
@@ -24,7 +25,7 @@ type BookmarkService struct {
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-func (service *BookmarkService) Create(link string, userId uint) (*Bookmark, error) {
+func (service *BookmarkService) Create(link string, userId types.UserId) (*Bookmark, error) {
 	// TODO: Check if the website exists
 	article, err := readability.FromURL(link, 5*time.Second)
 	if err != nil {
@@ -45,7 +46,7 @@ func (service *BookmarkService) Create(link string, userId uint) (*Bookmark, err
 	return &bookmark, nil
 }
 
-func (service *BookmarkService) ById(id uint) (*Bookmark, error) {
+func (service *BookmarkService) ById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		ID: id,
 	}
@@ -61,7 +62,7 @@ func (service *BookmarkService) ById(id uint) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (service *BookmarkService) ByUserId(userId uint) ([]Bookmark, error) {
+func (service *BookmarkService) ByUserId(userId types.UserId) ([]Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
 		`SELECT * FROM bookmarks WHERE user_id = $1;`, userId)
 	if err != nil {
@@ -85,7 +86,7 @@ func (service *BookmarkService) Update(bookmark *Bookmark) error {
 	return nil
 }
 
-func (service *BookmarkService) Delete(id uint) error {
+func (service *BookmarkService) Delete(id types.BookmarkId) error {
 	_, err := service.Pool.Exec(context.Background(),
 		`DELETE FROM bookmarks WHERE id = $1;`, id)
 	if err != nil {

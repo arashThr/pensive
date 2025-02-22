@@ -10,6 +10,7 @@ import (
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/controllers/validations"
 	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/types"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -33,7 +34,7 @@ func (b Bookmarks) New(w http.ResponseWriter, r *http.Request) {
 
 func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		UserId uint
+		UserId types.UserId
 		Link   string
 	}
 	data.UserId = context.User(r.Context()).ID
@@ -68,7 +69,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Link  string
 		Title string
-		Id    uint
+		Id    types.BookmarkId
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
@@ -91,7 +92,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Link  string
 		Title string
-		Id    uint
+		Id    types.BookmarkId
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
@@ -112,7 +113,7 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Bookmark struct {
-		Id    uint
+		Id    types.BookmarkId
 		Title string
 		Link  string
 	}
@@ -149,7 +150,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
 		return nil, err
 	}
-	bookmark, err := b.BookmarkService.ById(uint(id))
+	bookmark, err := b.BookmarkService.ById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {
 			http.Error(w, "Bookmark not found", http.StatusNotFound)

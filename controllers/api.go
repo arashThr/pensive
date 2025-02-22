@@ -11,6 +11,7 @@ import (
 	"github.com/arashthr/go-course/controllers/validations"
 	"github.com/arashthr/go-course/errors"
 	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/types"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -24,7 +25,7 @@ type ErrorResponse struct {
 }
 
 type Bookmark struct {
-	Id    uint
+	Id    types.BookmarkId
 	Title string
 	Link  string
 }
@@ -50,7 +51,7 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		UserId uint
+		UserId types.UserId
 		Link   string
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
@@ -128,7 +129,7 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var data struct {
-		Id uint `json:"id"`
+		Id types.BookmarkId `json:"id"`
 	}
 	data.Id = bookmark.ID
 	writeResponse(w, &data)
@@ -143,7 +144,7 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 		})
 		return nil
 	}
-	bookmark, err := a.BookmarkService.ById(uint(id))
+	bookmark, err := a.BookmarkService.ById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {
 			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{

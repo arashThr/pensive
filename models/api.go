@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/arashthr/go-course/rand"
+	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -17,15 +18,15 @@ type ApiService struct {
 const ApiTokenBytes = 32
 
 type ApiToken struct {
-	ID        uint
-	UserId    uint
+	ID        types.BookmarkId
+	UserId    types.UserId
 	TokenHash string
 	// Token is only set when creating a new session
 	// This is empty when we look up token in db
 	Token string
 }
 
-func (ss *ApiService) Create(userId uint) (*ApiToken, error) {
+func (ss *ApiService) Create(userId types.UserId) (*ApiToken, error) {
 	token, err := rand.String(ApiTokenBytes)
 	if err != nil {
 		return nil, fmt.Errorf("api token: %w", err)

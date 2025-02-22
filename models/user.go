@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID           uint
+	ID           types.UserId
 	Email        string
 	PasswordHash string
 
@@ -88,7 +89,7 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserService) UpdatePassword(userId uint, password string) error {
+func (us *UserService) UpdatePassword(userId types.UserId, password string) error {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("update password: %w", err)

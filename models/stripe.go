@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/errors"
+	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stripe/stripe-go/v81"
@@ -19,7 +20,7 @@ type StripeService struct {
 
 type Subscription struct {
 	ID                 string
-	UserID             uint
+	UserID             types.UserId
 	StripeCustomerID   string
 	Status             string
 	CurrentPeriodStart time.Time
@@ -35,7 +36,7 @@ type SubscriptionHistory struct {
 	EndedAt              time.Time
 }
 
-func (s *StripeService) SaveSession(userId uint, sessionId string) error {
+func (s *StripeService) SaveSession(userId types.UserId, sessionId string) error {
 	log.Printf("save session: userId: %d, sessionId: %s\n", userId, sessionId)
 	_, err := s.Pool.Exec(context.Background(), `
 		INSERT INTO stripe_sessions (user_id, stripe_session_id)
@@ -113,7 +114,7 @@ func (s *StripeService) HandleSubscriptionDeleted(subscription *stripe.Subscript
 	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
 }
 
-func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId uint, err error) {
+func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId types.UserId, err error) {
 	err = s.Pool.QueryRow(context.Background(),
 		`SELECT user_id FROM stripe_customers
 		WHERE stripe_customer_id = $1;`, customerId).Scan(&userId)
@@ -126,7 +127,7 @@ func (s *StripeService) GetUserIdByStripeCustomerId(customerId string) (userId u
 	return userId, nil
 }
 
-func (s *StripeService) GetCustomerIdByUserId(userId uint) (customerId string, err error) {
+func (s *StripeService) GetCustomerIdByUserId(userId types.UserId) (customerId string, err error) {
 	err = s.Pool.QueryRow(context.Background(), `
 		SELECT stripe_customer_id FROM stripe_customers
 		WHERE user_id = $1;
@@ -140,7 +141,7 @@ func (s *StripeService) GetCustomerIdByUserId(userId uint) (customerId string, e
 	return customerId, nil
 }
 
-func (s *StripeService) InsertCustomerId(userId uint, customerId string) error {
+func (s *StripeService) InsertCustomerId(userId types.UserId, customerId string) error {
 	_, err := s.Pool.Exec(context.Background(), `
 		INSERT INTO stripe_customers (user_id, stripe_customer_id)
 		VALUES ($1, $2)
