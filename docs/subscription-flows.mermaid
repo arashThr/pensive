@@ -1,0 +1,27 @@
+sequenceDiagram
+    participant C as Client
+    participant A as API
+    participant D as Database
+    participant S as Stripe
+
+    %% Creation Flow
+    Note over C,S: Subscription Creation
+    C->>A: POST /subscribe
+    A->>S: Create Customer
+    S-->>A: Customer ID
+    A->>S: Create Subscription
+    S-->>A: Subscription ID
+    A->>D: Create subscription record
+    A-->>C: Success Response
+    S->>A: webhook: subscription.created
+    A->>D: Update subscription status
+
+    %% Cancellation Flow
+    Note over C,S: Subscription Cancellation
+    C->>A: DELETE /subscription/{id}
+    A->>S: Cancel Subscription
+    S-->>A: Cancelled Subscription
+    A->>D: Update subscription status
+    A-->>C: Success Response
+    S->>A: webhook: subscription.deleted
+    A->>D: Mark subscription as cancelled

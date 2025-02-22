@@ -1,0 +1,43 @@
+erDiagram
+    users ||--o{ subscriptions : has
+    subscriptions ||--o{ subscription_events : generates
+    subscriptions ||--o{ invoices : generates
+    
+    users {
+        uuid id PK
+        string email
+        string stripe_customer_id
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    subscriptions {
+        uuid id PK
+        uuid user_id FK
+        string stripe_subscription_id
+        string stripe_price_id
+        string status
+        timestamp current_period_start
+        timestamp current_period_end
+        timestamp canceled_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    subscription_events {
+        uuid id PK
+        uuid subscription_id FK
+        string event_type
+        jsonb event_data
+        timestamp created_at
+    }
+
+    invoices {
+        uuid id PK
+        uuid subscription_id FK
+        string stripe_invoice_id
+        string status
+        decimal amount
+        timestamp paid_at
+        timestamp created_at
+    }
