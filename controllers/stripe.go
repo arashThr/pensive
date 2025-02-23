@@ -127,7 +127,7 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 
 	params := &stripeclient.BillingPortalSessionParams{
 		Customer:  stripeclient.String(sess.Customer.ID),
-		ReturnURL: stripeclient.String(s.Domain),
+		ReturnURL: stripeclient.String(s.Domain + "/user/me"),
 	}
 	ps, err := portalsession.New(params)
 
