@@ -66,7 +66,7 @@ func (s *StripeService) SaveSession(userId types.UserId, sessionId string) error
 
 func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEvent *json.RawMessage) {
 	if invoice.Subscription == nil {
-		slog.Error("No subscription found in invoice. We do not expect to receive this", "invoiceID", invoice.ID)
+		slog.Error("No subscription found in invoice paid event. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
 	}
 	if invoice.Status != stripeclient.InvoiceStatusPaid {
@@ -94,9 +94,9 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 
 	// Check if we already processed this invoice (idempotency)
 	var prevInvoice string
-	s.Pool.QueryRow(context.Background(), `
+	tx.QueryRow(context.Background(), `
 		SELECT * FROM invoices
-		WHERE id = $1;`, invoice.ID).Scan(&prevInvoice)
+		WHERE stripe_invoice_id = $1;`, invoice.ID).Scan(&prevInvoice)
 	if prevInvoice != "" {
 		slog.Info("Invoice already processed", "invoiceID", invoice.ID)
 		return
@@ -124,7 +124,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 			CurrentPeriodEnd:     time.Unix(sub.CurrentPeriodEnd, 0),
 		}
 
-		_, err := s.Pool.Exec(context.Background(), `
+		_, err := tx.Exec(context.Background(), `
 			INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end)
 			VALUES ($1, $2, $3, $4, $5);`,
 			newSub.StripeSubscriptionID, newSub.UserID, newSub.Status,
@@ -143,7 +143,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 		PaidAt:          time.Unix(invoice.StatusTransitions.PaidAt, 0),
 	}
 
-	_, err = s.Pool.Exec(context.Background(), `
+	_, err = tx.Exec(context.Background(), `
 		INSERT INTO invoices (stripe_invoice_id, stripe_subscription_id, status, amount, paid_at)
 		VALUES ($1, $2, $3, $4, $5);`,
 		newInvoice.StripeInvoiceId, newInvoice.SubscriptionID, newInvoice.Status,
@@ -153,7 +153,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 		return
 	}
 
-	_, err = s.Pool.Exec(context.Background(), `
+	_, err = tx.Exec(context.Background(), `
 		UPDATE subscriptions
 		SET status = $1
 		WHERE stripe_subscription_id = $2;`, sub.Status, sub.ID)
@@ -168,12 +168,9 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 		EventType:      "invoice.paid",
 		EventData:      *rawEvent,
 	}
-	_, err = s.Pool.Exec(context.Background(), `
-		INSERT INTO subscription_events (stripe_subscription_id, event_type, event_data)
-		VALUES ($1, $2, $3);`,
-		event.SubscriptionID, event.EventType, event.EventData)
+	err = recordEvent(tx, event)
 	if err != nil {
-		slog.Error("Error saving subscription event", "error", err, "subscriptionID", sub.ID)
+		slog.Error("Error saving subscription event for paid invoice", "error", err, "subscriptionID", sub.ID)
 		return
 	}
 
@@ -186,25 +183,129 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 	slog.Info("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
+func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice, rawEvent *json.RawMessage) {
+	if invoice.Subscription == nil {
+		slog.Error("No subscription found in invoice failed event. We do not expect to receive this", "invoiceID", invoice.ID)
+		return
+	}
+
+	customerId := invoice.Customer.ID
+	userId, err := s.GetUserIdByStripeCustomerId(customerId)
+	if err != nil {
+		if errors.Is(err, ErrNoStripeCustomer) {
+			slog.Error("We expect to have userId for the customer", "customerId", customerId)
+			return
+		}
+		slog.Error("Error getting user id", "customerId", customerId, "error", err)
+		return
+	}
+
+	slog.Info("Processing invoice failed", "userId", userId, "invoiceID", invoice.ID)
+
+	// Get the full subscription details from Stripe
+	// We need this because invoice doesn't contain all subscription
+	sub, err := subscriptionclient.Get(invoice.Subscription.ID, &stripeclient.SubscriptionParams{})
+	if err != nil {
+		slog.Error("Error getting subscription", "error", err, "subscriptionID", invoice.Subscription.ID)
+		return
+	}
+
+	newInvoice := &StripeInvoice{
+		StripeInvoiceId: invoice.ID,
+		SubscriptionID:  invoice.Subscription.ID,
+		Status:          string(invoice.Status),
+		Amount:          invoice.AmountPaid,
+		PaidAt:          time.Unix(invoice.StatusTransitions.PaidAt, 0),
+		CreatedAt:       time.Unix(invoice.Created, 0),
+	}
+
+	tx, err := s.Pool.Begin(context.Background())
+	if err != nil {
+		slog.Error("Error starting transaction", "error", err)
+		return
+	}
+	defer tx.Rollback(context.Background())
+
+	// Insert invoice into db
+	_, err = tx.Exec(context.Background(), `
+		INSERT INTO invoices (stripe_invoice_id, stripe_subscription_id, status, amount, paid_at, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6);`, newInvoice.StripeInvoiceId, newInvoice.SubscriptionID,
+		newInvoice.Status, newInvoice.Amount, newInvoice.PaidAt, newInvoice.CreatedAt)
+	if err != nil {
+		slog.Error("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
+		return
+	}
+
+	// Update the subscription status
+	// TODO: Do I want to do it for failed payments? Or is it better to do it when subscription deleted
+	// _, err = tx.Exec(context.Background(), `
+	// 	UPDATE subscriptions
+	// 	SET status = $1
+	// 	WHERE stripe_subscription_id = $2;`, sub.Status, sub.ID)
+	// if err != nil {
+	// 	slog.Error("Error updating subscription", "error", err, "subscriptionID", sub.ID)
+	// 	return
+	// }
+
+	// Log the event
+	event := &SubscriptionEvent{
+		SubscriptionID: sub.ID,
+		EventType:      "invoice.payment_failed",
+		EventData:      *rawEvent,
+	}
+	err = recordEvent(tx, event)
+	if err != nil {
+		slog.Error("Error saving subscription event for failed invoice", "error", err, "subscriptionID", sub.ID)
+		return
+	}
+
+	// TODO: Notify user that the payment has failed
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		slog.Error("Error committing transaction", "error", err)
+		return
+	}
+
+	slog.Info("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) HandleSubscriptionUpdated(subscription *stripeclient.Subscription) {
-	// TODO: Add to subscription history
-}
+func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Subscription, rawEvent *json.RawMessage) {
+	tx, err := s.Pool.Begin(context.Background())
+	if err != nil {
+		slog.Error("Error starting transaction", "error", err)
+		return
+	}
+	defer tx.Rollback(context.Background())
 
-func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
-	// HERE
-	_, err := s.Pool.Exec(context.Background(), `
-	UPDATE subscriptions
-	SET status = $1
-	WHERE id = $2;`, subscription.Status, subscription.ID)
-
+	// Update the subscription status
+	_, err = tx.Exec(context.Background(), `
+		UPDATE subscriptions
+		SET status = $1
+		WHERE stripe_subscription_id = $2;`, subscription.Status, subscription.ID)
 	if err != nil {
 		slog.Error("Error updating subscription", "error", err)
 		return
 	}
-	// TODO: Add to subscription history
+
+	// Record raw event in db
+	event := &SubscriptionEvent{
+		SubscriptionID: subscription.ID,
+		EventType:      "customer.subscription.deleted",
+		EventData:      *rawEvent,
+	}
+	err = recordEvent(tx, event)
+	if err != nil {
+		slog.Error("Error saving subscription event for failed invoice", "error", err, "subscriptionID", subscription.ID)
+		return
+	}
+
+	err = tx.Commit(context.Background())
+	if err != nil {
+		slog.Error("Error committing transaction", "error", err)
+		return
+	}
+
 	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
 }
 
@@ -243,4 +344,15 @@ func (s *StripeService) InsertCustomerId(userId types.UserId, customerId string)
 		SET stripe_customer_id = $2;
 	`, userId, customerId)
 	return err
+}
+
+func recordEvent(tx pgx.Tx, event *SubscriptionEvent) error {
+	_, err := tx.Exec(context.Background(), `
+	INSERT INTO subscription_events (stripe_subscription_id, event_type, event_data)
+	VALUES ($1, $2, $3);`,
+		event.SubscriptionID, event.EventType, event.EventData)
+	if err != nil {
+		return fmt.Errorf("saving subscription event: %w", err)
+	}
+	return nil
 }
