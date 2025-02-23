@@ -12,8 +12,8 @@ import (
 	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	stripeClient "github.com/stripe/stripe-go/v81"
-	subscriptionClient "github.com/stripe/stripe-go/v81/subscription"
+	stripeclient "github.com/stripe/stripe-go/v81"
+	subscriptionclient "github.com/stripe/stripe-go/v81/subscription"
 )
 
 type StripeService struct {
@@ -23,10 +23,10 @@ type StripeService struct {
 type Subscription struct {
 	UserID               types.UserId
 	StripeSubscriptionID string
-	StripePriceID        string
 	Status               string
 	CurrentPeriodStart   time.Time
 	CurrentPeriodEnd     time.Time
+	CanceledAt           time.Time
 }
 
 type StripeInvoice struct {
@@ -64,12 +64,12 @@ func (s *StripeService) SaveSession(userId types.UserId, sessionId string) error
 	return nil
 }
 
-func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEvent *json.RawMessage) {
+func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEvent *json.RawMessage) {
 	if invoice.Subscription == nil {
 		slog.Error("No subscription found in invoice. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
 	}
-	if invoice.Status != stripeClient.InvoiceStatusPaid {
+	if invoice.Status != stripeclient.InvoiceStatusPaid {
 		slog.Error("Invoice not paid", "status", invoice.Status, "invoiceID", invoice.ID)
 		return
 	}
@@ -104,7 +104,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEven
 
 	// Get the full subscription details from Stripe
 	// We need this because invoice doesn't contain all subscription details
-	sub, err := subscriptionClient.Get(invoice.Subscription.ID, &stripeClient.SubscriptionParams{})
+	sub, err := subscriptionclient.Get(invoice.Subscription.ID, &stripeclient.SubscriptionParams{})
 	if err != nil {
 		slog.Error("Error getting subscription", "error", err, "subscriptionID", invoice.Subscription.ID)
 		return
@@ -125,9 +125,9 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEven
 		}
 
 		_, err := s.Pool.Exec(context.Background(), `
-			INSERT INTO subscriptions (user_id, stripe_subscription_id, status, current_period_start, current_period_end)
-			VALUES ($1, $2, $3, $4, $5, $6);`,
-			newSub.UserID, newSub.StripeSubscriptionID, newSub.Status,
+			INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end)
+			VALUES ($1, $2, $3, $4, $5);`,
+			newSub.StripeSubscriptionID, newSub.UserID, newSub.Status,
 			newSub.CurrentPeriodStart, newSub.CurrentPeriodEnd)
 		if err != nil {
 			slog.Error("Error saving new subscription", "error", err, "invoiceID", invoice.ID, "userId", userId)
@@ -144,7 +144,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEven
 	}
 
 	_, err = s.Pool.Exec(context.Background(), `
-		INSERT INTO invoices (stripe_invoice_id, subscription_id, status, amount, paid_at)
+		INSERT INTO invoices (stripe_invoice_id, stripe_subscription_id, status, amount, paid_at)
 		VALUES ($1, $2, $3, $4, $5);`,
 		newInvoice.StripeInvoiceId, newInvoice.SubscriptionID, newInvoice.Status,
 		newInvoice.Amount, newInvoice.PaidAt)
@@ -169,7 +169,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEven
 		EventData:      *rawEvent,
 	}
 	_, err = s.Pool.Exec(context.Background(), `
-		INSERT INTO subscription_events (subscription_id, event_type, event_data)
+		INSERT INTO subscription_events (stripe_subscription_id, event_type, event_data)
 		VALUES ($1, $2, $3);`,
 		event.SubscriptionID, event.EventType, event.EventData)
 	if err != nil {
@@ -186,14 +186,14 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeClient.Invoice, rawEven
 	slog.Info("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) HandleInvoiceFailed(invoice *stripeClient.Invoice) {
+func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 }
 
-func (s *StripeService) HandleSubscriptionUpdated(subscription *stripeClient.Subscription) {
+func (s *StripeService) HandleSubscriptionUpdated(subscription *stripeclient.Subscription) {
 	// TODO: Add to subscription history
 }
 
-func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeClient.Subscription) {
+func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
 	// HERE
 	_, err := s.Pool.Exec(context.Background(), `
 	UPDATE subscriptions

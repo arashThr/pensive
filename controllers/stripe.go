@@ -14,7 +14,7 @@ import (
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/models"
-	stripeClient "github.com/stripe/stripe-go/v81"
+	stripeclient "github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	"github.com/stripe/stripe-go/v81/checkout/session"
 	"github.com/stripe/stripe-go/v81/customer"
@@ -41,7 +41,7 @@ func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err e
 		return "", fmt.Errorf("get stripe customer id: %w", err)
 	}
 	log.Printf("No stripe customer found for user %v", user.ID)
-	params := &stripeClient.CustomerListParams{Email: stripeClient.String(user.Email)}
+	params := &stripeclient.CustomerListParams{Email: stripeclient.String(user.Email)}
 	params.Filters.AddFilter("limit", "", "1")
 	result := customer.List(params)
 	if result.Next() {
@@ -51,12 +51,12 @@ func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err e
 		customerId = customer.ID
 	} else {
 		// Create a new customer
-		params := &stripeClient.CustomerParams{Email: stripeClient.String(user.Email)}
+		params := &stripeclient.CustomerParams{Email: stripeclient.String(user.Email)}
 		params.AddMetadata("user_id", strconv.Itoa(int(user.ID)))
 		// TODO: params.SetIdempotencyKey()
 		customer, err := customer.New(params)
 		if err != nil {
-			if stripeErr, ok := err.(*stripeClient.Error); ok {
+			if stripeErr, ok := err.(*stripeclient.Error); ok {
 				log.Printf("Stripe error: %v", stripeErr.Error())
 			} else {
 				log.Printf("Create stripe customer error: %v", err)
@@ -80,16 +80,16 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	checkoutParams := &stripeClient.CheckoutSessionParams{
-		Mode: stripeClient.String(string(stripeClient.CheckoutSessionModeSubscription)),
-		LineItems: []*stripeClient.CheckoutSessionLineItemParams{
+	checkoutParams := &stripeclient.CheckoutSessionParams{
+		Mode: stripeclient.String(string(stripeclient.CheckoutSessionModeSubscription)),
+		LineItems: []*stripeclient.CheckoutSessionLineItemParams{
 			{
-				Price:    stripeClient.String(s.PriceId),
-				Quantity: stripeClient.Int64(1),
+				Price:    stripeclient.String(s.PriceId),
+				Quantity: stripeclient.Int64(1),
 			},
 		},
-		SuccessURL: stripeClient.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:  stripeClient.String(s.Domain + "/payments/cancel"),
+		SuccessURL: stripeclient.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:  stripeclient.String(s.Domain + "/payments/cancel"),
 		Customer:   &customerId,
 	}
 
@@ -125,9 +125,9 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := &stripeClient.BillingPortalSessionParams{
-		Customer:  stripeClient.String(sess.Customer.ID),
-		ReturnURL: stripeClient.String(s.Domain),
+	params := &stripeclient.BillingPortalSessionParams{
+		Customer:  stripeclient.String(sess.Customer.ID),
+		ReturnURL: stripeclient.String(s.Domain),
 	}
 	ps, err := portalsession.New(params)
 
@@ -154,9 +154,9 @@ func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 		slog.Error("url.JoinPath", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
-	params := &stripeClient.BillingPortalSessionParams{
-		Customer:  stripeClient.String(customerId),
-		ReturnURL: stripeClient.String(returnPath),
+	params := &stripeclient.BillingPortalSessionParams{
+		Customer:  stripeclient.String(customerId),
+		ReturnURL: stripeclient.String(returnPath),
 	}
 
 	ps, err := portalsession.New(params)
@@ -315,8 +315,8 @@ func downgradeUserFromPremium(customerID string) {
 }
 */
 
-func handleSubscriptionCreated(event *stripeClient.Event) error {
-	var subscription stripeClient.Subscription
+func handleSubscriptionCreated(event *stripeclient.Event) error {
+	var subscription stripeclient.Subscription
 	err := json.Unmarshal(event.Data.Raw, &subscription)
 	if err != nil {
 		return fmt.Errorf("parsing webhook JSON: %w", err)
@@ -325,8 +325,8 @@ func handleSubscriptionCreated(event *stripeClient.Event) error {
 	return nil
 }
 
-func handleSubscriptionUpdated(event *stripeClient.Event) error {
-	var subscription stripeClient.Subscription
+func handleSubscriptionUpdated(event *stripeclient.Event) error {
+	var subscription stripeclient.Subscription
 	err := json.Unmarshal(event.Data.Raw, &subscription)
 	if err != nil {
 		return fmt.Errorf("parsing webhook JSON: %w", err)
@@ -336,8 +336,8 @@ func handleSubscriptionUpdated(event *stripeClient.Event) error {
 	return nil
 }
 
-func handleCheckoutSessionCompleted(event *stripeClient.Event) error {
-	var session stripeClient.CheckoutSession
+func handleCheckoutSessionCompleted(event *stripeclient.Event) error {
+	var session stripeclient.CheckoutSession
 	err := json.Unmarshal(event.Data.Raw, &session)
 	if err != nil {
 		slog.Error("Error parsing webhook JSON", "error", err)
@@ -349,8 +349,8 @@ func handleCheckoutSessionCompleted(event *stripeClient.Event) error {
 	return nil
 }
 
-func getInvoicePaid(event *stripeClient.Event) (*stripeClient.Invoice, error) {
-	var invoice stripeClient.Invoice
+func getInvoicePaid(event *stripeclient.Event) (*stripeclient.Invoice, error) {
+	var invoice stripeclient.Invoice
 	err := json.Unmarshal(event.Data.Raw, &invoice)
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.paid webhook JSON: %w", err)
@@ -359,8 +359,8 @@ func getInvoicePaid(event *stripeClient.Event) (*stripeClient.Invoice, error) {
 	return &invoice, nil
 }
 
-func getInvoiceFailed(event *stripeClient.Event) (*stripeClient.Invoice, error) {
-	var invoice stripeClient.Invoice
+func getInvoiceFailed(event *stripeclient.Event) (*stripeclient.Invoice, error) {
+	var invoice stripeclient.Invoice
 	err := json.Unmarshal(event.Data.Raw, &invoice)
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.failed webhook JSON: %w", err)
@@ -369,8 +369,8 @@ func getInvoiceFailed(event *stripeClient.Event) (*stripeClient.Invoice, error) 
 	return &invoice, nil
 }
 
-func getSubscriptionDeleted(event *stripeClient.Event) (*stripeClient.Subscription, error) {
-	var subscription stripeClient.Subscription
+func getSubscriptionDeleted(event *stripeclient.Event) (*stripeclient.Subscription, error) {
+	var subscription stripeclient.Subscription
 	err := json.Unmarshal(event.Data.Raw, &subscription)
 	if err != nil {
 		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)

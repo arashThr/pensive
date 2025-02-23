@@ -26,7 +26,7 @@ erDiagram
 
     subscription_events {
         uuid id PK
-        uuid subscription_id FK
+        uuid stripe_subscription_id FK
         string event_type
         jsonb event_data
         timestamp created_at
@@ -34,7 +34,7 @@ erDiagram
 
     invoices {
         uuid id PK
-        uuid subscription_id FK
+        uuid stripe_subscription_id FK
         string stripe_invoice_id
         string status
         decimal amount
