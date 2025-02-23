@@ -113,7 +113,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		IsSubscribed bool
 	}
 	data.Email = user.Email
-	data.IsSubscribed = user.SubscriptionStatus == "active"
+	data.IsSubscribed = user.IsSubscribed
 	u.Templates.UserPage.Execute(w, r, data)
 }
 

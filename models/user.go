@@ -24,7 +24,7 @@ type User struct {
 	// - 'unpaid'      -> payment failed and stopped retrying
 	// - 'canceled'    -> subscription was canceled
 	// - 'incomplete'  -> initial payment failed
-	SubscriptionStatus string
+	IsSubscribed bool
 }
 
 type UserService struct {
