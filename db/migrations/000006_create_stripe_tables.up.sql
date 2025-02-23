@@ -38,7 +38,8 @@ CREATE INDEX idx_subscription_events_created_at ON subscription_events(created_a
 
 -- Invoices table
 CREATE TABLE IF NOT EXISTS invoices (
-    stripe_invoice_id TEXT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    stripe_invoice_id TEXT,
     stripe_subscription_id TEXT NOT NULL REFERENCES subscriptions(stripe_subscription_id),
     status TEXT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
