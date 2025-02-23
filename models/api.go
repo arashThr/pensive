@@ -55,10 +55,9 @@ func (as *ApiService) User(token string) (*User, error) {
 	var user User
 
 	row := as.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash, COALESCE(subscriptions.status, 'none')
+		SELECT users.id, email, password_hash
 		FROM users
 		JOIN api_tokens ON users.id = api_tokens.user_id
-		LEFT JOIN subscriptions ON users.id = subscriptions.user_id
 		WHERE api_tokens.token_hash = $1`, tokenHash)
 
 	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash)
@@ -77,7 +76,7 @@ func (as *ApiService) User(token string) (*User, error) {
 	if activeSubs > 1 {
 		slog.Error("user has more than one active subscription", "user_id", user.ID)
 	}
-	user.IsSubscribed = activeSubs > 1
+	user.IsSubscribed = activeSubs == 1
 
 	return &user, nil
 

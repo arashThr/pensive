@@ -55,7 +55,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 	var user User
 
 	row := ss.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash, COALESCE(subscriptions.status, 'none')
+		SELECT users.id, email, password_hash
 		FROM users
 		JOIN sessions ON users.id = sessions.user_id
 		WHERE sessions.token_hash = $1`, tokenHash)
@@ -75,7 +75,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 	if activeSubs > 1 {
 		slog.Error("user has more than one active subscription", "user_id", user.ID)
 	}
-	user.IsSubscribed = activeSubs > 1
+	user.IsSubscribed = activeSubs == 1
 
 	return &user, nil
 }
