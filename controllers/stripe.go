@@ -184,8 +184,6 @@ func (s Stripe) Cancel(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
-	log.Printf("received webhook")
-
 	const MaxBodyBytes = int64(65536)
 	bodyReader := http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 	payload, err := io.ReadAll(bodyReader)
@@ -208,6 +206,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Unmarshal the event data into an appropriate struct depending on its Type
+	slog.Info("Received webhook", "event_type", event.Type)
 	switch event.Type {
 	case "customer.subscription.deleted":
 		subscription, err := getSubscriptionDeleted(&event)
@@ -215,7 +214,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleSubscriptionDeleted(subscription)
+		go s.StripeService.HandleSubscriptionDeleted(subscription, &event.Data.Raw)
 	case "customer.subscription.updated":
 		err := handleSubscriptionUpdated(&event)
 		if err != nil {
@@ -262,7 +261,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoiceFailed(invoice)
+		go s.StripeService.HandleInvoiceFailed(invoice, &event.Data.Raw)
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
 	}
@@ -333,6 +332,9 @@ func handleSubscriptionUpdated(event *stripeclient.Event) error {
 	}
 	slog.Info("Subscription updated", "subscriptionID", subscription.ID)
 	slog.Info("Subscription updated with previous attributes", "prevAtt", event.Data.PreviousAttributes)
+	if event.Data.PreviousAttributes["status"] != nil {
+		slog.Info("Subscription status changed", "prevStatus", event.Data.PreviousAttributes["status"], "newStatus", subscription.Status)
+	}
 	return nil
 }
 
