@@ -13,18 +13,10 @@ import (
 )
 
 type User struct {
-	ID           types.UserId
-	Email        string
-	PasswordHash string
-
-	// Possible status values:
-	// - 'none'        -> subscription was not created
-	// - 'active'      -> subscription is active and paid
-	// - 'past_due'    -> payment failed but still retrying
-	// - 'unpaid'      -> payment failed and stopped retrying
-	// - 'canceled'    -> subscription was canceled
-	// - 'incomplete'  -> initial payment failed
-	IsSubscribed bool
+	ID                 types.UserId
+	Email              string
+	PasswordHash       string
+	SubscriptionStatus string
 }
 
 type UserService struct {
@@ -33,6 +25,26 @@ type UserService struct {
 
 func normalizeEmail(email string) string {
 	return strings.ToLower(email)
+}
+
+// These are the states where user should have access
+var ActiveStates = map[string]bool{
+	"active":   true,
+	"trialing": true,
+}
+
+// These states require attention but might still have access
+var GracePeriodStates = map[string]bool{
+	"past_due": true, // Configurable based on your business rules
+}
+
+// These states should definitely not have access
+var InactiveStates = map[string]bool{
+	"canceled":           true,
+	"unpaid":             true,
+	"incomplete":         true,
+	"incomplete_expired": true,
+	"free":               true,
 }
 
 func (us *UserService) Create(email, password string) (*User, error) {

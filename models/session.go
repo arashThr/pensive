@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"log/slog"
 
 	"github.com/arashthr/go-course/rand"
 	"github.com/arashthr/go-course/types"
@@ -55,27 +54,14 @@ func (ss *SessionService) User(token string) (*User, error) {
 	var user User
 
 	row := ss.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash
+		SELECT users.id, email, password_hash, subscription_status
 		FROM users
 		JOIN sessions ON users.id = sessions.user_id
 		WHERE sessions.token_hash = $1`, tokenHash)
-	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash)
+	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.SubscriptionStatus)
 	if err != nil {
 		return nil, fmt.Errorf("session user: %w", err)
 	}
-
-	row = ss.Pool.QueryRow(context.Background(),
-		`SELECT COUNT(*) FROM subscriptions
-		WHERE user_id = $1 AND status = 'active';`, user.ID)
-	var activeSubs int
-	err = row.Scan(&activeSubs)
-	if err != nil {
-		return nil, fmt.Errorf("session user active subs: %w", err)
-	}
-	if activeSubs > 1 {
-		slog.Error("user has more than one active subscription", "user_id", user.ID)
-	}
-	user.IsSubscribed = activeSubs == 1
 
 	return &user, nil
 }
