@@ -222,11 +222,12 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "customer.subscription.created":
-		err := handleSubscriptionCreated(&event)
+		subscription, err := getSubscriptionCreated(&event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		go s.StripeService.HandleSubscriptionCreated(subscription, &event.Data.Raw)
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
@@ -314,16 +315,6 @@ func downgradeUserFromPremium(customerID string) {
 }
 */
 
-func handleSubscriptionCreated(event *stripeclient.Event) error {
-	var subscription stripeclient.Subscription
-	err := json.Unmarshal(event.Data.Raw, &subscription)
-	if err != nil {
-		return fmt.Errorf("parsing webhook JSON: %w", err)
-	}
-	slog.Info("Subscription created", "subscriptionID", subscription.ID)
-	return nil
-}
-
 func handleSubscriptionUpdated(event *stripeclient.Event) error {
 	var subscription stripeclient.Subscription
 	err := json.Unmarshal(event.Data.Raw, &subscription)
@@ -351,6 +342,26 @@ func handleCheckoutSessionCompleted(event *stripeclient.Event) error {
 	return nil
 }
 
+func getSubscriptionCreated(event *stripeclient.Event) (*stripeclient.Subscription, error) {
+	var subscription stripeclient.Subscription
+	err := json.Unmarshal(event.Data.Raw, &subscription)
+	if err != nil {
+		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
+	}
+	slog.Info("Subscription created", "subscriptionID", subscription.ID)
+	return &subscription, nil
+}
+
+func getSubscriptionDeleted(event *stripeclient.Event) (*stripeclient.Subscription, error) {
+	var subscription stripeclient.Subscription
+	err := json.Unmarshal(event.Data.Raw, &subscription)
+	if err != nil {
+		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)
+	}
+	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
+	return &subscription, nil
+}
+
 func getInvoicePaid(event *stripeclient.Event) (*stripeclient.Invoice, error) {
 	var invoice stripeclient.Invoice
 	err := json.Unmarshal(event.Data.Raw, &invoice)
@@ -369,14 +380,4 @@ func getInvoiceFailed(event *stripeclient.Event) (*stripeclient.Invoice, error) 
 	}
 	slog.Info("Invoice failed", "invoiceID", invoice.ID)
 	return &invoice, nil
-}
-
-func getSubscriptionDeleted(event *stripeclient.Event) (*stripeclient.Subscription, error) {
-	var subscription stripeclient.Subscription
-	err := json.Unmarshal(event.Data.Raw, &subscription)
-	if err != nil {
-		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)
-	}
-	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
-	return &subscription, nil
 }
