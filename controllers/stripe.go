@@ -127,7 +127,7 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 
 	params := &stripeclient.BillingPortalSessionParams{
 		Customer:  stripeclient.String(sess.Customer.ID),
-		ReturnURL: stripeclient.String(s.Domain + "/user/me"),
+		ReturnURL: stripeclient.String(s.Domain + "/users/me"),
 	}
 	ps, err := portalsession.New(params)
 
@@ -221,6 +221,9 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		// 1: record transition updates
+		// 2: update prevAtt="map[cancel_at:<nil> cancel_at_period_end:false canceled_at:<nil> cancellation_details:map[reason:<nil>]]"
+		// 3: feedback prevAtt=map[cancellation_details:map[feedback:<nil>]]
 	case "customer.subscription.created":
 		subscription, err := getSubscriptionCreated(&event)
 		if err != nil {
