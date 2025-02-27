@@ -113,7 +113,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		IsSubscribed bool
 	}
 	data.Email = user.Email
-	data.IsSubscribed = models.ActiveStates[user.SubscriptionStatus]
+	data.IsSubscribed = user.SubscriptionStatus == "premium"
 	u.Templates.UserPage.Execute(w, r, data)
 }
 

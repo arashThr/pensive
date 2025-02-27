@@ -128,11 +128,31 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 		return
 	}
 
-	// Update the subscription status
+	// Insert subscription into subscriptions table
+	newSub := Subscription{
+		UserID:               userId,
+		StripeSubscriptionID: sub.ID,
+		Status:               string(sub.Status),
+		CurrentPeriodStart:   time.Unix(sub.CurrentPeriodStart, 0),
+		CurrentPeriodEnd:     time.Unix(sub.CurrentPeriodEnd, 0),
+		CanceledAt:           time.Unix(sub.CanceledAt, 0),
+	}
+	fmt.Println("newSub", newSub)
+	_, err = tx.Exec(context.Background(), `
+		INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end, canceled_at)
+		VALUES ($1, $2, $3, $4, $5, $6);`,
+		newSub.StripeSubscriptionID, newSub.UserID, newSub.Status,
+		newSub.CurrentPeriodStart, newSub.CurrentPeriodEnd, newSub.CanceledAt)
+	if err != nil {
+		slog.Error("Error saving subscription", "error", err, "subscriptionID", newSub.ID)
+		return
+	}
+
+	// Update the subscription status in users table
 	_, err = tx.Exec(context.Background(), `
 		UPDATE users
 		SET subscription_status = $1
-		WHERE id = $2;`, sub.Status, userId)
+		WHERE id = $2;`, "premium", userId)
 	if err != nil {
 		slog.Error("Error updating subscription", "error", err)
 		return
@@ -243,6 +263,7 @@ func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice, rawEv
 }
 
 func (s *StripeService) HandleSubscriptionCreated(subscription *stripeclient.Subscription, rawEvent *json.RawMessage) {
+	// Get user ID
 	customerId := subscription.Customer.ID
 	userId, err := s.GetUserIdByStripeCustomerId(customerId)
 	if err != nil {
@@ -251,6 +272,7 @@ func (s *StripeService) HandleSubscriptionCreated(subscription *stripeclient.Sub
 	}
 	slog.Info("Processing subscription deletion", "userId", userId, "subscriptionID", subscription.ID)
 
+	// Start transaction
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
 		slog.Error("Error starting transaction", "error", err)
@@ -258,19 +280,20 @@ func (s *StripeService) HandleSubscriptionCreated(subscription *stripeclient.Sub
 	}
 	defer tx.Rollback(context.Background())
 
-	newSub := &Subscription{
+	// Insert subscription into subscriptions table
+	sub := Subscription{
 		UserID:               userId,
 		StripeSubscriptionID: subscription.ID,
-		Status:               "active",
+		Status:               string(subscription.Status),
 		CurrentPeriodStart:   time.Unix(subscription.CurrentPeriodStart, 0),
 		CurrentPeriodEnd:     time.Unix(subscription.CurrentPeriodEnd, 0),
+		CanceledAt:           time.Unix(subscription.CanceledAt, 0),
 	}
-
 	_, err = tx.Exec(context.Background(), `
-			INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end)
-			VALUES ($1, $2, $3, $4, $5);`,
-		newSub.StripeSubscriptionID, newSub.UserID, newSub.Status,
-		newSub.CurrentPeriodStart, newSub.CurrentPeriodEnd)
+		INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end, canceled_at)
+		VALUES ($1, $2, $3, $4, $5, $6);`,
+		sub.StripeSubscriptionID, sub.UserID, sub.Status,
+		sub.CurrentPeriodStart, sub.CurrentPeriodEnd, sub.CanceledAt)
 	if err != nil {
 		slog.Error("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
 		return
@@ -288,6 +311,7 @@ func (s *StripeService) HandleSubscriptionCreated(subscription *stripeclient.Sub
 		return
 	}
 
+	// Finalize queries
 	err = tx.Commit(context.Background())
 	if err != nil {
 		slog.Error("Error committing transaction", "error", err)
@@ -298,6 +322,7 @@ func (s *StripeService) HandleSubscriptionCreated(subscription *stripeclient.Sub
 }
 
 func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Subscription, rawEvent *json.RawMessage) {
+	// Get user Id
 	customerId := subscription.Customer.ID
 	userId, err := s.GetUserIdByStripeCustomerId(customerId)
 	if err != nil {
@@ -306,6 +331,7 @@ func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Sub
 	}
 	slog.Info("Processing subscription deletion", "userId", userId, "subscriptionID", subscription.ID)
 
+	// Start tx
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
 		slog.Error("Error starting transaction", "error", err)
@@ -317,7 +343,7 @@ func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Sub
 	_, err = tx.Exec(context.Background(), `
 		UPDATE users
 		SET subscription_status = $1
-		WHERE id = $2;`, subscription.Status, userId)
+		WHERE id = $2;`, "canceled", userId)
 	if err != nil {
 		slog.Error("Error updating subscription", "error", err)
 		return
