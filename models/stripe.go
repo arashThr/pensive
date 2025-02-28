@@ -144,7 +144,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice, rawEven
 		newSub.StripeSubscriptionID, newSub.UserID, newSub.Status,
 		newSub.CurrentPeriodStart, newSub.CurrentPeriodEnd, newSub.CanceledAt)
 	if err != nil {
-		slog.Error("Error saving subscription", "error", err, "subscriptionID", newSub.ID)
+		slog.Error("Error saving subscription", "error", err, "subscriptionID", sub.ID)
 		return
 	}
 
