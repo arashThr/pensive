@@ -214,7 +214,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleSubscriptionDeleted(subscription, &event.Data.Raw)
+		go s.StripeService.HandleSubscriptionDeleted(subscription)
 	case "customer.subscription.updated":
 		err := handleSubscriptionUpdated(&event)
 		if err != nil {
@@ -230,7 +230,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleSubscriptionCreated(subscription, &event.Data.Raw)
+		go s.StripeService.HandleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
@@ -255,7 +255,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoicePaid(invoice, &event.Data.Raw)
+		go s.StripeService.HandleInvoicePaid(invoice)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the
@@ -265,7 +265,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoiceFailed(invoice, &event.Data.Raw)
+		go s.StripeService.HandleInvoiceFailed(invoice)
 	default:
 		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
 	}

@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     current_period_end TIMESTAMPTZ NOT NULL,
     canceled_at TIMESTAMPTZ DEFAULT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT valid_status CHECK (status IN ('trialing', 'active', 'incomplete', 'incomplete_expired', 'past_due', 'canceled', 'unpaid', 'paused'))
 );
 
@@ -16,24 +15,11 @@ CREATE INDEX idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_su
 CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 CREATE INDEX idx_subscriptions_current_period_end ON subscriptions(current_period_end);
 
--- Subscription events table for audit trail
-CREATE TABLE IF NOT EXISTS subscription_events (
-    id SERIAL PRIMARY KEY,
-    stripe_subscription_id TEXT NOT NULL REFERENCES subscriptions(stripe_subscription_id),
-    event_type TEXT NOT NULL,
-    event_data JSONB NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX idx_subscription_events_stripe_subscription_id ON subscription_events(stripe_subscription_id);
-CREATE INDEX idx_subscription_events_event_type ON subscription_events(event_type);
-CREATE INDEX idx_subscription_events_created_at ON subscription_events(created_at);
-
 -- Invoices table
 CREATE TABLE IF NOT EXISTS invoices (
     id SERIAL PRIMARY KEY,
     stripe_invoice_id TEXT,
-    stripe_subscription_id TEXT NOT NULL REFERENCES subscriptions(stripe_subscription_id),
+    stripe_subscription_id TEXT NOT NULL,
     status TEXT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     paid_at TIMESTAMPTZ,
@@ -51,21 +37,5 @@ CREATE TABLE IF NOT EXISTS stripe_customers (
     stripe_customer_id TEXT NOT NULL UNIQUE PRIMARY KEY,
     user_id INTEGER NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    stripe_subscription_id TEXT DEFAULT NULL REFERENCES subscriptions(stripe_subscription_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
--- Trigger function to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Add triggers for updated_at
-CREATE OR REPLACE TRIGGER update_subscriptions_updated_at
-    BEFORE UPDATE ON subscriptions
-    FOR EACH ROW
-    EXECUTE PROCEDURE update_updated_at_column();
