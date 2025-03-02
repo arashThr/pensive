@@ -216,7 +216,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		}
 		go s.StripeService.HandleSubscriptionDeleted(subscription)
 	case "customer.subscription.updated":
-		err := handleSubscriptionUpdated(&event)
+		sub, err := handleSubscriptionUpdated(&event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -224,13 +224,14 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		// 1: record transition updates
 		// 2: update prevAtt="map[cancel_at:<nil> cancel_at_period_end:false canceled_at:<nil> cancellation_details:map[reason:<nil>]]"
 		// 3: feedback prevAtt=map[cancellation_details:map[feedback:<nil>]]
+		go s.StripeService.RecordSubscription(sub)
 	case "customer.subscription.created":
 		subscription, err := getSubscriptionCreated(&event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleSubscriptionCreated(subscription)
+		go s.StripeService.RecordSubscription(subscription)
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
@@ -267,31 +268,13 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		}
 		go s.StripeService.HandleInvoiceFailed(invoice)
 	default:
-		fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+		slog.Warn("Unhandled event type", "event_type", event.Type)
 	}
 	w.WriteHeader(http.StatusOK)
 }
 
 // FAILURE
 /*
-func handleWebhook(w http.ResponseWriter, r *http.Request) {
-    var event stripe.Event
-    if err := json.NewDecoder(r.Body).Decode(&event); err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
-
-    switch event.Type {
-    case "invoice.payment_failed":
-        invoice := event.Data.Object.(*stripe.Invoice)
-        handlePaymentFailure(invoice)
-
-    case "customer.subscription.deleted":
-        subscription := event.Data.Object.(*stripe.Subscription)
-        handleSubscriptionDeletion(subscription)
-    }
-}
-
 func handlePaymentFailure(invoice *stripe.Invoice) {
     // Here, you might:
     // - Notify the user about the failed payment
@@ -308,28 +291,20 @@ func handleSubscriptionDeletion(subscription *stripe.Subscription) {
     // Downgrade user to free tier or remove premium access
     downgradeUserFromPremium(subscription.Customer.ID)
 }
-
-func notifyUserOfPaymentIssue(subscriptionID string) {
-    // Implement logic to notify user via email, in-app message, etc.
-}
-
-func downgradeUserFromPremium(customerID string) {
-    // Implement logic to remove premium features or change user status
-}
 */
 
-func handleSubscriptionUpdated(event *stripeclient.Event) error {
+func handleSubscriptionUpdated(event *stripeclient.Event) (*stripeclient.Subscription, error) {
 	var subscription stripeclient.Subscription
 	err := json.Unmarshal(event.Data.Raw, &subscription)
 	if err != nil {
-		return fmt.Errorf("parsing webhook JSON: %w", err)
+		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
 	}
 	slog.Info("Subscription updated", "subscriptionID", subscription.ID)
 	slog.Info("Subscription updated with previous attributes", "prevAtt", event.Data.PreviousAttributes)
 	if event.Data.PreviousAttributes["status"] != nil {
 		slog.Info("Subscription status changed", "prevStatus", event.Data.PreviousAttributes["status"], "newStatus", subscription.Status)
 	}
-	return nil
+	return &subscription, nil
 }
 
 func handleCheckoutSessionCompleted(event *stripeclient.Event) error {

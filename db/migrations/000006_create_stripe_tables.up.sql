@@ -1,6 +1,14 @@
+-- Stripe customers table
+CREATE TABLE IF NOT EXISTS stripe_customers (
+    stripe_customer_id TEXT NOT NULL UNIQUE PRIMARY KEY,
+    user_id INTEGER NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Subscriptions table
 CREATE TABLE IF NOT EXISTS subscriptions (
-    stripe_subscription_id TEXT PRIMARY KEY,
+    stripe_subscription_id TEXT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL,
     current_period_start TIMESTAMPTZ NOT NULL,
@@ -31,11 +39,3 @@ CREATE INDEX idx_invoices_stripe_subscription_id ON invoices(stripe_subscription
 CREATE INDEX idx_invoices_stripe_invoice_id ON invoices(stripe_invoice_id);
 CREATE INDEX idx_invoices_status ON invoices(status);
 CREATE INDEX idx_invoices_created_at ON invoices(created_at);
-
--- Stripe customers table
-CREATE TABLE IF NOT EXISTS stripe_customers (
-    stripe_customer_id TEXT NOT NULL UNIQUE PRIMARY KEY,
-    user_id INTEGER NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
