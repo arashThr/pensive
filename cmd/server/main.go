@@ -190,7 +190,8 @@ func run(cfg *config) error {
 
 	// Middlewares
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+	// TODO: Use slog for logging requests
+	// r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(logging.LoggerMiddleware(cfg.Environment == "production"))
 
