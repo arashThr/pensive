@@ -224,14 +224,14 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		// 1: record transition updates
 		// 2: update prevAtt="map[cancel_at:<nil> cancel_at_period_end:false canceled_at:<nil> cancellation_details:map[reason:<nil>]]"
 		// 3: feedback prevAtt=map[cancellation_details:map[feedback:<nil>]]
-		go s.StripeService.RecordSubscription(sub)
+		go s.StripeService.RecordSubscription(sub, event.Data.PreviousAttributes)
 	case "customer.subscription.created":
 		subscription, err := getSubscriptionCreated(&event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.RecordSubscription(subscription)
+		go s.StripeService.RecordSubscription(subscription, nil)
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":

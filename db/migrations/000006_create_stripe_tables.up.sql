@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     stripe_subscription_id TEXT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL,
+    previous_attributes JSONB,
     current_period_start TIMESTAMPTZ NOT NULL,
     current_period_end TIMESTAMPTZ NOT NULL,
     canceled_at TIMESTAMPTZ DEFAULT NULL,

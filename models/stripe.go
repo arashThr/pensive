@@ -25,6 +25,7 @@ type Subscription struct {
 	CurrentPeriodStart   time.Time
 	CurrentPeriodEnd     time.Time
 	CanceledAt           time.Time
+	PreviousAttributes   map[string]any
 }
 
 type StripeInvoice struct {
@@ -195,7 +196,7 @@ func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 	slog.Info("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) RecordSubscription(subscription *stripeclient.Subscription) {
+func (s *StripeService) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
 	// Get user ID
 	customerId := subscription.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
@@ -213,11 +214,12 @@ func (s *StripeService) RecordSubscription(subscription *stripeclient.Subscripti
 		CurrentPeriodStart:   time.Unix(subscription.CurrentPeriodStart, 0),
 		CurrentPeriodEnd:     time.Unix(subscription.CurrentPeriodEnd, 0),
 		CanceledAt:           time.Unix(subscription.CanceledAt, 0),
+		PreviousAttributes:   prevAttr,
 	}
 	_, err = s.Pool.Exec(context.Background(), `
-		INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end, canceled_at)
-		VALUES ($1, $2, $3, $4, $5, $6);`, sub.StripeSubscriptionID, sub.UserID, sub.Status,
-		sub.CurrentPeriodStart, sub.CurrentPeriodEnd, sub.CanceledAt)
+		INSERT INTO subscriptions (stripe_subscription_id, user_id, status, current_period_start, current_period_end, canceled_at, previous_attributes)
+		VALUES ($1, $2, $3, $4, $5, $6, $7);`, sub.StripeSubscriptionID, sub.UserID, sub.Status,
+		sub.CurrentPeriodStart, sub.CurrentPeriodEnd, sub.CanceledAt, sub.PreviousAttributes)
 	if err != nil {
 		slog.Error("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
 		return
