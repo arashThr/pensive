@@ -2,8 +2,10 @@ package models
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/arashthr/go-course/errors"
@@ -14,10 +16,10 @@ import (
 )
 
 type Bookmark struct {
-	ID     types.BookmarkId
-	UserId types.UserId
-	Title  string
-	Link   string
+	BookmarkId types.BookmarkId
+	UserId     types.UserId
+	Title      string
+	Link       string
 }
 
 type BookmarkService struct {
@@ -36,10 +38,12 @@ func (service *BookmarkService) Create(link string, userId types.UserId) (*Bookm
 		Title:  article.Title,
 		Link:   link,
 	}
+	bookmarkId := strings.ToLower(rand.Text())[:8]
+
 	row := service.Pool.QueryRow(context.Background(),
-		`INSERT INTO bookmarks (user_id, title, link)
-		VALUES ($1, $2, $3) RETURNING id;`, userId, bookmark.Title, link)
-	err = row.Scan(&bookmark.ID)
+		`INSERT INTO bookmarks (bookmark_id, user_id, title, link)
+		VALUES ($1, $2, $3, $4) RETURNING bookmark_id;`, bookmarkId, userId, bookmark.Title, link)
+	err = row.Scan(&bookmark.BookmarkId)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
@@ -48,10 +52,10 @@ func (service *BookmarkService) Create(link string, userId types.UserId) (*Bookm
 
 func (service *BookmarkService) ById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
-		ID: id,
+		BookmarkId: id,
 	}
 	row := service.Pool.QueryRow(context.Background(),
-		`SELECT user_id, title, link FROM bookmarks WHERE id = $1;`, id)
+		`SELECT user_id, title, link FROM bookmarks WHERE bookmark_id = $1;`, id)
 	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -77,8 +81,8 @@ func (service *BookmarkService) ByUserId(userId types.UserId) ([]Bookmark, error
 
 func (service *BookmarkService) Update(bookmark *Bookmark) error {
 	_, err := service.Pool.Exec(context.Background(),
-		`UPDATE bookmarks SET link = $1, title = $2 WHERE id = $3`,
-		bookmark.Link, bookmark.Title, bookmark.ID,
+		`UPDATE bookmarks SET link = $1, title = $2 WHERE bookmark_id = $3`,
+		bookmark.Link, bookmark.Title, bookmark.BookmarkId,
 	)
 	if err != nil {
 		return fmt.Errorf("update bookmark: %w", err)
@@ -88,7 +92,7 @@ func (service *BookmarkService) Update(bookmark *Bookmark) error {
 
 func (service *BookmarkService) Delete(id types.BookmarkId) error {
 	_, err := service.Pool.Exec(context.Background(),
-		`DELETE FROM bookmarks WHERE id = $1;`, id)
+		`DELETE FROM bookmarks WHERE bookmark_id = $1;`, id)
 	if err != nil {
 		return fmt.Errorf("delete bookmark: %w", err)
 	}

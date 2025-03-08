@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/controllers/validations"
@@ -56,7 +55,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Load the same page with the message: Bookmark added
-	editPath := fmt.Sprintf("/bookmarks/%d/edit", bookmark.ID)
+	editPath := fmt.Sprintf("/bookmarks/%s/edit", bookmark.BookmarkId)
 	http.Redirect(w, r, editPath, http.StatusFound)
 }
 
@@ -73,7 +72,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
-	data.Id = bookmark.ID
+	data.Id = bookmark.BookmarkId
 	b.Templates.Edit.Execute(w, r, data)
 }
 
@@ -96,7 +95,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
-	data.Id = bookmark.ID
+	data.Id = bookmark.BookmarkId
 	b.Templates.Edit.Execute(w, r, data, NavbarMessage{
 		Message: "Bookmark updated",
 		IsError: false,
@@ -122,7 +121,7 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, b := range bookmarks {
 		data.Bookmarks = append(data.Bookmarks, Bookmark{
-			Id:    b.ID,
+			Id:    b.BookmarkId,
 			Title: b.Title,
 			Link:  b.Link,
 		})
@@ -136,7 +135,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = b.BookmarkService.Delete(bookmark.ID)
+	err = b.BookmarkService.Delete(bookmark.BookmarkId)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -145,11 +144,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		http.Error(w, "Invalid bookmark id", http.StatusBadRequest)
-		return nil, err
-	}
+	id := chi.URLParam(r, "id")
 	bookmark, err := b.BookmarkService.ById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {

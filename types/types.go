@@ -1,5 +1,5 @@
 package types
 
-type BookmarkId int
+type BookmarkId string
 
 type UserId int

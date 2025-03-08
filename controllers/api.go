@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/controllers/validations"
@@ -120,7 +119,7 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	if bookmark == nil {
 		return
 	}
-	err := a.BookmarkService.Delete(bookmark.ID)
+	err := a.BookmarkService.Delete(bookmark.BookmarkId)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
@@ -131,19 +130,12 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Id types.BookmarkId `json:"id"`
 	}
-	data.Id = bookmark.ID
+	data.Id = bookmark.BookmarkId
 	writeResponse(w, &data)
 }
 
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
-			Code:    "INVALID_ID",
-			Message: fmt.Sprintf("Invalid bookmark id: %v", err),
-		})
-		return nil
-	}
+	id := chi.URLParam(r, "id")
 	bookmark, err := a.BookmarkService.ById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, models.ErrNotFound) {
@@ -195,7 +187,7 @@ func writeErrorResponse(w http.ResponseWriter, statusCode int, errResp ErrorResp
 
 func mapModelToBookmark(b *models.Bookmark) Bookmark {
 	return Bookmark{
-		Id:    b.ID,
+		Id:    b.BookmarkId,
 		Title: b.Title,
 		Link:  b.Link,
 	}

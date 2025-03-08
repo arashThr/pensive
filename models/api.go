@@ -18,7 +18,7 @@ type ApiService struct {
 const ApiTokenBytes = 32
 
 type ApiToken struct {
-	ID        types.BookmarkId
+	ID        int
 	UserId    types.UserId
 	TokenHash string
 	// Token is only set when creating a new session
