@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/controllers"
 	"github.com/arashthr/go-course/logging"
 	"github.com/arashthr/go-course/models"
@@ -166,7 +167,7 @@ func run(cfg *config) error {
 	usersController.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
 	usersController.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
-	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user-page.gohtml", "tailwind.gohtml"))
+	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
 
 	bookmarksController := controllers.Bookmarks{
 		BookmarkService: bookmarksService,
@@ -218,9 +219,18 @@ func run(cfg *config) error {
 		r.Use(csrfMw)
 		r.Use(umw.SetUser)
 
-		r.Get("/", controllers.StaticHandler(
-			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-		))
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			user := context.User(r.Context())
+			if user != nil {
+				controllers.StaticHandler(
+					views.Must(views.ParseTemplate("user/search.gohtml", "tailwind.gohtml")),
+				)
+			} else {
+				controllers.StaticHandler(
+					views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+				)
+			}
+		})
 		r.Get("/contact", controllers.StaticHandler(
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
