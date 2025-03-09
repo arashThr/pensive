@@ -215,22 +215,24 @@ func run(cfg *config) error {
 		})
 	})
 
+	getHomePage := func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user != nil {
+			controllers.StaticHandler(
+				views.Must(views.ParseTemplate("user/search.gohtml", "tailwind.gohtml")),
+			)(w, r)
+		} else {
+			controllers.StaticHandler(
+				views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+			)(w, r)
+		}
+	}
+
 	r.Group(func(r chi.Router) {
 		r.Use(csrfMw)
 		r.Use(umw.SetUser)
 
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			user := context.User(r.Context())
-			if user != nil {
-				controllers.StaticHandler(
-					views.Must(views.ParseTemplate("user/search.gohtml", "tailwind.gohtml")),
-				)
-			} else {
-				controllers.StaticHandler(
-					views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-				)
-			}
-		})
+		r.Get("/", getHomePage)
 		r.Get("/contact", controllers.StaticHandler(
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
