@@ -20,6 +20,7 @@ type Users struct {
 		CheckYourEmail Template
 		ResetPassword  Template
 		UserPage       Template
+		Token          Template
 	}
 	UserService          *models.UserService
 	SessionService       *models.SessionService
@@ -108,12 +109,21 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
+	logger := context.Logger(r.Context())
 	var data struct {
 		Email        string
 		IsSubscribed bool
+		APIToken     string
 	}
 	data.Email = user.Email
 	data.IsSubscribed = user.SubscriptionStatus == "premium"
+	token, err := u.ApiService.Get(user.ID)
+	if err != nil {
+		logger.Info("get api token for current user", "error", err)
+		http.Error(w, "Failed to get API token", http.StatusInternalServerError)
+		return
+	}
+	data.APIToken = token.Token
 	u.Templates.UserPage.Execute(w, r, data)
 }
 
@@ -200,7 +210,10 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, `{"apiToken": "%s"}`, token.Token)
+	data := struct {
+		APIToken string
+	}{APIToken: token.Token}
+	u.Templates.Token.Execute(w, r, data)
 }
 
 type UserMiddleware struct {

@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"log"
 
 	"github.com/arashthr/go-course/rand"
 	"github.com/arashthr/go-course/types"
@@ -26,7 +27,7 @@ type ApiToken struct {
 	Token string
 }
 
-func (ss *ApiService) Create(userId types.UserId) (*ApiToken, error) {
+func (as *ApiService) Create(userId types.UserId) (*ApiToken, error) {
 	token, err := rand.String(ApiTokenBytes)
 	if err != nil {
 		return nil, fmt.Errorf("api token: %w", err)
@@ -34,9 +35,9 @@ func (ss *ApiService) Create(userId types.UserId) (*ApiToken, error) {
 	apiToken := ApiToken{
 		UserId:    userId,
 		Token:     token,
-		TokenHash: ss.hash(token),
+		TokenHash: as.hash(token),
 	}
-	row := ss.Pool.QueryRow(context.Background(), `
+	row := as.Pool.QueryRow(context.Background(), `
 		INSERT INTO api_tokens (user_id, token_hash)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id) DO UPDATE
@@ -46,6 +47,20 @@ func (ss *ApiService) Create(userId types.UserId) (*ApiToken, error) {
 	if err != nil {
 		return nil, fmt.Errorf("api token create: %w", err)
 	}
+	return &apiToken, nil
+}
+
+func (as *ApiService) Get(userId types.UserId) (*ApiToken, error) {
+	var apiToken ApiToken
+	row := as.Pool.QueryRow(context.Background(), `
+		SELECT id, token_hash
+		FROM api_tokens
+		WHERE user_id = $1`, userId)
+	err := row.Scan(&apiToken.ID, &apiToken.TokenHash)
+	if err != nil {
+		return nil, fmt.Errorf("api token get: %w", err)
+	}
+	log.Println("api token get spi tokn", apiToken)
 	return &apiToken, nil
 }
 

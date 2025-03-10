@@ -1,61 +1,77 @@
 {{template "header" .}}
 
 <div class="py-12 flex justify-center">
-    <div class="p-8 text-center w-1/3 bg-white rounded-lg shadow">
-        <div class="pt-6">
-            {{.Email}}
-        </div>
-        <div class="pt-6">
-            <button id="generate-api-token"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Generate API Token
-            </button>
-            <!-- TODO: Is it safe against CSRF? Move it to another page  -->
-            <script>
-                document.getElementById('generate-api-token').addEventListener('click', async function () {
-                    try {
-                        const response = await fetch('/users/generate-token', {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                        const data = await response.json()
-                        alert('New API token: ' + data.apiToken);
-                    } catch (err) {
-                        console.error('Error:', err);
-                    }
-                })
-            </script>
-        </div>
+  <div class="p-6 max-w-md w-full">
+    <h1 class="pb-6 text-2xl font-semibold text-black text-center">Your Account</h1>
 
-        {{if .IsSubscribed }}
-        Active
-        <div>
-            <a href="/payments/portal-session" class="text-blue-500 hover:underline">Manage Subscription</a>
-        </div>
-        {{else}}
-        Not Active
-        {{end}}
-        <div>
-            <h1 class="pt-4 pb-4 text-center text-2xl font-bold text-gray-900">
-                Buy cool new product
-            </h1>
-            <div>
-                <div>
-                    <h5>$1.00</h5>
-                </div>
-            </div>
-            <form action="/payments/create-checkout-session" method="POST">
-                <div class="hidden">
-                    {{csrfField}}
-                </div>
-                <div class="py-4">
-                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        type="submit">Checkout</button>
-                </div>
-            </form>
-        </div>
+    <!-- User Info -->
+    <div class="py-3">
+      <p class="text-sm text-gray-700">Email</p>
+      <p class="text-base text-black">{{.Email}}</p>
     </div>
+
+    <!-- API Token Section -->
+    <div class="py-3">
+      <p class="text-sm text-gray-700 mb-1">API Token</p>
+      <div id="token-container">
+        {{if .APIToken}}
+          <div class="flex items-center">
+            <input 
+              class="w-full px-3 py-2 border border-gray-300 rounded text-black bg-gray-50" 
+              type="text" 
+              value="{{.APIToken}}" 
+              readonly 
+              id="api-token" />
+            <button 
+              class="ml-2 text-gray-600 hover:text-blue-500" 
+              onclick="navigator.clipboard.writeText(document.getElementById('api-token').value)">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </button>
+          </div>
+          <p class="text-xs text-gray-500 mt-1">Copy and store this securely.</p>
+        {{else}}
+          <form action="/users/generate-token" method="post">
+            {{csrfField}}
+            <button 
+              class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold" 
+              hx-post="/users/generate-token" 
+              hx-target="#token-container" 
+              hx-swap="outerHTML" 
+              hx-indicator=".htmx-indicator"
+              type="submit">
+              Generate API Token
+            </button>
+            <span class="htmx-indicator hidden">⌛</span>
+          </form>
+        {{end}}
+      </div>
+    </div>
+
+    <!-- Subscription Section -->
+    <div class="py-3">
+      <p class="text-sm text-gray-700 mb-1">Subscription</p>
+      {{if .IsSubscribed}}
+        <p class="text-base text-black">Active</p>
+        <a 
+          href="/payments/portal-session" 
+          class="mt-2 inline-block text-sm text-blue-600 hover:text-blue-500">
+          Manage Subscription
+        </a>
+      {{else}}
+        <p class="text-base text-black">Not Active</p>
+        <form action="/payments/create-checkout-session" method="post">
+          {{csrfField}}
+          <button 
+            class="mt-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold" 
+            type="submit">
+            Subscribe - $1.00
+          </button>
+        </form>
+      {{end}}
+    </div>
+  </div>
 </div>
+
 {{template "footer" .}}
