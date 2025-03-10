@@ -1,18 +1,16 @@
 {{template "header" .}}
 
 <div class="py-12 flex justify-center">
-  <div class="p-8 bg-white rounded-lg shadow">
-    <h1 class="pt-4 pb-4 text-center text-2xl font-bold text-gray-900">
-        Start saving your bookmarks today!
-    </h1>
+  <div class="p-6 max-w-md w-full">
+    <h1 class="pb-6 text-2xl font-semibold text-black text-center">Start saving bookmarks</h1>
     <form action="/users" method="post">
       <div class="hidden">
-        {{ csrfField }}
+        {{csrfField}}
       </div>
-      <div class="py-2">
-        <label class="text-sm font-semibold text-gray-800">Email address</label>
+      <div class="py-3">
+        <label class="block text-sm text-gray-700 mb-1">Email address</label>
         <input
-          class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
+          class="w-full px-3 py-2 border border-gray-300 rounded text-black placeholder-gray-500 focus:border-blue-500 outline-none transition-all"
           name="email"
           id="email"
           type="email"
@@ -21,10 +19,10 @@
           autocomplete="email"
         />
       </div>
-      <div class="py-2">
-        <label class="text-sm font-semibold text-gray-800" for="password">Password</label>
+      <div class="py-3">
+        <label class="block text-sm text-gray-700 mb-1" for="password">Password</label>
         <input
-          class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
+          class="w-full px-3 py-2 border border-gray-300 rounded text-black placeholder-gray-500 focus:border-blue-500 outline-none transition-all"
           name="password"
           id="password"
           type="password"
@@ -33,13 +31,14 @@
         />
       </div>
       <div class="py-4">
-        <button class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-lg" type="submit">Sign up</button>
+        <button class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold" type="submit">Sign Up</button>
       </div>
-      <div class="py-2 w-full flex justify-between text-xs text-gray-500">
-        <p><a class="underline hover:text-indigo-600" href="/signin">Already have an account?</a></p>
-        <p><a class="underline hover:text-indigo-600" href="/forgot-pw">Forgot your password?</a></p>
+      <div class="text-sm text-gray-600 flex justify-between">
+        <a class="hover:text-blue-500" href="/signin">Already have an account?</a>
+        <a class="hover:text-blue-500" href="/forgot-pw">Forgot password?</a>
       </div>
     </form>
   </div>
 </div>
+
 {{template "footer" .}}
