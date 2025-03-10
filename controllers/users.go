@@ -10,6 +10,7 @@ import (
 	"github.com/arashthr/go-course/context"
 	"github.com/arashthr/go-course/errors"
 	"github.com/arashthr/go-course/models"
+	"github.com/jackc/pgx/v5"
 )
 
 type Users struct {
@@ -119,11 +120,17 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	data.IsSubscribed = user.SubscriptionStatus == "premium"
 	token, err := u.ApiService.Get(user.ID)
 	if err != nil {
-		logger.Info("get api token for current user", "error", err)
-		http.Error(w, "Failed to get API token", http.StatusInternalServerError)
-		return
+		if errors.Is(err, pgx.ErrNoRows) {
+			logger.Info("api token not found for current user")
+			data.APIToken = ""
+		} else {
+			logger.Info("get api token for current user", "error", err)
+			http.Error(w, "Failed to get API token", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		data.APIToken = token.Token
 	}
-	data.APIToken = token.Token
 	u.Templates.UserPage.Execute(w, r, data)
 }
 
