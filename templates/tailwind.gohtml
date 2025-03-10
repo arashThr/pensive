@@ -1,112 +1,85 @@
 {{define "header"}}
 <!doctype html>
 <html>
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/style.css" />
-  <style>
-    /* Basic transition for the nav menu */
-    .menu-hidden {
-      display: none;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
-
-<body class="min-h-screen bg-gray-100 flex flex-col">
-  <header class="bg-indigo-900">
-    <nav class="px-8 py-6 flex items-center text-white">
-      <div class="text-4xl pr-12 font-serif">
-        <a href="/">📖 Pensieve App</a>
+<body class="min-h-screen bg-white text-black font-sans flex flex-col">
+  <header class="bg-white border-b border-gray-200">
+    <nav class="px-6 py-4 flex items-center">
+      <div class="text-2xl font-semibold">
+        <a href="/">📖 Pensieve</a>
       </div>
 
-      <!-- Hamburger button (hidden on larger screens) -->
-      <div class="md:hidden">
+      <!-- Hamburger (mobile only) -->
+      <div class="ml-auto md:hidden">
         <button id="menu-btn" class="focus:outline-none">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
         </button>
       </div>
 
-      <!-- Menu links (visible on medium+ screens, hidden on small screens) -->
-      <div id="menu" class="hidden md:flex space-x-8 items-center">
-        <a class="text-lg font-semibold hover:text-blue-200" href="/">Home</a>
-        <a class="text-lg font-semibold hover:text-blue-200" href="/faq">FAQ</a>
-        <a class="text-lg font-semibold hover:text-blue-200" href="/contact">Contact</a>
-      </div>
-
-      {{if currentUser}}
-      <div class="flex-grow flex flex-row-reverse">
-        <a class="pr-8 text-lg font-semibold hover:text-blue-100" href="/bookmarks">Bookmarks</a>
-        <a class="pr-8 text-lg font-semibold hover:text-blue-100" href="/users/me">My Page</a>
-      </div>
-      {{else}}
-      <div class="flex-grow"></div>
-      {{end}}
-
-      <div>
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex ml-auto space-x-6 items-center">
         {{if currentUser}}
-        <form action="/signout" method="post">
-          <div class="hidden" class="pr-4 inline">
+          <a class="text-sm hover:text-gray-600" href="/bookmarks">Bookmarks</a>
+          <a class="text-sm hover:text-gray-600" href="/users/me">My Page</a>
+          <form action="/signout" method="post" class="inline">
             {{csrfField}}
-          </div>
-          <button type="submit">Sign out</button>
-        </form>
+            <button type="submit" class="text-sm hover:text-gray-600">Sign Out</button>
+          </form>
         {{else}}
-        <a class="pr-4" href="/signin">Sign in</a>
-        <a class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded" href="/signup">Sign up</a>
+          <a class="text-sm hover:text-gray-600" href="/signin">Sign In</a>
+          <a class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded" href="/signup">Sign Up</a>
         {{end}}
       </div>
     </nav>
 
-    <!-- Mobile Menu (toggle visibility on smaller screens) -->
-    <div id="mobile-menu" class="menu-hidden md:hidden">
-      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/">Home</a>
-      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/faq">FAQ</a>
-      <a class="block px-4 py-2 text-white bg-blue-700 hover:bg-blue-600" href="/contact">Contact</a>
-      <div class="p-2 bg-blue-700 flex flex-col items-center">
-        <a href="/signin" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign
-          in</a>
-        <a href="/signup" class="border rounded-full mb-4 w-2/3 bg-slate-50 hover:bg-slate-300 text-center py-1">Sign
-          up</a>
-      </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+      {{if currentUser}}
+        <a class="block px-6 py-2 hover:bg-gray-50" href="/bookmarks">Bookmarks</a>
+        <a class="block px-6 py-2 hover:bg-gray-50" href="/users/me">My Page</a>
+        <form action="/signout" method="post">
+          {{csrfField}}
+          <button type="submit" class="block w-full text-left px-6 py-2 hover:bg-gray-50">Sign Out</button>
+        </form>
+      {{else}}
+        <a class="block px-6 py-2 hover:bg-gray-50" href="/signin">Sign In</a>
+        <a class="block px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white" href="/signup">Sign Up</a>
+      {{end}}
     </div>
   </header>
 
   <!-- Alerts -->
-  <div class="py-4 px-2">
+  <div class="px-6 py-2">
   {{range messages}}
-    <div class="closable flex px-2 py-2 mb-2 rounded
-    {{if .IsError }}text-red-700 bg-red-200
-    {{else}}text-green-700 bg-green-200
-    {{end}}
-    ">
-      <div class="flex-grow">
-        {{ .Message }}
-      </div>
-      <a href="#" onclick="closeAlert(event)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+    <div class="flex px-3 py-2 mb-2 bg-gray-50 border {{if .IsError}}border-red-400 text-red-600{{else}}border-green-400 text-green-600{{end}} rounded">
+      <div class="flex-grow">{{.Message}}</div>
+      <a href="#" onclick="closeAlert(event)" class="ml-2">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </a>
     </div>
   {{end}}
   </div>
 
-  <!-- Main content should go here -->
   <main class="flex-grow">
 {{end}}
 
 {{define "footer"}}
   </main>
-  <footer class="bg-gray-200 text-gray-400 py-4">
-    <div class="container mx-auto text-center">
-      <p>&copy; 2024 Pensieve. All rights reserved.</p>
+  <footer class="bg-white border-t border-gray-200 py-4 text-gray-600">
+    <div class="container mx-auto text-center text-sm">
+      <p>© 2025 Pensieve</p>
       <p>
-        <a href="/privacy" class="hover:text-gray-400">Privacy Policy</a> |
-        <a href="/terms" class="hover:text-gray-400">Terms of Service</a>
+        <a href="/privacy" class="hover:text-black">Privacy</a> |
+        <a href="/terms" class="hover:text-black">Terms</a>
       </p>
     </div>
   </footer>
@@ -114,18 +87,12 @@
   <script>
     const menuBtn = document.getElementById('menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
-
-    menuBtn.addEventListener('click', () => {
-      // Toggle visibility class for mobile menu
-      mobileMenu.classList.toggle('menu-hidden');
-    })
-
-    function closeAlert(alert) {
-      let closable = event.target.closest('.closable')
-      closable.remove()
+    menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    function closeAlert(event) {
+      event.target.closest('.flex').remove();
     }
   </script>
+  <script src="https://unpkg.com/htmx.org@1.9.6"></script>
 </body>
-
 </html>
 {{end}}

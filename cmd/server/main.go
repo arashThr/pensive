@@ -175,6 +175,7 @@ func run(cfg *config) error {
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
+	bookmarksController.Templates.Search = views.Must(views.ParseTemplate("bookmarks/search.gohtml", "tailwind.gohtml"))
 
 	apiController := controllers.Api{
 		BookmarkService: bookmarksService,
@@ -217,15 +218,13 @@ func run(cfg *config) error {
 
 	getHomePage := func(w http.ResponseWriter, r *http.Request) {
 		user := context.User(r.Context())
+		home := "home.gohtml"
 		if user != nil {
-			controllers.StaticHandler(
-				views.Must(views.ParseTemplate("user/search.gohtml", "tailwind.gohtml")),
-			)(w, r)
-		} else {
-			controllers.StaticHandler(
-				views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-			)(w, r)
+			home = "user/home.gohtml"
 		}
+		controllers.StaticHandler(
+			views.Must(views.ParseTemplate(home, "tailwind.gohtml")),
+		)(w, r)
 	}
 
 	r.Group(func(r chi.Router) {
@@ -281,6 +280,7 @@ func run(cfg *config) error {
 				r.Get("/{id}/edit", bookmarksController.Edit)
 				r.Post("/{id}", bookmarksController.Update)
 				r.Post("/{id}/delete", bookmarksController.Delete)
+				r.Get("/search", bookmarksController.Search)
 			})
 		})
 	})

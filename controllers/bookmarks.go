@@ -15,10 +15,11 @@ import (
 
 type Bookmarks struct {
 	Templates struct {
-		New   Template
-		Edit  Template
-		Index Template
-		Show  Template
+		New    Template
+		Edit   Template
+		Index  Template
+		Show   Template
+		Search Template
 	}
 	BookmarkService *models.BookmarkService
 }
@@ -141,6 +142,42 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/bookmarks", http.StatusFound)
+}
+
+func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
+	query := r.FormValue("query")
+	if query == "" {
+		http.Error(w, "Query is required", http.StatusBadRequest)
+		return
+	}
+	user := context.User(r.Context())
+
+	bookmarks, err := b.BookmarkService.Search(user.ID, query)
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	type Bookmark struct {
+		Id    types.BookmarkId
+		Title string
+		Link  string
+	}
+	var data struct {
+		Bookmarks []Bookmark
+	}
+	for _, b := range bookmarks {
+		data.Bookmarks = append(data.Bookmarks, Bookmark{
+			Id:    b.BookmarkId,
+			Title: b.Title,
+			Link:  b.Link,
+		})
+	}
+	logger := context.Logger(r.Context())
+	logger.Info("searched bookmarks",
+		"query", query,
+		"count", len(data.Bookmarks))
+	b.Templates.Search.Execute(w, r, data)
 }
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {

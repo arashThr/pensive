@@ -98,3 +98,21 @@ func (service *BookmarkService) Delete(id types.BookmarkId) error {
 	}
 	return nil
 }
+
+func (service *BookmarkService) Search(userId types.UserId, query string) ([]Bookmark, error) {
+	// TODO: Query Db
+	return []Bookmark{
+		{
+			BookmarkId: "mock1",
+			UserId:     userId,
+			Title:      "Mock Title 1",
+			Link:       "http://mocklink1.com",
+		},
+		{
+			BookmarkId: "mock2",
+			UserId:     userId,
+			Title:      "Mock Title 2",
+			Link:       "http://mocklink2.com",
+		},
+	}, nil
+}
