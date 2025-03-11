@@ -101,18 +101,39 @@ func (service *BookmarkService) Delete(id types.BookmarkId) error {
 
 func (service *BookmarkService) Search(userId types.UserId, query string) ([]Bookmark, error) {
 	// TODO: Query Db
-	return []Bookmark{
-		{
-			BookmarkId: "mock1",
-			UserId:     userId,
-			Title:      "Mock Title 1",
-			Link:       "http://mocklink1.com",
-		},
-		{
-			BookmarkId: "mock2",
-			UserId:     userId,
-			Title:      "Mock Title 2",
-			Link:       "http://mocklink2.com",
-		},
-	}, nil
+	// return []Bookmark{
+	// 	{
+	// 		BookmarkId: "mock1",
+	// 		UserId:     userId,
+	// 		Title:      "Mock Title 1",
+	// 		Link:       "http://mocklink1.com",
+	// 	},
+	// 	{
+	// 		BookmarkId: "mock2",
+	// 		UserId:     userId,
+	// 		Title:      "Mock Title 2",
+	// 		Link:       "http://mocklink2.com",
+	// 	},
+	// }, nil
+
+	rows, err := service.Pool.Query(context.Background(), `
+		SELECT ts_headline(content, query,
+		  'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') as excerpt, url, title
+		FROM bookmarks, plainto_tsquery(:searchQuery) as query
+		WHERE to_tsvector(title || ' ' || content) @@ plainto_tsquery($1)`, query)
+
+	if err != nil {
+		return nil, fmt.Errorf("search bookmarks: %w", err)
+	}
+
+	var bookmarks []Bookmark
+	for rows.Next() {
+		var bookmark Bookmark
+		err := rows.Scan(&bookmark.Title, &bookmark.Link)
+		if err != nil {
+			return nil, fmt.Errorf("scan bookmark: %w", err)
+		}
+		bookmarks = append(bookmarks, bookmark)
+	}
+	return bookmarks, nil
 }
