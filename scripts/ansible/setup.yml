@@ -3,7 +3,7 @@
   hosts: local
   become: yes
   vars:
-    go_version: "1.24"
+    go_version: "1.24.1"
   roles:
     - go
     - docker
