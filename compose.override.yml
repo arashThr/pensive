@@ -20,5 +20,5 @@ services:
     restart: always
     volumes:
       - ./tailwind:/src:ro
-      - ./templates:/templates:ro
+      - ./web/templates:/templates:ro
       - ./web/assets:/dst:rw

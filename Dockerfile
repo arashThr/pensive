@@ -1,8 +1,7 @@
 FROM node:alpine AS tailwind-builder
 WORKDIR /app
 RUN npm init -y && npm install tailwindcss @tailwindcss/cli
-
-COPY ./templates /app/templates
+COPY ./web/templates ./templates
 COPY ./tailwind/style.css ./style.css
 RUN npx @tailwindcss/cli -i ./style.css -o /style.css --minify
 
