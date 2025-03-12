@@ -1,4 +1,4 @@
-package controllers
+package service
 
 import (
 	"encoding/json"
@@ -6,16 +6,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/controllers/validations"
-	"github.com/arashthr/go-course/errors"
-	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/validations"
 	"github.com/arashthr/go-course/types"
 	"github.com/go-chi/chi/v5"
 )
 
 type Api struct {
-	BookmarkService *models.BookmarkService
+	BookmarkModel *models.BookmarkModel
 }
 
 type ErrorResponse struct {
@@ -31,7 +31,7 @@ type Bookmark struct {
 
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	bookmarks, err := a.BookmarkService.ByUserId(user.ID)
+	bookmarks, err := a.BookmarkModel.ByUserId(user.ID)
 	if err != nil {
 		log.Printf("fetching bookmarks: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := a.BookmarkService.Create(data.Link, data.UserId, models.Api)
+	bookmark, err := a.BookmarkModel.Create(data.Link, data.UserId, models.Api)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "CREATE_BOOKMARK",
@@ -103,7 +103,7 @@ func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	bookmark.Title = b.Title
-	err := a.BookmarkService.Update(bookmark)
+	err := a.BookmarkModel.Update(bookmark)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "UPDATE_BOOKMARK",
@@ -119,7 +119,7 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	if bookmark == nil {
 		return
 	}
-	err := a.BookmarkService.Delete(bookmark.BookmarkId)
+	err := a.BookmarkModel.Delete(bookmark.BookmarkId)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
@@ -136,9 +136,9 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
 	id := chi.URLParam(r, "id")
-	bookmark, err := a.BookmarkService.ById(types.BookmarkId(id))
+	bookmark, err := a.BookmarkModel.ById(types.BookmarkId(id))
 	if err != nil {
-		if errors.Is(err, models.ErrNotFound) {
+		if errors.Is(err, errors.ErrNotFound) {
 			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
 				Code:    "NOT_FOUND",
 				Message: "Bookmark not found",

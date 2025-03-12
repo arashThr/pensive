@@ -1,4 +1,4 @@
-package controllers
+package auth
 
 import (
 	"log"
@@ -6,27 +6,29 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/errors"
-	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/service"
+	"github.com/arashthr/go-course/web"
 	"github.com/jackc/pgx/v5"
 )
 
 type Users struct {
 	Templates struct {
-		New            Template
-		SignIn         Template
-		ForgotPassword Template
-		CheckYourEmail Template
-		ResetPassword  Template
-		UserPage       Template
-		Token          Template
+		New            web.Template
+		SignIn         web.Template
+		ForgotPassword web.Template
+		CheckYourEmail web.Template
+		ResetPassword  web.Template
+		UserPage       web.Template
+		Token          web.Template
 	}
 	UserService          *models.UserService
 	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
-	EmailService         *models.EmailService
 	ApiService           *models.ApiService
+	EmailService         *service.EmailService
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -44,10 +46,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
-		if errors.Is(err, models.ErrEmailTaken) {
+		if errors.Is(err, errors.ErrEmailTaken) {
 			err = errors.Public(err, "That email address is already taken")
 		}
-		u.Templates.New.Execute(w, r, data, NavbarMessage{
+		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: err.Error(),
 			IsError: true,
 		})
@@ -57,7 +59,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		log.Println(err)
-		u.Templates.New.Execute(w, r, data, NavbarMessage{
+		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: "Creating session failed",
 			IsError: true,
 		})
@@ -79,7 +81,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	if err != nil {
 		logger.Info("sign in failed", "error", err)
-		u.Templates.SignIn.Execute(w, r, nil, NavbarMessage{
+		u.Templates.SignIn.Execute(w, r, nil, web.NavbarMessage{
 			Message: "Email address or password is incorrect",
 			IsError: true,
 		})

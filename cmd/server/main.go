@@ -8,11 +8,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/controllers"
-	"github.com/arashthr/go-course/logging"
-	"github.com/arashthr/go-course/models"
-	"github.com/arashthr/go-course/views"
+	"github.com/arashthr/go-course/internal/auth"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/db"
+	"github.com/arashthr/go-course/internal/logging"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/service"
+	"github.com/arashthr/go-course/web"
+	"github.com/arashthr/go-course/web/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
@@ -30,8 +33,8 @@ type StripeConfig struct {
 type config struct {
 	Environment string
 	Domain      string
-	PSQL        models.PostgresConfig
-	SMTP        models.SMTPConfig
+	PSQL        db.PostgresConfig
+	SMTP        service.SMTPConfig
 	CSRF        struct {
 		Key    string
 		Secure bool
@@ -52,14 +55,14 @@ func loadEnvConfig() (*config, error) {
 	cfg.Domain = os.Getenv("DOMAIN")
 
 	// DB
-	cfg.PSQL = models.DefaultPostgresConfig()
+	cfg.PSQL = db.DefaultPostgresConfig()
 
 	// SMTP
 	port, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
 	if err != nil {
 		return nil, err
 	}
-	cfg.SMTP = models.SMTPConfig{
+	cfg.SMTP = service.SMTPConfig{
 		Host:     os.Getenv("SMTP_HOST"),
 		Port:     port,
 		Username: os.Getenv("SMTP_USER"),
@@ -85,13 +88,13 @@ func loadEnvConfig() (*config, error) {
 	return &cfg, nil
 }
 
-func setupDb(cfg models.PostgresConfig) (*pgxpool.Pool, error) {
-	err := models.Migrate(cfg.PgConnectionString())
+func setupDb(cfg db.PostgresConfig) (*pgxpool.Pool, error) {
+	err := db.Migrate(cfg.PgConnectionString())
 	if err != nil {
 		panic(err)
 	}
 
-	pool, err := models.Open(cfg)
+	pool, err := db.Open(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("connecting to db: %v", err)
 	}
@@ -130,22 +133,22 @@ func run(cfg *config) error {
 		Pool: pool,
 		Now:  func() time.Time { return time.Now() },
 	}
-	emailService := models.NewEmailService(cfg.SMTP)
+	emailService := service.NewEmailService(cfg.SMTP)
 	apiService := &models.ApiService{
 		Pool: pool,
 	}
-	stripeService := &models.StripeService{
+	stripeService := &models.StripeModel{
 		Pool: pool,
 	}
-	bookmarksService := &models.BookmarkService{
+	bookmarksService := &models.BookmarkModel{
 		Pool: pool,
 	}
 
 	// Middlewares
-	umw := controllers.UserMiddleware{
+	umw := auth.UserMiddleware{
 		SessionService: sessionService,
 	}
-	amw := controllers.ApiMiddleware{
+	amw := auth.ApiMiddleware{
 		ApiService: apiService,
 	}
 	csrfMw := csrf.Protect(
@@ -155,7 +158,7 @@ func run(cfg *config) error {
 	)
 
 	// Controllers
-	usersController := controllers.Users{
+	usersController := auth.Users{
 		UserService:          userService,
 		SessionService:       sessionService,
 		PasswordResetService: passwordResetService,
@@ -170,23 +173,23 @@ func run(cfg *config) error {
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
 	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml", "tailwind.gohtml"))
 
-	bookmarksController := controllers.Bookmarks{
-		BookmarkService: bookmarksService,
+	bookmarksController := service.Bookmarks{
+		BookmarkModel: bookmarksService,
 	}
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Search = views.Must(views.ParseTemplate("bookmarks/search.gohtml", "tailwind.gohtml"))
 
-	apiController := controllers.Api{
-		BookmarkService: bookmarksService,
+	apiController := service.Api{
+		BookmarkModel: bookmarksService,
 	}
 
-	stripController := controllers.Stripe{
+	stripController := service.Stripe{
 		Domain:              cfg.Domain,
 		PriceId:             cfg.Stripe.PriceId,
 		StripeWebhookSecret: cfg.Stripe.StripeWebhookSecret,
-		StripeService:       stripeService,
+		StripeModel:         stripeService,
 	}
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
@@ -223,7 +226,7 @@ func run(cfg *config) error {
 		if user != nil {
 			home = "user/home.gohtml"
 		}
-		controllers.StaticHandler(
+		web.StaticHandler(
 			views.Must(views.ParseTemplate(home, "tailwind.gohtml")),
 		)(w, r)
 	}
@@ -233,10 +236,10 @@ func run(cfg *config) error {
 		r.Use(umw.SetUser)
 
 		r.Get("/", getHomePage)
-		r.Get("/contact", controllers.StaticHandler(
+		r.Get("/contact", web.StaticHandler(
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
-		r.Get("/faq", controllers.FAQ(
+		r.Get("/faq", web.FAQ(
 			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/signup", usersController.New)

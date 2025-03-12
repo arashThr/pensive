@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/arashthr/go-course/context"
+	"github.com/arashthr/go-course/internal/auth/context"
 )
 
 type loggerKey string

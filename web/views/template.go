@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/controllers"
-	"github.com/arashthr/go-course/models"
-	"github.com/arashthr/go-course/templates"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/web"
+	"github.com/arashthr/go-course/web/templates"
 	"github.com/gorilla/csrf"
 )
 
@@ -36,7 +36,7 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
-		"messages": func() []controllers.NavbarMessage {
+		"messages": func() []web.NavbarMessage {
 			return nil
 		},
 		"safe": func(s string) template.HTML {
@@ -52,7 +52,7 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 	}, nil
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navMsgs ...controllers.NavbarMessage) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navMsgs ...web.NavbarMessage) {
 	tpl, err := t.htmlTemplate.Clone()
 	if err != nil {
 		log.Printf("cloning template failed: %v", err)
@@ -67,7 +67,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 			"currentUser": func() *models.User {
 				return context.User(r.Context())
 			},
-			"messages": func() []controllers.NavbarMessage {
+			"messages": func() []web.NavbarMessage {
 				return navMsgs
 			},
 		},

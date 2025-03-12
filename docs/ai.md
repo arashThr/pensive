@@ -1,5 +1,19 @@
 # AI prompts
 
+## Project
+
+In our conversations, consider the following context: I am developing a web service that helps users gather and search through all their bookmarks in one place. Users add pages by bookmarking the page in their browser. This action is captured via our browser extension, which sends the full page content to a Go-based backend. We extract and store the content in PostgreSQL with full-text search capabilities. Users can later search through everything they’ve saved.
+
+Initially, bookmarks will support user-defined tags that are assigned in the browser when saving the bookmark, with future plans for more organization features. Users will be able to edit tags and add notes to saved bookmarks later. In the future, I also plan to support text extraction from YouTube videos for searchability.
+
+The service will include API integrations via API keys, such as a Telegram bot, which will not only add bookmarks but also support search and retrieval. API tokens will be user-specific.
+
+For UI/UX, I want a clean, simple, and intuitive design that requires no tutorials. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI will use a mix of light and dark themes and may include small animations for a modern touch. While I don’t have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal.
+
+For future scalability, I plan to support public bookmarking and importing existing bookmarks, but my current focus is on building a solid MVP.
+
+My questions will be mostly about technical aspects, UI/UX design, and ensuring the best user experience while maintaining a clean, aesthetic, and highly functional service.
+
 ## Design
 
 AI prompt to generate the design:

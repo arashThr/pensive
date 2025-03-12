@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/internal/models"
 )
 
 type key int

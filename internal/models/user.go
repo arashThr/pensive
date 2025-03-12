@@ -2,10 +2,10 @@ package models
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -71,7 +71,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 		}
 		if errors.As(err, &pgErr) {
 			if pgErr.SQLState() == pgerrcode.UniqueViolation {
-				return nil, ErrEmailTaken
+				return nil, errors.ErrEmailTaken
 			}
 		}
 		fmt.Printf("Type: %T\n", err)

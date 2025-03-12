@@ -7,14 +7,14 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/arashthr/go-course/errors"
+	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	stripeclient "github.com/stripe/stripe-go/v81"
 )
 
-type StripeService struct {
+type StripeModel struct {
 	Pool *pgxpool.Pool
 }
 
@@ -52,7 +52,7 @@ type SubscriptionHistory struct {
 	EndedAt              time.Time
 }
 
-func (s *StripeService) SaveSession(userId types.UserId, sessionId string) error {
+func (s *StripeModel) SaveSession(userId types.UserId, sessionId string) error {
 	log.Printf("save session: userId: %d, sessionId: %s\n", userId, sessionId)
 	_, err := s.Pool.Exec(context.Background(), `
 		INSERT INTO stripe_sessions (user_id, stripe_session_id)
@@ -63,7 +63,7 @@ func (s *StripeService) SaveSession(userId types.UserId, sessionId string) error
 	return nil
 }
 
-func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice) {
+func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 	if invoice.Subscription == nil {
 		slog.Error("No subscription found in invoice paid event. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
@@ -135,7 +135,7 @@ func (s *StripeService) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 	slog.Info("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
+func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 	if invoice.Subscription == nil {
 		slog.Error("No subscription found in invoice failed event. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
@@ -196,7 +196,7 @@ func (s *StripeService) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 	slog.Info("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
-func (s *StripeService) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
+func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
 	// Get user ID
 	customerId := subscription.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
@@ -228,7 +228,7 @@ func (s *StripeService) RecordSubscription(subscription *stripeclient.Subscripti
 	slog.Info("Subscription inserted", "subscriptionID", subscription.ID)
 }
 
-func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
+func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
 	// Get user Id
 	customerId := subscription.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
@@ -283,34 +283,34 @@ func (s *StripeService) HandleSubscriptionDeleted(subscription *stripeclient.Sub
 	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
 }
 
-func (s *StripeService) GetCustomerIdByUserId(userId types.UserId) (customerId string, err error) {
+func (s *StripeModel) GetCustomerIdByUserId(userId types.UserId) (customerId string, err error) {
 	err = s.Pool.QueryRow(context.Background(), `
 		SELECT stripe_customer_id FROM stripe_customers
 		WHERE user_id = $1;
 	`, userId).Scan(&customerId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", ErrNoStripeCustomer
+			return "", errors.ErrNoStripeCustomer
 		}
 		return "", fmt.Errorf("getting stripe customer id: %w", err)
 	}
 	return customerId, nil
 }
 
-func (s *StripeService) InsertCustomerId(userId types.UserId, customerId string) error {
+func (s *StripeModel) InsertCustomerId(userId types.UserId, customerId string) error {
 	_, err := s.Pool.Exec(context.Background(), `
 		INSERT INTO stripe_customers (user_id, stripe_customer_id)
 		VALUES ($1, $2);`, userId, customerId)
 	return err
 }
 
-func (s *StripeService) getUserIdByStripeCustomerId(customerId string) (userId types.UserId, err error) {
+func (s *StripeModel) getUserIdByStripeCustomerId(customerId string) (userId types.UserId, err error) {
 	err = s.Pool.QueryRow(context.Background(),
 		`SELECT user_id FROM stripe_customers
 		WHERE stripe_customer_id = $1;`, customerId).Scan(&userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return userId, ErrNoStripeCustomer
+			return userId, errors.ErrNoStripeCustomer
 		}
 		return userId, fmt.Errorf("getting user id by stripe customer id: %w", err)
 	}

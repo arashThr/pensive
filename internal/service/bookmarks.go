@@ -1,27 +1,28 @@
-package controllers
+package service
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/controllers/validations"
-	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/validations"
 	"github.com/arashthr/go-course/types"
+	"github.com/arashthr/go-course/web"
 	"github.com/go-chi/chi/v5"
 )
 
 type Bookmarks struct {
 	Templates struct {
-		New    Template
-		Edit   Template
-		Index  Template
-		Show   Template
-		Search Template
+		New    web.Template
+		Edit   web.Template
+		Index  web.Template
+		Show   web.Template
+		Search web.Template
 	}
-	BookmarkService *models.BookmarkService
+	BookmarkModel *models.BookmarkModel
 }
 
 func (b Bookmarks) New(w http.ResponseWriter, r *http.Request) {
@@ -46,9 +47,9 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := b.BookmarkService.Create(data.Link, data.UserId, models.WebSource)
+	bookmark, err := b.BookmarkModel.Create(data.Link, data.UserId, models.WebSource)
 	if err != nil {
-		b.Templates.New.Execute(w, r, data, NavbarMessage{
+		b.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: err.Error(),
 			IsError: true,
 		})
@@ -84,7 +85,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bookmark.Title = r.FormValue("title")
-	err = b.BookmarkService.Update(bookmark)
+	err = b.BookmarkModel.Update(bookmark)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -97,7 +98,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
-	b.Templates.Edit.Execute(w, r, data, NavbarMessage{
+	b.Templates.Edit.Execute(w, r, data, web.NavbarMessage{
 		Message: "Bookmark updated",
 		IsError: false,
 	})
@@ -105,7 +106,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 
 func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	bookmarks, err := b.BookmarkService.ByUserId(user.ID)
+	bookmarks, err := b.BookmarkModel.ByUserId(user.ID)
 	if err != nil {
 		log.Printf("bookmark by user id: %v", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -136,7 +137,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = b.BookmarkService.Delete(bookmark.BookmarkId)
+	err = b.BookmarkModel.Delete(bookmark.BookmarkId)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -153,7 +154,7 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 	}
 	user := context.User(r.Context())
 
-	results, err := b.BookmarkService.Search(user.ID, query)
+	results, err := b.BookmarkModel.Search(user.ID, query)
 	if err != nil {
 		logger.Error("searching bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -192,9 +193,9 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
 	id := chi.URLParam(r, "id")
-	bookmark, err := b.BookmarkService.ById(types.BookmarkId(id))
+	bookmark, err := b.BookmarkModel.ById(types.BookmarkId(id))
 	if err != nil {
-		if errors.Is(err, models.ErrNotFound) {
+		if errors.Is(err, errors.ErrNotFound) {
 			http.Error(w, "Bookmark not found", http.StatusNotFound)
 			return nil, err
 		}

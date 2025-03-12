@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/errors"
+	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/types"
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -47,12 +47,12 @@ type Bookmark struct {
 	PublishedTime string
 }
 
-type BookmarkService struct {
+type BookmarkModel struct {
 	Pool *pgxpool.Pool
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-func (service *BookmarkService) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
+func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// TODO: Check if the website exists
 	article, err := readability.FromURL(link, 5*time.Second)
 	// TODO: Check for the language
@@ -90,7 +90,7 @@ func (service *BookmarkService) Create(link string, userId types.UserId, source 
 	return &bookmark, nil
 }
 
-func (service *BookmarkService) ById(id types.BookmarkId) (*Bookmark, error) {
+func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		BookmarkId: id,
 	}
@@ -99,14 +99,14 @@ func (service *BookmarkService) ById(id types.BookmarkId) (*Bookmark, error) {
 	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotFound
+			return nil, errors.ErrNotFound
 		}
 		return nil, fmt.Errorf("bookmark by id: %w", err)
 	}
 	return &bookmark, nil
 }
 
-func (service *BookmarkService) ByUserId(userId types.UserId) ([]Bookmark, error) {
+func (service *BookmarkModel) ByUserId(userId types.UserId) ([]Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
 		`SELECT bookmark_id, title, link, excerpt FROM bookmarks WHERE user_id = $1;`, userId)
 	if err != nil {
@@ -130,7 +130,7 @@ func (service *BookmarkService) ByUserId(userId types.UserId) ([]Bookmark, error
 	return bookmarks, nil
 }
 
-func (service *BookmarkService) Update(bookmark *Bookmark) error {
+func (service *BookmarkModel) Update(bookmark *Bookmark) error {
 	_, err := service.Pool.Exec(context.Background(),
 		`UPDATE bookmarks SET link = $1, title = $2 WHERE bookmark_id = $3`,
 		bookmark.Link, bookmark.Title, bookmark.BookmarkId,
@@ -141,7 +141,7 @@ func (service *BookmarkService) Update(bookmark *Bookmark) error {
 	return nil
 }
 
-func (service *BookmarkService) Delete(id types.BookmarkId) error {
+func (service *BookmarkModel) Delete(id types.BookmarkId) error {
 	_, err := service.Pool.Exec(context.Background(),
 		`DELETE FROM bookmarks WHERE bookmark_id = $1;`, id)
 	if err != nil {
@@ -160,7 +160,7 @@ type SearchResult struct {
 	Rank       float32
 }
 
-func (service *BookmarkService) Search(userId types.UserId, query string) ([]SearchResult, error) {
+func (service *BookmarkModel) Search(userId types.UserId, query string) ([]SearchResult, error) {
 	rows, err := service.Pool.Query(context.Background(), `
 	WITH search_query AS (
 		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query

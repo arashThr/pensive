@@ -1,8 +1,7 @@
-package controllers
+package service
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,8 +11,10 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/arashthr/go-course/context"
-	"github.com/arashthr/go-course/models"
+	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/web"
 	stripeclient "github.com/stripe/stripe-go/v81"
 	portalsession "github.com/stripe/stripe-go/v81/billingportal/session"
 	"github.com/stripe/stripe-go/v81/checkout/session"
@@ -23,21 +24,21 @@ import (
 
 type Stripe struct {
 	Templates struct {
-		Success Template
-		Cancel  Template
+		Success web.Template
+		Cancel  web.Template
 	}
 	Domain              string
 	PriceId             string
 	StripeWebhookSecret string
-	StripeService       *models.StripeService
+	StripeModel         *models.StripeModel
 }
 
 func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err error) {
-	customerId, err = s.StripeService.GetCustomerIdByUserId(user.ID)
+	customerId, err = s.StripeModel.GetCustomerIdByUserId(user.ID)
 	if err == nil {
 		return customerId, nil
 	}
-	if !errors.Is(err, models.ErrNoStripeCustomer) {
+	if !errors.Is(err, errors.ErrNoStripeCustomer) {
 		return "", fmt.Errorf("get stripe customer id: %w", err)
 	}
 	log.Printf("No stripe customer found for user %v", user.ID)
@@ -66,7 +67,7 @@ func (s Stripe) getStripeCustomerId(user *models.User) (customerId string, err e
 		log.Printf("Created stripe customer for user %v with customer id %v", user.ID, customer.ID)
 		customerId = customer.ID
 	}
-	s.StripeService.InsertCustomerId(user.ID, customerId)
+	s.StripeModel.InsertCustomerId(user.ID, customerId)
 	return customerId, nil
 }
 
@@ -142,7 +143,7 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 
 func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	customerId, err := s.StripeService.GetCustomerIdByUserId(user.ID)
+	customerId, err := s.StripeModel.GetCustomerIdByUserId(user.ID)
 	if err != nil {
 		slog.Error("get stripe customer id", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -214,7 +215,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleSubscriptionDeleted(subscription)
+		go s.StripeModel.HandleSubscriptionDeleted(subscription)
 	case "customer.subscription.updated":
 		sub, err := handleSubscriptionUpdated(&event)
 		if err != nil {
@@ -224,14 +225,14 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		// 1: record transition updates
 		// 2: update prevAtt="map[cancel_at:<nil> cancel_at_period_end:false canceled_at:<nil> cancellation_details:map[reason:<nil>]]"
 		// 3: feedback prevAtt=map[cancellation_details:map[feedback:<nil>]]
-		go s.StripeService.RecordSubscription(sub, event.Data.PreviousAttributes)
+		go s.StripeModel.RecordSubscription(sub, event.Data.PreviousAttributes)
 	case "customer.subscription.created":
 		subscription, err := getSubscriptionCreated(&event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.RecordSubscription(subscription, nil)
+		go s.StripeModel.RecordSubscription(subscription, nil)
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
@@ -256,7 +257,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoicePaid(invoice)
+		go s.StripeModel.HandleInvoicePaid(invoice)
 	case "invoice.payment_failed":
 		// The payment failed or the customer does not have a valid payment method.
 		// The subscription becomes past_due. Notify your customer and send them to the
@@ -266,7 +267,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		go s.StripeService.HandleInvoiceFailed(invoice)
+		go s.StripeModel.HandleInvoiceFailed(invoice)
 	default:
 		slog.Warn("Unhandled event type", "event_type", event.Type)
 	}

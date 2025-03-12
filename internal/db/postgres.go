@@ -1,4 +1,4 @@
-package models
+package db
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/db/migrations"
+	"github.com/arashthr/go-course/internal/db/migrations"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
