@@ -5,6 +5,8 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"log/slog"
+	"net/url"
 	"strings"
 	"time"
 
@@ -12,7 +14,10 @@ import (
 	"github.com/arashthr/go-course/types"
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/microcosm-cc/bluemonday"
 )
+
+var sanitization = bluemonday.StrictPolicy()
 
 type BookmarkSource = int
 
@@ -54,19 +59,28 @@ func (service *BookmarkService) Create(link string, userId types.UserId, source 
 	if err != nil {
 		return nil, fmt.Errorf("readability: %w", err)
 	}
+
 	fmt.Printf("%+v\n\n", article)
 	bookmark := Bookmark{
-		UserId: userId,
-		Title:  article.Title,
-		Link:   link,
+		UserId:   userId,
+		Title:    sanitization.Sanitize(article.Title),
+		Link:     link,
+		Excerpt:  sanitization.Sanitize(article.Excerpt),
+		ImageUrl: article.Image,
 	}
 	bookmarkId := strings.ToLower(rand.Text())[:8]
+
+	if _, err := url.ParseRequestURI(article.Image); err != nil {
+		slog.Warn("Failed to parse image URL", "error", err)
+		bookmark.ImageUrl = ""
+	}
+	content := sanitization.Sanitize(article.TextContent)
 
 	row := service.Pool.QueryRow(context.Background(),
 		`INSERT INTO bookmarks (bookmark_id, user_id, title, link, content, excerpt, image_url, article_lang, site_name, published_time, source)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING bookmark_id;`,
-		bookmarkId, userId, article.Title, link, article.TextContent,
-		article.Excerpt, article.Image, article.Language, article.SiteName,
+		bookmarkId, userId, article.Title, link, content,
+		bookmark.Excerpt, article.Image, sanitization.Sanitize(article.Language), sanitization.Sanitize(article.SiteName),
 		article.PublishedTime, sourceMapping[source])
 	err = row.Scan(&bookmark.BookmarkId)
 	if err != nil {

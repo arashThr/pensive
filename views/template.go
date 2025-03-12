@@ -39,6 +39,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"messages": func() []controllers.NavbarMessage {
 			return nil
 		},
+		"safe": func(s string) template.HTML {
+			return template.HTML(s) // Trust ts_headline output
+		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)
 	if err != nil {

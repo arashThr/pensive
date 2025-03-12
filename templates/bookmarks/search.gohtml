@@ -10,7 +10,7 @@
       <!-- Content -->
       <div class="flex-1">
         <a href="{{.Link}}" class="text-blue-600 hover:text-blue-500 text-base font-semibold">{{.Title}}</a>
-        <p class="mt-1 text-sm text-gray-700">{{.Headline}}</p>
+        <p class="mt-1 text-sm text-gray-700">{{.Headline | safe}}</p>
       </div>
     </div>
   {{end}}
