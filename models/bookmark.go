@@ -11,7 +11,6 @@ import (
 	"github.com/arashthr/go-course/errors"
 	"github.com/arashthr/go-course/types"
 	"github.com/go-shiori/go-readability"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -137,28 +136,53 @@ func (service *BookmarkService) Delete(id types.BookmarkId) error {
 	return nil
 }
 
-func (service *BookmarkService) Search(userId types.UserId, query string) ([]Bookmark, error) {
+type SearchResult struct {
+	Headline   string
+	BookmarkId types.BookmarkId
+	Title      string
+	Link       string
+	Excerpt    string
+	ImageUrl   string
+	Rank       float32
+}
+
+func (service *BookmarkService) Search(userId types.UserId, query string) ([]SearchResult, error) {
 	rows, err := service.Pool.Query(context.Background(), `
-		SELECT 
-		ts_headline(content, query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') as excerpt,
-			url,
-			title,
-			ts_rank(search_vector, query) as rank
-		FROM bookmarks,
-			(SELECT CASE WHEN $1 = '' THEN plainto_tsquery('') ELSE plainto_tsquery($1) END) as query
-		WHERE user_id = $2 AND
-			query IS NOT NULL AND
-			search_vector @@ query
-		ORDER BY rank DESC
-		LIMIT 10`, query, userId)
+	WITH search_query AS (
+		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
+	)
+	SELECT
+		ts_headline(content, search_query.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS excerpt,
+		bookmark_id,
+		title,
+		link,
+		excerpt,
+		image_url,
+		ts_rank(search_vector, search_query.query) AS rank
+	FROM bookmarks, search_query
+	WHERE user_id = $2
+		AND search_vector @@ search_query.query
+	ORDER BY rank DESC
+	LIMIT 10
+	`, query, userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("search bookmarks: %w", err)
 	}
 
-	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
-	if err != nil {
-		return nil, fmt.Errorf("collecting bookmark rows: %w", err)
+	defer rows.Close()
+	var results []SearchResult
+	// Iterate through the result set
+	for rows.Next() {
+		var result SearchResult
+		err := rows.Scan(&result.Headline, &result.BookmarkId, &result.Title, &result.Link, &result.Excerpt, &result.ImageUrl, &result.Rank)
+		if err != nil {
+			return nil, fmt.Errorf("scan bookmark: %w", err)
+		}
+		results = append(results, result)
 	}
-	return bookmarks, nil
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
+	}
+	return results, nil
 }

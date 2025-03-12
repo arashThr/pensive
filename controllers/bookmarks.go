@@ -145,6 +145,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	query := r.FormValue("query")
 	if query == "" {
 		http.Error(w, "Query is required", http.StatusBadRequest)
@@ -152,28 +153,37 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 	}
 	user := context.User(r.Context())
 
-	bookmarks, err := b.BookmarkService.Search(user.ID, query)
+	results, err := b.BookmarkService.Search(user.ID, query)
 	if err != nil {
+		logger.Error("searching bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
-	type Bookmark struct {
-		Id    types.BookmarkId
-		Title string
-		Link  string
+	type bookmarkSearchResult struct {
+		Id        types.BookmarkId
+		Title     string
+		Link      string
+		Headline  string
+		Thumbnail string
 	}
 	var data struct {
-		Bookmarks []Bookmark
+		Bookmarks []bookmarkSearchResult
 	}
-	for _, b := range bookmarks {
-		data.Bookmarks = append(data.Bookmarks, Bookmark{
-			Id:    b.BookmarkId,
-			Title: b.Title,
-			Link:  b.Link,
+	for _, r := range results {
+		data.Bookmarks = append(data.Bookmarks, bookmarkSearchResult{
+			Id:        r.BookmarkId,
+			Title:     r.Title,
+			Link:      r.Link,
+			Headline:  r.Headline,
+			Thumbnail: r.ImageUrl,
 		})
 	}
-	logger := context.Logger(r.Context())
+	if len(data.Bookmarks) == 0 {
+		w.Write([]byte(`<p class="text-gray-500">Not found</p>`))
+		return
+	}
+
 	logger.Info("searched bookmarks",
 		"query", query,
 		"count", len(data.Bookmarks))
