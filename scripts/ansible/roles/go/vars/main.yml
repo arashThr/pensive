@@ -1,0 +1,2 @@
+---
+go_install_path: "{{ lookup('env', 'GOPATH') | default('/usr/local/go', true) }}"

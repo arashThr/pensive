@@ -1,0 +1,45 @@
+---
+- name: Install Go
+  become: true
+  block:
+    - name: Download Go
+      ansible.builtin.get_url:
+        url: "https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz"
+        dest: /tmp/go.tar.gz
+        mode: "0644"
+
+    - name: Create temp directory for Go
+      ansible.builtin.file:
+        path: /tmp/go_install
+        state: directory
+        mode: "0755"
+
+    - name: Extract Go to temp directory
+      ansible.builtin.unarchive:
+        src: /tmp/go.tar.gz
+        dest: /tmp/go_install
+        remote_src: true
+
+    - name: Remove existing Go installation
+      ansible.builtin.file:
+        path: "{{ go_install_path }}"
+        state: absent
+
+    - name: Move Go to install path
+      ansible.builtin.copy:
+        src: /tmp/go_install/go/
+        dest:  "{{ go_install_path }}"
+        remote_src: true
+        mode: preserve
+
+    - name: Clean up temp directory
+      ansible.builtin.file:
+        path: /tmp/go_install
+        state: absent
+
+    - name: Add Go to PATH
+      ansible.builtin.lineinfile:
+        path: ~/.zshrc
+        line: 'export PATH="$GOPATH/bin:$PATH"'
+        create: true
+
