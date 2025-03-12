@@ -21,4 +21,4 @@ services:
     volumes:
       - ./tailwind:/src:ro
       - ./templates:/templates:ro
-      - ./assets:/dst:rw
+      - ./web/assets:/dst:rw

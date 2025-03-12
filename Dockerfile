@@ -15,7 +15,7 @@ RUN go build -v -o ./server ./cmd/server
 
 FROM scratch
 WORKDIR /app
-COPY ./assets ./assets
+COPY ./web/assets ./web/assets
 COPY --from=build /app/server ./server
 COPY --from=tailwind-builder /style.css ./assets/style.css
 COPY .env .env

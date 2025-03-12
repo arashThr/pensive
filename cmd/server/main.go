@@ -267,11 +267,11 @@ func run(cfg *config) error {
 			r.Get("/cancel", stripController.Cancel)
 		})
 
-		assetHandler := http.FileServer(http.Dir("assets"))
+		assetHandler := http.FileServer(http.Dir("./web/assets"))
 		r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
 		r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("favicon")
-			http.ServeFile(w, r, "./assets/favicon.ico")
+			http.ServeFile(w, r, "./web/assets/favicon.ico")
 		})
 
 		r.Route("/bookmarks", func(r chi.Router) {

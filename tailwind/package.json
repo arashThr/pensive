@@ -1,7 +1,7 @@
 {
   "name": "tailwind",
   "version": "1.0.0",
-  "description": "Run: `npx @tailwindcss/cli -i style.css -o ../assets/style.css` Note: In [setting up tailwind v4 using the standalone CLI](https://github.com/tailwindlabs/tailwindcss/discussions/15855) mentions:",
+  "description": "Run: `npx @tailwindcss/cli -i style.css -o ../web/assets/style.css` Note: In [setting up tailwind v4 using the standalone CLI](https://github.com/tailwindlabs/tailwindcss/discussions/15855) mentions:",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

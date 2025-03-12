@@ -1,7 +1,7 @@
 # Build Tailwind
 
 Install Tailwind CSS: `npm init -y && npm install tailwindcss @tailwindcss/cli`
-Run: `npx @tailwindcss/cli --cwd ../templates -i ../tailwind/style.css -o ../assets/style.css --watch`
+Run: `npx @tailwindcss/cli --cwd ../templates -i ../tailwind/style.css -o ../web/assets/style.css --watch`
 Note: In [setting up tailwind v4 using the standalone CLI](https://github.com/tailwindlabs/tailwindcss/discussions/15855) mentions:
 
 > The biggest difference here from v3 is that there is no init step. In fact, if you try to use the init command you will get an error. You also won't need a tailwind.config.js file.
@@ -10,4 +10,4 @@ Note: In [setting up tailwind v4 using the standalone CLI](https://github.com/ta
 That's why we add this: `@import "tailwindcss" source("../");`
 
 Other option it to change the working directory:
-`npx @tailwindcss/cli --cwd ../ -i ./tailwind/style.css -o ./assets/style.css --watch`
+`npx @tailwindcss/cli --cwd ../ -i ./tailwind/style.css -o ./web/assets/style.css --watch`
