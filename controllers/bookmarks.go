@@ -46,7 +46,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := b.BookmarkService.Create(data.Link, data.UserId)
+	bookmark, err := b.BookmarkService.Create(data.Link, data.UserId, models.WebSource)
 	if err != nil {
 		b.Templates.New.Execute(w, r, data, NavbarMessage{
 			Message: err.Error(),

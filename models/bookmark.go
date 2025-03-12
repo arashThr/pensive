@@ -15,11 +15,32 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type BookmarkSource = int
+
+const (
+	WebSource BookmarkSource = iota
+	TelegramSource
+	Api
+)
+
+var sourceMapping = map[BookmarkSource]string{
+	WebSource:      "web",
+	TelegramSource: "telegram",
+	Api:            "api",
+}
+
 type Bookmark struct {
-	BookmarkId types.BookmarkId
-	UserId     types.UserId
-	Title      string
-	Link       string
+	BookmarkId    types.BookmarkId
+	UserId        types.UserId
+	Title         string
+	Link          string
+	Content       string
+	Source        string
+	Excerpt       string
+	ImageUrl      string
+	ArticleLang   string
+	SiteName      string
+	PublishedTime string
 }
 
 type BookmarkService struct {
@@ -27,12 +48,14 @@ type BookmarkService struct {
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-func (service *BookmarkService) Create(link string, userId types.UserId) (*Bookmark, error) {
+func (service *BookmarkService) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// TODO: Check if the website exists
 	article, err := readability.FromURL(link, 5*time.Second)
+	// TODO: Check for the language
 	if err != nil {
 		return nil, fmt.Errorf("readability: %w", err)
 	}
+	fmt.Printf("%+v\n\n", article)
 	bookmark := Bookmark{
 		UserId: userId,
 		Title:  article.Title,
@@ -41,12 +64,16 @@ func (service *BookmarkService) Create(link string, userId types.UserId) (*Bookm
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 
 	row := service.Pool.QueryRow(context.Background(),
-		`INSERT INTO bookmarks (bookmark_id, user_id, title, link)
-		VALUES ($1, $2, $3, $4) RETURNING bookmark_id;`, bookmarkId, userId, bookmark.Title, link)
+		`INSERT INTO bookmarks (bookmark_id, user_id, title, link, content, excerpt, image_url, article_lang, site_name, published_time, source)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING bookmark_id;`,
+		bookmarkId, userId, article.Title, link, article.TextContent,
+		article.Excerpt, article.Image, article.Language, article.SiteName,
+		article.PublishedTime, sourceMapping[source])
 	err = row.Scan(&bookmark.BookmarkId)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
+
 	return &bookmark, nil
 }
 
@@ -68,14 +95,25 @@ func (service *BookmarkService) ById(id types.BookmarkId) (*Bookmark, error) {
 
 func (service *BookmarkService) ByUserId(userId types.UserId) ([]Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
-		`SELECT * FROM bookmarks WHERE user_id = $1;`, userId)
+		`SELECT bookmark_id, title, link, excerpt FROM bookmarks WHERE user_id = $1;`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by user id: %w", err)
 	}
-	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
-	if err != nil {
-		return nil, fmt.Errorf("collecting bookmark rows: %w", err)
+	defer rows.Close()
+	var bookmarks []Bookmark
+	// Iterate through the result set
+	for rows.Next() {
+		var bookmark Bookmark
+		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt)
+		if err != nil {
+			return nil, fmt.Errorf("scan bookmark: %w", err)
+		}
+		bookmarks = append(bookmarks, bookmark)
 	}
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
+	}
+
 	return bookmarks, nil
 }
 
@@ -100,40 +138,27 @@ func (service *BookmarkService) Delete(id types.BookmarkId) error {
 }
 
 func (service *BookmarkService) Search(userId types.UserId, query string) ([]Bookmark, error) {
-	// TODO: Query Db
-	// return []Bookmark{
-	// 	{
-	// 		BookmarkId: "mock1",
-	// 		UserId:     userId,
-	// 		Title:      "Mock Title 1",
-	// 		Link:       "http://mocklink1.com",
-	// 	},
-	// 	{
-	// 		BookmarkId: "mock2",
-	// 		UserId:     userId,
-	// 		Title:      "Mock Title 2",
-	// 		Link:       "http://mocklink2.com",
-	// 	},
-	// }, nil
-
 	rows, err := service.Pool.Query(context.Background(), `
-		SELECT ts_headline(content, query,
-		  'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') as excerpt, url, title
-		FROM bookmarks, plainto_tsquery(:searchQuery) as query
-		WHERE to_tsvector(title || ' ' || content) @@ plainto_tsquery($1)`, query)
+		SELECT 
+		ts_headline(content, query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') as excerpt,
+			url,
+			title,
+			ts_rank(search_vector, query) as rank
+		FROM bookmarks,
+			(SELECT CASE WHEN $1 = '' THEN plainto_tsquery('') ELSE plainto_tsquery($1) END) as query
+		WHERE user_id = $2 AND
+			query IS NOT NULL AND
+			search_vector @@ query
+		ORDER BY rank DESC
+		LIMIT 10`, query, userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("search bookmarks: %w", err)
 	}
 
-	var bookmarks []Bookmark
-	for rows.Next() {
-		var bookmark Bookmark
-		err := rows.Scan(&bookmark.Title, &bookmark.Link)
-		if err != nil {
-			return nil, fmt.Errorf("scan bookmark: %w", err)
-		}
-		bookmarks = append(bookmarks, bookmark)
+	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
+	if err != nil {
+		return nil, fmt.Errorf("collecting bookmark rows: %w", err)
 	}
 	return bookmarks, nil
 }

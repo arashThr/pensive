@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -77,9 +76,13 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Authenticate(email, password)
+	logger := context.Logger(r.Context())
 	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Authentication failed", http.StatusInternalServerError)
+		logger.Info("sign in failed", "error", err)
+		u.Templates.SignIn.Execute(w, r, nil, NavbarMessage{
+			Message: "Email address or password is incorrect",
+			IsError: true,
+		})
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)

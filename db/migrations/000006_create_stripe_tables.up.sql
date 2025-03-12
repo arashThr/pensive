@@ -1,5 +1,5 @@
 -- Stripe customers table
-CREATE TABLE IF NOT EXISTS stripe_customers (
+CREATE TABLE stripe_customers (
     stripe_customer_id TEXT NOT NULL UNIQUE PRIMARY KEY,
     user_id INTEGER NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS stripe_customers (
 );
 
 -- Subscriptions table
-CREATE TABLE IF NOT EXISTS subscriptions (
+CREATE TABLE subscriptions (
     stripe_subscription_id TEXT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 CREATE INDEX idx_subscriptions_current_period_end ON subscriptions(current_period_end);
 
 -- Invoices table
-CREATE TABLE IF NOT EXISTS invoices (
+CREATE TABLE invoices (
     id SERIAL PRIMARY KEY,
     stripe_invoice_id TEXT,
     stripe_subscription_id TEXT NOT NULL,

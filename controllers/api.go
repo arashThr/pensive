@@ -70,7 +70,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := a.BookmarkService.Create(data.Link, data.UserId)
+	bookmark, err := a.BookmarkService.Create(data.Link, data.UserId, models.Api)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "CREATE_BOOKMARK",
