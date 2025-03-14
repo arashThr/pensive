@@ -5,18 +5,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-white text-black font-sans flex flex-col">
-  <header class="bg-white border-b border-gray-200">
-    <nav class="px-6 py-4 flex items-center">
-      <div class="text-2xl font-semibold">
-        <a href="/">📖 Pensieve</a>
+<body class="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col antialiased">
+  <header class="bg-white border-b border-gray-200 shadow-sm">
+    <nav class="px-6 py-4 flex items-center max-w-7xl mx-auto">
+      <div class="text-2xl font-semibold tracking-tight">
+        <a href="/" class="flex items-center gap-2">
+          <span>📖</span> <span>Pensieve</span>
+        </a>
       </div>
 
       <!-- Hamburger (mobile only) -->
       <div class="ml-auto md:hidden">
-        <button id="menu-btn" class="focus:outline-none">
+        <button id="menu-btn" class="focus:outline-none text-gray-900 hover:text-red-600 transition-colors">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
@@ -24,17 +26,18 @@
       </div>
 
       <!-- Desktop Menu -->
-      <div class="hidden md:flex ml-auto space-x-6 items-center">
+      <div class="hidden md:flex ml-auto space-x-6 items-center text-sm font-medium">
         {{if currentUser}}
-          <a class="text-sm hover:text-gray-600" href="/bookmarks">Bookmarks</a>
-          <a class="text-sm hover:text-gray-600" href="/users/me">My Page</a>
+          <a class="hover:text-red-600 transition-colors" href="/bookmarks">Bookmarks</a>
+          <a class="hover:text-red-600 transition-colors" href="/users/me">Account</a>
+          <a class="hover:text-red-600 transition-colors" href="/integrations">Integrations</a>
           <form action="/signout" method="post" class="inline">
             {{csrfField}}
-            <button type="submit" class="text-sm hover:text-gray-600">Sign Out</button>
+            <button type="submit" class="hover:text-red-600 transition-colors">Sign Out</button>
           </form>
         {{else}}
-          <a class="text-sm hover:text-gray-600" href="/signin">Sign In</a>
-          <a class="text-sm bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded" href="/signup">Sign Up</a>
+          <a class="hover:text-red-600 transition-colors" href="/signin">Sign In</a>
+          <a class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-md transition-colors" href="/signup">Sign Up</a>
         {{end}}
       </div>
     </nav>
@@ -42,31 +45,32 @@
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
       {{if currentUser}}
-        <a class="block px-6 py-2 hover:bg-gray-50" href="/bookmarks">Bookmarks</a>
-        <a class="block px-6 py-2 hover:bg-gray-50" href="/users/me">My Page</a>
+        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/bookmarks">Bookmarks</a>
+        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/users/me">Account</a>
+        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/integrations">Integrations</a>
         <form action="/signout" method="post">
           {{csrfField}}
-          <button type="submit" class="block w-full text-left px-6 py-2 hover:bg-gray-50">Sign Out</button>
+          <button type="submit" class="block w-full text-left px-6 py-3 hover:bg-gray-100 transition-colors">Sign Out</button>
         </form>
       {{else}}
-        <a class="block px-6 py-2 hover:bg-gray-50" href="/signin">Sign In</a>
-        <a class="block px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white" href="/signup">Sign Up</a>
+        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/signin">Sign In</a>
+        <a class="block px-6 py-3 bg-red-600 hover:bg-red-700 text-white transition-colors" href="/signup">Sign Up</a>
       {{end}}
     </div>
   </header>
 
   <!-- Alerts -->
-  <div class="px-6 py-2">
-  {{range messages}}
-    <div class="flex px-3 py-2 mb-2 bg-gray-50 border {{if .IsError}}border-red-400 text-red-600{{else}}border-green-400 text-green-600{{end}} rounded">
-      <div class="flex-grow">{{.Message}}</div>
-      <a href="#" onclick="closeAlert(event)" class="ml-2">
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </a>
-    </div>
-  {{end}}
+  <div class="px-6 py-2 max-w-2xl mx-auto">
+    {{range messages}}
+      <div class="flex px-4 py-3 mb-2 bg-white border {{if .IsError}}border-red-500 text-red-600{{else}}border-amber-700 text-amber-700{{end}} rounded-md shadow-sm">
+        <div class="flex-grow">{{.Message}}</div>
+        <a href="#" onclick="closeAlert(event)" class="ml-2 hover:opacity-75 transition-opacity">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </a>
+      </div>
+    {{end}}
   </div>
 
   <main class="flex-grow">
@@ -74,12 +78,13 @@
 
 {{define "footer"}}
   </main>
-  <footer class="bg-white border-t border-gray-200 py-4 text-gray-600">
-    <div class="container mx-auto text-center text-sm">
-      <p>© 2025 Pensieve</p>
+  <footer class="bg-white border-t border-gray-200 py-6 text-gray-500 text-sm">
+    <div class="max-w-7xl mx-auto text-center">
+      <p class="mb-1">© 2025 Pensieve</p>
       <p>
-        <a href="/privacy" class="hover:text-black">Privacy</a> |
-        <a href="/terms" class="hover:text-black">Terms</a>
+        <a href="/privacy" class="hover:text-gray-900 transition-colors">Privacy</a> 
+        <span class="mx-2">•</span>
+        <a href="/terms" class="hover:text-gray-900 transition-colors">Terms</a>
       </p>
     </div>
   </footer>

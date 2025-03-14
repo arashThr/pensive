@@ -252,6 +252,9 @@ func run(cfg *config) error {
 		r.Post("/reset-password", usersController.ProcessResetPassword)
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
+			r.Get("/subscribe", web.StaticHandler(
+				views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml")),
+			))
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
 				r.Get("/me", usersController.CurrentUser)
