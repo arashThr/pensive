@@ -29,8 +29,8 @@ services:
       - "443:443/udp"
     volumes:
       - $PWD/caddy:/etc/caddy
-      - caddy_data:/data
-      - caddy_config:/config
+      - ~/caddy/caddy_data:/data
+      - ~/caddy/caddy_config:/config
   
   db:
     logging: *highlight-logging
@@ -38,8 +38,4 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - ~/data/apps.arashtaher.com/psql:/var/lib/postgresql/data/pgdata
-
-volumes:
-  caddy_data:
-  caddy_config:
   
