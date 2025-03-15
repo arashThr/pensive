@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
@@ -63,6 +64,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
@@ -75,8 +77,17 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		Excerpt   string
 		CreatedAt time.Time
 		Thumbnail string
+		Host      string
 	}
+	u, err := url.Parse(bookmark.Link)
+	if err != nil {
+		logger.Error("parsing url for bookmark edit", "error", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+	logger.Info("editing bookmark", "url", u)
 	data.Link = bookmark.Link
+	data.Host = u.Host
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
 	data.Excerpt = bookmark.Excerpt
