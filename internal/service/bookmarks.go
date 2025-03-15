@@ -74,12 +74,14 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		Id        types.BookmarkId
 		Excerpt   string
 		CreatedAt time.Time
+		Thumbnail string
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
 	data.Excerpt = bookmark.Excerpt
 	data.CreatedAt = bookmark.CreatedAt
+	data.Thumbnail = bookmark.ImageUrl
 	b.Templates.Edit.Execute(w, r, data)
 }
 

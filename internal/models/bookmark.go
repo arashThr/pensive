@@ -95,8 +95,8 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 		BookmarkId: id,
 	}
 	row := service.Pool.QueryRow(context.Background(),
-		`SELECT user_id, title, link, excerpt, created_at FROM bookmarks WHERE bookmark_id = $1;`, id)
-	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
+		`SELECT user_id, title, link, excerpt, image_url, created_at FROM bookmarks WHERE bookmark_id = $1;`, id)
+	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.ErrNotFound

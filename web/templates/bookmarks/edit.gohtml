@@ -3,12 +3,17 @@
 <div class="px-6 py-16 max-w-2xl mx-auto">
   <div class="bg-white rounded-lg shadow-sm p-6">
     <div class="space-y-6">
-      <div>
-        <div class="flex items-center gap-2" id="title-container">
-          <a href="/bookmarks/{{.Id}}/edit" class="text-lg font-medium text-red-600 hover:text-red-700 transition-colors truncate max-w-full">{{.Title}}</a>
+      <div class="flex">
+        {{if .Thumbnail}}
+        <div class="w-16 h-16 mr-3 flex-shrink-0">
+            <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded" />
         </div>
-        <p class="text-sm text-gray-500 mt-2">{{.Link}}</p>
+        {{end}}
+        <div>
+        <p class="text-lg font-medium text-red-600 hover:text-red-700 transition-colors truncate max-w-full">{{.Title}}</p>
+        <a href="{{.Link}}" class="text-blue-600 hover:text-blue-500 text-sm mt-2">{{.Link}}</a>
         <p class="text-sm text-gray-500 mt-2">{{.Excerpt}}</p>
+      </div>
       </div>
       <div class="text-sm text-gray-500">
         <p>Added: {{.CreatedAt.Format "Jan 2"}}</p>
