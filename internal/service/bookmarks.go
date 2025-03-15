@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
@@ -68,13 +69,17 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data struct {
-		Link  string
-		Title string
-		Id    types.BookmarkId
+		Link      string
+		Title     string
+		Id        types.BookmarkId
+		Excerpt   string
+		CreatedAt time.Time
 	}
 	data.Link = bookmark.Link
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
+	data.Excerpt = bookmark.Excerpt
+	data.CreatedAt = bookmark.CreatedAt
 	b.Templates.Edit.Execute(w, r, data)
 }
 
@@ -90,14 +95,19 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	var data struct {
-		Link  string
-		Title string
-		Id    types.BookmarkId
+	data := struct {
+		Link      string
+		Title     string
+		Id        types.BookmarkId
+		Excerpt   string
+		CreatedAt time.Time
+	}{
+		Link:      bookmark.Link,
+		Title:     bookmark.Title,
+		Id:        bookmark.BookmarkId,
+		Excerpt:   bookmark.Excerpt,
+		CreatedAt: bookmark.CreatedAt,
 	}
-	data.Link = bookmark.Link
-	data.Title = bookmark.Title
-	data.Id = bookmark.BookmarkId
 	b.Templates.Edit.Execute(w, r, data, web.NavbarMessage{
 		Message: "Bookmark updated",
 		IsError: false,

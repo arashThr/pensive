@@ -34,18 +34,17 @@ var sourceMapping = map[BookmarkSource]string{
 }
 
 type Bookmark struct {
-	BookmarkId    types.BookmarkId
-	UserId        types.UserId
-	Title         string
-	Link          string
-	Content       string
-	Source        string
-	Excerpt       string
-	ImageUrl      string
-	ArticleLang   string
-	SiteName      string
-	PublishedTime string
-	CreatedAt     time.Time
+	BookmarkId  types.BookmarkId
+	UserId      types.UserId
+	Title       string
+	Link        string
+	Content     string
+	Source      string
+	Excerpt     string
+	ImageUrl    string
+	ArticleLang string
+	SiteName    string
+	CreatedAt   time.Time
 }
 
 type BookmarkModel struct {
@@ -96,8 +95,8 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 		BookmarkId: id,
 	}
 	row := service.Pool.QueryRow(context.Background(),
-		`SELECT user_id, title, link FROM bookmarks WHERE bookmark_id = $1;`, id)
-	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link)
+		`SELECT user_id, title, link, excerpt, created_at FROM bookmarks WHERE bookmark_id = $1;`, id)
+	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, errors.ErrNotFound
