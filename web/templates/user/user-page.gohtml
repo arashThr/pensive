@@ -1,71 +1,76 @@
 {{template "header" .}}
 
-<div class="py-12 flex justify-center">
-  <div class="p-6 max-w-md w-full">
-    <h1 class="pb-6 text-2xl font-semibold text-black text-center">Your Account</h1>
+<div class="px-6 py-16 max-w-2xl mx-auto">
+  <div class="bg-white rounded-lg shadow-sm p-6">
+    <h1 class="pb-6 text-2xl font-semibold text-gray-900 tracking-tight text-center">Your Account</h1>
 
     <!-- User Info -->
-    <div class="py-3">
-      <p class="text-sm text-gray-700">Email</p>
-      <p class="text-base text-black">{{.Email}}</p>
+    <div class="py-4">
+      <p class="text-sm text-gray-500">Email</p>
+      <p class="text-base text-gray-900">{{.Email}}</p>
     </div>
 
     <!-- API Token Section -->
-    <div class="py-3">
-      <p class="text-sm text-gray-700 mb-1">API Token</p>
+    <div class="py-4">
+      <p class="text-sm text-gray-500 mb-2">API Token</p>
       <div id="token-container">
         {{if .APIToken}}
           <div class="flex items-center">
             <input 
-              class="w-full px-3 py-2 border border-gray-300 rounded text-black bg-gray-50" 
+              class="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 bg-gray-50 shadow-sm" 
               type="text" 
               value="{{.APIToken}}" 
               readonly 
-              id="api-token" />
+              id="api-token" 
+            />
             <button 
-              class="ml-2 text-gray-600 hover:text-blue-500" 
-              onclick="navigator.clipboard.writeText(document.getElementById('api-token').value)">
+              class="ml-2 text-gray-500 hover:text-red-600 transition-colors" 
+              onclick="navigator.clipboard.writeText(document.getElementById('api-token').value).then(() => { alert('API Token copied to clipboard'); })"
+            >
               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
             </button>
           </div>
-          <p class="text-xs text-gray-500 mt-1">Copy and store this securely.</p>
+          <p class="text-xs text-gray-500 mt-2">Copy and store this securely.</p>
         {{else}}
           <form action="/users/generate-token" method="post">
             {{csrfField}}
             <button 
-              class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold" 
+              class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200" 
               hx-post="/users/generate-token" 
               hx-target="#token-container" 
               hx-swap="outerHTML" 
               hx-indicator=".htmx-indicator"
-              type="submit">
+              type="submit"
+            >
               Generate API Token
             </button>
-            <span class="htmx-indicator hidden">⌛</span>
+            <span class="htmx-indicator hidden text-gray-500 ml-2">⌛</span>
           </form>
         {{end}}
       </div>
     </div>
 
     <!-- Subscription Section -->
-    <div class="py-3">
-      <p class="text-sm text-gray-700 mb-1">Subscription</p>
+    <div class="py-4">
+      <p class="text-sm text-gray-500 mb-2">Subscription</p>
       {{if .IsSubscribed}}
-        <p class="text-base text-black">Active</p>
+        <p class="text-base text-gray-900">Active</p>
         <a 
           href="/payments/portal-session" 
-          class="mt-2 inline-block text-sm text-blue-600 hover:text-blue-500">
+          class="mt-2 inline-block text-sm text-red-600 hover:text-red-700 transition-colors"
+        >
           Manage Subscription
         </a>
       {{else}}
-        <p class="text-base text-black">Not Active</p>
+        <p class="text-base text-gray-900">Not Active</p>
         <form action="/payments/create-checkout-session" method="post">
           {{csrfField}}
           <button 
-            class="mt-2 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold" 
-            type="submit">
+            class="mt-2 w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200" 
+            type="submit"
+          >
             Subscribe - $1.00
           </button>
         </form>
