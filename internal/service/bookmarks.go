@@ -114,18 +114,20 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type Bookmark struct {
-		Id    types.BookmarkId
-		Title string
-		Link  string
+		Id        types.BookmarkId
+		Title     string
+		Link      string
+		CreatedAt string
 	}
 	var data struct {
 		Bookmarks []Bookmark
 	}
 	for _, b := range bookmarks {
 		data.Bookmarks = append(data.Bookmarks, Bookmark{
-			Id:    b.BookmarkId,
-			Title: b.Title,
-			Link:  b.Link,
+			Id:        b.BookmarkId,
+			Title:     b.Title,
+			Link:      b.Link,
+			CreatedAt: b.CreatedAt.Format("Jan 02"),
 		})
 	}
 

@@ -45,6 +45,7 @@ type Bookmark struct {
 	ArticleLang   string
 	SiteName      string
 	PublishedTime string
+	CreatedAt     time.Time
 }
 
 type BookmarkModel struct {
@@ -108,16 +109,17 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 
 func (service *BookmarkModel) ByUserId(userId types.UserId) ([]Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
-		`SELECT bookmark_id, title, link, excerpt FROM bookmarks WHERE user_id = $1;`, userId)
+		`SELECT bookmark_id, title, link, excerpt, created_at FROM bookmarks WHERE user_id = $1;`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by user id: %w", err)
 	}
 	defer rows.Close()
+	// TODO: Get all the row elements
 	var bookmarks []Bookmark
 	// Iterate through the result set
 	for rows.Next() {
 		var bookmark Bookmark
-		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt)
+		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("scan bookmark: %w", err)
 		}

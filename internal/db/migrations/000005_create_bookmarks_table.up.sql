@@ -15,6 +15,7 @@ CREATE TABLE bookmarks (
     article_lang TEXT,
     site_name TEXT,
     published_time TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
     -- TODO: Add these columns
     -- summary TEXT,
     -- source_id TEXT,

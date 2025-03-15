@@ -1,36 +1,39 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-xl mx-auto">
-  <h1 class="pb-6 text-2xl font-semibold text-black">My Bookmarks</h1>
+<div class="px-6 py-16 max-w-2xl mx-auto">
+  <h1 class="pb-6 text-2xl font-semibold text-gray-900 tracking-tight">My Bookmarks</h1>
 
-  <table class="w-full">
-    <thead>
-      <tr>
-        <th class="text-left py-2 text-sm text-gray-700">Title</th>
-        <th class="text-left py-2 text-sm text-gray-700">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .Bookmarks}}
-      <tr class="border-t border-gray-200">
-        <td class="py-2">
-          <a href="{{.Link}}" class="text-blue-600 hover:text-blue-500">{{.Title}}</a>
-        </td>
-        <td class="py-2">
-          <a href="/bookmarks/{{.Id}}/edit" class="text-sm text-blue-600 hover:text-blue-500">Edit</a>
-          <form action="/bookmarks/{{.Id}}/delete" method="post" class="inline ml-4" 
-                onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
-            {{csrfField}}
-            <button type="submit" class="text-sm text-blue-600 hover:text-blue-500">Delete</button>
-          </form>
-        </td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
+  <div class="bg-white rounded-lg shadow-sm">
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Title</th>
+          <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Date Added</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Bookmarks}}
+        <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+          <td class="py-4 px-6 flex items-center gap-2">
+            <a href="/bookmarks/{{.Id}}/edit" class="text-red-600 hover:text-red-700 transition-colors">{{.Title}}</a>
+            <a href="{{.Link}}" target="_blank" class="text-red-600 hover:text-red-700 transition-colors">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </td>
+          <td class="py-4 px-6 text-sm text-gray-500">{{.CreatedAt}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{if eq (len .Bookmarks) 0}}
+      <div class="py-6 px-6 text-center text-gray-500 text-sm">No bookmarks yet. Add one below!</div>
+    {{end}}
+  </div>
 
-  <div class="pt-6">
-    <a href="/bookmarks/new" class="inline-block py-3 px-6 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold">New Bookmark</a>
+  <div class="mt-8">
+    <a href="/bookmarks/new" class="inline-block py-3 px-6 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200">New Bookmark</a>
   </div>
 </div>
 
