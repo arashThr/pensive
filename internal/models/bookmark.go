@@ -13,11 +13,12 @@ import (
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/types"
 	"github.com/go-shiori/go-readability"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/microcosm-cc/bluemonday"
 )
 
-var sanitization = bluemonday.StrictPolicy()
+var sanitization = bluemonday.UGCPolicy()
 
 type BookmarkSource = int
 
@@ -53,7 +54,19 @@ type BookmarkModel struct {
 
 // TODO: Add validation of the db query inputs (Like Id)
 func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
-	// TODO: Check if the website exists
+	// Check if the link already exists
+	row := service.Pool.QueryRow(context.Background(),
+		`SELECT bookmark_id, user_id, title, link, excerpt, image_url, created_at FROM bookmarks WHERE user_id = $1 AND link = $2;`, userId, link)
+	var bookmark Bookmark
+	err := row.Scan(&bookmark.BookmarkId, &bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
+	if err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("failed to collect row: %w", err)
+		}
+	} else {
+		return &bookmark, nil
+	}
+
 	article, err := readability.FromURL(link, 5*time.Second)
 	// TODO: Check for the language
 	if err != nil {
@@ -61,7 +74,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	}
 
 	fmt.Printf("%+v\n\n", article)
-	bookmark := Bookmark{
+	bookmark = Bookmark{
 		UserId:   userId,
 		Title:    sanitization.Sanitize(article.Title),
 		Link:     link,
@@ -76,7 +89,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	}
 	content := sanitization.Sanitize(article.TextContent)
 
-	row := service.Pool.QueryRow(context.Background(),
+	row = service.Pool.QueryRow(context.Background(),
 		`INSERT INTO bookmarks (bookmark_id, user_id, title, link, content, excerpt, image_url, article_lang, site_name, published_time, source)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING bookmark_id;`,
 		bookmarkId, userId, article.Title, link, content,
