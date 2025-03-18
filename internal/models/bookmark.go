@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/errors"
-	"github.com/arashthr/go-course/types"
+	"github.com/arashthr/go-course/internal/types"
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

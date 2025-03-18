@@ -8,7 +8,7 @@ import (
 	"log"
 
 	"github.com/arashthr/go-course/internal/rand"
-	"github.com/arashthr/go-course/types"
+	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

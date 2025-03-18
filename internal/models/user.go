@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/arashthr/go-course/internal/errors"
-	"github.com/arashthr/go-course/types"
+	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"

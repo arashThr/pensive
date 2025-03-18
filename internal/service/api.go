@@ -9,8 +9,8 @@ import (
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
-	"github.com/arashthr/go-course/types"
 	"github.com/go-chi/chi/v5"
 )
 
