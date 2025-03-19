@@ -13,7 +13,7 @@
     - uint ids are good enough for my user case
     - I have created a type to represent them
 - [x] Nano UUID for bookmarks
-- [ ] Separate table for content and ts_vector content to make it easier to back up data
+- [x] Separate table for content and ts_vector content to make it easier to back up data
 - [ ] API token page instead of fetching it
 - [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password

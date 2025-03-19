@@ -56,7 +56,7 @@ type BookmarkModel struct {
 func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// Check if the link already exists
 	row := service.Pool.QueryRow(context.Background(),
-		`SELECT bookmark_id, user_id, title, link, excerpt, image_url, created_at FROM bookmarks WHERE user_id = $1 AND link = $2;`, userId, link)
+		`SELECT bookmark_id, user_id, title, link, excerpt, image_url, created_at FROM users_bookmarks WHERE user_id = $1 AND link = $2;`, userId, link)
 	var bookmark Bookmark
 	err := row.Scan(&bookmark.BookmarkId, &bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
 	if err != nil {
@@ -87,15 +87,28 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 		slog.Warn("Failed to parse image URL", "error", err)
 		bookmark.ImageUrl = ""
 	}
+	// TODO: It's not working as expected and escapes the HTML
 	content := sanitization.Sanitize(article.TextContent)
 
-	row = service.Pool.QueryRow(context.Background(),
-		`INSERT INTO bookmarks (bookmark_id, user_id, title, link, content, excerpt, image_url, article_lang, site_name, published_time, source)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING bookmark_id;`,
-		bookmarkId, userId, article.Title, link, content,
-		bookmark.Excerpt, article.Image, sanitization.Sanitize(article.Language), sanitization.Sanitize(article.SiteName),
-		article.PublishedTime, sourceMapping[source])
-	err = row.Scan(&bookmark.BookmarkId)
+	_, err = service.Pool.Exec(context.Background(), `
+		WITH inserted_bookmark AS (
+			INSERT INTO users_bookmarks (
+				bookmark_id, 
+				user_id, 
+				link, 
+				title,
+				source,
+				excerpt, 
+				image_url, 
+				article_lang, 
+				site_name, 
+				published_time
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		)
+		INSERT INTO bookmarks_contents (bookmark_id, title, content)
+		VALUES ($1, $4, $11);`,
+		bookmarkId, userId, link, article.Title, sourceMapping[source], bookmark.Excerpt,
+		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
@@ -108,7 +121,7 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 		BookmarkId: id,
 	}
 	row := service.Pool.QueryRow(context.Background(),
-		`SELECT user_id, title, link, excerpt, image_url, created_at FROM bookmarks WHERE bookmark_id = $1;`, id)
+		`SELECT user_id, title, link, excerpt, image_url, created_at FROM users_bookmarks WHERE bookmark_id = $1;`, id)
 	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -121,7 +134,7 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 
 func (service *BookmarkModel) ByUserId(userId types.UserId) ([]Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
-		`SELECT bookmark_id, title, link, excerpt, created_at FROM bookmarks WHERE user_id = $1;`, userId)
+		`SELECT bookmark_id, title, link, excerpt, created_at FROM users_bookmarks WHERE user_id = $1;`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by user id: %w", err)
 	}
@@ -146,7 +159,7 @@ func (service *BookmarkModel) ByUserId(userId types.UserId) ([]Bookmark, error) 
 
 func (service *BookmarkModel) Update(bookmark *Bookmark) error {
 	_, err := service.Pool.Exec(context.Background(),
-		`UPDATE bookmarks SET link = $1, title = $2 WHERE bookmark_id = $3`,
+		`UPDATE users_bookmarks SET link = $1, title = $2 WHERE bookmark_id = $3`,
 		bookmark.Link, bookmark.Title, bookmark.BookmarkId,
 	)
 	if err != nil {
@@ -157,7 +170,7 @@ func (service *BookmarkModel) Update(bookmark *Bookmark) error {
 
 func (service *BookmarkModel) Delete(id types.BookmarkId) error {
 	_, err := service.Pool.Exec(context.Background(),
-		`DELETE FROM bookmarks WHERE bookmark_id = $1;`, id)
+		`DELETE FROM users_bookmarks WHERE bookmark_id = $1;`, id)
 	if err != nil {
 		return fmt.Errorf("delete bookmark: %w", err)
 	}
@@ -180,19 +193,20 @@ func (service *BookmarkModel) Search(userId types.UserId, query string) ([]Searc
 		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
 	)
 	SELECT
-		ts_headline(content, search_query.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS excerpt,
-		bookmark_id,
-		title,
+		ts_headline(content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS excerpt,
+		ub.bookmark_id,
+		ub.title,
 		link,
 		excerpt,
 		image_url,
-		ts_rank(search_vector, search_query.query) AS rank
-	FROM bookmarks, search_query
-	WHERE user_id = $2
-		AND search_vector @@ search_query.query
+		ts_rank(search_vector, sq.query) AS rank
+	FROM users_bookmarks ub
+	JOIN bookmarks_contents bc ON ub.bookmark_id = bc.bookmark_id
+	CROSS JOIN search_query sq
+	WHERE ub.user_id = $2
+    	AND bc.search_vector @@ sq.query
 	ORDER BY rank DESC
-	LIMIT 10
-	`, query, userId)
+	LIMIT 10`, query, userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("search bookmarks: %w", err)
