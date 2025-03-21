@@ -73,15 +73,15 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 		return nil, fmt.Errorf("readability: %w", err)
 	}
 
-	fmt.Printf("%+v\n\n", article)
-	bookmark = Bookmark{
-		UserId:   userId,
-		Title:    sanitization.Sanitize(article.Title),
-		Link:     link,
-		Excerpt:  sanitization.Sanitize(article.Excerpt),
-		ImageUrl: article.Image,
-	}
 	bookmarkId := strings.ToLower(rand.Text())[:8]
+	bookmark = Bookmark{
+		BookmarkId: types.BookmarkId(bookmarkId),
+		UserId:     userId,
+		Title:      sanitization.Sanitize(article.Title),
+		Link:       link,
+		Excerpt:    sanitization.Sanitize(article.Excerpt),
+		ImageUrl:   article.Image,
+	}
 
 	if _, err := url.ParseRequestURI(article.Image); err != nil {
 		slog.Warn("Failed to parse image URL", "error", err)
