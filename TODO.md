@@ -9,6 +9,10 @@
     - [x] Add tsvector
 - [ ] Twitter posts
 - [ ] Get token for extension without copy paste by redirect from website
+- [ ] Bookmarks
+    - [ ] Look for changes in bookmarks parent folder
+    - [ ] Remove the bookmark
+    - [ ] Pretty config
 
 ## Changes
 - [x] Ids from uint to string
