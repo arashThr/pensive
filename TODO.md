@@ -7,6 +7,8 @@
 - [ ] Multi-page for bookmarks index page
 - [x] Bookmark search in database
     - [x] Add tsvector
+- [ ] Twitter posts
+- [ ] Get token for extension without copy paste by redirect from website
 
 ## Changes
 - [x] Ids from uint to string
@@ -17,6 +19,9 @@
 - [ ] API token page instead of fetching it
 - [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password
+- [ ] Replace multi-empty lines and spaces with one
+- [ ] "Failed to parse image URL"
+- [ ] Tags from browser
 
 ### Stripe
 - [x] change `IsSubscribed` to subStatus

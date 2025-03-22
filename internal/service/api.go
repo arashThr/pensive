@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 
 	"github.com/arashthr/go-course/internal/auth/context"
@@ -48,12 +49,22 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, data)
 }
 
+// CreateAPI handles the creation of a new bookmark.
+//
+// @Accept json
+// @Produce json
+// @Param bookmark body struct{Link string} true "Bookmark link"
+// @Success 200 {object} Bookmark
+// @Failure 400 {object} ErrorResponse "Invalid request body or invalid URL"
+// @Failure 500 {object} ErrorResponse "Failed to create bookmark"
+// @Router /v1/api/bookmarks [post]
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		UserId types.UserId
 		Link   string
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		slog.Error("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: fmt.Sprintf("Invalid request body: %v", err),
@@ -63,6 +74,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	data.UserId = context.User(r.Context()).ID
 
 	if !validations.IsURLValid(data.Link) {
+		slog.Error("[api] invalid URL", "link", data.Link)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_URL",
 			Message: fmt.Sprintf("Invalid URL: %v", data.Link),
@@ -70,14 +82,17 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId)
 	bookmark, err := a.BookmarkModel.Create(data.Link, data.UserId, models.Api)
 	if err != nil {
+		slog.Error("[api] failed to create bookmark", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "CREATE_BOOKMARK",
 			Message: fmt.Sprintf("Failed to create bookmark: %v", err),
 		})
 		return
 	}
+	slog.Info("[api] created bookmark", "bookmarkId", bookmark.BookmarkId)
 	writeResponse(w, mapModelToBookmark(bookmark))
 }
 
