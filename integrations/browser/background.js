@@ -4,8 +4,8 @@ const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
 browserAPI.bookmarks.onCreated.addListener((id, bookmark) => {
   browserAPI.bookmarks.get(bookmark.parentId, (parent) => {
     console.log("parent", parent[0].title);
-    // Get the configured folder name (defaults to "archive" if not set)
-    browserAPI.storage.sync.get({ folderName: "archive" }, (data) => {
+    // Get the configured folder name (defaults to "Archive" if not set)
+    browserAPI.storage.sync.get({ folderName: "Archive" }, (data) => {
       if (parent[0].title === data.folderName) {
         sendToApi(bookmark.url, bookmark.title);
       }

@@ -1,7 +1,7 @@
 document.getElementById("save").addEventListener("click", () => {
     const endpoint = document.getElementById("endpoint").value;
     const apiKey = document.getElementById("apiKey").value;
-    const folderName = document.getElementById("folderName").value || "archive"; // Default to "archive" if empty
+    const folderName = document.getElementById("folderName").value || "Archive"; // Default to "Archive" if empty
     chrome.storage.sync.set({ endpoint, apiKey, folderName }, () => {
       const status = document.getElementById("status");
       status.textContent = "Settings saved!";
@@ -13,5 +13,5 @@ document.getElementById("save").addEventListener("click", () => {
   chrome.storage.sync.get(["endpoint", "apiKey", "folderName"], (data) => {
     document.getElementById("endpoint").value = data.endpoint || "";
     document.getElementById("apiKey").value = data.apiKey || "";
-    document.getElementById("folderName").value = data.folderName || "archive";
+    document.getElementById("folderName").value = data.folderName || "Archive";
   });

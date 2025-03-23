@@ -7,12 +7,14 @@
 - [ ] Multi-page for bookmarks index page
 - [x] Bookmark search in database
     - [x] Add tsvector
-- [ ] Twitter posts
+- [x] Test base extension on Firefox
+    - Firefox does not support `service_worker`
 - [ ] Get token for extension without copy paste by redirect from website
 - [ ] Bookmarks
     - [ ] Look for changes in bookmarks parent folder
     - [ ] Remove the bookmark
     - [ ] Pretty config
+- [ ] Twitter posts
 
 ## Changes
 - [x] Ids from uint to string
