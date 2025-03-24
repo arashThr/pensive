@@ -149,6 +149,42 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, &data)
 }
 
+// TODO: Test it
+func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
+	query := r.FormValue("query")
+	if query == "" {
+		http.Error(w, "Query is required", http.StatusBadRequest)
+		return
+	}
+	user := context.User(r.Context())
+
+	results, err := a.BookmarkModel.Search(user.ID, query)
+	if err != nil {
+		slog.Error("searching bookmarks", "error", err)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	type bookmarkSearchResult struct {
+		Id       types.BookmarkId
+		Title    string
+		Link     string
+		Headline string
+	}
+	var data struct {
+		Bookmarks []bookmarkSearchResult
+	}
+	for _, r := range results {
+		data.Bookmarks = append(data.Bookmarks, bookmarkSearchResult{
+			Id:       r.BookmarkId,
+			Title:    r.Title,
+			Link:     r.Link,
+			Headline: r.Headline,
+		})
+	}
+	writeResponse(w, data)
+}
+
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
 	id := chi.URLParam(r, "id")
 	bookmark, err := a.BookmarkModel.ById(types.BookmarkId(id))
