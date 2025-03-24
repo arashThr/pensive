@@ -9,6 +9,7 @@
     - [x] Add tsvector
 - [x] Test base extension on Firefox
     - Firefox does not support `service_worker`
+- [ ] Multiple sessions for the user
 - [ ] Get token for extension without copy paste by redirect from website
 - [ ] Bookmarks
     - [ ] Look for changes in bookmarks parent folder
