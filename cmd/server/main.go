@@ -216,6 +216,7 @@ func run(cfg *config) error {
 				r.Get("/{id}", apiController.GetAPI)
 				r.Put("/{id}", apiController.UpdateAPI)
 				r.Delete("/{id}", apiController.DeleteAPI)
+				r.Post("/search", apiController.SearchAPI)
 			})
 		})
 	})

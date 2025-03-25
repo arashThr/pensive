@@ -9,6 +9,8 @@
     - [x] Add tsvector
 - [x] Test base extension on Firefox
     - Firefox does not support `service_worker`
+- [ ] Add search to API
+- [ ] Telegram bot: Using API
 - [ ] Multiple sessions for the user
 - [ ] Get token for extension without copy paste by redirect from website
 - [ ] Bookmarks
