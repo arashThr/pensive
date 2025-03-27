@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -67,7 +68,17 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 		return &bookmark, nil
 	}
 
-	article, err := readability.FromURL(link, 5*time.Second)
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse URL: %w", err)
+	}
+
+	resp, err := getPage(link)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get page: %w", err)
+	}
+
+	article, err := readability.FromReader(resp.Body, parsedURL)
 	// TODO: Check for the language
 	if err != nil {
 		return nil, fmt.Errorf("readability: %w", err)
@@ -90,6 +101,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	// TODO: It's not working as expected and escapes the HTML
 	content := sanitization.Sanitize(article.TextContent)
 
+	// TODO: Add excerpt to bookmarks_content table
 	_, err = service.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO users_bookmarks (
@@ -227,4 +239,29 @@ func (service *BookmarkModel) Search(userId types.UserId, query string) ([]Searc
 		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
 	}
 	return results, nil
+}
+
+func getPage(link string) (*http.Response, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+	return resp, nil
 }
