@@ -11,3 +11,7 @@ content-type: application/json
 {
     "url": "https://ieeexplore.ieee.org/document/628099"
 }
+
+### Search bookmark
+GET {{host}}/api/v1/bookmarks/search?query=engineers
+Authorization: Bearer {{token}}
