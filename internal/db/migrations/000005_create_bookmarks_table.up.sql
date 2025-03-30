@@ -23,6 +23,7 @@ CREATE TABLE bookmarks_contents (
   bookmark_id TEXT PRIMARY KEY REFERENCES users_bookmarks(bookmark_id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
-  search_vector tsvector GENERATED ALWAYS AS (immutable_to_tsvector(title || ' ' || content)) STORED
+  excerpt TEXT NOT NULL,
+  search_vector tsvector GENERATED ALWAYS AS (immutable_to_tsvector(title || ' ' || excerpt || ' ' ||content)) STORED
 );
 CREATE INDEX search_vector_idx ON bookmarks_contents USING GIN(search_vector);

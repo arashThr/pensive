@@ -77,6 +77,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	if err != nil {
 		return nil, fmt.Errorf("failed to get page: %w", err)
 	}
+	defer resp.Body.Close()
 
 	article, err := readability.FromReader(resp.Body, parsedURL)
 	// TODO: Check for the language
@@ -117,8 +118,8 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 				published_time
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		)
-		INSERT INTO bookmarks_contents (bookmark_id, title, content)
-		VALUES ($1, $4, $11);`,
+		INSERT INTO bookmarks_contents (bookmark_id, title, excerpt, content)
+		VALUES ($1, $4, $6, $11);`,
 		bookmarkId, userId, link, article.Title, sourceMapping[source], bookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
 	if err != nil {
@@ -209,7 +210,7 @@ func (service *BookmarkModel) Search(userId types.UserId, query string) ([]Searc
 		ub.bookmark_id,
 		ub.title,
 		link,
-		excerpt,
+		ub.excerpt,
 		image_url,
 		ts_rank(search_vector, sq.query) AS rank
 	FROM users_bookmarks ub
@@ -258,7 +259,6 @@ func getPage(link string) (*http.Response, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to perform request: %w", err)
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
