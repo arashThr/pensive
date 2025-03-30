@@ -13,13 +13,11 @@ import (
 
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/types"
+	"github.com/arashthr/go-course/internal/validations"
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/microcosm-cc/bluemonday"
 )
-
-var sanitization = bluemonday.UGCPolicy()
 
 type BookmarkSource = int
 
@@ -89,9 +87,9 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	bookmark = Bookmark{
 		BookmarkId: types.BookmarkId(bookmarkId),
 		UserId:     userId,
-		Title:      sanitization.Sanitize(article.Title),
+		Title:      validations.CleanUpText(article.Title),
 		Link:       link,
-		Excerpt:    sanitization.Sanitize(article.Excerpt),
+		Excerpt:    validations.CleanUpText(article.Excerpt),
 		ImageUrl:   article.Image,
 	}
 
@@ -100,7 +98,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 		bookmark.ImageUrl = ""
 	}
 	// TODO: It's not working as expected and escapes the HTML
-	content := sanitization.Sanitize(article.TextContent)
+	content := validations.CleanUpText(article.TextContent)
 
 	// TODO: Add excerpt to bookmarks_content table
 	_, err = service.Pool.Exec(context.Background(), `

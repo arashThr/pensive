@@ -2,16 +2,20 @@
 GET {{host}}/api/v1/bookmarks
 Authorization: Bearer {{token}}
 
-## Node app
-
-### Get DOM
-POST http://localhost:3000/fetch
+### Create bookmark
+POST {{host}}/api/v1/bookmarks
 content-type: application/json
+Authorization: Bearer {{token}}
 
 {
-    "url": "https://ieeexplore.ieee.org/document/628099"
+    "link": "https://ieeexplore.ieee.org/document/628099"
 }
 
 ### Search bookmark
 GET {{host}}/api/v1/bookmarks/search?query=engineers
+Authorization: Bearer {{token}}
+
+### Delete bookmark
+@bookmarkId = dtes3csg
+DELETE {{host}}/api/v1/bookmarks/{{bookmarkId}}
 Authorization: Bearer {{token}}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
@@ -188,12 +189,19 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
 	id := chi.URLParam(r, "id")
+	if strings.TrimSpace(id) == "" {
+		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "Bookmark ID is required",
+		})
+		return nil
+	}
 	bookmark, err := a.BookmarkModel.ById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
 			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
 				Code:    "NOT_FOUND",
-				Message: "Bookmark not found",
+				Message: fmt.Sprintf("Bookmark not found: %s", id),
 			})
 			return nil
 		}
