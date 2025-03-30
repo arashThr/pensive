@@ -91,6 +91,9 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
 	data.Excerpt = bookmark.Excerpt
+	if len(data.Excerpt) > 200 {
+		data.Excerpt = data.Excerpt[:200] + "..."
+	}
 	data.CreatedAt = bookmark.CreatedAt
 	data.Thumbnail = bookmark.ImageUrl
 	b.Templates.Edit.Execute(w, r, data)
