@@ -189,18 +189,11 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type bookmarkSearchResult struct {
-		Id        types.BookmarkId
-		Title     string
-		Link      string
-		Headline  string
-		Thumbnail string
-	}
 	var data struct {
-		Bookmarks []bookmarkSearchResult
+		Bookmarks []types.BookmarkSearchResult
 	}
 	for _, r := range results {
-		data.Bookmarks = append(data.Bookmarks, bookmarkSearchResult{
+		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
 			Id:        r.BookmarkId,
 			Title:     r.Title,
 			Link:      r.Link,

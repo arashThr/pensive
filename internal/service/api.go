@@ -176,10 +176,11 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, r := range results {
 		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
-			Id:       r.BookmarkId,
-			Title:    r.Title,
-			Link:     r.Link,
-			Headline: r.Headline,
+			Id:        r.BookmarkId,
+			Title:     r.Title,
+			Link:      r.Link,
+			Headline:  r.Headline,
+			Thumbnail: r.ImageUrl,
 		})
 	}
 	writeResponse(w, data)
