@@ -149,7 +149,13 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, &data)
 }
 
-// TODO: Test it
+// SearchAPI handles the search for bookmarks based on a query.
+// @Produce json
+// @Param query query string true "Search query"
+// @Success 200 {object} bookmarkSearchResult `json:"bookmarks"`
+// @Failure 400 {object} ErrorResponse "Query is required"
+// @Failure 500 {object} ErrorResponse "Something went wrong"
+// @Router /v1/api/bookmarks/search [get]
 func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	query := r.FormValue("query")
 	if query == "" {
@@ -165,17 +171,11 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	type bookmarkSearchResult struct {
-		Id       types.BookmarkId
-		Title    string
-		Link     string
-		Headline string
-	}
 	var data struct {
-		Bookmarks []bookmarkSearchResult
+		Bookmarks []types.BookmarkSearchResult
 	}
 	for _, r := range results {
-		data.Bookmarks = append(data.Bookmarks, bookmarkSearchResult{
+		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
 			Id:       r.BookmarkId,
 			Title:    r.Title,
 			Link:     r.Link,
