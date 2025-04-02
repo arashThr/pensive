@@ -1,5 +1,11 @@
+@bookmarkId = fvtnxo5c
+
 ### Get bookmarks
 GET {{host}}/api/v1/bookmarks
+Authorization: Bearer {{token}}
+
+### Get a bookmark
+GET {{host}}/api/v1/bookmarks/{{bookmarkId}}
 Authorization: Bearer {{token}}
 
 ### Create bookmark
@@ -8,14 +14,16 @@ content-type: application/json
 Authorization: Bearer {{token}}
 
 {
-    "link": "https://ieeexplore.ieee.org/document/628099"
+    // "link": "https://ieeexplore.ieee.org/document/628099"
+    "link": "https://stackoverflow.com/questions/75043889/manifest-v3-background-scripts-service-worker-on-firefox"
+    // "link": "http://localhost:3000/xss"
 }
 
 ### Search bookmark
-GET {{host}}/api/v1/bookmarks/search?query=engineers
+@query = continue
+GET {{host}}/api/v1/bookmarks/search?query={{query}}
 Authorization: Bearer {{token}}
 
 ### Delete bookmark
-@bookmarkId = dtes3csg
 DELETE {{host}}/api/v1/bookmarks/{{bookmarkId}}
 Authorization: Bearer {{token}}

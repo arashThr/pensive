@@ -34,7 +34,24 @@ app.post('/fetch', async (req, res) => {
     }
 });
 
-app.use((req, res) => {
+app.get("/xss", (_, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Sample Document</title>
+        </head>
+        <body>
+            <h1>Welcome to the Sample Document</h1>
+            <p>This is a sample document designed to demonstrate reading mode in a browser.</p>
+            <p>Reading mode extracts the main content of a webpage for better readability.</p>
+            <img src="nonexistent.jpg" onerror="alert('This is a malicious image alert!')" />
+        </body>
+        </html>
+    `);
+})
+
+app.use((_, res) => {
     res.status(404).send('Not Found');
 });
 
