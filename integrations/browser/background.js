@@ -42,7 +42,7 @@ async function sendToApi(link) {
 }
 
 function parseToError(result) {
-  let errorCode = result.errorCode || "UNKNOWN_ERROR";
-  let errorMessage = result.errorMessage || "Unknown error occurred";
+  const errorCode = result.errorCode || "UNKNOWN_ERROR";
+  const errorMessage = result.errorMessage || "Unknown error occurred";
   return { errorCode, errorMessage };
 }

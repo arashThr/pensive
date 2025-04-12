@@ -1,15 +1,104 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      body {
+        min-height: 100vh;
+        background-color: #f3f4f6;
+        color: #111827;
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        padding: 16px;
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        color: #111827;
+        margin-bottom: 24px;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        color: #6b7280;
+        margin-bottom: 8px;
+      }
+      input {
+        width: 100%;
+        padding: 8px 16px;
+        border: 1px solid #d1d5db;
+        background-color: #ffffff;
+        color: #111827;
+        border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        outline: none;
+        transition: all 200ms ease-in-out;
+        margin-bottom: 16px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      input:focus {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+      }
+      input::placeholder {
+        color: #6b7280;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background-color: #dc2626;
+        color: #ffffff;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        border: none;
+        cursor: pointer;
+        transition: all 200ms ease-in-out;
+        margin-top: 24px;
+      }
+      button:hover {
+        background-color: #b91c1c;
+      }
+      #status {
+        margin-top: 16px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+      @media (min-width: 640px) {
+        body {
+          padding: 32px;
+        }
+        .container {
+          max-width: 500px;
+        }
+        h1 {
+          font-size: 28px;
+        }
+      }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  </head>
   <body>
-    <h1>Bookmark to API Settings</h1>
-    <label>REST Endpoint:</label><br>
-    <input type="text" id="endpoint"><br>
-    <label>API Key:</label><br>
-    <input type="text" id="apiKey"><br>
-    <label>Bookmark Folder Name (default: Archive):</label><br>
-    <input type="text" id="folderName"><br>
-    <button id="save">Save</button>
-    <div id="status"></div>
+    <div class="container">
+      <h1>Bookmark to API Settings</h1>
+      <label>REST Endpoint:</label>
+      <input type="text" id="endpoint">
+      <label>API Key:</label>
+      <input type="text" id="apiKey">
+      <label>Bookmark Folder Name (default: Archive):</label>
+      <input type="text" id="folderName">
+      <button id="save">Save</button>
+      <div id="status"></div>
+    </div>
     <script src="options.js"></script>
   </body>
 </html>
