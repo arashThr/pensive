@@ -569,6 +569,9 @@
   .mb-2 {
     margin-bottom: calc(var(--spacing) * 2);
   }
+  .mb-4 {
+    margin-bottom: calc(var(--spacing) * 4);
+  }
   .mb-6 {
     margin-bottom: calc(var(--spacing) * 6);
   }
@@ -878,6 +881,10 @@
   .text-sm {
     font-size: var(--text-sm);
     line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+  .text-xl {
+    font-size: var(--text-xl);
+    line-height: var(--tw-leading, var(--text-xl--line-height));
   }
   .text-xs {
     font-size: var(--text-xs);

@@ -260,6 +260,7 @@ func run(cfg *config) error {
 				r.Use(umw.RequireUser)
 				r.Get("/me", usersController.CurrentUser)
 				r.Post("/generate-token", usersController.GenerateToken)
+				r.Post("/delete-token", usersController.DeleteToken)
 			})
 		})
 		r.Route("/payments", func(r chi.Router) {

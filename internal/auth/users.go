@@ -119,22 +119,21 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Email        string
 		IsSubscribed bool
-		APIToken     string
+		Tokens       []models.ApiToken
 	}
 	data.Email = user.Email
 	data.IsSubscribed = user.SubscriptionStatus == "premium"
-	token, err := u.ApiService.Get(user.ID)
+	validTokens, err := u.ApiService.Get(user.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Info("api token not found for current user")
-			data.APIToken = ""
 		} else {
 			logger.Info("get api token for current user", "error", err)
 			http.Error(w, "Failed to get API token", http.StatusInternalServerError)
 			return
 		}
 	} else {
-		data.APIToken = token.Token
+		data.Tokens = validTokens
 	}
 	u.Templates.UserPage.Execute(w, r, data)
 }
@@ -226,6 +225,18 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		APIToken string
 	}{APIToken: token.Token}
 	u.Templates.Token.Execute(w, r, data)
+}
+
+func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
+	tokenId := r.FormValue("token_id")
+	user := context.User(r.Context())
+	err := u.ApiService.Delete(user.ID, tokenId)
+	if err != nil {
+		log.Printf("delete api token: %v", err)
+		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 type UserMiddleware struct {
