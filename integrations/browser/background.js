@@ -19,9 +19,9 @@ async function sendToApi(link) {
     console.error("Endpoint or API key not configured.");
     return;
   }
-
+  const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(createEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
