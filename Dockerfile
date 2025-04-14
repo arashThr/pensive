@@ -1,4 +1,4 @@
-FROM node:alpine AS tailwind-builder
+FROM node:slim AS tailwind-builder
 WORKDIR /app
 RUN npm init -y && npm install tailwindcss @tailwindcss/cli
 COPY ./web/templates ./templates
@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 RUN go build -v -o ./server ./cmd/server
 
-FROM scratch
+FROM alpine
 WORKDIR /app
 COPY ./web/assets ./web/assets
 COPY --from=build /app/server ./server
