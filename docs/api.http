@@ -1,4 +1,5 @@
 @bookmarkId = fvtnxo5c
+@query = search
 
 ### Get bookmarks
 GET {{host}}/api/v1/bookmarks
@@ -20,7 +21,6 @@ Authorization: Bearer {{token}}
 }
 
 ### Search bookmark
-@query = continue
 GET {{host}}/api/v1/bookmarks/search?query={{query}}
 Authorization: Bearer {{token}}
 

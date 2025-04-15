@@ -4,12 +4,12 @@
 
 ## Features
 - [x] Generate API  tokens
-- [ ] Multi-page for bookmarks index page
 - [x] Bookmark search in database
     - [x] Add tsvector
 - [x] Test base extension on Firefox
     - Firefox does not support `service_worker`
-- [ ] Add search to API
+- [x] Add search to API
+- [ ] Delete bookmark with extension
 - [ ] Telegram bot: Using API
 - [ ] Multiple sessions for the user
 - [ ] Get token for extension without copy paste by redirect from website
@@ -18,6 +18,7 @@
     - [ ] Remove the bookmark
     - [ ] Pretty config
 - [ ] Twitter posts
+- [ ] Multi-page for bookmarks index page
 
 ## Changes
 - [x] Ids from uint to string
@@ -25,6 +26,9 @@
     - I have created a type to represent them
 - [x] Nano UUID for bookmarks
 - [x] Separate table for content and ts_vector content to make it easier to back up data
+- [x] Add excerpt to bookmarks_content table
+- [x] Trim excerpt for bookmark page
+- [x] Support multiple API tokens: Show them once and keep the hashed version
 - [ ] API token page instead of fetching it
 - [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password
@@ -46,3 +50,5 @@
 ## Fix
 - [x] Fix the Caddy file issue
 - [x] Don't fetch duplicates
+- [x] Fix the HTTP issue on production 
+    - tls: failed to verify certificate: x509: certificate signed by unknown authority: Scratch did not have ce-certificates
