@@ -1,16 +1,17 @@
 <div id="token-container" class="flex items-center">
-    <input 
-      class="w-full px-3 py-2 border border-gray-300 rounded text-black bg-gray-50" 
-      type="text" 
-      value="{{.APIToken}}" 
-      readonly 
-      id="api-token" />
-    <button 
-      class="ml-2 text-gray-600 hover:text-blue-500" 
-      onclick="navigator.clipboard.writeText(document.getElementById('api-token').value)">
-      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    </button>
-  </div>
-  <p class="text-xs text-gray-500 mt-1">Copy and store this securely.</p>
+  <input 
+    class="w-full px-3 py-2 border border-gray-300 rounded text-black bg-gray-50" 
+    type="text" 
+    value="{{.APIToken}}" 
+    readonly 
+    id="api-token" />
+  <button 
+    class="ml-2 text-gray-600 hover:text-blue-500" 
+    onclick="navigator.clipboard.writeText(document.getElementById('api-token').value); document.getElementById('copy-message').classList.remove('hidden'); setTimeout(() => document.getElementById('copy-message').classList.add('hidden'), 3000);">
+    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    </svg>
+  </button>
+</div>
+<div id="copy-message" class="hidden text-sm text-gray-600 mt-1 text-right">Token copied!</div>
+<p class="text-xs text-gray-500 mt-1">Copy and store this securely.</p>
