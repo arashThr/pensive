@@ -38,12 +38,12 @@
         <p class="text-xs text-gray-500 mt-2 mb-4">No API tokens generated yet.</p>
         {{end}}
 
-        <form action="/users/generate-token" method="post">
+        <form action="/users/generate-token" method="post" id="token-generate-container">
           {{csrfField}}
           <button
             class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200"
             hx-post="/users/generate-token"
-            hx-target="#token-container"
+            hx-target="#token-generate-container"
             hx-swap="outerHTML"
             hx-indicator=".htmx-indicator"
             type="submit"
