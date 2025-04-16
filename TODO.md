@@ -9,13 +9,10 @@
 - [x] Test base extension on Firefox
     - Firefox does not support `service_worker`
 - [x] Add search to API
-- [ ] Pagination
+- [x] Pagination
     - [x] Bookmarks
         - [x] API
         - [x] Site
-    - [ ] Search results
-        - [ ] API
-        - [ ] Site
 - [ ] Delete bookmark with extension
 - [ ] Telegram bot: Using API
 - [ ] Multiple sessions for the user

@@ -171,7 +171,7 @@ func run(cfg *config) error {
 	usersController.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
-	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml", "tailwind.gohtml"))
+	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksService,

@@ -42,31 +42,7 @@
     {{end}}
   </div>
 
-  <!-- Pagination -->
-  <div class="mt-6 flex justify-between items-center">
-    <!-- Previous button or empty placeholder -->
-    {{if gt .Pages.Current 1}}
-      <a href="?page={{.Pages.Previous}}" 
-         class="inline-block py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200">
-        Previous
-      </a>
-    {{else}}
-      <span class="invisible py-2 px-4"></span>
-    {{end}}
-
-    <!-- Page number, always centered -->
-    <span class="text-sm text-gray-600">Page {{.Pages.Current}}</span>
-
-    <!-- Next button or empty placeholder -->
-    {{if .MorePages}}
-      <a href="?page={{.Pages.Next}}" 
-         class="inline-block py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200">
-        Next
-      </a>
-    {{else}}
-      <span class="invisible py-2 px-4"></span>
-    {{end}}
-  </div>
+  {{template "pagination" .}}
 </div>
 
 {{template "footer" .}}
