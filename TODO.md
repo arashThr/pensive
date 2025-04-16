@@ -29,6 +29,7 @@
 - [x] Add excerpt to bookmarks_content table
 - [x] Trim excerpt for bookmark page
 - [x] Support multiple API tokens: Show them once and keep the hashed version
+- [ ] Remove password and just use email
 - [ ] API token page instead of fetching it
 - [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password

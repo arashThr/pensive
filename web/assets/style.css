@@ -533,6 +533,9 @@
   .top-\[-2rem\] {
     top: -2rem;
   }
+  .top-\[2rem\] {
+    top: 2rem;
+  }
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
