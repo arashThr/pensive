@@ -34,7 +34,7 @@ type Bookmark struct {
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
-	bookmarks, err := a.BookmarkModel.ByUserId(user.ID, page)
+	bookmarks, _, err := a.BookmarkModel.ByUserId(user.ID, page)
 	if err != nil {
 		log.Printf("fetching bookmarks: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

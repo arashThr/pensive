@@ -21,7 +21,7 @@ import (
 
 type BookmarkSource = int
 
-const PageSize = 10
+const PageSize = 2
 
 const (
 	WebSource BookmarkSource = iota
@@ -145,9 +145,20 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmark, error) {
+func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
+	row := service.Pool.QueryRow(context.Background(), `
+		SELECT COUNT(*) FROM users_bookmarks WHERE user_id = $1`, userId)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return nil, false, fmt.Errorf("count bookmarks to get all by user ID: %w", err)
+	}
+	if count == 0 {
+		return []Bookmark{}, false, nil
+	}
+
 	if page <= 0 || page >= 100 {
-		return nil, fmt.Errorf("page number out of range")
+		return nil, false, fmt.Errorf("page number out of range")
 	}
 	page -= 1
 	rows, err := service.Pool.Query(context.Background(),
@@ -158,7 +169,7 @@ func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmar
 		OFFSET $3
 		`, userId, PageSize, page*PageSize)
 	if err != nil {
-		return nil, fmt.Errorf("query bookmark by user id: %w", err)
+		return nil, false, fmt.Errorf("query bookmark by user id: %w", err)
 	}
 	defer rows.Close()
 	// TODO: Get all the row elements
@@ -168,15 +179,16 @@ func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmar
 		var bookmark Bookmark
 		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("scan bookmark: %w", err)
+			return nil, false, fmt.Errorf("scan bookmark: %w", err)
 		}
 		bookmarks = append(bookmarks, bookmark)
 	}
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
+		return nil, false, fmt.Errorf("iterating rows: %w", rows.Err())
 	}
+	morePages := PageSize+page*PageSize < count
 
-	return bookmarks, nil
+	return bookmarks, morePages, nil
 }
 
 func (service *BookmarkModel) Update(bookmark *Bookmark) error {

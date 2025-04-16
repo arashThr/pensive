@@ -132,7 +132,8 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 
 func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
-	bookmarks, err := b.BookmarkModel.ByUserId(user.ID)
+	page := validations.GetPageOffset(r.FormValue("page"))
+	bookmarks, morePages, err := b.BookmarkModel.ByUserId(user.ID, page)
 	if err != nil {
 		log.Printf("bookmark by user id: %v", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -145,9 +146,22 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 		Link      string
 		CreatedAt string
 	}
+	type PagesData struct {
+		Previous int
+		Current  int
+		Next     int
+	}
 	var data struct {
+		Pages     PagesData
+		MorePages bool
 		Bookmarks []Bookmark
 	}
+	data.Pages = PagesData{
+		Previous: page - 1,
+		Current:  page,
+		Next:     page + 1,
+	}
+	data.MorePages = morePages
 	for _, b := range bookmarks {
 		data.Bookmarks = append(data.Bookmarks, Bookmark{
 			Id:        b.BookmarkId,
