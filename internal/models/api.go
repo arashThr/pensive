@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/rand"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5"
@@ -37,6 +38,19 @@ func (as *ApiService) Create(userId types.UserId) (*GeneratedApiToken, error) {
 	if err != nil {
 		return nil, fmt.Errorf("api token: %w", err)
 	}
+
+	// Check the limit on the number of tokens
+	row := as.Pool.QueryRow(context.Background(),
+		`SELECT COUNT(*) FROM api_tokens WHERE user_id = $1`, userId)
+	var count int
+	err = row.Scan(&count)
+	if err != nil {
+		return nil, fmt.Errorf("api token count: %w", err)
+	}
+	if count >= 3 {
+		return nil, fmt.Errorf("api token limit: %w", errors.ErrTooManyTokens)
+	}
+
 	apiToken := GeneratedApiToken{
 		ApiToken: ApiToken{
 			UserId:    userId,
@@ -44,7 +58,7 @@ func (as *ApiService) Create(userId types.UserId) (*GeneratedApiToken, error) {
 		},
 		Token: token,
 	}
-	row := as.Pool.QueryRow(context.Background(), `
+	row = as.Pool.QueryRow(context.Background(), `
 		INSERT INTO api_tokens (user_id, token_hash)
 		VALUES ($1, $2)
 		RETURNING id`, userId, apiToken.TokenHash)

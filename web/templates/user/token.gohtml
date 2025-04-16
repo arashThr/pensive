@@ -1,3 +1,7 @@
+{{if .ErrorMessage}}
+<p class="text-sm text-red-600 mb-4">{{.ErrorMessage}}</p>
+{{else}}
+
 <div id="token-container" class="flex items-center relative">
   <input 
     class="w-full px-3 py-2 border border-gray-300 rounded text-black bg-gray-50" 
@@ -18,3 +22,4 @@
   <div id="copy-message" class="hidden absolute right-0 top-[2rem] bg-gray-800 text-white text-xs px-2 py-1 rounded">Copied</div>
 </div>
 <p class="text-xs text-gray-500 mt-1">Copy and store this securely.</p>
+{{end}}

@@ -214,16 +214,23 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	type TokenResponse struct {
+		APIToken     string
+		ErrorMessage string
+	}
 	user := context.User(r.Context())
 	token, err := u.ApiService.Create(user.ID)
 	if err != nil {
 		log.Printf("create api token: %v", err)
+		if errors.Is(err, errors.ErrTooManyTokens) {
+			errorResponse := TokenResponse{ErrorMessage: "You have reached the maximum number of tokens"}
+			u.Templates.Token.Execute(w, r, errorResponse)
+			return
+		}
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
-	data := struct {
-		APIToken string
-	}{APIToken: token.Token}
+	data := TokenResponse{APIToken: token.Token}
 	u.Templates.Token.Execute(w, r, data)
 }
 
