@@ -21,6 +21,8 @@ import (
 
 type BookmarkSource = int
 
+const PageSize = 10
+
 const (
 	WebSource BookmarkSource = iota
 	TelegramSource
@@ -143,9 +145,18 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (service *BookmarkModel) ByUserId(userId types.UserId) ([]Bookmark, error) {
+func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmark, error) {
+	if page <= 0 || page >= 100 {
+		return nil, fmt.Errorf("page number out of range")
+	}
+	page -= 1
 	rows, err := service.Pool.Query(context.Background(),
-		`SELECT bookmark_id, title, link, excerpt, created_at FROM users_bookmarks WHERE user_id = $1;`, userId)
+		`SELECT bookmark_id, title, link, excerpt, created_at
+		FROM users_bookmarks
+		WHERE user_id = $1
+		LIMIT $2
+		OFFSET $3
+		`, userId, PageSize, page*PageSize)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by user id: %w", err)
 	}

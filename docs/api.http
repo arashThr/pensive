@@ -2,7 +2,7 @@
 @query = search
 
 ### Get bookmarks
-GET {{host}}/api/v1/bookmarks
+GET {{host}}/api/v1/bookmarks?page=1
 Authorization: Bearer {{token}}
 
 ### Get a bookmark
