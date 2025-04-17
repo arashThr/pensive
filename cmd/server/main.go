@@ -213,6 +213,7 @@ func run(cfg *config) error {
 			r.Route("/bookmarks", func(r chi.Router) {
 				r.Get("/", apiController.IndexAPI)
 				r.Post("/", apiController.CreateAPI)
+				r.Delete("/", apiController.DeleteByLinkAPI)
 				r.Get("/{id}", apiController.GetAPI)
 				r.Put("/{id}", apiController.UpdateAPI)
 				r.Delete("/{id}", apiController.DeleteAPI)

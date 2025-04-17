@@ -7,13 +7,28 @@ browserAPI.bookmarks.onCreated.addListener((id, bookmark) => {
     // Get the configured folder name (defaults to "Archive" if not set)
     browserAPI.storage.sync.get({ folderName: "Archive" }, (data) => {
       if (parent[0].title === data.folderName) {
-        sendToApi(bookmark.url, bookmark.title);
+        sendToApi(bookmark.url, "POST");
       }
     });
   });
 });
 
-async function sendToApi(link) {
+browserAPI.bookmarks.onRemoved.addListener((id, removeInfo) => {
+  // Get the configured folder name (defaults to "Archive" if not set)
+  browserAPI.storage.sync.get({ folderName: "Archive" }, (data) => {
+    // Check if the removed bookmark's parent folder is the Archive folder
+    browserAPI.bookmarks.get(removeInfo.parentId, (parent) => {
+      if (parent[0].title === data.folderName) {
+        // Assuming you have the URL or a unique identifier available
+        // You might need to store the URL elsewhere or fetch it differently
+        console.log("Remove URL:", removeInfo.node.url)
+        sendToApi(removeInfo.node.url, "DELETE"); // Call your delete endpoint with the bookmark ID or URL
+      }
+    });
+  });
+});
+
+async function sendToApi(link, method) {
   const { endpoint, apiKey } = await browserAPI.storage.sync.get(["endpoint", "apiKey"]);
   if (!endpoint || !apiKey) {
     console.error("Endpoint or API key not configured.");
@@ -22,19 +37,28 @@ async function sendToApi(link) {
   const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href
   try {
     const response = await fetch(createEndpoint, {
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({ link }),
     });
-    const result = await response.json();
     if (response.status !== 200) {
-      const error = parseToError(result);
+      // If response is JSON, decode it
+      // Otherwise, parse it as text
+      const contentType = response.headers.get("Content-Type");
+      let error
+      if (contentType?.includes("application/json")) {
+        const responseBody = await response.json();
+        const error = parseToError(responseBody);
+      } else {
+        error = await response.text();
+      }
       console.error("Error:", error);
       return;
     }
+    const result = await response.json();
     console.log("Success:", result);
   } catch (error) {
     console.error("Error:", error);

@@ -13,9 +13,9 @@
     - [x] Bookmarks
         - [x] API
         - [x] Site
-- [ ] Delete bookmark with extension
-- [ ] Telegram bot: Using API
+- [x] Delete bookmark with extension
 - [ ] Multiple sessions for the user
+- [ ] Telegram bot: Using API
 - [ ] Get token for extension without copy paste by redirect from website
 - [ ] Bookmarks
     - [ ] Look for changes in bookmarks parent folder
@@ -34,8 +34,9 @@
 - [x] Trim excerpt for bookmark page
 - [x] Support multiple API tokens: Show them once and keep the hashed version
 - [x] Limit the number of tokens
-- [ ] Keep the token name
 - [ ] Remove password and just use email
+- [ ] Clear the search results when text box is cleared
+- [ ] Keep the token name
 - [ ] API token page instead of fetching it
 - [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password

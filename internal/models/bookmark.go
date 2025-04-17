@@ -36,17 +36,17 @@ var sourceMapping = map[BookmarkSource]string{
 }
 
 type Bookmark struct {
-	BookmarkId  types.BookmarkId
-	UserId      types.UserId
-	Title       string
-	Link        string
-	Content     string
-	Source      string
-	Excerpt     string
-	ImageUrl    string
-	ArticleLang string
-	SiteName    string
-	CreatedAt   time.Time
+	BookmarkId    types.BookmarkId
+	UserId        types.UserId
+	Title         string
+	Link          string
+	Source        string
+	Excerpt       string
+	ImageUrl      string
+	ArticleLang   string
+	SiteName      string
+	CreatedAt     time.Time
+	PublishedTime *time.Time
 }
 
 type BookmarkModel struct {
@@ -56,16 +56,13 @@ type BookmarkModel struct {
 // TODO: Add validation of the db query inputs (Like Id)
 func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// Check if the link already exists
-	row := service.Pool.QueryRow(context.Background(),
-		`SELECT bookmark_id, user_id, title, link, excerpt, image_url, created_at FROM users_bookmarks WHERE user_id = $1 AND link = $2;`, userId, link)
-	var bookmark Bookmark
-	err := row.Scan(&bookmark.BookmarkId, &bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
+	bookmark, err := service.ByLink(userId, link)
 	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
+		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
 		}
 	} else {
-		return &bookmark, nil
+		return bookmark, nil
 	}
 
 	parsedURL, err := url.Parse(link)
@@ -86,13 +83,17 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	}
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
-	bookmark = Bookmark{
-		BookmarkId: types.BookmarkId(bookmarkId),
-		UserId:     userId,
-		Title:      validations.CleanUpText(article.Title),
-		Link:       link,
-		Excerpt:    validations.CleanUpText(article.Excerpt),
-		ImageUrl:   article.Image,
+	bookmark = &Bookmark{
+		BookmarkId:    types.BookmarkId(bookmarkId),
+		UserId:        userId,
+		Title:         validations.CleanUpText(article.Title),
+		Link:          link,
+		Excerpt:       validations.CleanUpText(article.Excerpt),
+		ImageUrl:      article.Image,
+		PublishedTime: article.PublishedTime,
+		ArticleLang:   article.Language,
+		SiteName:      article.SiteName,
+		Source:        sourceMapping[source],
 	}
 
 	if _, err := url.ParseRequestURI(article.Image); err != nil {
@@ -126,7 +127,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 
-	return &bookmark, nil
+	return bookmark, nil
 }
 
 func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
@@ -189,6 +190,24 @@ func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmar
 	morePages := PageSize+page*PageSize < count
 
 	return bookmarks, morePages, nil
+}
+
+func (service *BookmarkModel) ByLink(userId types.UserId, link string) (*Bookmark, error) {
+	rows, err := service.Pool.Query(context.Background(),
+		`SELECT *
+		FROM users_bookmarks
+		WHERE user_id = $1 AND link = $2`, userId, link)
+	if err != nil {
+		return nil, fmt.Errorf("query bookmark by link: %w", err)
+	}
+	bookmark, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Bookmark])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrNotFound
+		}
+		return nil, fmt.Errorf("bookmark by link: %w", err)
+	}
+	return &bookmark, nil
 }
 
 func (service *BookmarkModel) Update(bookmark *Bookmark) error {

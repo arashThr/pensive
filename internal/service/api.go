@@ -131,6 +131,24 @@ func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, mapModelToBookmark(bookmark))
 }
 
+func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
+	bookmark := a.getBookmarkByLink(w, r)
+	if bookmark == nil {
+		return
+	}
+
+	err := a.BookmarkModel.Delete(bookmark.BookmarkId)
+	if err != nil {
+		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
+			Code:    "DELETE_BOOKMARK",
+			Message: fmt.Sprintf("Failed to delete bookmark: %v", err),
+		})
+		return
+	}
+	writeResponse(w, mapModelToBookmark(bookmark))
+	slog.Info("[api] deleted bookmark", "bookmarkId", bookmark.BookmarkId)
+}
+
 func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
@@ -223,6 +241,47 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 			})
 			return nil
 		}
+	}
+	return bookmark
+}
+
+func (a *Api) getBookmarkByLink(w http.ResponseWriter, r *http.Request) *models.Bookmark {
+	user := context.User(r.Context())
+	var data struct {
+		Link string
+	}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		slog.Error("[api] decoding request body", "error", err)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: fmt.Sprintf("Invalid request body: %v", err),
+		})
+		return nil
+	}
+
+	if !validations.IsURLValid(data.Link) {
+		slog.Error("[api] invalid URL", "link", data.Link)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_URL",
+			Message: fmt.Sprintf("Invalid URL: %v", data.Link),
+		})
+		return nil
+	}
+	bookmark, err := a.BookmarkModel.ByLink(user.ID, data.Link)
+	if err != nil {
+		if errors.Is(err, errors.ErrNotFound) {
+			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
+				Code:    "NOT_FOUND",
+				Message: fmt.Sprintf("Bookmark not found: %s", data.Link),
+			})
+			return nil
+		}
+		slog.Error("[api] failed to create bookmark", "error", err, "link", data.Link)
+		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
+			Code:    "INTERNAL_ERROR",
+			Message: "api: Something went wrong",
+		})
+		return nil
 	}
 	return bookmark
 }
