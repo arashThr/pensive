@@ -51,7 +51,7 @@ async function sendToApi(link, method) {
       let error
       if (contentType?.includes("application/json")) {
         const responseBody = await response.json();
-        const error = parseToError(responseBody);
+        error = parseToError(responseBody);
       } else {
         error = await response.text();
       }
