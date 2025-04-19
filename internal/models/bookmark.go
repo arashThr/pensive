@@ -56,7 +56,7 @@ type BookmarkModel struct {
 // TODO: Add validation of the db query inputs (Like Id)
 func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// Check if the link already exists
-	bookmark, err := service.ByLink(userId, link)
+	bookmark, err := service.GetByLink(userId, link)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
@@ -130,7 +130,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	return bookmark, nil
 }
 
-func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
+func (service *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		BookmarkId: id,
 	}
@@ -146,7 +146,7 @@ func (service *BookmarkModel) ById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
+func (service *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
 	row := service.Pool.QueryRow(context.Background(), `
 		SELECT COUNT(*) FROM users_bookmarks WHERE user_id = $1`, userId)
 	var count int
@@ -192,7 +192,7 @@ func (service *BookmarkModel) ByUserId(userId types.UserId, page int) ([]Bookmar
 	return bookmarks, morePages, nil
 }
 
-func (service *BookmarkModel) ByLink(userId types.UserId, link string) (*Bookmark, error) {
+func (service *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	rows, err := service.Pool.Query(context.Background(),
 		`SELECT *
 		FROM users_bookmarks

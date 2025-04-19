@@ -133,7 +133,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
-	bookmarks, morePages, err := b.BookmarkModel.ByUserId(user.ID, page)
+	bookmarks, morePages, err := b.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
 		log.Printf("bookmark by user id: %v", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -228,7 +228,7 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
 	id := chi.URLParam(r, "id")
-	bookmark, err := b.BookmarkModel.ById(types.BookmarkId(id))
+	bookmark, err := b.BookmarkModel.GetById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
 			http.Error(w, "Bookmark not found", http.StatusNotFound)
