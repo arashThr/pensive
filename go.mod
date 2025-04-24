@@ -16,6 +16,7 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/stripe/stripe-go/v81 v81.3.1
+	gopkg.in/telebot.v4 v4.0.0-beta.4
 )
 
 require (
@@ -25,6 +26,7 @@ require (
 	github.com/go-shiori/dom v0.0.0-20230515143342-73569d674e1c // indirect
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f // indirect
 	github.com/gorilla/css v1.0.1 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	golang.org/x/net v0.36.0 // indirect
 )
 
