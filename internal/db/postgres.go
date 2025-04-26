@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/arashthr/go-course/internal/db/migrations"
+	"github.com/arashthr/go-course/internal/validations"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -47,21 +47,13 @@ type PostgresConfig struct {
 	DbName   string
 }
 
-// TODO: Move it to configs or utils
-func getEnvWithDefault(envName, defaultValue string) string {
-	if value := os.Getenv(envName); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
 func DefaultPostgresConfig() PostgresConfig {
 	return PostgresConfig{
-		Host:     getEnvWithDefault("POSTGRES_HOST", "localhost"),
-		Port:     getEnvWithDefault("POSTGRES_PORT", "5432"),
-		User:     getEnvWithDefault("POSTGRES_USER", "postgres"),
-		Password: getEnvWithDefault("POSTGRES_PASS", "postgres"),
-		DbName:   getEnvWithDefault("DB_NAME", "postgres"),
+		Host:     validations.GetEnvWithDefault("POSTGRES_HOST", "localhost"),
+		Port:     validations.GetEnvWithDefault("POSTGRES_PORT", "5432"),
+		User:     validations.GetEnvWithDefault("POSTGRES_USER", "postgres"),
+		Password: validations.GetEnvWithDefault("POSTGRES_PASS", "postgres"),
+		DbName:   validations.GetEnvWithDefault("DB_NAME", "postgres"),
 	}
 }
 
