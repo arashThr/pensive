@@ -620,6 +620,9 @@
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
+  .h-10 {
+    height: calc(var(--spacing) * 10);
+  }
   .h-16 {
     height: calc(var(--spacing) * 16);
   }
@@ -634,6 +637,9 @@
   }
   .w-6 {
     width: calc(var(--spacing) * 6);
+  }
+  .w-10 {
+    width: calc(var(--spacing) * 10);
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
@@ -717,6 +723,13 @@
       margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
+  .space-y-8 {
+    :where(& > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 8) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 8) * calc(1 - var(--tw-space-y-reverse)));
+    }
+  }
   .space-x-6 {
     :where(& > :not(:last-child)) {
       --tw-space-x-reverse: 0;
@@ -726,6 +739,9 @@
   }
   .rounded {
     border-radius: 0.25rem;
+  }
+  .rounded-full {
+    border-radius: calc(infinity * 1px);
   }
   .rounded-lg {
     border-radius: var(--radius-lg);
@@ -745,6 +761,9 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
   }
+  .border-\[\#838d90\]\/20 {
+    border-color: color-mix(in oklab, #838d90 20%, transparent);
+  }
   .border-\[\#838d90\]\/50 {
     border-color: color-mix(in oklab, #838d90 50%, transparent);
   }
@@ -763,8 +782,14 @@
   .border-red-500 {
     border-color: var(--color-red-500);
   }
+  .bg-\[\#0088cc\] {
+    background-color: #0088cc;
+  }
   .bg-\[\#b73628\] {
     background-color: #b73628;
+  }
+  .bg-\[\#b73628\]\/10 {
+    background-color: color-mix(in oklab, #b73628 10%, transparent);
   }
   .bg-gray-50 {
     background-color: var(--color-gray-50);
@@ -932,6 +957,9 @@
   .text-\[\#838d90\] {
     color: #838d90;
   }
+  .text-\[\#b73628\] {
+    color: #b73628;
+  }
   .text-amber-700 {
     color: var(--color-amber-700);
   }
@@ -1017,6 +1045,13 @@
   .placeholder\:text-gray-500 {
     &::placeholder {
       color: var(--color-gray-500);
+    }
+  }
+  .hover\:bg-\[\#0088cc\]\/90 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in oklab, #0088cc 90%, transparent);
+      }
     }
   }
   .hover\:bg-\[\#b73628\]\/90 {

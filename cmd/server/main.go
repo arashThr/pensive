@@ -244,6 +244,9 @@ func run(cfg *config) error {
 		r.Get("/faq", web.FAQ(
 			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 		))
+		r.Get("/integrations", web.StaticHandler(
+			views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml")),
+		))
 		r.Get("/signup", usersController.New)
 		r.Get("/signin", usersController.SignIn)
 		r.Post("/signin", usersController.ProcessSignIn)
