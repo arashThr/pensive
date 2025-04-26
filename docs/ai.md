@@ -95,7 +95,7 @@ w-full px-4 py-2 border border-gray-300 focus:border-red-600 focus:ring-1 focus:
 Full width, subtle border, red focus with faint ring, smooth transitions.
 
 Buttons: 
-w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200.
+w-full py-3 bg-red-700 hover:bg-red-600 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200.
 
 Full-width, red accent, hover shift, subtle shadow.
 
@@ -140,7 +140,7 @@ Wrap main content in <div class="py-16 flex justify-center"> with an inner <div 
 Apply Colors:
 Replace all text colors with gray-900 (primary) or gray-500 (secondary).
 
-Buttons: bg-red-600 hover:bg-red-700 text-white.
+Buttons: bg-red-700 hover:bg-red-600 text-white.
 
 Links: text-gray-500 hover:text-red-600.
 
@@ -179,7 +179,7 @@ New: <input class="w-full px-4 py-2 border border-gray-300 focus:border-red-600 
 
 Button:
 Old: <button class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded text-base font-semibold">
-New: <button class="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200">
+New: <button class="w-full py-3 bg-red-700 hover:bg-red-600 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200">
 
 Final Notes
 Stick to this exact palette and styling unless they request changes (e.g., “use blue instead”).

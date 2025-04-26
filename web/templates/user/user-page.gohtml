@@ -17,7 +17,7 @@
         <form action="/users/generate-token" method="post" id="token-generate-container">
           {{csrfField}}
           <button
-            class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200"
+            class="py-2 px-4 bg-red-700 hover:bg-red-600 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200"
             hx-post="/users/generate-token"
             hx-target="#token-container"
             hx-swap="innerHTML"
@@ -84,7 +84,7 @@
       <form action="/payments/create-checkout-session" method="post">
         {{csrfField}}
         <button
-          class="mt-2 w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200"
+          class="mt-2 w-full py-3 bg-red-700 hover:bg-red-600 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200"
           type="submit"
         >
           Subscribe - $1.00
