@@ -18,15 +18,13 @@
     - [x] Remove the bookmark
     - [x] Pretty config
 - [x] Telegram bot: Add, delete
-- [ ] Save the token for chat
-- [ ] Respond with duplicate with link exists
+- [x] Save the token for chat
+- [x] Multi-page for bookmarks index page
+- [x] Deep link auth for telegram (check Proposals)
 - [ ] Multiple sessions for the user
 - [ ] Get token for extension without copy paste by redirect from website
-- [ ] Twitter posts
-- [ ] Look for changes in bookmarks parent folder
-- [ ] Multi-page for bookmarks index page
-- [ ] Deep link auth for telegram (check Proposals)
 - [ ] Ping server from Telegram bot to check the validity of the token
+- [ ] Slash command for bookmarks in Telegram
 
 ## Changes
 - [x] Ids from uint to string
@@ -38,14 +36,17 @@
 - [x] Trim excerpt for bookmark page
 - [x] Support multiple API tokens: Show them once and keep the hashed version
 - [x] Limit the number of tokens
+- [x] Replace multi-empty lines and spaces with one
+- [ ] Keep the token, and not the token hash
 - [ ] Remove password and just use email
 - [ ] Clear the search results when text box is cleared
 - [ ] Keep the token name
-- [ ] API token page instead of fetching it
-- [ ] Keep the token, and not the token hash
 - [ ] Email only users - No password
-- [ ] Replace multi-empty lines and spaces with one
 - [ ] "Failed to parse image URL"
+
+### Future
+- [ ] Twitter posts
+- [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser
 
 ### Stripe

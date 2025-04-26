@@ -84,7 +84,8 @@ func (as *ApiService) Get(userId types.UserId) ([]ApiToken, error) {
 	rows, err := as.Pool.Query(context.Background(), `
 		SELECT *
 		FROM api_tokens
-		WHERE user_id = $1`, userId)
+		WHERE user_id = $1
+		ORDER BY created_at`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("api token rows get: %w", err)
 	}
