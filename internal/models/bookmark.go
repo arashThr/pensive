@@ -21,7 +21,7 @@ import (
 
 type BookmarkSource = int
 
-const PageSize = 2
+const PageSize = 5
 
 const (
 	WebSource BookmarkSource = iota
