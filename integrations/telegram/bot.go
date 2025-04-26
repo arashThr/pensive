@@ -2,292 +2,277 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"log/slog"
 	"net/http"
-	"net/url"
+	"os"
 	"strings"
 	"time"
 
-	telebot "gopkg.in/telebot.v4"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
-type Bot struct {
-	bot       *telebot.Bot
-	apiClient *APIClient
-}
-
-type APIClient struct {
-	endpoint string
-	token    string
-	client   *http.Client
-}
+var (
+	apiToken     string
+	apiEndpoint  string
+	httpClient   = &http.Client{Timeout: 10 * time.Second}
+	userAPIToken = "" // In-memory for demo purposes
+)
 
 type BookmarkResponse struct {
-	BookmarkId    string
-	Title         string
-	Link          string
-	Excerpt       string
-	CreatedAt     time.Time
-	PublishedTime *time.Time
+	Id            string     `json:"id"`
+	Title         string     `json:"title"`
+	Link          string     `json:"link"`
+	Excerpt       string     `json:"excerpt"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	PublishedTime *time.Time `json:"publishedTime,omitempty"`
 }
 
 type SearchResult struct {
-	Headline   string
-	BookmarkId string
-	Title      string
-	Link       string
-	Excerpt    string
-	Rank       float32
+	Headline   string  `json:"headline"`
+	BookmarkId string  `json:"bookmarkId"`
+	Title      string  `json:"title"`
+	Link       string  `json:"link"`
+	Excerpt    string  `json:"excerpt"`
+	Rank       float32 `json:"rank"`
 }
 
 type SearchResponse struct {
-	Bookmarks []SearchResult
-}
-
-func NewBot(token, apiEndpoint string) (*Bot, error) {
-	bot, err := telebot.NewBot(telebot.Settings{
-		Token:  token,
-		Poller: &telebot.LongPoller{Timeout: 10},
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &Bot{
-		bot: bot,
-		apiClient: &APIClient{
-			endpoint: apiEndpoint,
-			client:   &http.Client{},
-		},
-	}, nil
-}
-
-func (b *Bot) Start() {
-	b.bot.Handle("/start", b.handleStart)
-	b.bot.Handle(telebot.OnText, b.handleText)
-	b.bot.Handle(telebot.OnCallback, b.handleCallback)
-
-	b.bot.Start()
-}
-
-func (b *Bot) handleStart(c telebot.Context) error {
-	return c.Send("Please provide your API token from https://yourwebsite.com/account")
-}
-
-func (b *Bot) handleText(c telebot.Context) error {
-	text := c.Text()
-
-	// Check if the user has set their token
-	if b.apiClient.token == "" {
-		b.apiClient.token = strings.TrimSpace(text)
-		c.Delete()
-		return c.Edit("Token set! You can now send links to bookmark or text to search.")
-	}
-
-	// Check if the text is a URL
-	if isURL(text) {
-		return b.handleBookmark(c, text)
-	}
-
-	// Otherwise, treat as search query
-	return b.handleSearch(c, text)
-}
-
-func (b *Bot) handleBookmark(c telebot.Context, link string) error {
-	bookmark, err := b.apiClient.CreateBookmark(link)
-	if err != nil {
-		return c.Send("Failed to save bookmark: " + err.Error())
-	}
-	fmt.Printf("%+v\n", bookmark)
-
-	// Create inline keyboard with Delete and Summary buttons
-	selector := &telebot.ReplyMarkup{}
-	deleteBtn := selector.Data("Delete", "delete|"+bookmark.BookmarkId)
-	summaryBtn := selector.Data("Summary", "summary|"+bookmark.BookmarkId)
-	selector.Inline(selector.Row(deleteBtn, summaryBtn))
-
-	return c.Send(
-		fmt.Sprintf("Bookmark saved: %s", bookmark.Title),
-		selector,
-	)
-}
-
-func (b *Bot) handleSearch(c telebot.Context, query string) error {
-	results, err := b.apiClient.SearchBookmarks(query)
-	if err != nil {
-		return c.Send("Search failed: " + err.Error())
-	}
-
-	if len(results) == 0 {
-		return c.Send("No results found.")
-	}
-
-	var response strings.Builder
-	for i, bookmark := range results {
-		response.WriteString(fmt.Sprintf("%d. %s\n%s\n%s\n\n", i+1, bookmark.Title, bookmark.Link, bookmark.Headline))
-	}
-
-	return c.Send(response.String())
-}
-
-func (b *Bot) handleCallback(c telebot.Context) error {
-	data := strings.TrimSpace(c.Callback().Data)
-	parts := strings.SplitN(data, "|", 2)
-	if len(parts) != 2 {
-		return c.Respond(&telebot.CallbackResponse{Text: "Invalid callback"})
-	}
-
-	fmt.Println("parts: ", parts)
-	action, id := parts[0], parts[1]
-
-	switch action {
-	case "delete":
-		err := b.apiClient.DeleteBookmark(id)
-		if err != nil {
-			return c.Respond(&telebot.CallbackResponse{Text: "Failed to delete bookmark"})
-		}
-		err = c.Edit("Bookmark deleted")
-		if err != nil {
-			return c.Respond(&telebot.CallbackResponse{Text: "Failed to update message"})
-		}
-		return c.Respond(&telebot.CallbackResponse{})
-
-	case "summary":
-		bookmark, err := b.apiClient.GetBookmark(id)
-		fmt.Println("Summary", bookmark, id)
-		if err != nil {
-			slog.Error("getting bookmark", "error", err)
-			return c.Respond(&telebot.CallbackResponse{Text: "Failed to get summary"})
-		}
-		return c.Respond(&telebot.CallbackResponse{Text: bookmark.Excerpt})
-	}
-
-	return c.Respond(&telebot.CallbackResponse{Text: "Unknown action"})
-}
-
-func (ac *APIClient) CreateBookmark(link string) (*BookmarkResponse, error) {
-	body, _ := json.Marshal(map[string]string{"link": link})
-	req, err := http.NewRequest("POST", ac.endpoint+"/api/v1/bookmarks", bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+ac.token)
-
-	resp, err := ac.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("API error: %s", string(body))
-	}
-
-	var bookmark BookmarkResponse
-	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
-		return nil, err
-	}
-	return &bookmark, nil
-}
-
-func (ac *APIClient) DeleteBookmark(id string) error {
-	req, err := http.NewRequest("DELETE", ac.endpoint+"/api/v1/bookmarks/"+id, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Authorization", "Bearer "+ac.token)
-
-	resp, err := ac.client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("API error: %s", string(body))
-	}
-	return nil
-}
-
-func (ac *APIClient) GetBookmark(id string) (*BookmarkResponse, error) {
-	req, err := http.NewRequest("GET", ac.endpoint+"/api/v1/bookmarks/"+id, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+ac.token)
-
-	resp, err := ac.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("API error: %s", string(body))
-	}
-
-	var bookmark BookmarkResponse
-	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
-		return nil, err
-	}
-	return &bookmark, nil
-}
-
-func (ac *APIClient) SearchBookmarks(query string) ([]SearchResult, error) {
-	req, err := http.NewRequest("GET", ac.endpoint+"/api/v1/bookmarks/search?query="+url.QueryEscape(query), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+ac.token)
-
-	resp, err := ac.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("API error: %s", string(body))
-	}
-
-	var searchResp SearchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&searchResp); err != nil {
-		return nil, err
-	}
-	return searchResp.Bookmarks, nil
-}
-
-func isURL(str string) bool {
-	return strings.HasPrefix(str, "http://") || strings.HasPrefix(str, "https://")
+	Bookmarks []SearchResult `json:"bookmarks"`
 }
 
 func main() {
-	// telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	telegramToken := "365677088:AAHfGI47u4v5PcQK-yDzxUV_htFOvQzEM58"
+	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
+	apiEndpoint = os.Getenv("API_ENDPOINT")
+
 	if telegramToken == "" {
 		log.Fatal("TELEGRAM_BOT_TOKEN is not set")
 	}
-
-	// apiEndpoint := os.Getenv("API_ENDPOINT")
-	apiEndpoint := "http://localhost:8000"
 	if apiEndpoint == "" {
 		log.Fatal("API_ENDPOINT is not set")
 	}
 
-	bot, err := NewBot(telegramToken, apiEndpoint)
+	slog.Info("Starting Telegram bot")
+
+	b, err := bot.New(telegramToken)
 	if err != nil {
-		log.Fatal("Failed to create bot: ", err)
+		log.Fatalf("failed to create bot: %v", err)
 	}
 
-	log.Println("Starting Telegram bot...")
-	bot.Start()
+	// TODO: Don't process messages until a ping to server is successful
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Please provide your API token from " + apiEndpoint + "/users/me",
+		})
+	})
+
+	b.RegisterHandler(bot.HandlerTypeMessageText, "", bot.MatchTypePrefix, handleMessage)
+	b.RegisterHandler(bot.HandlerTypeCallbackQueryData, "", bot.MatchTypePrefix, handleCallbackQuery)
+
+	b.Start(context.Background())
+}
+
+func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
+	msg := update.Message.Text
+
+	if userAPIToken == "" {
+		userAPIToken = msg
+		b.DeleteMessage(ctx, &bot.DeleteMessageParams{
+			ChatID:    update.Message.Chat.ID,
+			MessageID: update.Message.ID,
+		})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Token set! You can now send links to bookmark or text to search.",
+		})
+		return
+	}
+
+	if strings.HasPrefix(msg, "http://") || strings.HasPrefix(msg, "https://") {
+		saveBookmark(ctx, b, update.Message.Chat.ID, msg)
+	} else {
+		searchBookmarks(ctx, b, update.Message.Chat.ID, msg)
+	}
+}
+
+func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
+	reqBody, _ := json.Marshal(map[string]string{"link": link})
+	req, err := http.NewRequest("POST", apiEndpoint+"/api/v1/bookmarks", bytes.NewBuffer(reqBody))
+	if err != nil {
+		slog.Error("failed to create request", "error", err, "link", link, "chatID", chatID)
+		return
+	}
+	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		slog.Error("failed to send request", "error", err, "link", link, "chatID", chatID)
+		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Failed to save bookmark: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
+		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Failed to save bookmark: " + resp.Status})
+		return
+	}
+
+	var bookmark BookmarkResponse
+	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
+		slog.Error("failed to decode response", "error", err, "link", link, "chatID", chatID)
+		return
+	}
+	slog.Info("Saved bookmark", "id", bookmark.Id, "title", bookmark.Title)
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatID,
+		Text:   "Bookmark saved: " + bookmark.Title,
+		ReplyMarkup: &models.InlineKeyboardMarkup{
+			InlineKeyboard: [][]models.InlineKeyboardButton{
+				{
+					{Text: "Delete", CallbackData: "delete|" + bookmark.Id},
+					{Text: "Summary", CallbackData: "summary|" + bookmark.Id},
+				},
+			},
+		},
+	})
+}
+
+func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string) {
+	req, err := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/search?query="+urlQueryEscape(query), nil)
+	if err != nil {
+		slog.Error("failed to create request", "error", err, "query", query, "chatID", chatID)
+		return
+	}
+	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		slog.Error("failed to send request", "error", err, "query", query, "chatID", chatID)
+		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Search failed: " + err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("failed to search bookmarks", "status", resp.Status, "query", query, "chatID", chatID)
+		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Search failed: " + resp.Status})
+		return
+	}
+
+	var result SearchResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		slog.Error("failed to decode response", "error", err, "query", query, "chatID", chatID)
+		return
+	}
+
+	if len(result.Bookmarks) == 0 {
+		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "No results found."})
+		return
+	}
+
+	var sb strings.Builder
+	for i, r := range result.Bookmarks {
+		sb.WriteString(fmt.Sprintf("%d. <a href=\"%s\">%s</a>\n%s\n\n", i+1, r.Link, r.Title, r.Headline))
+	}
+
+	b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: sb.String(), ParseMode: models.ParseModeHTML, LinkPreviewOptions: &models.LinkPreviewOptions{
+		IsDisabled: bot.True(),
+	}})
+}
+
+func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update) {
+	data := update.CallbackQuery.Data
+	parts := strings.Split(data, "|")
+	if len(parts) != 2 {
+		slog.Error("invalid callback data", "data", data)
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Invalid callback",
+			ShowAlert:       true,
+		})
+		return
+	}
+	action, bookmarkID := parts[0], parts[1]
+
+	switch action {
+	case "delete":
+		deleteBookmark(ctx, b, update, bookmarkID)
+	case "summary":
+		getSummary(ctx, b, update, bookmarkID)
+	}
+}
+
+func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
+	slog.Info("Deleting bookmark", "id", bookmarkID)
+	req, _ := http.NewRequest("DELETE", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
+	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+
+	resp, err := httpClient.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		slog.Error("failed to delete bookmark", "error", err, "status", resp.StatusCode)
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Failed to delete bookmark",
+			ShowAlert:       true,
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	b.EditMessageText(ctx, &bot.EditMessageTextParams{
+		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
+		MessageID: update.CallbackQuery.Message.Message.ID,
+		Text:      "Bookmark deleted",
+	})
+	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: update.CallbackQuery.ID,
+		Text:            "Bookmark deleted",
+		ShowAlert:       true,
+	})
+}
+
+func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
+	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
+	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+
+	resp, err := httpClient.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "bookmarkID", bookmarkID)
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Failed to get summary",
+			ShowAlert:       true,
+		})
+		return
+	}
+	defer resp.Body.Close()
+
+	var bookmark BookmarkResponse
+	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil || true {
+		slog.Error("failed to decode bookmark", "error", err, "bookmarkID", bookmarkID)
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Failed to get summary",
+			ShowAlert:       true,
+		})
+		return
+	}
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
+		Text:      fmt.Sprintf("<b>Title</b>: %s\n<em>Link<em>: %s\n\n%s", bookmark.Title, bookmark.Link, bookmark.Excerpt),
+		ParseMode: models.ParseModeHTML,
+	})
+}
+
+func urlQueryEscape(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, " ", "%20"), "+", "%2B")
 }

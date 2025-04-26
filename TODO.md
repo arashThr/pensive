@@ -14,15 +14,19 @@
         - [x] API
         - [x] Site
 - [x] Delete bookmark with extension
+- [x] Bookmarks
+    - [x] Remove the bookmark
+    - [x] Pretty config
+- [x] Telegram bot: Add, delete
+- [ ] Save the token for chat
+- [ ] Respond with duplicate with link exists
 - [ ] Multiple sessions for the user
-- [ ] Telegram bot: Using API
 - [ ] Get token for extension without copy paste by redirect from website
-- [ ] Bookmarks
-    - [ ] Look for changes in bookmarks parent folder
-    - [ ] Remove the bookmark
-    - [ ] Pretty config
 - [ ] Twitter posts
+- [ ] Look for changes in bookmarks parent folder
 - [ ] Multi-page for bookmarks index page
+- [ ] Deep link auth for telegram (check Proposals)
+- [ ] Ping server from Telegram bot to check the validity of the token
 
 ## Changes
 - [x] Ids from uint to string
@@ -60,3 +64,18 @@
 - [x] Don't fetch duplicates
 - [x] Fix the HTTP issue on production 
     - tls: failed to verify certificate: x509: certificate signed by unknown authority: Scratch did not have ce-certificates
+- [ ] Remove telebot: Thousands of dependecies
+
+# Proposals
+
+## Telegram Auth
+
+Deep Link from Website to Telegram with Token Exchange
+
+#### Flow Overview
+- User Action on Website: The user, already logged into the website, clicks a "Connect Telegram" button or link.
+- Deep Link to Telegram: The website generates a unique deep link (e.g., https://t.me/YourBot?start=unique_state) and redirects the user to Telegram.
+- Bot Receives State: The user opens the link in Telegram, which sends a /start unique_state command to the bot.
+- Token Exchange: The bot sends the unique_state to the API, which verifies it, associates the Telegram user ID with the authenticated website user, and issues a Bearer token.
+- Bot Stores Token: The bot stores the token and uses it for future API requests on behalf of the user.
+- User Confirmation: The bot confirms successful integration to the user in Telegram.

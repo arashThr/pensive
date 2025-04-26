@@ -26,9 +26,10 @@ type ErrorResponse struct {
 }
 
 type Bookmark struct {
-	Id    types.BookmarkId
-	Title string
-	Link  string
+	Id      types.BookmarkId
+	Title   string
+	Link    string
+	Excerpt string
 }
 
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
@@ -307,8 +308,9 @@ func writeErrorResponse(w http.ResponseWriter, statusCode int, errResp ErrorResp
 
 func mapModelToBookmark(b *models.Bookmark) Bookmark {
 	return Bookmark{
-		Id:    b.BookmarkId,
-		Title: b.Title,
-		Link:  b.Link,
+		Id:      b.BookmarkId,
+		Title:   b.Title,
+		Link:    b.Link,
+		Excerpt: b.Excerpt,
 	}
 }
