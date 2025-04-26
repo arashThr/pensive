@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth"
 	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
@@ -20,73 +19,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
-	"github.com/stripe/stripe-go/v81"
 )
-
-type StripeConfig struct {
-	Key                 string
-	PriceId             string
-	StripeWebhookSecret string
-}
-
-type config struct {
-	Environment string
-	Domain      string
-	PSQL        db.PostgresConfig
-	SMTP        service.SMTPConfig
-	CSRF        struct {
-		Key    string
-		Secure bool
-	}
-	Server struct {
-		Address string
-	}
-	Stripe StripeConfig
-}
-
-func loadEnvConfig() (*config, error) {
-	var cfg config
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("loading .env file: %w", err)
-	}
-
-	cfg.Domain = os.Getenv("DOMAIN")
-
-	// DB
-	cfg.PSQL = db.DefaultPostgresConfig()
-
-	// SMTP
-	port, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
-	if err != nil {
-		return nil, err
-	}
-	cfg.SMTP = service.SMTPConfig{
-		Host:     os.Getenv("SMTP_HOST"),
-		Port:     port,
-		Username: os.Getenv("SMTP_USER"),
-		Password: os.Getenv("SMTP_PASS"),
-	}
-
-	// CSRF
-	cfg.CSRF.Key = os.Getenv("CSRF_TOKEN")
-	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
-
-	// Server
-	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
-
-	// Stripe
-	cfg.Stripe = StripeConfig{
-		Key:                 os.Getenv("STRIPE_KEY"),
-		PriceId:             os.Getenv("STRIPE_PRICE_ID"),
-		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
-	}
-	// Or set stripe.Key
-	stripe.Key = os.Getenv("STRIPE_KEY")
-
-	return &cfg, nil
-}
 
 func setupDb(cfg db.PostgresConfig) (*pgxpool.Pool, error) {
 	err := db.Migrate(cfg.PgConnectionString())
@@ -102,7 +35,7 @@ func setupDb(cfg db.PostgresConfig) (*pgxpool.Pool, error) {
 }
 
 func main() {
-	cfg, err := loadEnvConfig()
+	cfg, err := config.LoadEnvConfig()
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +47,7 @@ func main() {
 	}
 }
 
-func run(cfg *config) error {
+func run(cfg *config.AppConfig) error {
 	// Database
 	pool, err := setupDb(cfg.PSQL)
 	if err != nil {
