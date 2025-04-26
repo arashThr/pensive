@@ -21,6 +21,9 @@ func CleanUpText(text string) string {
 }
 
 func GetPageOffset(pageStr string) int {
+	if pageStr == "" {
+		return 1
+	}
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		slog.Error("converting page to int", "page", pageStr, "error", err)
