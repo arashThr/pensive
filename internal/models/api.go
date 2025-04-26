@@ -19,6 +19,7 @@ type ApiService struct {
 }
 
 const ApiTokenBytes = 32
+const MaxTokens = 10
 
 type ApiToken struct {
 	ID         int
@@ -47,7 +48,7 @@ func (as *ApiService) Create(userId types.UserId) (*GeneratedApiToken, error) {
 	if err != nil {
 		return nil, fmt.Errorf("api token count: %w", err)
 	}
-	if count >= 3 {
+	if count >= MaxTokens {
 		return nil, fmt.Errorf("api token limit: %w", errors.ErrTooManyTokens)
 	}
 

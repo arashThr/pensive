@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"time"
@@ -42,9 +43,10 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	data.UserId = context.User(r.Context()).ID
 	data.Link = r.FormValue("link")
+	slog.Debug("creating bookmark", "link", data.Link, "userId", data.UserId)
 
 	if !validations.IsURLValid(data.Link) {
-		log.Printf("Invalid URL: %v", data.Link)
+		slog.Error("Invalid URL", "url", data.Link)
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}

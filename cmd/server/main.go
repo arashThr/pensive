@@ -76,6 +76,9 @@ func run(cfg *config.AppConfig) error {
 	bookmarksService := &models.BookmarkModel{
 		Pool: pool,
 	}
+	telegramService := &models.TelegramService{
+		Pool: pool,
+	}
 
 	// Middlewares
 	umw := auth.UserMiddleware{
@@ -126,6 +129,11 @@ func run(cfg *config.AppConfig) error {
 	}
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
+
+	telegramController := auth.Telegram{
+		TelegramModel: telegramService,
+		BotName:       cfg.Telegram.BotName,
+	}
 
 	// Middlewares
 	r := chi.NewRouter()
@@ -207,6 +215,11 @@ func run(cfg *config.AppConfig) error {
 			r.Get("/portal-session", stripController.GoToBillingPortal)
 			r.Get("/success", stripController.Success)
 			r.Get("/cancel", stripController.Cancel)
+		})
+
+		r.Route("/telegram", func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/auth", telegramController.RedirectWithAuthToken)
 		})
 
 		assetHandler := http.FileServer(http.Dir("./web/assets"))

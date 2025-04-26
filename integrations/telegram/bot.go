@@ -8,19 +8,25 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-	"os"
+	"net/url"
 	"strings"
 	"time"
 
+	"github.com/arashthr/go-course/internal/config"
+	"github.com/arashthr/go-course/internal/db"
+	"github.com/arashthr/go-course/internal/errors"
+	internalModels "github.com/arashthr/go-course/internal/models"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
 var (
-	apiToken     string
-	apiEndpoint  string
-	httpClient   = &http.Client{Timeout: 10 * time.Second}
-	userAPIToken = "" // In-memory for demo purposes
+	apiEndpoint     string
+	httpClient      = &http.Client{Timeout: 10 * time.Second}
+	userAPIToken    = ""
+	telegramService *internalModels.TelegramService
+	ApiService      *internalModels.ApiService
+	configs         *config.AppConfig
 )
 
 type BookmarkResponse struct {
@@ -46,30 +52,35 @@ type SearchResponse struct {
 }
 
 func main() {
-	telegramToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-	apiEndpoint = os.Getenv("API_ENDPOINT")
-
-	if telegramToken == "" {
-		log.Fatal("TELEGRAM_BOT_TOKEN is not set")
-	}
-	if apiEndpoint == "" {
-		log.Fatal("API_ENDPOINT is not set")
-	}
-
 	slog.Info("Starting Telegram bot")
+
+	var err error
+	configs, err = config.LoadEnvConfig()
+
+	if err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+
+	telegramToken := configs.Telegram.Token
+	apiEndpoint = configs.Domain
 
 	b, err := bot.New(telegramToken)
 	if err != nil {
 		log.Fatalf("failed to create bot: %v", err)
 	}
 
-	// TODO: Don't process messages until a ping to server is successful
-	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, func(ctx context.Context, b *bot.Bot, update *models.Update) {
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Please provide your API token from " + apiEndpoint + "/users/me",
-		})
-	})
+	pool, err := db.Open(configs.PSQL)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	telegramService = &internalModels.TelegramService{
+		Pool: pool,
+	}
+	ApiService = &internalModels.ApiService{
+		Pool: pool,
+	}
+
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypePrefix, startHandler)
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "", bot.MatchTypePrefix, handleMessage)
 	b.RegisterHandler(bot.HandlerTypeCallbackQueryData, "", bot.MatchTypePrefix, handleCallbackQuery)
@@ -77,22 +88,89 @@ func main() {
 	b.Start(context.Background())
 }
 
-func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
-	msg := update.Message.Text
+func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	fmt.Printf("Received message: %s\n", update.Message.Text)
 
-	if userAPIToken == "" {
-		userAPIToken = msg
-		b.DeleteMessage(ctx, &bot.DeleteMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			MessageID: update.Message.ID,
-		})
+	if userAPIToken != "" {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Token set! You can now send links to bookmark or text to search.",
+			Text:   "Your account is already connected. You can send links to save them to Pensieve.",
 		})
 		return
 	}
 
+	parts := strings.Split(update.Message.Text, " ")
+	if len(parts) != 2 {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Please use the link from the Pensieve website to connect your account.",
+		})
+		return
+	}
+	authToken := parts[1]
+
+	userId, err := telegramService.GetUserFromAuthToken(authToken)
+	if err != nil {
+		slog.Error("failed to find auth token", "error", err)
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Invalid or expired authentication link. Please try again from the Pensieve website.",
+		})
+		return
+	}
+
+	token, err := ApiService.Create(userId)
+	if err != nil {
+		if errors.Is(err, errors.ErrTooManyTokens) {
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID: update.Message.Chat.ID,
+				Text:   "You have reached the maximum number of tokens. Please delete an existing token before creating a new one.",
+			})
+			return
+		}
+		slog.Error("failed to create API token", "error", err)
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Failed to create API token. Please try again.",
+		})
+		return
+	}
+
+	err = telegramService.SetTokenForChatId(userId, update.Message.Chat.ID, token)
+	if err != nil {
+		slog.Error("failed to store chat ID", "error", err)
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Failed to connect your account. Please try again.",
+		})
+		return
+	}
+
+	userAPIToken = token.Token
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: update.Message.Chat.ID,
+		Text:   "Your Telegram account has been connected! You can now send links to save them to Pensieve.",
+	})
+}
+
+func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if !isUserAuthenticated(update.Message.Chat.ID) {
+		integrationsPath, err := url.JoinPath(configs.Domain, "integrations")
+		if err != nil {
+			slog.Error("failed to create integrations path", "error", err)
+			return
+		}
+		fmt.Println(integrationsPath)
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    update.Message.Chat.ID,
+			Text:      fmt.Sprintf(`Please visit Telegram authentication page for authentication: %s`, integrationsPath),
+			ParseMode: models.ParseModeMarkdown,
+		})
+		return
+	}
+
+	msg := update.Message.Text
 	if strings.HasPrefix(msg, "http://") || strings.HasPrefix(msg, "https://") {
 		saveBookmark(ctx, b, update.Message.Chat.ID, msg)
 	} else {
@@ -189,6 +267,24 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 }
 
 func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update) {
+	if update.Message == nil {
+		slog.Error("callback query without message", "data", update.CallbackQuery.Data)
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Invalid callback",
+			ShowAlert:       true,
+		})
+		return
+	}
+	if !isUserAuthenticated(update.Message.Chat.ID) {
+		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			Text:            "Please send your API token to connect your account.",
+			ShowAlert:       true,
+		})
+		return
+	}
+
 	data := update.CallbackQuery.Data
 	parts := strings.Split(data, "|")
 	if len(parts) != 2 {
@@ -243,6 +339,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPIToken)
 
+	slog.Info("Getting bookmark summary", "id", bookmarkID)
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "bookmarkID", bookmarkID)
@@ -256,7 +353,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 	defer resp.Body.Close()
 
 	var bookmark BookmarkResponse
-	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil || true {
+	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
 		slog.Error("failed to decode bookmark", "error", err, "bookmarkID", bookmarkID)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
@@ -266,6 +363,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 		return
 	}
 
+	slog.Info("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
 		Text:      fmt.Sprintf("<b>Title</b>: %s\n<em>Link<em>: %s\n\n%s", bookmark.Title, bookmark.Link, bookmark.Excerpt),
@@ -275,4 +373,12 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 
 func urlQueryEscape(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, " ", "%20"), "+", "%2B")
+}
+
+func isUserAuthenticated(chatId int64) bool {
+	if userAPIToken != "" {
+		return true
+	}
+	userAPIToken = telegramService.GetToken(chatId)
+	return userAPIToken != ""
 }

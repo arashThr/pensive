@@ -33,6 +33,7 @@ type AppConfig struct {
 	Stripe   StripeConfig
 	Telegram struct {
 		BotName string
+		Token   string
 	}
 }
 
@@ -77,6 +78,7 @@ func LoadEnvConfig() (*AppConfig, error) {
 	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	cfg.Telegram.BotName = validations.GetEnvOrDie("TELEGRAM_BOT_NAME")
+	cfg.Telegram.Token = validations.GetEnvOrDie("TELEGRAM_BOT_TOKEN")
 
 	return &cfg, nil
 }

@@ -11,28 +11,32 @@
   </div>
 
   <div class="bg-white rounded-lg shadow-sm">
-    <div class="flex flex-col">
-      <div class="border-b border-gray-200 px-6 py-4 flex flex-wrap gap-4">
-        <div class="text-sm text-gray-500 font-medium flex-grow">Title</div>
-        <div class="text-sm text-gray-500 font-medium">Date Added</div>
-        <div class="text-sm text-gray-500 font-medium">Link</div>
-      </div>
-      {{range .Bookmarks}}
-      <div class="border-t border-gray-200 hover:bg-gray-50 transition-colors px-6 py-4 flex flex-wrap gap-4">
-        <div class="flex-grow">
-          <a href="/bookmarks/{{.Id}}/edit" class="text-red-600 hover:text-red-700 transition-colors">{{.Title}}</a>
-        </div>
-        <div class="text-sm text-gray-500">{{.CreatedAt}}</div>
-        <div class="text-sm text-gray-500">
-          <a href="{{.Link}}" target="_blank" class="text-red-600 hover:text-red-700 transition-colors">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </a>
-        </div>
-      </div>
-      {{end}}
-    </div>
+    <table class="w-full">
+      <thead>
+        <tr class="border-b border-gray-200">
+          <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Title</th>
+          <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Date Added</th>
+          <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Bookmarks}}
+        <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
+          <td class="py-4 px-6 flex items-center gap-2">
+              <a href="/bookmarks/{{.Id}}/edit" class="text-red-600 hover:text-red-700 transition-colors">{{.Title}}</a>
+          </td>
+          <td class="py-4 px-6 text-sm text-gray-500">{{.CreatedAt}}</td>
+          <td class="py-4 px-6 text-sm text-gray-500">
+              <a href="{{.Link}}" target="_blank" class="text-red-600 hover:text-red-700 transition-colors">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
     {{if eq (len .Bookmarks) 0}}
       <div class="py-6 px-6 text-center text-gray-500 text-sm">No bookmarks yet. Add one below!</div>
     {{end}}
