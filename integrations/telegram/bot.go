@@ -23,7 +23,7 @@ import (
 var (
 	apiEndpoint     string
 	httpClient      = &http.Client{Timeout: 10 * time.Second}
-	userAPIToken    = ""
+	userAPITokens   = map[int64]string{}
 	telegramService *internalModels.TelegramService
 	ApiService      *internalModels.ApiService
 	configs         *config.AppConfig
@@ -90,8 +90,9 @@ func main() {
 
 func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	fmt.Printf("Received message: %s\n", update.Message.Text)
+	chatId := update.Message.From.ID
 
-	if userAPIToken != "" {
+	if userAPITokens[chatId] != "" {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
 			Text:   "Your account is already connected. You can send links to save them to Pensieve.",
@@ -146,7 +147,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	userAPIToken = token.Token
+	userAPITokens[chatId] = token.Token
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: update.Message.Chat.ID,
@@ -155,7 +156,8 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if !isUserAuthenticated(update.Message.Chat.ID) {
+	userId := update.Message.From.ID
+	if !isUserAuthenticated(userId) {
 		integrationsPath, err := url.JoinPath(configs.Domain, "integrations")
 		if err != nil {
 			slog.Error("failed to create integrations path", "error", err)
@@ -185,7 +187,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 		slog.Error("failed to create request", "error", err, "link", link, "chatID", chatID)
 		return
 	}
-	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := httpClient.Do(req)
@@ -229,7 +231,7 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 		slog.Error("failed to create request", "error", err, "query", query, "chatID", chatID)
 		return
 	}
-	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -267,16 +269,8 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 }
 
 func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update) {
-	if update.Message == nil {
-		slog.Error("callback query without message", "data", update.CallbackQuery.Data)
-		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
-			CallbackQueryID: update.CallbackQuery.ID,
-			Text:            "Invalid callback",
-			ShowAlert:       true,
-		})
-		return
-	}
-	if !isUserAuthenticated(update.Message.Chat.ID) {
+	userId := update.CallbackQuery.From.ID
+	if !isUserAuthenticated(userId) {
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Please send your API token to connect your account.",
@@ -307,9 +301,10 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 }
 
 func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
-	slog.Info("Deleting bookmark", "id", bookmarkID)
+	userId := update.CallbackQuery.From.ID
+	slog.Debug("Deleting bookmark", "id", bookmarkID, "userId", userId)
 	req, _ := http.NewRequest("DELETE", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
-	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
@@ -336,10 +331,11 @@ func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, book
 }
 
 func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
+	userId := update.CallbackQuery.From.ID
+	slog.Debug("Getting bookmark summary", "id", bookmarkID, "userId", userId)
 	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
-	req.Header.Set("Authorization", "Bearer "+userAPIToken)
+	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
-	slog.Info("Getting bookmark summary", "id", bookmarkID)
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "bookmarkID", bookmarkID)
@@ -363,11 +359,10 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 		return
 	}
 
-	slog.Info("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
+	slog.Debug("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
-		Text:      fmt.Sprintf("<b>Title</b>: %s\n<em>Link<em>: %s\n\n%s", bookmark.Title, bookmark.Link, bookmark.Excerpt),
-		ParseMode: models.ParseModeHTML,
+		ChatID: update.CallbackQuery.Message.Message.Chat.ID,
+		Text:   fmt.Sprintf("%s\n%s\n\n%s", bookmark.Title, bookmark.Link, bookmark.Excerpt),
 	})
 }
 
@@ -375,10 +370,10 @@ func urlQueryEscape(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, " ", "%20"), "+", "%2B")
 }
 
-func isUserAuthenticated(chatId int64) bool {
-	if userAPIToken != "" {
+func isUserAuthenticated(userId int64) bool {
+	if userAPITokens[userId] != "" {
 		return true
 	}
-	userAPIToken = telegramService.GetToken(chatId)
-	return userAPIToken != ""
+	userAPITokens[userId] = telegramService.GetToken(userId)
+	return userAPITokens[userId] != ""
 }

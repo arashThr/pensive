@@ -19,7 +19,7 @@ func (t *TelegramService) CreateAuthToken(userId types.UserId) (string, error) {
 		INSERT INTO telegram_auth (user_id, auth_token, updated_at)
 		VALUES ($1, $2, NOW())
 		ON CONFLICT (user_id) DO UPDATE
-		SET auth_token = $2, chat_id = NULL, updated_at = NOW()`, userId, token)
+		SET auth_token = $2, telegram_user_id = NULL, updated_at = NOW()`, userId, token)
 	if err != nil {
 		return "", fmt.Errorf("failed to create auth token: %w", err)
 	}
@@ -43,7 +43,7 @@ func (t *TelegramService) GetUserFromAuthToken(token string) (types.UserId, erro
 func (t *TelegramService) SetTokenForChatId(userId types.UserId, chatId int64, token *GeneratedApiToken) error {
 	_, err := t.Pool.Exec(context.Background(), `
 		UPDATE telegram_auth
-		SET chat_id = $2, token = $3, updated_at = NOW()
+		SET telegram_user_id = $2, token = $3, updated_at = NOW()
 		WHERE user_id = $1`, userId, chatId, token.Token)
 	if err != nil {
 		return fmt.Errorf("failed to update chat id: %w", err)
@@ -51,13 +51,13 @@ func (t *TelegramService) SetTokenForChatId(userId types.UserId, chatId int64, t
 	return nil
 }
 
-func (t *TelegramService) GetToken(chatId int64) string {
+func (t *TelegramService) GetToken(userId int64) string {
 	var token string
 	err := t.Pool.QueryRow(context.Background(), `
 		SELECT token
 		FROM telegram_auth
-		WHERE chat_id = $1
-	`, chatId).Scan(&token)
+		WHERE telegram_user_id = $1
+	`, userId).Scan(&token)
 	if err != nil {
 		return ""
 	}
