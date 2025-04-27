@@ -20,6 +20,7 @@ func main() {
 
 	telegramToken := configs.Telegram.Token
 	apiEndpoint := configs.Domain
+	slog.Info("API endpoint", "endpoint", apiEndpoint)
 
 	pool, err := db.Open(configs.PSQL)
 	if err != nil {
