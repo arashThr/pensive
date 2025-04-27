@@ -51,7 +51,8 @@ type SearchResponse struct {
 	Bookmarks []SearchResult `json:"bookmarks"`
 }
 
-func StartBot(telegramToken string, apiEndpoint string, pool *pgxpool.Pool) {
+func StartBot(telegramToken string, endpoint string, pool *pgxpool.Pool) {
+	apiEndpoint = endpoint
 	b, err := bot.New(telegramToken)
 	if err != nil {
 		log.Fatalf("failed to create bot: %v", err)
