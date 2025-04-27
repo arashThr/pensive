@@ -158,8 +158,37 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	msg := update.Message.Text
-	if strings.HasPrefix(msg, "http://") || strings.HasPrefix(msg, "https://") {
-		saveBookmark(ctx, b, update.Message.Chat.ID, msg)
+	// Chech message length
+	if len(msg) > 1000 {
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Message is too long. Please shorten it to 1000 characters or less.",
+		})
+		return
+	}
+
+	// Look for a link in the message
+	var link string
+	parts := strings.Split(msg, " ")
+	for _, part := range parts {
+		if strings.HasPrefix(part, "http://") || strings.HasPrefix(part, "https://") {
+			link = part
+			break
+		}
+	}
+
+	// If there is no link, check if there are too many search terms
+	if link == "" && len(parts) > 10 {
+		// Too many search terms
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID: update.Message.Chat.ID,
+			Text:   "Too many search terms. Please provide a shorter query.",
+		})
+		return
+	}
+
+	if link != "" {
+		saveBookmark(ctx, b, update.Message.Chat.ID, link)
 	} else {
 		searchBookmarks(ctx, b, update.Message.Chat.ID, msg)
 	}
