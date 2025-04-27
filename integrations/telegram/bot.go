@@ -1,4 +1,4 @@
-package main
+package telegram
 
 import (
 	"bytes"
@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/config"
-	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/errors"
 	internalModels "github.com/arashthr/go-course/internal/models"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -51,28 +51,12 @@ type SearchResponse struct {
 	Bookmarks []SearchResult `json:"bookmarks"`
 }
 
-func main() {
-	slog.Info("Starting Telegram bot")
-
-	var err error
-	configs, err = config.LoadEnvConfig()
-
-	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
-	}
-
-	telegramToken := configs.Telegram.Token
-	apiEndpoint = configs.Domain
-
+func StartBot(telegramToken string, apiEndpoint string, pool *pgxpool.Pool) {
 	b, err := bot.New(telegramToken)
 	if err != nil {
 		log.Fatalf("failed to create bot: %v", err)
 	}
 
-	pool, err := db.Open(configs.PSQL)
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
 	telegramService = &internalModels.TelegramService{
 		Pool: pool,
 	}
@@ -158,7 +142,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	userId := update.Message.From.ID
 	if !isUserAuthenticated(userId) {
-		integrationsPath, err := url.JoinPath(configs.Domain, "integrations")
+		integrationsPath, err := url.JoinPath(apiEndpoint, "integrations")
 		if err != nil {
 			slog.Error("failed to create integrations path", "error", err)
 			return

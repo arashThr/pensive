@@ -18,6 +18,11 @@ type StripeConfig struct {
 	StripeWebhookSecret string
 }
 
+type TelegramConfig struct {
+	BotName string
+	Token   string
+}
+
 type AppConfig struct {
 	Environment string
 	Domain      string
@@ -31,10 +36,7 @@ type AppConfig struct {
 		Address string
 	}
 	Stripe   StripeConfig
-	Telegram struct {
-		BotName string
-		Token   string
-	}
+	Telegram TelegramConfig
 }
 
 func LoadEnvConfig() (*AppConfig, error) {
@@ -77,8 +79,10 @@ func LoadEnvConfig() (*AppConfig, error) {
 	// Or set stripe.Key
 	stripe.Key = os.Getenv("STRIPE_KEY")
 
-	cfg.Telegram.BotName = validations.GetEnvOrDie("TELEGRAM_BOT_NAME")
-	cfg.Telegram.Token = validations.GetEnvOrDie("TELEGRAM_BOT_TOKEN")
+	cfg.Telegram = TelegramConfig{
+		BotName: validations.GetEnvOrDie("TELEGRAM_BOT_NAME"),
+		Token:   validations.GetEnvOrDie("TELEGRAM_BOT_TOKEN"),
+	}
 
 	return &cfg, nil
 }
