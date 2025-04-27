@@ -17,6 +17,16 @@ services:
     depends_on:
       - db
 
+  # TODO: Update .env file in prod
+  # bot:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./integrations/telegram/Dockerfile
+  #   logging: *highlight-logging
+  #   restart: always
+  #   depends_on:
+  #     - db
+
   caddy:
     image: caddy:2.9-alpine
     restart: unless-stopped

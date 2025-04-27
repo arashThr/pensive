@@ -1,5 +1,18 @@
-__Run__:
-- Use `modd`
+
+## Run 
+
+### Locally
+
+- `docker compose up` to start the database and other services
+- Run `modd` to start the server in watch mode
+- Telegram bot: `go run integrations/telegram/bot.go`
+
+Or you can run all the services locally with docker compose:
+`docker compose -f compose.yml -f compose.local.yml up`
+
+### Production
+
+Check `scripts/post-receive-hook`
 
 ## Database
 __Connect to db__:

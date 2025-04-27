@@ -1,0 +1,23 @@
+services:
+  server:
+    ports:
+      - 8000:8000
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_HOST=db
+    depends_on:
+      - db
+  
+  bot:
+    build:
+      context: ./
+      dockerfile: ./integrations/telegram/Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_HOST=db
+      - DOMAIN=http://server:8000
+    depends_on:
+      - db
