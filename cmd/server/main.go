@@ -130,6 +130,10 @@ func run(cfg *config.AppConfig) error {
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
 
+	extensionController := auth.Extension{
+		ApiService: apiService,
+	}
+
 	telegramController := auth.Telegram{
 		TelegramModel: telegramService,
 		BotName:       cfg.Telegram.BotName,
@@ -215,6 +219,11 @@ func run(cfg *config.AppConfig) error {
 			r.Get("/portal-session", stripController.GoToBillingPortal)
 			r.Get("/success", stripController.Success)
 			r.Get("/cancel", stripController.Cancel)
+		})
+
+		r.Route("/extension", func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/auth", extensionController.GenerateToken)
 		})
 
 		r.Route("/telegram", func(r chi.Router) {

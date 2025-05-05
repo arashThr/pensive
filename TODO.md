@@ -37,6 +37,7 @@
 - [x] Support multiple API tokens: Show them once and keep the hashed version
 - [x] Limit the number of tokens
 - [x] Replace multi-empty lines and spaces with one
+- [ ] Rename api in model and service to avoid confusion
 - [ ] Keep the token, and not the token hash
 - [ ] Remove password and just use email
 - [ ] Clear the search results when text box is cleared

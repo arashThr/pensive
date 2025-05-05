@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Bookmark to API",
+    "name": "Pensieve",
     "version": "1.0",
-    "description": "Sends bookmarked URLs and tags to a REST endpoint.",
+    "description": "Save and organize your bookmarks with Pensieve",
     "permissions": [
       "bookmarks",
       "storage",
@@ -14,5 +14,15 @@
     "background": {
       "service_worker": "background.js"
     },
-    "options_page": "options.html"
+    "options_page": "options.html",
+    "content_scripts": [
+      {
+        "matches": ["http://localhost:8000/extension/auth"],
+        "js": ["content.js"]
+      }
+    ],
+    "web_accessible_resources": [{
+      "resources": ["options.js"],
+      "matches": ["http://localhost:8000/*"]
+    }]
   }
