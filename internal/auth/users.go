@@ -213,7 +213,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "text/html")
 	type TokenResponse struct {
 		APIToken     string
 		ErrorMessage string
@@ -304,7 +304,7 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 		token := tokenParts[1]
 		user, err := amw.ApiService.User(token)
 		if err != nil {
-			log.Printf("api user: %v", err)
+			log.Printf("set user: %v", err)
 			next.ServeHTTP(w, r)
 			return
 		}
