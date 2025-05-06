@@ -5,21 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-gray-100 text-gray-900 font-sans flex flex-col antialiased">
-  <header class="bg-white border-b border-gray-200 shadow-sm">
+<body class="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col antialiased">
+  <header class="bg-white border-b border-gray-100 shadow-sm">
     <nav class="px-6 py-4 flex items-center max-w-7xl mx-auto">
-      <div class="text-2xl font-semibold tracking-tight">
-        <a href="/" class="flex items-center gap-1 text-red-600 hover:text-red-700 transition-colors">
+      <div class="text-xl font-semibold tracking-tight">
+        <a href="/" class="flex items-center gap-2 text-gray-900 hover:text-gray-700 transition-colors">
           <span class="font-bold">Pensieve</span>
-          <span class="text-sm font-normal text-gray-500">Beta</span>
+          <span class="text-xs font-medium text-gray-400">Beta</span>
         </a>
       </div>
 
       <!-- Hamburger (mobile only) -->
       <div class="ml-auto md:hidden">
-        <button id="menu-btn" class="focus:outline-none text-gray-900 hover:text-red-600 transition-colors">
+        <button id="menu-btn" class="text-gray-600 hover:text-gray-900 transition-colors">
           <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
           </svg>
@@ -29,41 +29,41 @@
       <!-- Desktop Menu -->
       <div class="hidden md:flex ml-auto space-x-6 items-center text-sm font-medium">
         {{if currentUser}}
-          <a class="hover:text-red-600 transition-colors" href="/bookmarks">Bookmarks</a>
-          <a class="hover:text-red-600 transition-colors" href="/users/me">Account</a>
-          <a class="hover:text-red-600 transition-colors" href="/integrations">Integrations</a>
+          <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/bookmarks">Bookmarks</a>
+          <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/users/me">Account</a>
+          <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/integrations">Integrations</a>
           <form action="/signout" method="post" class="inline">
             {{csrfField}}
-            <button type="submit" class="hover:text-red-600 transition-colors">Sign Out</button>
+            <button type="submit" class="text-gray-600 hover:text-gray-900 transition-colors">Sign Out</button>
           </form>
         {{else}}
-          <a class="hover:text-red-600 transition-colors" href="/signin">Sign In</a>
-          <a class="bg-red-600 hover:bg-red-600 text-white px-4 py-1.5 rounded-md transition-colors" href="/signup">Sign Up</a>
+          <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/signin">Sign In</a>
+          <a class="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors shadow-sm" href="/signup">Sign Up</a>
         {{end}}
       </div>
     </nav>
 
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100">
       {{if currentUser}}
-        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/bookmarks">Bookmarks</a>
-        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/users/me">Account</a>
-        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/integrations">Integrations</a>
+        <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/bookmarks">Bookmarks</a>
+        <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/users/me">Account</a>
+        <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/integrations">Integrations</a>
         <form action="/signout" method="post">
           {{csrfField}}
-          <button type="submit" class="block w-full text-left px-6 py-3 hover:bg-gray-100 transition-colors">Sign Out</button>
+          <button type="submit" class="block w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">Sign Out</button>
         </form>
       {{else}}
-        <a class="block px-6 py-3 hover:bg-gray-100 transition-colors" href="/signin">Sign In</a>
-        <a class="block px-6 py-3 bg-red-700 hover:bg-red-600 text-white transition-colors" href="/signup">Sign Up</a>
+        <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/signin">Sign In</a>
+        <a class="block px-6 py-3 bg-gray-900 text-white hover:bg-gray-800 transition-colors" href="/signup">Sign Up</a>
       {{end}}
     </div>
   </header>
 
   <!-- Alerts -->
-  <div class="px-6 py-2 max-w-2xl mx-auto">
+  <div class="px-6 py-4 max-w-4xl mx-auto">
     {{range messages}}
-      <div class="flex px-4 py-3 mb-2 bg-white border {{if .IsError}}border-red-500 text-red-600{{else}}border-amber-700 text-amber-700{{end}} rounded-md shadow-sm">
+      <div class="flex px-4 py-3 mb-2 bg-white border border-gray-100 rounded-lg shadow-sm {{if .IsError}}text-red-600{{else}}text-gray-600{{end}}">
         <div class="flex-grow">{{.Message}}</div>
         <a href="#" onclick="closeAlert(event)" class="ml-2 hover:opacity-75 transition-opacity">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,13 +79,13 @@
 
 {{define "footer"}}
   </main>
-  <footer class="bg-white border-t border-gray-200 py-6 text-gray-500 text-sm">
+  <footer class="bg-white border-t border-gray-100 py-8 text-gray-500 text-sm">
     <div class="max-w-7xl mx-auto text-center">
-      <p class="mb-1">© 2025 Pensieve</p>
+      <p class="mb-2">© 2025 Pensieve</p>
       <p>
-        <a href="/privacy" class="hover:text-gray-900 transition-colors">Privacy</a> 
-        <span class="mx-2">•</span>
-        <a href="/terms" class="hover:text-gray-900 transition-colors">Terms</a>
+        <a href="/privacy" class="text-gray-500 hover:text-gray-900 transition-colors">Privacy</a>
+        <span class="mx-3">•</span>
+        <a href="/terms" class="text-gray-500 hover:text-gray-900 transition-colors">Terms</a>
       </p>
     </div>
   </footer>
@@ -103,27 +103,25 @@
 </html>
 {{end}}
 
+
 <!-- Pagination -->
 <!-- Need Pages { Current; Previous; Next } -->
 {{define "pagination"}}
-  <div class="mt-6 flex justify-between items-center">
-    <!-- Previous button or empty placeholder -->
+  <div class="mt-8 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
       <a href="?page={{.Pages.Previous}}" 
-         class="inline-block py-2 px-4 bg-red-700 hover:bg-red-600 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200">
+         class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-150 shadow-sm">
         Previous
       </a>
     {{else}}
       <span class="invisible py-2 px-4"></span>
     {{end}}
 
-    <!-- Page number, always centered -->
-    <span class="text-sm text-gray-600">Page {{.Pages.Current}}</span>
+    <span class="text-sm text-gray-500">Page {{.Pages.Current}}</span>
 
-    <!-- Next button or empty placeholder -->
     {{if .MorePages}}
       <a href="?page={{.Pages.Next}}" 
-         class="inline-block py-2 px-4 bg-red-700 hover:bg-red-600 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200">
+         class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-150 shadow-sm">
         Next
       </a>
     {{else}}

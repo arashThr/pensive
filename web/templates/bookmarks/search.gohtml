@@ -1,21 +1,21 @@
 <div id="results" class="space-y-4">
   {{if .Bookmarks}}
     {{range .Bookmarks}}
-      <div class="flex items-start p-3">
+      <div class="flex items-start p-3 hover:bg-gray-50 rounded-lg transition-colors duration-100">
         <!-- Thumbnail Placeholder -->
         {{if .Thumbnail}}
         <div class="w-16 h-16 mr-3 flex-shrink-0">
-            <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded" />
+            <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded-lg" />
         </div>
         {{end}}
         <!-- Content -->
         <div class="flex-1">
-          <a href="{{.Link}}" class="text-blue-600 hover:text-blue-500 text-base font-semibold">{{.Title}}</a>
-          <p class="mt-1 text-sm text-gray-700">{{.Headline | safe}}</p>
+          <a href="{{.Link}}" class="text-gray-900 hover:text-gray-700 text-base font-medium transition-colors">{{.Title}}</a>
+          <p class="mt-1 text-sm text-gray-500">{{.Headline | safe}}</p>
         </div>
       </div>
     {{end}}
   {{else}}
-    <p class="p-3 text-gray-600 text-sm">No bookmarks found.</p>
+    <p class="p-3 text-gray-500 text-sm">No bookmarks found.</p>
   {{end}}
 </div>

@@ -1,7 +1,7 @@
 {{template "header" .}}
 
-<div class="px-6 py-16 max-w-2xl mx-auto">
-  <div class="bg-white rounded-lg shadow-sm p-8">
+<div class="px-6 py-12 max-w-4xl mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
     <h1 class="text-2xl font-semibold text-gray-900 text-center tracking-tight mb-6">Unlock More with a Subscription</h1>
     <p class="text-gray-500 text-center text-sm leading-relaxed mb-8">Supercharge your Pensieve experience with exclusive features designed to make bookmarking smarter, faster, and more connected.</p>
     
@@ -11,19 +11,19 @@
         <h2 class="text-lg font-medium text-gray-900">Coming Soon for Subscribers</h2>
         <ul class="mt-3 space-y-3 text-gray-500 text-sm">
           <li class="flex items-start">
-            <svg class="h-5 w-5 text-red-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-5 w-5 text-gray-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span><strong>Telegram Integration:</strong> Save bookmarks directly from Telegram and search your collection via a custom bot.</span>
           </li>
           <li class="flex items-start">
-            <svg class="h-5 w-5 text-red-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-5 w-5 text-gray-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span><strong>AI Summary:</strong> Get instant, concise summaries of your saved pages powered by cutting-edge AI.</span>
           </li>
           <li class="flex items-start">
-            <svg class="h-5 w-5 text-red-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg class="h-5 w-5 text-gray-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
             <span><strong>And More:</strong> Exciting new tools and enhancements rolling out soon—stay tuned!</span>
@@ -38,7 +38,7 @@
             {{csrfField}}
             <button 
             type="submit" 
-            class="w-full py-3 bg-gray-600 text-white rounded-md text-base font-semibold shadow-sm opacity-50 cursor-not-allowed" 
+            class="w-full py-3 bg-gray-300 text-gray-600 rounded-lg text-base font-medium shadow-sm opacity-50 cursor-not-allowed" 
             disabled
             >Subscribe Now</button>
         </form>
@@ -46,7 +46,7 @@
 
     <!-- Back to Home -->
     <div class="mt-4 text-center">
-      <a href="/" class="text-sm text-gray-500 hover:text-red-600 transition-colors">Back to Home</a>
+      <a href="/" class="text-sm text-gray-500 hover:text-gray-900 transition-colors">Back to Home</a>
     </div>
   </div>
 </div>

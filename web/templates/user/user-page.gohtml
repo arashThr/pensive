@@ -1,7 +1,7 @@
 {{template "header" .}}
 
-<div class="px-6 py-16 max-w-2xl mx-auto">
-  <div class="bg-white rounded-lg shadow-sm p-6">
+<div class="px-6 py-12 max-w-4xl mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
     <h1 class="pb-6 text-2xl font-semibold text-gray-900 tracking-tight text-center">Your Account</h1>
 
     <!-- User Info -->
@@ -17,7 +17,7 @@
         <form action="/users/generate-token" method="post" id="token-generate-container">
           {{csrfField}}
           <button
-            class="py-2 px-4 bg-red-700 hover:bg-red-600 text-white rounded-md text-sm font-semibold shadow-sm transition-all duration-200"
+            class="py-2 px-4 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors duration-150 shadow-sm"
             hx-post="/users/generate-token"
             hx-target="#token-container"
             hx-swap="innerHTML"
@@ -41,14 +41,14 @@
           </thead>
           <tbody>
             {{range $index, $token := .Tokens}}
-            <tr id="token-{{$index}}" class="border-t border-gray-200">
+            <tr id="token-{{$index}}" class="border-t border-gray-100">
               <td class="py-3 text-base text-gray-900">{{"***"}}</td>
               <td class="py-3 text-base text-gray-900">{{$token.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
               <td class="py-3 text-right">
                 <form id="delete-form-{{$index}}">
                   {{csrfField}}
                   <input type="hidden" name="token_id" value="{{$token.ID}}">
-                  <button class="text-gray-500 hover:text-red-600 transition-colors" type="button"
+                  <button class="text-gray-500 hover:text-gray-900 transition-colors" type="button"
                     hx-post="/users/delete-token" hx-confirm="Are you sure you want to delete this token? This action cannot be undone." hx-target="#token-{{$index}}" hx-swap="outerHTML"
                     title="Delete token">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,7 +75,7 @@
       <p class="text-base text-gray-900">Active</p>
       <a
         href="/payments/portal-session"
-        class="mt-2 inline-block text-sm text-red-600 hover:text-red-700 transition-colors"
+        class="mt-2 inline-block text-sm text-gray-900 hover:text-gray-700 transition-colors"
       >
         Manage Subscription
       </a>
@@ -84,7 +84,7 @@
       <form action="/payments/create-checkout-session" method="post">
         {{csrfField}}
         <button
-          class="mt-2 w-full py-3 bg-red-700 hover:bg-red-600 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200"
+          class="mt-2 w-full py-3 bg-gray-900 text-white rounded-lg text-base font-medium hover:bg-gray-800 transition-colors duration-150 shadow-sm"
           type="submit"
         >
           Subscribe - $1.00

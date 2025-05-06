@@ -1,19 +1,17 @@
 {{template "header" .}}
 
-<div class="px-6 py-16 max-w-2xl mx-auto">
-
-  <div class="flex justify-between pb-6">
+<div class="px-6 py-12 max-w-4xl mx-auto">
+  <div class="flex justify-between items-center mb-8">
     <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">My Bookmarks</h1>
-
-    <div>
-      <a href="/bookmarks/new" class="inline-block py-3 px-6 bg-red-700 hover:bg-red-600 text-white rounded-md text-base font-semibold shadow-sm transition-all duration-200">New Bookmark</a>
-    </div>
+    <a href="/bookmarks/new" class="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors duration-150 shadow-sm">
+      New Bookmark
+    </a>
   </div>
 
-  <div class="bg-white rounded-lg shadow-sm">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100">
     <table class="w-full">
       <thead>
-        <tr class="border-b border-gray-200">
+        <tr class="border-b border-gray-100">
           <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Title</th>
           <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Date Added</th>
           <th class="text-left py-4 px-6 text-sm text-gray-500 font-medium">Link</th>
@@ -21,24 +19,24 @@
       </thead>
       <tbody>
         {{range .Bookmarks}}
-        <tr class="border-t border-gray-200 hover:bg-gray-50 transition-colors">
-          <td class="py-4 px-6 flex items-center gap-2">
-              <a href="/bookmarks/{{.Id}}/edit" class="text-red-600 hover:text-red-700 transition-colors">{{.Title}}</a>
+        <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors duration-100">
+          <td class="py-4 px-6">
+            <a href="/bookmarks/{{.Id}}/edit" class="text-gray-900 hover:text-gray-700 font-medium transition-colors">{{.Title}}</a>
           </td>
           <td class="py-4 px-6 text-sm text-gray-500">{{.CreatedAt}}</td>
-          <td class="py-4 px-6 text-sm text-gray-500">
-              <a href="{{.Link}}" target="_blank" class="text-red-600 hover:text-red-700 transition-colors">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
+          <td class="py-4 px-6">
+            <a href="{{.Link}}" target="_blank" class="text-gray-500 hover:text-gray-700 transition-colors">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
           </td>
         </tr>
         {{end}}
       </tbody>
     </table>
     {{if eq (len .Bookmarks) 0}}
-      <div class="py-6 px-6 text-center text-gray-500 text-sm">No bookmarks yet. Add one below!</div>
+      <div class="py-8 px-6 text-center text-gray-500 text-sm">No bookmarks yet. Add one above!</div>
     {{end}}
   </div>
 
