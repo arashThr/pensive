@@ -1,10 +1,10 @@
 {{if .ErrorMessage}}
-<p class="text-sm text-red-600 mb-4">{{.ErrorMessage}}</p>
+<p class="text-sm text-red-500 mb-4">{{.ErrorMessage}}</p>
 {{else}}
 
 <div id="token-container" class="flex items-center relative">
   <input 
-    class="w-full px-4 py-2 border border-gray-100 rounded-lg bg-white text-gray-900 shadow-sm" 
+    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 shadow-sm" 
     type="text" 
     value="{{.APIToken}}" 
     readonly 
@@ -15,7 +15,7 @@
     <svg class="h-5 w-5 copy-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
-    <svg class="h-5 w-5 check-icon hidden text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg class="h-5 w-5 check-icon hidden text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
     </svg>
   </button>

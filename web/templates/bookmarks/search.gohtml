@@ -11,11 +11,11 @@
         <!-- Content -->
         <div class="flex-1">
           <a href="{{.Link}}" class="text-gray-900 hover:text-gray-700 text-base font-medium transition-colors">{{.Title}}</a>
-          <p class="mt-1 text-sm text-gray-500">{{.Headline | safe}}</p>
+          <p class="mt-1 text-sm text-gray-600">{{.Headline | safe}}</p>
         </div>
       </div>
     {{end}}
   {{else}}
-    <p class="p-3 text-gray-500 text-sm">No bookmarks found.</p>
+    <p class="p-3 text-gray-600 text-sm">No bookmarks found.</p>
   {{end}}
 </div>

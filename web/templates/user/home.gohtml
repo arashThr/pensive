@@ -6,7 +6,7 @@
     <input 
       type="text" 
       placeholder="Search your bookmarks..." 
-      class="w-full p-4 border border-gray-100 focus:border-gray-500 focus:ring-1 focus:ring-gray-500/20 outline-none bg-white text-gray-900 rounded-lg shadow-sm transition-all duration-150 placeholder:text-gray-400" 
+      class="w-full p-4 border border-gray-300 focus:border-blue-600 focus:ring-1 focus:ring-blue-600/20 outline-none bg-white text-gray-900 rounded-lg shadow-sm transition-all duration-150 placeholder:text-gray-500" 
       id="search-input"
       hx-get="/bookmarks/search" 
       hx-target="#results" 
@@ -17,13 +17,13 @@
     <span class="htmx-indicator absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hidden">⌛</span>
   </div>
   <div class="mt-4 flex justify-between items-center">
-    <p class="text-sm text-gray-500">Start typing to search your saved bookmarks.</p>
+    <p class="text-sm text-gray-600">Start typing to search your saved bookmarks.</p>
     <a href="/bookmarks/new" class="text-sm text-gray-900 hover:text-gray-700 font-medium transition-colors">+ Add Bookmark</a>
   </div>
 
   <!-- Results Area -->
-  <div id="results" class="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-    <p class="text-gray-500 text-sm">No results yet. Type above to search.</p>
+  <div id="results" class="mt-6 bg-white rounded-xl shadow-sm border border-gray-300 p-6">
+    <p class="text-gray-600 text-sm">No results yet. Type above to search.</p>
   </div>
 
   <!-- Subscription Link -->
