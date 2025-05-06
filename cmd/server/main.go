@@ -67,16 +67,16 @@ func run(cfg *config.AppConfig) error {
 		Now:  func() time.Time { return time.Now() },
 	}
 	emailService := service.NewEmailService(cfg.SMTP)
-	apiService := &models.ApiService{
+	tokenModel := &models.TokenModel{
 		Pool: pool,
 	}
-	stripeService := &models.StripeModel{
+	stripeModel := &models.StripeModel{
 		Pool: pool,
 	}
-	bookmarksService := &models.BookmarkModel{
+	bookmarksModel := &models.BookmarkModel{
 		Pool: pool,
 	}
-	telegramService := &models.TelegramService{
+	telegramModel := &models.TelegramService{
 		Pool: pool,
 	}
 
@@ -85,7 +85,7 @@ func run(cfg *config.AppConfig) error {
 		SessionService: sessionService,
 	}
 	amw := auth.ApiMiddleware{
-		ApiService: apiService,
+		TokenModel: tokenModel,
 	}
 	csrfMw := csrf.Protect(
 		[]byte(cfg.CSRF.Key),
@@ -99,7 +99,7 @@ func run(cfg *config.AppConfig) error {
 		SessionService:       sessionService,
 		PasswordResetService: passwordResetService,
 		EmailService:         emailService,
-		ApiService:           apiService,
+		TokenModel:           tokenModel,
 	}
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
@@ -110,7 +110,7 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
 
 	bookmarksController := service.Bookmarks{
-		BookmarkModel: bookmarksService,
+		BookmarkModel: bookmarksModel,
 	}
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
@@ -118,24 +118,24 @@ func run(cfg *config.AppConfig) error {
 	bookmarksController.Templates.Search = views.Must(views.ParseTemplate("bookmarks/search.gohtml", "tailwind.gohtml"))
 
 	apiController := service.Api{
-		BookmarkModel: bookmarksService,
+		BookmarkModel: bookmarksModel,
 	}
 
 	stripController := service.Stripe{
 		Domain:              cfg.Domain,
 		PriceId:             cfg.Stripe.PriceId,
 		StripeWebhookSecret: cfg.Stripe.StripeWebhookSecret,
-		StripeModel:         stripeService,
+		StripeModel:         stripeModel,
 	}
 	stripController.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
 	stripController.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
 
 	extensionController := auth.Extension{
-		ApiService: apiService,
+		TokenModel: tokenModel,
 	}
 
 	telegramController := auth.Telegram{
-		TelegramModel: telegramService,
+		TelegramModel: telegramModel,
 		BotName:       cfg.Telegram.BotName,
 	}
 

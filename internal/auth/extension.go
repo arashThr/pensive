@@ -10,7 +10,7 @@ import (
 )
 
 type Extension struct {
-	ApiService *models.ApiService
+	TokenModel *models.TokenModel
 }
 
 type ExtensionAuthResponse struct {
@@ -28,7 +28,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := e.ApiService.Create(user.ID)
+	token, err := e.TokenModel.Create(user.ID)
 	if err != nil {
 		slog.Error("failed to create extension token", "error", err, "user", user.ID)
 		json.NewEncoder(w).Encode(ExtensionAuthResponse{

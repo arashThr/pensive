@@ -27,8 +27,8 @@ type Users struct {
 	UserService          *models.UserService
 	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
-	ApiService           *models.ApiService
 	EmailService         *service.EmailService
+	TokenModel           *models.TokenModel
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -123,7 +123,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Email = user.Email
 	data.IsSubscribed = user.SubscriptionStatus == "premium"
-	validTokens, err := u.ApiService.Get(user.ID)
+	validTokens, err := u.TokenModel.Get(user.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Info("api token not found for current user")
@@ -219,7 +219,7 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage string
 	}
 	user := context.User(r.Context())
-	token, err := u.ApiService.Create(user.ID)
+	token, err := u.TokenModel.Create(user.ID)
 	if err != nil {
 		log.Printf("create api token: %v", err)
 		if errors.Is(err, errors.ErrTooManyTokens) {
@@ -237,7 +237,7 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	tokenId := r.FormValue("token_id")
 	user := context.User(r.Context())
-	err := u.ApiService.Delete(user.ID, tokenId)
+	err := u.TokenModel.Delete(user.ID, tokenId)
 	if err != nil {
 		log.Printf("delete api token: %v", err)
 		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
@@ -286,7 +286,7 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 }
 
 type ApiMiddleware struct {
-	ApiService *models.ApiService
+	TokenModel *models.TokenModel
 }
 
 func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
@@ -302,7 +302,7 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 			return
 		}
 		token := tokenParts[1]
-		user, err := amw.ApiService.User(token)
+		user, err := amw.TokenModel.User(token)
 		if err != nil {
 			log.Printf("set user: %v", err)
 			next.ServeHTTP(w, r)

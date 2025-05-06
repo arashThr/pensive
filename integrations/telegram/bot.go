@@ -25,7 +25,7 @@ var (
 	httpClient      = &http.Client{Timeout: 10 * time.Second}
 	userAPITokens   = map[int64]string{}
 	telegramService *internalModels.TelegramService
-	ApiService      *internalModels.ApiService
+	TokenModel      *internalModels.TokenModel
 	configs         *config.AppConfig
 )
 
@@ -61,7 +61,7 @@ func StartBot(telegramToken string, endpoint string, pool *pgxpool.Pool) {
 	telegramService = &internalModels.TelegramService{
 		Pool: pool,
 	}
-	ApiService = &internalModels.ApiService{
+	TokenModel = &internalModels.TokenModel{
 		Pool: pool,
 	}
 
@@ -105,7 +105,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	token, err := ApiService.Create(userId)
+	token, err := TokenModel.Create(userId)
 	if err != nil {
 		if errors.Is(err, errors.ErrTooManyTokens) {
 			b.SendMessage(ctx, &bot.SendMessageParams{
