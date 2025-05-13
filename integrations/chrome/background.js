@@ -2,8 +2,9 @@
 const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
 
 // Action item for the options
-chrome.action.onClicked.addListener(() => {
-  chrome.runtime.openOptionsPage();
+const action = browserAPI.browserAction || browserAPI.action
+browserAPI.action.onClicked.addListener(() => {
+  browserAPI.runtime.openOptionsPage();
 });
 
 browserAPI.bookmarks.onCreated.addListener((id, bookmark) => {

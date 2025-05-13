@@ -1,3 +1,6 @@
+// For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
+const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+
 document.addEventListener('DOMContentLoaded', function() {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
@@ -10,14 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
   let defaultFolderName = "Archive"
 
   // Load saved settings or use defaults
-  chrome.storage.sync.get(["endpoint", "folderName"], (data) => {
+  browserAPI.storage.sync.get(["endpoint", "folderName"]).then((data) => {
     defaultEndpoint = data.endpoint || defaultEndpoint;
     defaultFolderName = data.folderName || defaultFolderName;
     document.getElementById("endpoint").value = defaultEndpoint;
     document.getElementById("folderName").value = defaultFolderName;
   });
 
-  chrome.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }, () => {
+  browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
     console.log("Default settings saved");
   })
 
@@ -26,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     defaultEndpoint = document.getElementById("endpoint").value || defaultEndpoint;
     defaultFolderName = document.getElementById("folderName").value || defaultFolderName;
     
-    chrome.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }, () => {
+    browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
       const status = document.getElementById("status");
       status.textContent = "Settings saved!";
       setTimeout(() => {
@@ -36,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Check if we already have a token
-  chrome.storage.sync.get(['apiToken'], function(result) {
+  browserAPI.storage.sync.get(['apiToken']).then((result) => {
     if (result.apiToken) {
       showConnectedState(result.apiToken);
     }
@@ -47,12 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
     connectButton.textContent = 'Connecting...';
 
     // Open a new tab with the auth URL
-    chrome.tabs.create({
+    browserAPI.tabs.create({
       url: defaultEndpoint + '/extension/auth',
       active: true
-    }, function(tab) {
-      if (chrome.runtime.lastError) {
-        console.error('Failed to create tab:', chrome.runtime.lastError);
+    }).then((tab) => {
+      if (browserAPI.runtime.lastError) {
+        console.error('Failed to create tab:', browserAPI.runtime.lastError);
         showError('Failed to open authentication page');
         return;
       }
@@ -62,30 +65,31 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Received message", request)
         if (request.type === 'AUTH_TOKEN') {
           // Store the token
-          chrome.storage.sync.set({ apiToken: request.token }, function() {
-            if (chrome.runtime.lastError) {
-              console.error('Failed to store token:', chrome.runtime.lastError);
-              showError('Failed to store authentication token');
-              return;
-            }
+          browserAPI.storage.sync.set({ apiToken: request.token }).then(() => {
             showConnectedState(request.token);
             // Close the auth tab
-            chrome.tabs.remove(tab.id);
+            browserAPI.tabs.remove(tab.id);
             // Remove the message listener
-            chrome.runtime.onMessage.removeListener(messageListener);
+            browserAPI.runtime.onMessage.removeListener(messageListener);
+          }).catch((error) => {
+            console.error('Failed to store token:', error);
+            showError('Failed to store authentication token');
           });
         }
       };
 
-      chrome.runtime.onMessage.addListener(messageListener);
+      browserAPI.runtime.onMessage.addListener(messageListener);
 
       // Set a timeout to handle cases where the auth page doesn't respond
       setTimeout(() => {
-        chrome.runtime.onMessage.removeListener(messageListener);
+        browserAPI.runtime.onMessage.removeListener(messageListener);
         if (!tokenDisplaySection.style.display || tokenDisplaySection.style.display === 'none') {
           showError('Authentication timed out. Please try again.');
         }
       }, 10000); // 10 seconds timeout
+    }).catch((error) => {
+      console.error('Failed to create tab:', error);
+      showError('Failed to open authentication page');
     });
   });
 

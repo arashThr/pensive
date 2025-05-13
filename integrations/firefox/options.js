@@ -1,3 +1,6 @@
+// For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
+const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+
 document.addEventListener('DOMContentLoaded', function() {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
@@ -6,27 +9,27 @@ document.addEventListener('DOMContentLoaded', function() {
   const tokenDisplay = document.getElementById('token-display');
 
   // Set default values
-  let defaultEndpoint = "http://localhost:8000";
-  let defaultFolderName = "Archive";
+  let defaultEndpoint = "http://localhost:8000"
+  let defaultFolderName = "Archive"
 
   // Load saved settings or use defaults
-  browser.storage.sync.get(["endpoint", "folderName"]).then((data) => {
+  browserAPI.storage.sync.get(["endpoint", "folderName"]).then((data) => {
     defaultEndpoint = data.endpoint || defaultEndpoint;
     defaultFolderName = data.folderName || defaultFolderName;
     document.getElementById("endpoint").value = defaultEndpoint;
     document.getElementById("folderName").value = defaultFolderName;
   });
 
-  browser.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
+  browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
     console.log("Default settings saved");
-  });
+  })
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
     defaultEndpoint = document.getElementById("endpoint").value || defaultEndpoint;
     defaultFolderName = document.getElementById("folderName").value || defaultFolderName;
     
-    browser.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
+    browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
       const status = document.getElementById("status");
       status.textContent = "Settings saved!";
       setTimeout(() => {
@@ -36,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Check if we already have a token
-  browser.storage.sync.get(['apiToken']).then((result) => {
+  browserAPI.storage.sync.get(['apiToken']).then((result) => {
     if (result.apiToken) {
       showConnectedState(result.apiToken);
     }
@@ -47,21 +50,27 @@ document.addEventListener('DOMContentLoaded', function() {
     connectButton.textContent = 'Connecting...';
 
     // Open a new tab with the auth URL
-    browser.tabs.create({
+    browserAPI.tabs.create({
       url: defaultEndpoint + '/extension/auth',
       active: true
     }).then((tab) => {
+      if (browserAPI.runtime.lastError) {
+        console.error('Failed to create tab:', browserAPI.runtime.lastError);
+        showError('Failed to open authentication page');
+        return;
+      }
+
       // Listen for messages from the content script
       const messageListener = function(request, sender, sendResponse) {
-        console.log("Received message", request);
+        console.log("Received message", request)
         if (request.type === 'AUTH_TOKEN') {
           // Store the token
-          browser.storage.sync.set({ apiToken: request.token }).then(() => {
+          browserAPI.storage.sync.set({ apiToken: request.token }).then(() => {
             showConnectedState(request.token);
             // Close the auth tab
-            browser.tabs.remove(tab.id);
+            browserAPI.tabs.remove(tab.id);
             // Remove the message listener
-            browser.runtime.onMessage.removeListener(messageListener);
+            browserAPI.runtime.onMessage.removeListener(messageListener);
           }).catch((error) => {
             console.error('Failed to store token:', error);
             showError('Failed to store authentication token');
@@ -69,11 +78,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       };
 
-      browser.runtime.onMessage.addListener(messageListener);
+      browserAPI.runtime.onMessage.addListener(messageListener);
 
       // Set a timeout to handle cases where the auth page doesn't respond
       setTimeout(() => {
-        browser.runtime.onMessage.removeListener(messageListener);
+        browserAPI.runtime.onMessage.removeListener(messageListener);
         if (!tokenDisplaySection.style.display || tokenDisplaySection.style.display === 'none') {
           showError('Authentication timed out. Please try again.');
         }

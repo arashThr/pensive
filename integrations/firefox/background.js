@@ -2,8 +2,9 @@
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
 // Action item for the options
-browser.browserAction.onClicked.addListener(() => {
-  browser.runtime.openOptionsPage();
+const action = browserAPI.browserAction || browserAPI.action
+browserAPI.browserAction.onClicked.addListener(() => {
+  browserAPI.runtime.openOptionsPage();
 });
 
 browserAPI.bookmarks.onCreated.addListener((id, bookmark) => {
@@ -37,7 +38,7 @@ async function sendToApi(link, method) {
     console.error("Endpoint or API token not configured.");
     return;
   }
-  const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href;
+  const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href
   try {
     const response = await fetch(createEndpoint, {
       method,
@@ -51,7 +52,7 @@ async function sendToApi(link, method) {
       // If response is JSON, decode it
       // Otherwise, parse it as text
       const contentType = response.headers.get("Content-Type");
-      let error;
+      let error
       if (contentType?.includes("application/json")) {
         const responseBody = await response.json();
         error = parseToError(responseBody);
