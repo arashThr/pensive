@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', function() {
     defaultFolderName = data.folderName || defaultFolderName;
     document.getElementById("endpoint").value = defaultEndpoint;
     document.getElementById("folderName").value = defaultFolderName;
-  });
 
-  browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
-    console.log("Default settings saved");
-  })
+    browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
+      console.log("Default settings saved");
+    })
+  });
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
