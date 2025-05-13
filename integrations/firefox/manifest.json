@@ -1,0 +1,30 @@
+{
+    "manifest_version": 2,
+    "name": "Pensieve",
+    "version": "1.0",
+    "description": "Save and organize your bookmarks with Pensieve",
+    "permissions": [
+      "<all_urls>",
+      "bookmarks",
+      "storage",
+      "activeTab"
+    ],
+    "background": {
+      "scripts": ["background.js"]
+    },
+    "options_page": "options.html",
+    "content_scripts": [
+      {
+        "matches": ["http://localhost/extension/auth"],
+        "js": ["content.js"]
+      }
+    ],
+    "web_accessible_resources": [
+      "options.js"
+    ],
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "pensieve-extension@mozilla.org"
+      }
+    }
+  }
