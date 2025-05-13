@@ -11,6 +11,16 @@
     "host_permissions": [
       "http://localhost:8000/*"
     ],
+    "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
+    },
+    "action": {
+      "default_icon": {
+        "48": "img.png"
+      },
+      "default_title": "Pensieve Settings"
+    },
     "background": {
       "service_worker": "background.js"
     },

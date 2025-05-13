@@ -1,6 +1,11 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
 const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
 
+// Action item for the options
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage();
+});
+
 browserAPI.bookmarks.onCreated.addListener((id, bookmark) => {
   browserAPI.bookmarks.get(bookmark.parentId, (parent) => {
     // Get the configured folder name (defaults to "Archive" if not set)

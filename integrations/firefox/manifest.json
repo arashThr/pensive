@@ -9,6 +9,16 @@
       "storage",
       "activeTab"
     ],
+    "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
+    },
+    "browser_action": {
+      "default_icon": {
+        "48": "img.png"
+      },
+      "default_title": "Pensieve Settings"
+    },
     "background": {
       "scripts": ["background.js"]
     },
