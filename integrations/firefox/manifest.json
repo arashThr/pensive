@@ -25,7 +25,10 @@
     "options_page": "options.html",
     "content_scripts": [
       {
-        "matches": ["http://localhost/extension/auth"],
+        "matches": [
+          "http://localhost/extension/auth",
+          "https://apps.arashtaher.com/extension/auth"
+        ],
         "js": ["content.js"]
       }
     ],
