@@ -19,7 +19,7 @@ type User struct {
 	SubscriptionStatus string
 }
 
-type UserService struct {
+type UserModel struct {
 	Pool *pgxpool.Pool
 }
 
@@ -47,7 +47,7 @@ var InactiveStates = map[string]bool{
 	"free":               true,
 }
 
-func (us *UserService) Create(email, password string) (*User, error) {
+func (us *UserModel) Create(email, password string) (*User, error) {
 	email = normalizeEmail(email)
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -82,7 +82,7 @@ func (us *UserService) Create(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserService) Authenticate(email, password string) (*User, error) {
+func (us *UserModel) Authenticate(email, password string) (*User, error) {
 	email = normalizeEmail(email)
 	user := User{
 		Email: email,
@@ -101,7 +101,7 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserService) UpdatePassword(userId types.UserId, password string) error {
+func (us *UserModel) UpdatePassword(userId types.UserId, password string) error {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("update password: %w", err)

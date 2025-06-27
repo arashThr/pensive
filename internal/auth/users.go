@@ -24,7 +24,7 @@ type Users struct {
 		UserPage       web.Template
 		Token          web.Template
 	}
-	UserService          *models.UserService
+	UserService          *models.UserModel
 	SessionService       *models.SessionService
 	PasswordResetService *models.PasswordResetService
 	EmailService         *service.EmailService

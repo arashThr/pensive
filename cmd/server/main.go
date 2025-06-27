@@ -56,7 +56,7 @@ func run(cfg *config.AppConfig) error {
 	defer pool.Close()
 
 	// Services
-	userService := &models.UserService{
+	userService := &models.UserModel{
 		Pool: pool,
 	}
 	sessionService := &models.SessionService{
