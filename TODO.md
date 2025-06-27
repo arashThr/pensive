@@ -3,28 +3,23 @@
 - Get `recollectra.com` domain
 
 ## Fixes
-- [ ] Fix the table
-    - [ ] Flex for the table
-    - [ ] Buttons above
 - [ ] Why YouTube is not working?
-- [ ] Ping to make sure the API token in extension is valid (is it deleted?)
 - [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
-- [ ] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
-- [ ] Fix the message pop up in the extension
+- [x] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
+- [x] Flex for the table
 
 ## Features
-- [ ] Slash command for bookmarks in Telegram
 - [ ] Ping server from Telegram bot to check the validity of the token
-- [ ] Get token for extension without copy paste by redirect from website
-    - Telegram bot
 - [ ] Feedback link
 - [ ] Google login
-- [ ] Multiple sessions for the user
 - [ ] Disconnect the extension
 - [ ] Upload the extensions
-- [ ] Show the raw content
 - [ ] Separate text extraction service
+- [ ] Show the raw content
+- [x] Multiple sessions for the user
+- [x] Get token for extension without copy paste by redirect from website
+    - Telegram bot
 - [x] Deep link auth for telegram (check Proposals)
 - [x] Multi-page for bookmarks index page
 - [x] Save the token for chat
@@ -55,9 +50,9 @@
 - [ ] Does user really need API key?
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase
-- [ ] Hid API Tokens and Subscriptions. Redirect to bookmarks
 - [ ] Remove password - Email validation
-- [ ] Multiple sessions
+- [ ] Remove token from extensions settings page
+- [x] Hid API Tokens and Subscriptions. Redirect to bookmarks after login
 - [x] Rename api in model and service to avoid confusion
 - [x] Replace multi-empty lines and spaces with one
 - [x] Limit the number of tokens
@@ -74,6 +69,8 @@
 - [ ] Twitter posts
 - [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser
+- [ ] Ping to make sure the API token in extension is valid (is it deleted?)
+- [ ] Slash command for bookmarks in Telegram
 
 ### Stripe
 - [x] change `IsSubscribed` to subStatus

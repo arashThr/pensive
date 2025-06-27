@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
-  const tokenDisplaySection = document.getElementById('token-display-section');
-  const tokenDisplay = document.getElementById('token-display');
 
   // Set default values
   let defaultEndpoint = "http://localhost:8000"
@@ -41,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check if we already have a token
   browserAPI.storage.sync.get(['apiToken']).then((result) => {
     if (result.apiToken) {
-      showConnectedState(result.apiToken);
+      showConnectedState();
     }
   });
 
@@ -51,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Open a new tab with the auth URL
     browserAPI.tabs.create({
-      url: defaultEndpoint + '/extension/auth',
+      url: new URL('/extension/auth', defaultEndpoint).toString(),
       active: true
     }).then((tab) => {
       if (browserAPI.runtime.lastError) {
@@ -66,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (request.type === 'AUTH_TOKEN') {
           // Store the token
           browserAPI.storage.sync.set({ apiToken: request.token }).then(() => {
-            showConnectedState(request.token);
+            showConnectedState();
             // Close the auth tab
             browserAPI.tabs.remove(tab.id);
             // Remove the message listener
@@ -83,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Set a timeout to handle cases where the auth page doesn't respond
       setTimeout(() => {
         browserAPI.runtime.onMessage.removeListener(messageListener);
-        if (!tokenDisplaySection.style.display || tokenDisplaySection.style.display === 'none') {
+        if (authSection.style.display !== 'none') {
           showError('Authentication timed out. Please try again.');
         }
       }, 10000); // 10 seconds timeout
@@ -93,18 +91,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  function showConnectedState(token) {
+  function showConnectedState() {
     statusDiv.className = 'status connected';
     statusDiv.textContent = 'Connected to Pensieve';
     authSection.style.display = 'none';
-    tokenDisplaySection.style.display = 'block';
     
-    // Mask the token except for last 4 characters
-    const maskedToken = '*'.repeat(10) + token.slice(-6);
-    tokenDisplay.textContent = maskedToken;
-    
-    connectButton.disabled = false;
-    connectButton.textContent = 'Connect to Pensieve';
+    connectButton.disabled = true;
   }
 
   function showError(message) {
