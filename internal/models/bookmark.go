@@ -166,6 +166,7 @@ func (service *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Book
 		`SELECT bookmark_id, title, link, excerpt, created_at
 		FROM users_bookmarks
 		WHERE user_id = $1
+		ORDER BY created_at DESC
 		LIMIT $2
 		OFFSET $3
 		`, userId, PageSize, page*PageSize)
