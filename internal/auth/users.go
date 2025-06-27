@@ -89,7 +89,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		log.Print(err)
+		logger.Error("sign in process failed", "error", err)
 		http.Error(w, "Sign in process failed", http.StatusInternalServerError)
 		return
 	}
@@ -98,6 +98,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
@@ -105,7 +106,7 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	err = u.SessionService.Delete(token)
 	if err != nil {
-		log.Printf("process sign out: %v\n", err)
+		logger.Info("sign out failed", "error", err)
 		http.Error(w, "Sign out failed", http.StatusInternalServerError)
 		return
 	}
