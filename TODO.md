@@ -2,48 +2,73 @@
 - Check Cloudflare [D1](https://developers.cloudflare.com/d1/) for database
 - Get `recollectra.com` domain
 
+## Fixes
+- [ ] Fix the table
+    - [ ] Flex for the table
+    - [ ] Buttons above
+- [ ] Why YouTube is not working?
+- [ ] Ping to make sure the API token in extension is valid (is it deleted?)
+- [ ] Remove token when endpoint is changed
+    - Check if endpoint is valid
+- [ ] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
+- [ ] Fix the message pop up in the extension
+
 ## Features
-- [x] Generate API  tokens
-- [x] Bookmark search in database
-    - [x] Add tsvector
-- [x] Test base extension on Firefox
-    - Firefox does not support `service_worker`
-- [x] Add search to API
-- [x] Pagination
-    - [x] Bookmarks
-        - [x] API
-        - [x] Site
-- [x] Delete bookmark with extension
-- [x] Bookmarks
-    - [x] Remove the bookmark
-    - [x] Pretty config
-- [x] Telegram bot: Add, delete
-- [x] Save the token for chat
-- [x] Multi-page for bookmarks index page
-- [x] Deep link auth for telegram (check Proposals)
-- [ ] Multiple sessions for the user
-- [ ] Get token for extension without copy paste by redirect from website
-- [ ] Ping server from Telegram bot to check the validity of the token
 - [ ] Slash command for bookmarks in Telegram
+- [ ] Ping server from Telegram bot to check the validity of the token
+- [ ] Get token for extension without copy paste by redirect from website
+    - Telegram bot
+- [ ] Feedback link
+- [ ] Google login
+- [ ] Multiple sessions for the user
+- [ ] Disconnect the extension
+- [ ] Upload the extensions
+- [ ] Show the raw content
+- [ ] Separate text extraction service
+- [x] Deep link auth for telegram (check Proposals)
+- [x] Multi-page for bookmarks index page
+- [x] Save the token for chat
+- [x] Telegram bot: Add, delete
+    - [x] Pretty config
+    - [x] Remove the bookmark
+- [x] Bookmarks
+- [x] Delete bookmark with extension
+        - [x] Site
+        - [x] API
+    - [x] Bookmarks
+- [x] Pagination
+- [x] Add search to API
+    - Firefox does not support `service_worker`
+- [x] Test base extension on Firefox
+    - [x] Add tsvector
+- [x] Bookmark search in database
+- [x] Generate API  tokens
 
 ## Changes
-- [x] Ids from uint to string
-    - uint ids are good enough for my user case
-    - I have created a type to represent them
-- [x] Nano UUID for bookmarks
-- [x] Separate table for content and ts_vector content to make it easier to back up data
-- [x] Add excerpt to bookmarks_content table
-- [x] Trim excerpt for bookmark page
-- [x] Support multiple API tokens: Show them once and keep the hashed version
-- [x] Limit the number of tokens
-- [x] Replace multi-empty lines and spaces with one
-- [x] Rename api in model and service to avoid confusion
-- [ ] Keep the token, and not the token hash
-- [ ] Remove password and just use email
-- [ ] Clear the search results when text box is cleared
-- [ ] Keep the token name
-- [ ] Email only users - No password
 - [ ] "Failed to parse image URL"
+- [ ] Email only users - No password
+- [ ] Keep the token name
+- [ ] Clear the search results when text box is cleared
+- [ ] Remove password and just use email
+- [ ] Keep the token, and not the token hash
+- [ ] Apply rate limit on requests
+- [ ] Does user really need API key?
+- [ ] If API is not set, or incorrect, don't send the request
+- [ ] Move prod to Supabase
+- [ ] Hid API Tokens and Subscriptions. Redirect to bookmarks
+- [ ] Remove password - Email validation
+- [ ] Multiple sessions
+- [x] Rename api in model and service to avoid confusion
+- [x] Replace multi-empty lines and spaces with one
+- [x] Limit the number of tokens
+- [x] Support multiple API tokens: Show them once and keep the hashed version
+- [x] Trim excerpt for bookmark page
+- [x] Add excerpt to bookmarks_content table
+- [x] Separate table for content and ts_vector content to make it easier to back up data
+- [x] Nano UUID for bookmarks
+    - I have created a type to represent them
+    - uint ids are good enough for my user case
+- [x] Ids from uint to string
 
 ### Future
 - [ ] Twitter posts

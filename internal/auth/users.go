@@ -56,7 +56,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := u.SessionService.Create(user.ID)
+	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
 		log.Println(err)
 		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
@@ -87,7 +87,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	session, err := u.SessionService.Create(user.ID)
+	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, "Sign in process failed", http.StatusInternalServerError)
@@ -161,6 +161,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	values := url.Values{
 		"token": {pwReset.Token},
 	}
+	// TODO
 	resetUrl := "http://localhost:8000/reset-password?" + values.Encode()
 	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
 	if err != nil {
@@ -202,7 +203,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := u.SessionService.Create(user.ID)
+	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
 		log.Println("create session for password reset", err)
 		http.Redirect(w, r, "/signin", http.StatusFound)
