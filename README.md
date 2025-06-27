@@ -12,6 +12,7 @@ Or you can run all the services locally with docker compose:
 
 ### Production
 
+Deployment to production happens by executing the `post-receive-hook` in bare repo on the server.  
 Check `scripts/post-receive-hook`
 
 ## Database
