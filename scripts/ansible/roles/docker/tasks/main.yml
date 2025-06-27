@@ -3,28 +3,28 @@
   become: true
   block:
     - name: Add Docker GPG apt Key
-      apt_key:
+      ansible.builtin.apt_key:
         url: https://download.docker.com/linux/debian/gpg
         state: present
 
     - name: Add Docker Repository
-      apt_repository:
+      ansible.builtin.apt_repository:
         repo: deb [arch=amd64] https://download.docker.com/linux/debian bookworm stable
         state: present
 
     - name: Update apt and install docker-ce
-      apt:
-        name: 
+      ansible.builtin.apt:
+        name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
           - docker-buildx-plugin
           - docker-compose-plugin
-        state: latest
+        state: latest # noqa package-latest
         update_cache: true
 
     - name: Add user to the Docker group
-      user:
+      ansible.builtin.user:
         name: "{{ ansible_user_id }}"
         groups: docker
-        append: yes
+        append: true

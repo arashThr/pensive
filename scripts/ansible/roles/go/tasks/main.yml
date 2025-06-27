@@ -28,7 +28,7 @@
     - name: Move Go to install path
       ansible.builtin.copy:
         src: /tmp/go_install/go/
-        dest:  "{{ go_install_path }}"
+        dest: "{{ go_install_path }}"
         remote_src: true
         mode: preserve
 
@@ -42,4 +42,4 @@
         path: ~/.zshrc
         line: 'export PATH="$GOPATH/bin:$PATH"'
         create: true
-
+        mode: "0644"

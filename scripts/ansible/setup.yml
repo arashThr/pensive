@@ -1,7 +1,7 @@
 ---
 - name: Install git, nginx, and ufw on local machine
   hosts: local
-  become: yes
+  become: true
   vars:
     go_version: "1.24.1"
   roles:
@@ -9,16 +9,16 @@
     - docker
   tasks:
     - name: Ensure required packages are installed
-      apt:
+      ansible.builtin.apt:
         pkg:
           - git
           - ufw
           - aptitude
-        state: latest
-        update_cache: yes
+        state: latest # noqa package-latest
+        update_cache: true
 
     - name: Install required system packages
-      apt:
+      ansible.builtin.apt:
         pkg:
           - apt-transport-https
           - ca-certificates
@@ -27,5 +27,10 @@
           - python3-pip
           - virtualenv
           - python3-setuptools
-        state: latest
+        state: latest # noqa package-latest
         update_cache: true
+
+    - name: Install pip packages
+      ansible.builtin.pip:
+        name:
+          - youtube-transcript-api
