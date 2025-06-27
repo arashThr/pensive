@@ -66,7 +66,7 @@
   <!-- Alerts -->
   <div class="px-6 py-4 max-w-4xl mx-auto">
     {{range messages}}
-      <div class="flex px-4 py-3 mb-2 bg-white border border-gray-300 rounded-lg shadow-sm {{if .IsError}}text-red-500{{else}}text-gray-600{{end}}">
+      <div class="flex px-4 py-3 mb-2 bg-white border border-gray-300 rounded-lg shadow-sm items-center {{if .IsError}}text-red-500{{else}}text-gray-600{{end}}">
         <div class="flex-grow">{{.Message}}</div>
         <a href="#" onclick="closeAlert(event)" class="ml-2 hover:opacity-75 transition-opacity">
           <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
