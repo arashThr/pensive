@@ -45,27 +45,17 @@
           Manage Subscription
         </a>
       {{else}}
-        <div class="flex items-center mb-4">
-          <span class="flex h-8 w-8 rounded-full bg-gray-100 items-center justify-center mr-3">
-            <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </span>
-          <div>
-            <p class="text-base font-medium text-gray-900">No Active Subscription</p>
-            <p class="text-sm text-gray-600">Subscribe to unlock premium features.</p>
-          </div>
+        <div class="mb-4">
+          <p class="text-base font-medium text-gray-900">No Active Subscription</p>
+          <p class="text-sm text-gray-600">Subscribe to unlock premium features. (Coming soon)</p>
         </div>
         <form action="/payments/create-checkout-session" method="post">
           {{csrfField}}
           <button
-            class="w-full py-3 bg-blue-600 text-white rounded-lg text-base font-medium hover:bg-blue-700 transition-colors duration-150 shadow-sm flex items-center justify-center"
-            type="submit"
+            class="w-60 py-3 bg-gray-300 text-white rounded-lg text-base font-medium transition-colors duration-150 shadow-sm flex items-center justify-center"
+            type="submit" disabled
           >
-            <span class="mr-2">Subscribe - $1.00</span>
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            <span class="mr-2">Subscribe</span>
           </button>
         </form>
       {{end}}
