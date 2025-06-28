@@ -19,7 +19,7 @@ type TokenModel struct {
 }
 
 const ApiTokenBytes = 32
-const MaxTokens = 10
+const MaxTokens = 100
 
 type ApiToken struct {
 	ID         int
