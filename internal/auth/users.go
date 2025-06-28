@@ -215,6 +215,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	w.Header().Set("Content-Type", "text/html")
 	type TokenResponse struct {
 		APIToken     string
@@ -223,12 +224,7 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	token, err := u.TokenModel.Create(user.ID)
 	if err != nil {
-		log.Printf("create api token: %v", err)
-		if errors.Is(err, errors.ErrTooManyTokens) {
-			errorResponse := TokenResponse{ErrorMessage: "You have reached the maximum number of tokens"}
-			u.Templates.Token.Execute(w, r, errorResponse)
-			return
-		}
+		logger.Error("generate token", "error", err)
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
@@ -237,11 +233,12 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	tokenId := r.FormValue("token_id")
 	user := context.User(r.Context())
 	err := u.TokenModel.Delete(user.ID, tokenId)
 	if err != nil {
-		log.Printf("delete api token: %v", err)
+		logger.Error("delete token", "error", err)
 		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
 		return
 	}

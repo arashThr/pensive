@@ -7,9 +7,6 @@ var (
 	ErrEmailTaken = errors.New("models: email address is already in use")
 	ErrInvalidUrl = errors.New("controller: url is invalid")
 
-	// Tokens
-	ErrTooManyTokens = errors.New("models: too many tokens")
-
 	// Stripe
 	ErrNoStripeCustomer = errors.New("models: stripe customer not found")
 )

@@ -107,13 +107,6 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	token, err := TokenModel.Create(userId)
 	if err != nil {
-		if errors.Is(err, errors.ErrTooManyTokens) {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: update.Message.Chat.ID,
-				Text:   "You have reached the maximum number of tokens. Please delete an existing token before creating a new one.",
-			})
-			return
-		}
 		slog.Error("failed to create API token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
