@@ -65,19 +65,14 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	<!DOCTYPE html>
 	<html>
 	<head>
-		<title>Token Generated</title>
+		<title>Authentication</title>
 	</head>
 	<body>
-		<h2>Token Generated Successfully</h2>
-		<p>Your authentication token has been created.</p>
+		<h2>Authentication succeeded</h2>
+		<p>Your extension is now authenticated.</p>
 		<form id="tokenForm">
 			<input type="hidden" id="token" name="token" value="%s">
 		</form>
-		<script>
-			// You can add JavaScript here to use the token if needed
-			// For example, copying it to clipboard or redirecting with token
-			console.log("Token available in hidden field");
-		</script>
 	</body>
 	</html>
 	`, token.Token)

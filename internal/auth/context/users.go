@@ -39,7 +39,7 @@ func Logger(ctx context.Context) *slog.Logger {
 	logger, ok := value.(*slog.Logger)
 	if !ok {
 		fmt.Fprintln(os.Stderr, "logger was not found in the context")
-		return nil
+		return slog.Default()
 	}
 	return logger
 }
