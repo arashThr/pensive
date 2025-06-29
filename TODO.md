@@ -49,9 +49,10 @@
 - [ ] Apply rate limit on requests
 - [ ] Does user really need API key?
 - [ ] If API is not set, or incorrect, don't send the request
-- [ ] Move prod to Supabase
+- [ ] Move prod to Supabase or Cloudflare
+- [ ] Only one API token
 - [ ] Remove password - Email validation
-- [ ] Remove token from extensions settings page
+- [x] Remove token from extensions settings page
 - [x] Hid API Tokens and Subscriptions. Redirect to bookmarks after login
 - [x] Rename api in model and service to avoid confusion
 - [x] Replace multi-empty lines and spaces with one
