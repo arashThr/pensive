@@ -30,23 +30,26 @@
       </div>
 
       <div class="pr-8">
-        <div class="flex flex-col sm:flex-row sm:flex-row">
+        <div class="flex flex-col sm:flex-row">
           {{if .Thumbnail}}
           <div class="h-16 mb-3 sm:mb-0 sm:mr-3 flex-shrink-0">
-            <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-auto h-full object-cover rounded-lg" />
+            <a href="{{.Link}}" target="_blank">
+              <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-auto h-full object-cover rounded-lg" />
+            </a>
           </div>
           {{end}}
           <div class="flex flex-col">
-            <p class="text-lg font-medium text-gray-900 hover:text-gray-700 transition-colors">
-              {{.Title}}</p>
-            <a href="{{.Link}}"
-              class="hover:underline text-gray-600 hover:text-gray-900 text-sm mt-2 transition-colors">{{.Host}}</a>
+            <a href="{{.Link}}" target="_blank" class="text-lg font-medium text-blue-900 hover:text-blue-700 transition-colors">
+              {{.Title}}
+            </a>
+            <p class="text-gray-600 text-sm mt-2 transition-colors">{{.Host}}</p>
           </div>
         </div>
         <div>
           <p class="text-sm text-gray-600 mt-2">{{.Excerpt}}</p>
         </div>
-        <div class="text-sm text-gray-600">
+        <br />
+        <div class="text-xs text-gray-600">
           <p class="italic">Added: {{.CreatedAt.Format "Jan 2"}}</p>
         </div>
       </div>
