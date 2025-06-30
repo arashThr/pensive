@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/config"
-	"github.com/arashthr/go-course/internal/errors"
 	internalModels "github.com/arashthr/go-course/internal/models"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
