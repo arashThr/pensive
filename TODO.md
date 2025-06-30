@@ -16,6 +16,12 @@
 - [ ] Disconnect the extension
 - [ ] Upload the extensions
 - [ ] Separate text extraction service
+- [ ] Extension: Future search
+- [ ] Premium: Get YouTube
+    - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
+    - `youtube-transcript-api`
+- [ ] Add premium layer
+- [ ] Extension: Click to save
 - [ ] Show the raw content
 - [x] Multiple sessions for the user
 - [x] Get token for extension without copy paste by redirect from website
