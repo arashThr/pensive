@@ -249,6 +249,7 @@ func run(cfg *config.AppConfig) error {
 				r.Post("/{id}", bookmarksController.Update)
 				r.Post("/{id}/delete", bookmarksController.Delete)
 				r.Get("/search", bookmarksController.Search)
+				r.Get("/{id}/full", bookmarksController.GetFullBookmark)
 			})
 		})
 	})

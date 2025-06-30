@@ -15,7 +15,7 @@
           <!-- Properties dropdown menu -->
           <div id="propertiesMenu"
             class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-            <a href="#" id="showTextButton" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+            <a href="/bookmarks/{{.Id}}/full" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               Show Text
             </a>
             <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"

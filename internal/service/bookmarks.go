@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -226,6 +227,56 @@ func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
 		"query", query,
 		"count", len(data.Bookmarks))
 	b.Templates.Search.Execute(w, r, data)
+}
+
+// GetFullBookmark handles GET /v1/bookmarks/{id}/full and returns the full content of a bookmark.
+func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
+	if err != nil {
+		return
+	}
+	fullContent, err := b.BookmarkModel.GetBookmarkContent(bookmark.BookmarkId)
+	if err != nil {
+		if errors.Is(err, errors.ErrNotFound) {
+			http.Error(w, fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.BookmarkId), http.StatusNotFound)
+			return
+		}
+		logger.Error("[bookmarks] get bookmark content by ID", "error", err, "id", bookmark.BookmarkId)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	type Response struct {
+		Id          types.BookmarkId `json:"id"`
+		Title       string           `json:"title"`
+		Link        string           `json:"link"`
+		Excerpt     string           `json:"excerpt"`
+		CreatedAt   time.Time        `json:"created_at,omitempty"`
+		SiteName    string           `json:"site_name,omitempty"`
+		Source      string           `json:"source,omitempty"`
+		ImageUrl    string           `json:"image_url,omitempty"`
+		ArticleLang string           `json:"article_lang,omitempty"`
+		Content     string           `json:"content"`
+	}
+	resp := Response{
+		Id:          bookmark.BookmarkId,
+		Title:       bookmark.Title,
+		Link:        bookmark.Link,
+		Excerpt:     bookmark.Excerpt,
+		CreatedAt:   bookmark.CreatedAt,
+		SiteName:    bookmark.SiteName,
+		Source:      bookmark.Source,
+		ImageUrl:    bookmark.ImageUrl,
+		ArticleLang: bookmark.ArticleLang,
+		Content:     fullContent,
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Error("encoding response", "error", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
