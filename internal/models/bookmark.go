@@ -49,14 +49,19 @@ type Bookmark struct {
 	PublishedTime *time.Time
 }
 
+type BookmarkWithContent struct {
+	Bookmark
+	Content string // Full content of the bookmark
+}
+
 type BookmarkModel struct {
 	Pool *pgxpool.Pool
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
-func (service *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
+func (model *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// Check if the link already exists
-	bookmark, err := service.GetByLink(userId, link)
+	bookmark, err := model.GetByLink(userId, link)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
@@ -104,7 +109,7 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	content := validations.CleanUpText(article.TextContent)
 
 	// TODO: Add excerpt to bookmarks_content table
-	_, err = service.Pool.Exec(context.Background(), `
+	_, err = model.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO users_bookmarks (
 				bookmark_id, 
@@ -130,11 +135,11 @@ func (service *BookmarkModel) Create(link string, userId types.UserId, source Bo
 	return bookmark, nil
 }
 
-func (service *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
+func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		BookmarkId: id,
 	}
-	row := service.Pool.QueryRow(context.Background(),
+	row := model.Pool.QueryRow(context.Background(),
 		`SELECT user_id, title, link, excerpt, image_url, created_at FROM users_bookmarks WHERE bookmark_id = $1;`, id)
 	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
 	if err != nil {
@@ -146,8 +151,8 @@ func (service *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (service *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
-	row := service.Pool.QueryRow(context.Background(), `
+func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
+	row := model.Pool.QueryRow(context.Background(), `
 		SELECT COUNT(*) FROM users_bookmarks WHERE user_id = $1`, userId)
 	var count int
 	err := row.Scan(&count)
@@ -162,7 +167,7 @@ func (service *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Book
 		return nil, false, fmt.Errorf("page number out of range")
 	}
 	page -= 1
-	rows, err := service.Pool.Query(context.Background(),
+	rows, err := model.Pool.Query(context.Background(),
 		`SELECT bookmark_id, title, link, excerpt, created_at
 		FROM users_bookmarks
 		WHERE user_id = $1
@@ -193,8 +198,8 @@ func (service *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Book
 	return bookmarks, morePages, nil
 }
 
-func (service *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
-	rows, err := service.Pool.Query(context.Background(),
+func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
+	rows, err := model.Pool.Query(context.Background(),
 		`SELECT *
 		FROM users_bookmarks
 		WHERE user_id = $1 AND link = $2`, userId, link)
@@ -211,8 +216,8 @@ func (service *BookmarkModel) GetByLink(userId types.UserId, link string) (*Book
 	return &bookmark, nil
 }
 
-func (service *BookmarkModel) Update(bookmark *Bookmark) error {
-	_, err := service.Pool.Exec(context.Background(),
+func (model *BookmarkModel) Update(bookmark *Bookmark) error {
+	_, err := model.Pool.Exec(context.Background(),
 		`UPDATE users_bookmarks SET link = $1, title = $2 WHERE bookmark_id = $3`,
 		bookmark.Link, bookmark.Title, bookmark.BookmarkId,
 	)
@@ -222,8 +227,8 @@ func (service *BookmarkModel) Update(bookmark *Bookmark) error {
 	return nil
 }
 
-func (service *BookmarkModel) Delete(id types.BookmarkId) error {
-	_, err := service.Pool.Exec(context.Background(),
+func (model *BookmarkModel) Delete(id types.BookmarkId) error {
+	_, err := model.Pool.Exec(context.Background(),
 		`DELETE FROM users_bookmarks WHERE bookmark_id = $1;`, id)
 	if err != nil {
 		return fmt.Errorf("delete bookmark: %w", err)
@@ -241,8 +246,8 @@ type SearchResult struct {
 	Rank       float32
 }
 
-func (service *BookmarkModel) Search(userId types.UserId, query string) ([]SearchResult, error) {
-	rows, err := service.Pool.Query(context.Background(), `
+func (model *BookmarkModel) Search(userId types.UserId, query string) ([]SearchResult, error) {
+	rows, err := model.Pool.Query(context.Background(), `
 	WITH search_query AS (
 		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
 	)
@@ -281,6 +286,64 @@ func (service *BookmarkModel) Search(userId types.UserId, query string) ([]Searc
 		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
 	}
 	return results, nil
+}
+
+func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, error) {
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT content
+		FROM bookmarks_contents
+		WHERE bookmark_id = $1
+		LIMIT 1`, id)
+	if err != nil {
+		return "", fmt.Errorf("query bookmark content by id: %w", err)
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return "", errors.ErrNotFound
+	}
+	var content string
+	err = rows.Scan(&content)
+	if err != nil {
+		return "", fmt.Errorf("scan bookmark content: %w", err)
+	}
+	if rows.Err() != nil {
+		return "", fmt.Errorf("iterating rows: %w", rows.Err())
+	}
+	return content, nil
+}
+
+func (model *BookmarkModel) GetFullBookmark(id types.BookmarkId) (*BookmarkWithContent, error) {
+	rows, err := model.Pool.Query(context.Background(), `
+	SELECT
+		ub.bookmark_id,
+		ub.user_id,
+		ub.title,
+		ub.link,
+		ub.source,
+		bc.excerpt,
+		bc.content,
+		ub.image_url,
+		bc.article_lang,
+		ub.site_name,
+		ub.created_at,
+		bc.published_time
+	FROM users_bookmarks ub
+	JOIN bookmarks_contents bc ON ub.bookmark_id = bc.bookmark_id
+	WHERE ub.bookmark_id = $1`, id)
+
+	if err != nil {
+		return nil, fmt.Errorf("query full bookmark by id: %w", err)
+	}
+
+	bookmark, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[BookmarkWithContent])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrNotFound
+		}
+		return nil, fmt.Errorf("bookmark by id: %w", err)
+	}
+
+	return &bookmark, nil
 }
 
 func getPage(link string) (*http.Response, error) {
