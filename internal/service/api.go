@@ -18,7 +18,6 @@ import (
 
 type Api struct {
 	BookmarkModel *models.BookmarkModel
-	TokenModel    *models.TokenModel
 }
 
 type ErrorResponse struct {
@@ -31,17 +30,6 @@ type Bookmark struct {
 	Title   string
 	Link    string
 	Excerpt string
-}
-
-func (a *Api) GetTokens(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	tokens, err := a.TokenModel.Get(user.ID)
-	if err != nil {
-		log.Printf("fetching tokens: %v", err)
-		http.Error(w, "Failed to fetch tokens", http.StatusInternalServerError)
-		return
-	}
-	writeResponse(w, tokens)
 }
 
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
@@ -221,42 +209,6 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	writeResponse(w, data)
-}
-
-func (a *Api) GetFullBookmarkAPI(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
-	if bookmark == nil {
-		return
-	}
-	fullContent, err := a.BookmarkModel.GetBookmarkContent(bookmark.BookmarkId)
-	if err != nil {
-		if errors.Is(err, errors.ErrNotFound) {
-			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
-				Code:    "NOT_FOUND",
-				Message: fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.BookmarkId),
-			})
-			return
-		}
-		logger.Error("[api] get bookmark content by ID", "error", err, "id", bookmark.BookmarkId)
-		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
-			Code:    "INTERNAL_ERROR",
-			Message: "api: Something went wrong",
-		})
-		return
-	}
-
-	bookmarkResponse := mapModelToBookmark(bookmark)
-	type Response struct {
-		Bookmark Bookmark
-		Content  string
-	}
-	var fullBookmark Response
-	fullBookmark = Response{
-		Bookmark: bookmarkResponse,
-		Content:  fullContent,
-	}
-	writeResponse(w, fullBookmark)
 }
 
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
