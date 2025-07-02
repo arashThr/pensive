@@ -1,9 +1,12 @@
 package auth
 
 import (
+	"archive/zip"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/arashthr/go-course/internal/auth/context"
@@ -16,13 +19,16 @@ import (
 
 type Users struct {
 	Templates struct {
-		New            web.Template
-		SignIn         web.Template
-		ForgotPassword web.Template
-		CheckYourEmail web.Template
-		ResetPassword  web.Template
-		UserPage       web.Template
-		Token          web.Template
+		New              web.Template
+		SignIn           web.Template
+		ForgotPassword   web.Template
+		CheckYourEmail   web.Template
+		ResetPassword    web.Template
+		UserPage         web.Template
+		Token            web.Template
+		ImportExport     web.Template
+		ImportProcessing web.Template
+		ImportStatus     web.Template
 	}
 	UserService          *models.UserModel
 	SessionService       *models.SessionService
@@ -243,6 +249,152 @@ func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+// ImportExport displays the import/export page
+func (u Users) ImportExport(w http.ResponseWriter, r *http.Request) {
+	u.Templates.ImportExport.Execute(w, r, nil)
+}
+
+// ProcessImport handles the file upload and initial validation
+func (u Users) ProcessImport(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	user := context.User(r.Context())
+
+	// Parse multipart form (8MB max size)
+	err := r.ParseMultipartForm(8 << 20)
+	if err != nil {
+		logger.Error("parse multipart form", "error", err)
+		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
+		return
+	}
+
+	// Get the uploaded file
+	file, header, err := r.FormFile("import-file")
+	if err != nil {
+		logger.Error("get form file", "error", err)
+		http.Error(w, "Failed to get uploaded file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	// Validate file extension
+	if !strings.HasSuffix(strings.ToLower(header.Filename), ".zip") {
+		http.Error(w, "Only ZIP files are supported", http.StatusBadRequest)
+		return
+	}
+
+	// Get form values
+	source := r.FormValue("source")
+	importOption := r.FormValue("import-option")
+
+	// Basic validation
+	if source != "pocket" {
+		http.Error(w, "Unsupported import source", http.StatusBadRequest)
+		return
+	}
+
+	if importOption != "highlighted" && importOption != "all" {
+		http.Error(w, "Invalid import option", http.StatusBadRequest)
+		return
+	}
+
+	// Create a temporary file to store the uploaded ZIP
+	tempFile, err := os.CreateTemp("", "pocket-import-*.zip")
+	if err != nil {
+		logger.Error("create temp file", "error", err)
+		http.Error(w, "Failed to process upload", http.StatusInternalServerError)
+		return
+	}
+	defer os.Remove(tempFile.Name()) // Clean up temp file
+	defer tempFile.Close()
+
+	// Copy uploaded file to temp file
+	_, err = io.Copy(tempFile, file)
+	if err != nil {
+		logger.Error("copy file to temp", "error", err)
+		http.Error(w, "Failed to process upload", http.StatusInternalServerError)
+		return
+	}
+
+	// Basic ZIP validation - try to open it
+	_, err = zip.OpenReader(tempFile.Name())
+	if err != nil {
+		logger.Error("validate zip file", "error", err)
+		http.Error(w, "Invalid ZIP file", http.StatusBadRequest)
+		return
+	}
+
+	logger.Info("import validation successful",
+		"user_id", user.ID,
+		"source", source,
+		"option", importOption,
+		"filename", header.Filename,
+		"size", header.Size)
+
+	// For now, just redirect to processing page
+	// In a real implementation, you would:
+	// 1. Store the file in persistent storage
+	// 2. Queue a background job for processing
+	// 3. Generate a job ID for tracking
+
+	data := struct {
+		Source string
+		JobID  string
+	}{
+		Source: strings.ToUpper(source[:1]) + source[1:], // Capitalize first letter
+		JobID:  "temp-job-id",                            // In real implementation, generate unique job ID
+	}
+
+	u.Templates.ImportProcessing.Execute(w, r, data)
+}
+
+// ProcessExport handles exporting user data
+func (u Users) ProcessExport(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	user := context.User(r.Context())
+
+	logger.Info("export requested", "user_id", user.ID)
+
+	// TODO: Implement actual export functionality
+	// For now, just return an error indicating it's not implemented yet
+	http.Error(w, "Export functionality coming soon", http.StatusNotImplemented)
+}
+
+// ImportStatus checks the status of an import job
+func (u Users) ImportStatus(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	user := context.User(r.Context())
+	jobID := r.URL.Query().Get("job_id")
+
+	logger.Info("import status check", "user_id", user.ID, "job_id", jobID)
+
+	// For now, simulate different states based on job_id
+	// In a real implementation, you would check actual job status from database/queue
+	data := struct {
+		JobID          string
+		Source         string
+		ImportComplete bool
+		ImportFailed   bool
+		ImportedCount  int
+		ErrorMessage   string
+	}{
+		JobID:  jobID,
+		Source: "Pocket",
+	}
+
+	// Simulate processing states for demo purposes
+	if jobID == "temp-job-id" {
+		// For demo, show still processing
+		data.ImportComplete = false
+		data.ImportFailed = false
+	} else {
+		// For other job IDs, simulate completion
+		data.ImportComplete = true
+		data.ImportedCount = 42 // Demo value
+	}
+
+	u.Templates.ImportStatus.Execute(w, r, data)
 }
 
 type UserMiddleware struct {

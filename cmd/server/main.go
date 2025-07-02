@@ -108,6 +108,9 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
 	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
+	usersController.Templates.ImportExport = views.Must(views.ParseTemplate("user/import-export.gohtml", "tailwind.gohtml"))
+	usersController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
+	usersController.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksModel,
@@ -210,6 +213,10 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/me", usersController.CurrentUser)
 				r.Post("/generate-token", usersController.GenerateToken)
 				r.Post("/delete-token", usersController.DeleteToken)
+				r.Get("/import-export", usersController.ImportExport)
+				r.Post("/import", usersController.ProcessImport)
+				r.Post("/export", usersController.ProcessExport)
+				r.Get("/import-status", usersController.ImportStatus)
 			})
 		})
 		r.Route("/payments", func(r chi.Router) {
