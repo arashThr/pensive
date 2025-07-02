@@ -1,0 +1,102 @@
+{{template "header" .}}
+
+<div class="px-6 py-12 max-w-2xl mx-auto">
+  <div class="text-center">
+    {{if .ImportComplete}}
+      <!-- Success State -->
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6">
+        <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">Import Complete!</h1>
+      <p class="text-lg text-gray-600 mb-8">
+        Successfully imported {{.ImportedCount}} bookmarks from {{.Source}}.
+      </p>
+
+      <div class="space-y-4">
+        <a
+          href="/bookmarks"
+          class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        >
+          View Your Bookmarks
+        </a>
+        <div>
+          <a
+            href="/users/me"
+            class="text-blue-600 hover:text-blue-500 underline"
+          >
+            Back to Account
+          </a>
+        </div>
+      </div>
+    {{else if .ImportFailed}}
+      <!-- Error State -->
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+        <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">Import Failed</h1>
+      <p class="text-lg text-gray-600 mb-8">
+        We encountered an error while importing your {{.Source}} data.
+      </p>
+
+      {{if .ErrorMessage}}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <p class="text-sm text-red-700">{{.ErrorMessage}}</p>
+        </div>
+      {{end}}
+
+      <div class="space-y-4">
+        <a
+          href="/users/import-export"
+          class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        >
+          Try Again
+        </a>
+        <div>
+          <a
+            href="/users/me"
+            class="text-blue-600 hover:text-blue-500 underline"
+          >
+            Back to Account
+          </a>
+        </div>
+      </div>
+    {{else}}
+      <!-- Still Processing State -->
+      <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
+        <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">Still Processing...</h1>
+      <p class="text-lg text-gray-600 mb-8">
+        Your {{.Source}} import is still being processed. Please wait a moment.
+      </p>
+
+      <div class="bg-blue-50 rounded-lg p-4 border border-blue-200 mb-6">
+        <p class="text-sm text-blue-700">
+          This page will automatically refresh every 10 seconds.
+        </p>
+      </div>
+
+      <a
+        href="/users/me"
+        class="text-blue-600 hover:text-blue-500 underline"
+      >
+        Back to Account
+      </a>
+
+      <!-- Auto-refresh meta tag -->
+      <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
+    {{end}}
+  </div>
+</div>
+
+{{template "footer" .}}

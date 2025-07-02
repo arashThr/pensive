@@ -25,7 +25,7 @@
 - [ ] Limit search result to 10
 - [ ] Export links
 - [ ] Parse Pocket export
-- [ ] Show the raw content
+- [x] Show the raw content
 - [x] Multiple sessions for the user
 - [x] Get token for extension without copy paste by redirect from website
     - Telegram bot
