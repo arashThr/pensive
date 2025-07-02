@@ -27,12 +27,14 @@ const (
 	WebSource BookmarkSource = iota
 	TelegramSource
 	Api
+	Pocket
 )
 
 var sourceMapping = map[BookmarkSource]string{
 	WebSource:      "web",
 	TelegramSource: "telegram",
 	Api:            "api",
+	Pocket:         "pocket",
 }
 
 type Bookmark struct {

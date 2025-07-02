@@ -1,18 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth"
-	"github.com/arashthr/go-course/internal/auth/context"
+	authcontext "github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service"
+	"github.com/arashthr/go-course/internal/service/importer"
 	"github.com/arashthr/go-course/web"
 	"github.com/arashthr/go-course/web/views"
 	"github.com/go-chi/chi/v5"
@@ -79,6 +81,9 @@ func run(cfg *config.AppConfig) error {
 	telegramModel := &models.TelegramService{
 		Pool: pool,
 	}
+	importJobModel := &models.ImportJobModel{
+		DB: pool,
+	}
 
 	// Middlewares
 	umw := auth.UserMiddleware{
@@ -108,9 +113,6 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
 	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
-	usersController.Templates.ImportExport = views.Must(views.ParseTemplate("user/import-export.gohtml", "tailwind.gohtml"))
-	usersController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
-	usersController.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksModel,
@@ -119,6 +121,13 @@ func run(cfg *config.AppConfig) error {
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Search = views.Must(views.ParseTemplate("bookmarks/search.gohtml", "tailwind.gohtml"))
+
+	importerController := service.Importer{
+		ImportJobModel: importJobModel,
+	}
+	importerController.Templates.ImportExport = views.Must(views.ParseTemplate("user/import-export.gohtml", "tailwind.gohtml"))
+	importerController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
+	importerController.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
 
 	apiController := service.Api{
 		BookmarkModel: bookmarksModel,
@@ -141,6 +150,12 @@ func run(cfg *config.AppConfig) error {
 		TelegramModel: telegramModel,
 		BotName:       cfg.Telegram.BotName,
 	}
+
+	// Start import processor in background
+	importProcessor := importer.NewImportProcessor(importJobModel, bookmarksModel, slog.Default())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go importProcessor.Start(ctx)
 
 	// Middlewares
 	r := chi.NewRouter()
@@ -171,7 +186,7 @@ func run(cfg *config.AppConfig) error {
 	})
 
 	getHomePage := func(w http.ResponseWriter, r *http.Request) {
-		user := context.User(r.Context())
+		user := authcontext.User(r.Context())
 		home := "home.gohtml"
 		if user != nil {
 			home = "user/home.gohtml"
@@ -205,18 +220,24 @@ func run(cfg *config.AppConfig) error {
 		r.Post("/reset-password", usersController.ProcessResetPassword)
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
+			// Subscriptions
 			r.Get("/subscribe", web.StaticHandler(
 				views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml")),
 			))
+			// Auth
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
 				r.Get("/me", usersController.CurrentUser)
 				r.Post("/generate-token", usersController.GenerateToken)
 				r.Post("/delete-token", usersController.DeleteToken)
-				r.Get("/import-export", usersController.ImportExport)
-				r.Post("/import", usersController.ProcessImport)
-				r.Post("/export", usersController.ProcessExport)
-				r.Get("/import-status", usersController.ImportStatus)
+			})
+			// Import/export
+			r.Group(func(r chi.Router) {
+				r.Use(umw.RequireUser)
+				r.Get("/import-export", importerController.ImportExport)
+				r.Post("/import", importerController.ProcessImport)
+				r.Post("/export", importerController.ProcessExport)
+				r.Get("/import-status", importerController.ImportStatus)
 			})
 		})
 		r.Route("/payments", func(r chi.Router) {
