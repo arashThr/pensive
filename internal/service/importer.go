@@ -187,7 +187,6 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 		ImportFailed   bool
 		ImportedCount  int
 		TotalItems     int
-		Progress       int
 		ErrorMessage   *string
 	}{
 		JobID:          job.ID,
@@ -196,7 +195,6 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 		ImportFailed:   job.Status == "failed",
 		ImportedCount:  job.ImportedCount,
 		TotalItems:     job.TotalItems,
-		Progress:       job.Progress,
 		ErrorMessage:   job.ErrorMessage,
 	}
 

@@ -17,7 +17,6 @@ type ImportJob struct {
 	ImportOption  string       `json:"import_option"`
 	FilePath      string       `json:"file_path"`
 	Status        string       `json:"status"` // pending, processing, completed, failed
-	Progress      int          `json:"progress"`
 	TotalItems    int          `json:"total_items"`
 	ImportedCount int          `json:"imported_count"`
 	ErrorMessage  *string      `json:"error_message,omitempty"`
@@ -53,7 +52,7 @@ func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 	query := `
 		SELECT id, user_id, source, import_option, file_path, status, 
-		       progress, total_items, imported_count, error_message, 
+		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 
 		WHERE status = 'pending' 
@@ -78,7 +77,7 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
 	query := `
 		SELECT id, user_id, source, import_option, file_path, status, 
-		       progress, total_items, imported_count, error_message, 
+		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 
 		WHERE id = $1`
@@ -86,7 +85,7 @@ func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
 	var job ImportJob
 	err := m.DB.QueryRow(context.Background(), query, jobID).Scan(
 		&job.ID, &job.UserID, &job.Source, &job.ImportOption, &job.FilePath,
-		&job.Status, &job.Progress, &job.TotalItems, &job.ImportedCount,
+		&job.Status, &job.TotalItems, &job.ImportedCount,
 		&job.ErrorMessage, &job.CreatedAt, &job.StartedAt, &job.CompletedAt,
 	)
 
@@ -125,10 +124,7 @@ func (m *ImportJobModel) UpdateStatus(jobID, status string, errorMessage *string
 func (m *ImportJobModel) UpdateProgress(jobID string, totalItems, importedCount int) error {
 	query := `
 		UPDATE import_jobs 
-		SET total_items = $1, imported_count = $2, progress = CASE 
-			WHEN $1 > 0 THEN ROUND(($2::numeric / $1::numeric) * 100)
-			ELSE 0
-		END
+		SET total_items = $1, imported_count = $2
 		WHERE id = $3`
 
 	_, err := m.DB.Exec(context.Background(), query, totalItems, importedCount, jobID)
@@ -139,7 +135,7 @@ func (m *ImportJobModel) UpdateProgress(jobID string, totalItems, importedCount 
 func (m *ImportJobModel) GetByUserID(userID types.UserId, limit int) ([]ImportJob, error) {
 	query := `
 		SELECT id, user_id, source, import_option, file_path, status, 
-		       progress, total_items, imported_count, error_message, 
+		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 
 		WHERE user_id = $1 
@@ -152,18 +148,9 @@ func (m *ImportJobModel) GetByUserID(userID types.UserId, limit int) ([]ImportJo
 	}
 	defer rows.Close()
 
-	var jobs []ImportJob
-	for rows.Next() {
-		var job ImportJob
-		err := rows.Scan(
-			&job.ID, &job.UserID, &job.Source, &job.ImportOption, &job.FilePath,
-			&job.Status, &job.Progress, &job.TotalItems, &job.ImportedCount,
-			&job.ErrorMessage, &job.CreatedAt, &job.StartedAt, &job.CompletedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		jobs = append(jobs, job)
+	jobs, err := pgx.CollectRows(rows, pgx.RowToStructByName[ImportJob])
+	if err != nil {
+		return nil, fmt.Errorf("collect jobs rows for get by user id: %w", err)
 	}
 
 	return jobs, rows.Err()
