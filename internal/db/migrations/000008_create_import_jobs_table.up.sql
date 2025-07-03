@@ -5,7 +5,6 @@ CREATE TABLE import_jobs (
     import_option TEXT NOT NULL,
     file_path TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
-    progress INTEGER DEFAULT 0,
     total_items INTEGER DEFAULT 0,
     imported_count INTEGER DEFAULT 0,
     error_message TEXT,
