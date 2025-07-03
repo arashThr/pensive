@@ -6,6 +6,8 @@
 - [ ] Why YouTube is not working?
 - [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
+- [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
+- [ ] Fix redirects: http://www.defmacro.org/ramblings/fp.html
 - [x] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
 - [x] Flex for the table
 

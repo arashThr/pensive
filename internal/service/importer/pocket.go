@@ -260,6 +260,8 @@ func GetImportFilePath(userId types.UserId, source string) (string, error) {
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		return "", fmt.Errorf("create upload directory: %w", err)
 	}
+	// TODO: use temp dir
+	// uploadDir := os.TempDir()
 	filename := fmt.Sprintf("%s_%s.zip", strconv.Itoa(int(userId)), source)
 	filePath := filepath.Join(uploadDir, filename)
 	return filePath, nil
