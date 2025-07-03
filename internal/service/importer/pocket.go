@@ -260,7 +260,7 @@ func GetImportFilePath(userId types.UserId, source string) (string, error) {
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		return "", fmt.Errorf("create upload directory: %w", err)
 	}
-	filename := fmt.Sprintf("%s_%s_%s.zip", strconv.Itoa(int(userId)), source, time.Now().Format("20060102_150405"))
+	filename := fmt.Sprintf("%s_%s.zip", strconv.Itoa(int(userId)), source)
 	filePath := filepath.Join(uploadDir, filename)
 	return filePath, nil
 }
