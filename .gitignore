@@ -2,3 +2,4 @@
 server_binary
 cmd/exp
 .env
+uploads
