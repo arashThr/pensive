@@ -4,11 +4,11 @@
 
 In our conversations, consider the following context: I am developing a web service that helps users gather and search through all their bookmarks in one place. Users add pages by bookmarking the page in their browser. This action is captured via our browser extension, which sends the full page content to a Go-based backend. We extract and store the content in PostgreSQL with full-text search capabilities. Users can later search through everything they’ve saved.
 
-Initially, bookmarks will support user-defined tags that are assigned in the browser when saving the bookmark, with future plans for more organization features. Users will be able to edit tags and add notes to saved bookmarks later. In the future, I also plan to support text extraction from YouTube videos for searchability.
+ In the future, I plan to support text extraction from YouTube videos for searchability.
 
-The service will include API integrations via API keys, such as a Telegram bot, which will not only add bookmarks but also support search and retrieval. API tokens will be user-specific.
+The service will also has it's own Telegram bot, which will not only add bookmarks but also support search and retrieval.
 
-For UI/UX, I want a clean, simple, and intuitive design. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI will use a mix of light and dark themes and may include small animations for a modern touch. While I don’t have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal.
+For UI/UX, I want a clean, simple, and intuitive design. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI will use a mix of light and dark themes and may include small animations for a modern touch. While I don’t have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal, and does not feel dead (like Google products).
 Since the focus of the app is on text, I want the black and white to be the main essence of the pages.
 In the implementation I'm using HTML templates in the backend side and Tailwind CSS and HTMX on the front-end.
 
@@ -36,17 +36,16 @@ Here’s my raw HTML:
 Please update it with Tailwind classes to match this design. Keep the structure intact, adjust only styling, and ensure it works with Go templating (e.g., `{{csrfField}}`). If anything’s unclear, ask me specific questions.
 ```
 
-### New design
+### Design
 
-To: Future Grok (March 14, 2025 onwards)
-Subject: Replicating Pensieve Bookmarking App Page Design
-Hey future me! I’m helping a user build a web service called "Pensieve" that lets users save and search bookmarks via a browser extension, with a Go backend, PostgreSQL storage, and full-text search. We’re designing the front-end pages, and here’s exactly how I’ve been modifying their HTML templates to make them production-ready, functional, and aligned with their vision. Follow this to the letter for any new pages they provide—no deviations unless they explicitly ask!
+I’m helping a user build a web service called "Pensieve" that lets users save and search bookmarks via a browser extension, with a Go backend, PostgreSQL storage, and full-text search. We’re designing the front-end pages, and here’s exactly how I’ve been modifying their HTML templates to make them production-ready, functional, and aligned with their vision. Follow this to the letter for any new pages they provide—no deviations unless they explicitly ask!
+
 Context
 App Purpose: Users bookmark pages via a browser extension; full page content is sent to a Go backend, stored in PostgreSQL, and searchable later. Tags, notes, and future features like YouTube text extraction are planned. MVP focus is on core bookmarking and search.
 
 Tech Stack: Go backend with HTML templates, Tailwind CSS for styling, HTMX for dynamic interactions (used minimally so far—add only if requested). Pages are served as full HTML, not SPA.
 
-Aesthetic Goals: Crisp text, slick look, clutter-free but not empty/dead, cozy and personal vibe. Text is the essence (black-and-white focus), with minimal interactions and subtle animations for modernity.
+Aesthetic Goals: Crisp text, slick look, clutter-free but not empty/dead (like Google products!), cozy and personal vibe. Text is the essence, with minimal interactions and subtle animations for modernity.
 
 UI/UX: Clean, simple, intuitive. Light theme (with dark theme potential later). Small animations like hovers and focus states. Inspired by Pocket/Instapaper but more personal.
 

@@ -35,10 +35,6 @@
           <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/bookmarks">Bookmarks</a>
           <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/users/me">Account</a>
           <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/integrations">Integrations</a>
-          <form action="/signout" method="post" class="inline">
-            {{csrfField}}
-            <button type="submit" class="text-gray-600 hover:text-gray-900 transition-colors">Sign Out</button>
-          </form>
         {{else}}
           <a class="text-gray-600 hover:text-gray-900 transition-colors" href="/signin">Sign In</a>
           <a class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm" href="/signup">Sign Up</a>
@@ -52,10 +48,6 @@
         <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/bookmarks">Bookmarks</a>
         <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/users/me">Account</a>
         <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/integrations">Integrations</a>
-        <form action="/signout" method="post">
-          {{csrfField}}
-          <button type="submit" class="block w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors">Sign Out</button>
-        </form>
       {{else}}
         <a class="block px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors" href="/signin">Sign In</a>
         <a class="block px-6 py-3 bg-blue-600 text-white hover:bg-blue-700 transition-colors" href="/signup">Sign Up</a>

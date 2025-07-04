@@ -4,6 +4,7 @@
 
 ## Fixes
 - [ ] Why YouTube is not working?
+- [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
 - [ ] failed to collect row: bookmark by link: too many rows in result set
