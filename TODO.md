@@ -6,13 +6,17 @@
 - [ ] Why YouTube is not working?
 - [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
+- [ ] failed to collect row: bookmark by link: too many rows in result set
+    - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
-- [ ] Fix redirects: http://www.defmacro.org/ramblings/fp.html
+- [x] failed to get page: failed to perform request: Get "www.defmacro.org/2006/06/19/fp.html": unsupported protocol scheme ""
+- [x] Fix redirects: http://www.defmacro.org/ramblings/fp.html
 - [x] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
 - [x] Flex for the table
 
 ## Features
 - [ ] Ping server from Telegram bot to check the validity of the token
+- [ ] Use Pupeteer and playwright for getting the pages
 - [ ] Feedback link
 - [ ] Google login
 - [ ] Disconnect the extension
@@ -53,6 +57,7 @@
 ## Changes
 - [ ] "Failed to parse image URL"
 - [ ] Email only users - No password
+- [ ] Use temp dir for pocket imports
 - [ ] Keep the token name
 - [ ] Clear the search results when text box is cleared
 - [ ] Remove password and just use email
@@ -62,7 +67,9 @@
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase or Cloudflare
 - [ ] Only one API token
+- [ ] Rename users_bookmarks table to bookmarks
 - [ ] Remove password - Email validation
+- [ ] Use zap for logging
 - [x] Remove token from extensions settings page
 - [x] Hid API Tokens and Subscriptions. Redirect to bookmarks after login
 - [x] Rename api in model and service to avoid confusion

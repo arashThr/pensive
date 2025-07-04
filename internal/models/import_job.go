@@ -14,7 +14,6 @@ type ImportJob struct {
 	ID            string       `json:"id"`
 	UserID        types.UserId `json:"user_id"`
 	Source        string       `json:"source"`
-	ImportOption  string       `json:"import_option"`
 	FilePath      string       `json:"file_path"`
 	Status        string       `json:"status"` // pending, processing, completed, failed
 	TotalItems    int          `json:"total_items"`
@@ -32,16 +31,16 @@ type ImportJobModel struct {
 // Create creates a new import job
 func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 	query := `
-		INSERT INTO import_jobs (user_id, source, import_option, file_path, status)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO import_jobs (user_id, source, file_path, status)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at`
 
 	err := m.DB.QueryRow(context.Background(), query,
-		job.UserID, job.Source, job.ImportOption, job.FilePath, "pending").
+		job.UserID, job.Source, job.FilePath, "pending").
 		Scan(&job.ID, &job.CreatedAt)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("insert import job: %w", err)
 	}
 
 	job.Status = "pending"
@@ -51,11 +50,11 @@ func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 // GetPendingJobs returns up to limit pending jobs
 func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 	query := `
-		SELECT id, user_id, source, import_option, file_path, status, 
+		SELECT id, user_id, source, file_path, status, 
 		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 
-		WHERE status = 'pending' 
+		WHERE status != 'completed'
 		ORDER BY created_at ASC 
 		LIMIT $1`
 
@@ -76,7 +75,7 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 // GetByID returns a job by ID
 func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
 	query := `
-		SELECT id, user_id, source, import_option, file_path, status, 
+		SELECT id, user_id, source, file_path, status, 
 		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 
@@ -84,7 +83,7 @@ func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
 
 	var job ImportJob
 	err := m.DB.QueryRow(context.Background(), query, jobID).Scan(
-		&job.ID, &job.UserID, &job.Source, &job.ImportOption, &job.FilePath,
+		&job.ID, &job.UserID, &job.Source, &job.FilePath,
 		&job.Status, &job.TotalItems, &job.ImportedCount,
 		&job.ErrorMessage, &job.CreatedAt, &job.StartedAt, &job.CompletedAt,
 	)
@@ -134,7 +133,7 @@ func (m *ImportJobModel) UpdateProgress(jobID string, totalItems, importedCount 
 // GetByUserID returns jobs for a specific user
 func (m *ImportJobModel) GetByUserID(userID types.UserId, limit int) ([]ImportJob, error) {
 	query := `
-		SELECT id, user_id, source, import_option, file_path, status, 
+		SELECT id, user_id, source, file_path, status, 
 		       total_items, imported_count, error_message, 
 		       created_at, started_at, completed_at
 		FROM import_jobs 

@@ -70,12 +70,11 @@ func (p *ImportProcessor) Start(ctx context.Context) {
 
 // processJob processes a single import job
 func (p *ImportProcessor) processJob(job models.ImportJob) {
-	logger := p.Logger.With("job_id", job.ID, "user_id", job.UserID)
-	logger.Info("processing import job", "source", job.Source, "file", job.FilePath)
+	slog.Info("processing import job", "source", job.Source, "file", job.FilePath)
 
 	// Update status to processing
 	if err := p.ImportJobModel.UpdateStatus(job.ID, "processing", nil); err != nil {
-		logger.Error("update job status to processing", "error", err)
+		slog.Error("update job status to processing", "error", err)
 		return
 	}
 
@@ -90,23 +89,21 @@ func (p *ImportProcessor) processJob(job models.ImportJob) {
 
 	// Update final status
 	if err != nil {
-		logger.Error("job processing failed", "error", err)
+		slog.Error("job processing failed", "error", err)
 		errorMsg := err.Error()
 		if updateErr := p.ImportJobModel.UpdateStatus(job.ID, "failed", &errorMsg); updateErr != nil {
-			logger.Error("update job status to failed", "error", updateErr)
+			slog.Error("update job status to failed", "error", updateErr)
 		}
 	} else {
-		logger.Info("job processing completed")
+		slog.Info("job processing completed")
 		if updateErr := p.ImportJobModel.UpdateStatus(job.ID, "completed", nil); updateErr != nil {
-			logger.Error("update job status to completed", "error", updateErr)
+			slog.Error("update job status to completed", "error", updateErr)
 		}
 	}
 }
 
 // processPocketImport processes a Pocket ZIP export
 func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
-	logger := p.Logger.With("job_id", job.ID)
-
 	// Open ZIP file
 	reader, err := zip.OpenReader(job.FilePath)
 	if err != nil {
@@ -133,44 +130,33 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 		return fmt.Errorf("parse pocket CSV: %w", err)
 	}
 
-	// Filter items based on import option
-	filteredItems := p.filterPocketItems(items, job.ImportOption)
-
-	logger.Info("parsed pocket items", "total", len(items), "filtered", len(filteredItems))
-
 	// Update total items count
-	if err := p.ImportJobModel.UpdateProgress(job.ID, len(filteredItems), 0); err != nil {
-		logger.Error("update total items count", "error", err)
+	if err := p.ImportJobModel.UpdateProgress(job.ID, len(items), 0); err != nil {
+		slog.Error("update total items count", "error", err)
 	}
 
 	// Import bookmarks
 	importedCount := 0
-	for i, item := range filteredItems {
+	for i, item := range items {
 		// Validate URL
 		if !validations.IsURLValid(item.URL) {
-			logger.Debug("skipping invalid URL", "url", item.URL)
-			continue
+			slog.Debug("skipping invalid URL", "url", item.URL)
+		} else if item.Status == "archive" {
+			_, err := p.BookmarkModel.Create(item.URL, job.UserID, models.Pocket)
+			if err != nil {
+				slog.Error("create bookmark failed", "error", err, "url", item.URL)
+			}
 		}
-
-		// Create bookmark
-		_, err := p.BookmarkModel.Create(item.URL, job.UserID, models.Pocket)
-		if err != nil {
-			logger.Error("create bookmark failed", "error", err, "url", item.URL)
-			// Continue with other items even if one fails
-			continue
-		}
-
 		importedCount++
-
 		// Update progress every 10 items or at the end
-		if (i+1)%10 == 0 || i == len(filteredItems)-1 {
-			if err := p.ImportJobModel.UpdateProgress(job.ID, len(filteredItems), importedCount); err != nil {
-				logger.Error("update progress", "error", err)
+		if (i+1)%10 == 0 || i == len(items)-1 {
+			if err := p.ImportJobModel.UpdateProgress(job.ID, len(items), importedCount); err != nil {
+				slog.Error("update progress", "error", err)
 			}
 		}
 	}
 
-	logger.Info("import completed", "imported_count", importedCount, "total_items", len(filteredItems))
+	slog.Info("import completed", "imported_count", importedCount, "total_items", len(items))
 	return nil
 }
 
@@ -225,7 +211,7 @@ func (p *ImportProcessor) parsePocketCSV(csvFile *zip.File) ([]PocketItem, error
 		timeAddedStr := strings.TrimSpace(record[timeAddedIndex])
 		timeAddedUnix, err := strconv.ParseInt(timeAddedStr, 10, 64)
 		if err != nil {
-			p.Logger.Debug("invalid time_added, using current time", "time_added", timeAddedStr)
+			slog.Debug("invalid time_added, using current time", "time_added", timeAddedStr)
 			timeAddedUnix = time.Now().Unix()
 		}
 
@@ -240,19 +226,6 @@ func (p *ImportProcessor) parsePocketCSV(csvFile *zip.File) ([]PocketItem, error
 	}
 
 	return items, nil
-}
-
-// filterPocketItems filters items based on import option
-func (p *ImportProcessor) filterPocketItems(items []PocketItem, importOption string) []PocketItem {
-	if importOption == "all" {
-		return items
-	}
-
-	// For "highlighted" option, we would need to check favorites
-	// Since Pocket CSV doesn't clearly distinguish highlights vs favorites,
-	// and we don't have the exact CSV structure, we'll return all for now
-	// In a real implementation, you'd filter based on favorite=1 or similar
-	return items
 }
 
 func GetImportFilePath(userId types.UserId, source string) (string, error) {

@@ -57,16 +57,10 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 
 	// Get form values
 	source := r.FormValue("source")
-	importOption := r.FormValue("import-option")
 
 	// Basic validation
 	if source != "pocket" {
 		http.Error(w, "Unsupported import source", http.StatusBadRequest)
-		return
-	}
-
-	if importOption != "highlighted" && importOption != "all" {
-		http.Error(w, "Invalid import option", http.StatusBadRequest)
 		return
 	}
 
@@ -106,10 +100,9 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 
 	// Create import job
 	job := models.ImportJob{
-		UserID:       user.ID,
-		Source:       source,
-		ImportOption: importOption,
-		FilePath:     filePath,
+		UserID:   user.ID,
+		Source:   source,
+		FilePath: filePath,
 	}
 
 	createdJob, err := p.ImportJobModel.Create(job)
@@ -124,7 +117,6 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 		"job_id", createdJob.ID,
 		"user_id", user.ID,
 		"source", source,
-		"option", importOption,
 		"filename", header.Filename,
 		"size", header.Size)
 

@@ -1,13 +1,16 @@
 package models
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -61,6 +64,7 @@ type BookmarkModel struct {
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
+// TODO: When LLMs are inlcuded, don't use them for imports, such as pocket
 func (model *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
 	// Check if the link already exists
 	bookmark, err := model.GetByLink(userId, link)
@@ -103,7 +107,9 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 		Source:        sourceMapping[source],
 	}
 
-	if _, err := url.ParseRequestURI(article.Image); err != nil {
+	if article.Image == "" {
+		bookmark.ImageUrl = ""
+	} else if _, err := url.ParseRequestURI(article.Image); err != nil {
 		slog.Warn("Failed to parse image URL", "error", err)
 		bookmark.ImageUrl = ""
 	}
@@ -348,6 +354,8 @@ func (model *BookmarkModel) GetFullBookmark(id types.BookmarkId) (*BookmarkWithC
 	return &bookmark, nil
 }
 
+var metaRefreshRe = regexp.MustCompile(`(?i)<meta[^>]+http-equiv=["']?refresh["']?[^>]+content=["']?\d+;\s*url=([^"'>]+)["']?`)
+
 func getPage(link string) (*http.Response, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", link, nil)
@@ -366,8 +374,34 @@ func getPage(link string) (*http.Response, error) {
 		return nil, fmt.Errorf("failed to perform request: %w", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
+	// Accept any 2xx status code
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("read response body: %w", err)
+	}
+	body := string(bodyBytes)
+
+	metaRefresh := metaRefreshRe.FindStringSubmatch(body)
+	if len(metaRefresh) > 0 {
+		redirectURL, err := url.Parse(metaRefresh[1])
+		if err != nil {
+			return nil, fmt.Errorf("parse redirect URL: %w", err)
+		}
+		redirectLink := redirectURL.String()
+		// If the redirect link is a relative link, join it with the host of the original link
+		if strings.Index(redirectLink, "/") == 0 {
+			parsedURL, err := url.Parse(link)
+			if err != nil {
+				return nil, fmt.Errorf("parse original link: %w", err)
+			}
+			redirectLink = parsedURL.Scheme + "://" + parsedURL.Host + redirectLink
+		}
+		return getPage(redirectLink)
+	}
+	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	return resp, nil
 }

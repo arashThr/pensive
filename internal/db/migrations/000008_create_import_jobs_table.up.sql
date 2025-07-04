@@ -2,7 +2,6 @@ CREATE TABLE import_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id SERIAL NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     source TEXT NOT NULL,
-    import_option TEXT NOT NULL,
     file_path TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     total_items INTEGER DEFAULT 0,
