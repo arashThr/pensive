@@ -39,7 +39,7 @@ func (u Users) New(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	log.Println("create user request")
+	logger := context.Logger(r.Context())
 	var data struct {
 		Email    string
 		Password string
@@ -61,7 +61,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		log.Println(err)
+		logger.Error("create user failed", "error", err)
 		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: "Creating session failed",
 			IsError: true,
@@ -69,7 +69,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
-	log.Println("create user success")
+	logger.Info("create user success")
 	http.Redirect(w, r, "/users/me", http.StatusFound)
 }
 
@@ -97,7 +97,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {

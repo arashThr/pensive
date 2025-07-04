@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth"
-	authcontext "github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
@@ -188,22 +187,13 @@ func run(cfg *config.AppConfig) error {
 		})
 	})
 
-	getHomePage := func(w http.ResponseWriter, r *http.Request) {
-		user := authcontext.User(r.Context())
-		home := "home.gohtml"
-		if user != nil {
-			home = "user/home.gohtml"
-		}
-		web.StaticHandler(
-			views.Must(views.ParseTemplate(home, "tailwind.gohtml")),
-		)(w, r)
-	}
-
 	r.Group(func(r chi.Router) {
 		r.Use(csrfMw)
 		r.Use(umw.SetUser)
 
-		r.Get("/", getHomePage)
+		r.Get("/", web.StaticHandler(
+			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+		))
 		r.Get("/contact", web.StaticHandler(
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
@@ -221,6 +211,12 @@ func run(cfg *config.AppConfig) error {
 		r.Post("/forgot-pw", usersController.ProcessForgotPassword)
 		r.Get("/reset-password", usersController.ResetPassword)
 		r.Post("/reset-password", usersController.ProcessResetPassword)
+		r.Route("/home", func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/", web.StaticHandler(
+				views.Must(views.ParseTemplate("user/home.gohtml", "tailwind.gohtml")),
+			))
+		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
 			// Subscriptions

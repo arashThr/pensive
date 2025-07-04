@@ -30,6 +30,7 @@
 - [ ] Add premium layer
 - [ ] Extension: Click to save
 - [ ] Limit search result to 10
+- [ ] Captcha for Sign in
 - [ ] Export links
 - [ ] Parse Pocket export
 - [x] Show the raw content
