@@ -76,9 +76,9 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 		return bookmark, nil
 	}
 
-	parsedURL, err := url.Parse(link)
+	_, err = url.Parse(link)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse URL: %w", err)
+		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
 
 	resp, err := getPage(link)
@@ -86,8 +86,9 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 		return nil, fmt.Errorf("failed to get page: %w", err)
 	}
 	defer resp.Body.Close()
+	finalURL := resp.Request.URL
 
-	article, err := readability.FromReader(resp.Body, parsedURL)
+	article, err := readability.FromReader(resp.Body, finalURL)
 	// TODO: Check for the language
 	if err != nil {
 		return nil, fmt.Errorf("readability: %w", err)
