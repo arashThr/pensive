@@ -16,13 +16,16 @@ import (
 
 type Users struct {
 	Templates struct {
-		New            web.Template
-		SignIn         web.Template
-		ForgotPassword web.Template
-		CheckYourEmail web.Template
-		ResetPassword  web.Template
-		UserPage       web.Template
-		Token          web.Template
+		New             web.Template
+		SignIn          web.Template
+		ForgotPassword  web.Template
+		CheckYourEmail  web.Template
+		ResetPassword   web.Template
+		UserPage        web.Template
+		Token           web.Template
+		ProfileTab      web.Template
+		TokensTab       web.Template
+		ImportExportTab web.Template
 	}
 	UserService          *models.UserModel
 	SessionService       *models.SessionService
@@ -243,6 +246,56 @@ func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	logger := context.Logger(r.Context())
+
+	tab := r.URL.Query().Get("tab")
+	if tab == "" {
+		tab = r.FormValue("tab")
+	}
+	if tab == "" {
+		tab = "profile"
+	}
+
+	var data struct {
+		Email        string
+		IsSubscribed bool
+		Tokens       []models.ApiToken
+	}
+	data.Email = user.Email
+	data.IsSubscribed = user.SubscriptionStatus == "premium"
+
+	// Get tokens for tokens tab
+	if tab == "tokens" {
+		validTokens, err := u.TokenModel.Get(user.ID)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				logger.Info("api token not found for current user")
+			} else {
+				logger.Info("get api token for current user", "error", err)
+				http.Error(w, "Failed to get API token", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			data.Tokens = validTokens
+		}
+	}
+
+	w.Header().Set("Content-Type", "text/html")
+
+	switch tab {
+	case "profile":
+		u.Templates.ProfileTab.Execute(w, r, data)
+	case "tokens":
+		u.Templates.TokensTab.Execute(w, r, data)
+	case "import-export":
+		u.Templates.ImportExportTab.Execute(w, r, data)
+	default:
+		u.Templates.ProfileTab.Execute(w, r, data)
+	}
 }
 
 type UserMiddleware struct {

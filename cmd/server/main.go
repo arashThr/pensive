@@ -113,6 +113,9 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersController.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
 	usersController.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
+	usersController.Templates.ProfileTab = views.Must(views.ParseTemplate("user/profile-tab.gohtml"))
+	usersController.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
+	usersController.Templates.ImportExportTab = views.Must(views.ParseTemplate("user/import-export-tab.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksModel,
@@ -228,6 +231,7 @@ func run(cfg *config.AppConfig) error {
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
 				r.Get("/me", usersController.CurrentUser)
+				r.Get("/tab-content", usersController.TabContent)
 				r.Post("/generate-token", usersController.GenerateToken)
 				r.Post("/delete-token", usersController.DeleteToken)
 			})
