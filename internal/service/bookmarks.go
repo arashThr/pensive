@@ -187,7 +187,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/bookmarks", http.StatusFound)
+	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
 func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
