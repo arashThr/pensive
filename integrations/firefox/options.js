@@ -1,4 +1,4 @@
-// For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
+// For cross-browser compatibility (Firefox prefers 'browser', Chrome uses 'chrome')
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8,16 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Set default values
   let defaultEndpoint = "http://localhost:8000"
-  let defaultFolderName = "Archive"
 
   // Load saved settings or use defaults
-  browserAPI.storage.sync.get(["endpoint", "folderName"]).then((data) => {
+  browserAPI.storage.sync.get(["endpoint"]).then((data) => {
     defaultEndpoint = data.endpoint || defaultEndpoint;
-    defaultFolderName = data.folderName || defaultFolderName;
     document.getElementById("endpoint").value = defaultEndpoint;
-    document.getElementById("folderName").value = defaultFolderName;
 
-    browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
+    browserAPI.storage.sync.set({ endpoint: defaultEndpoint }).then(() => {
       console.log("Default settings saved");
     })
   });
@@ -25,13 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
     defaultEndpoint = document.getElementById("endpoint").value || defaultEndpoint;
-    defaultFolderName = document.getElementById("folderName").value || defaultFolderName;
     
-    browserAPI.storage.sync.set({ endpoint: defaultEndpoint, folderName: defaultFolderName }).then(() => {
+    browserAPI.storage.sync.set({ endpoint: defaultEndpoint }).then(() => {
       const status = document.getElementById("status");
+      const originalText = status.textContent;
       status.textContent = "Settings saved!";
       setTimeout(() => {
-        status.textContent = "";
+        status.textContent = originalText;
       }, 2000);
     });
   });

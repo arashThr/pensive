@@ -1,3 +1,6 @@
+// For cross-browser compatibility (Firefox prefers 'browser', Chrome uses 'chrome')
+const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+
 // Alternative approach that doesn't require waiting for DOMContentLoaded
 // and works even if the script runs after page load
 (function() {
@@ -10,7 +13,7 @@
     setTimeout(function() {
       tokenField = document.getElementById('token');
       if (tokenField && tokenField.value) {
-        chrome.runtime.sendMessage({
+        browserAPI.runtime.sendMessage({
           type: "AUTH_TOKEN",
           token: tokenField.value,
         });
@@ -18,7 +21,7 @@
       }
     }, 500);
   } else if (tokenField && tokenField.value) {
-    chrome.runtime.sendMessage({
+    browserAPI.runtime.sendMessage({
       type: "AUTH_TOKEN",
       token: tokenField.value,
     });
