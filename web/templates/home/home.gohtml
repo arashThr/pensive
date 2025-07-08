@@ -24,55 +24,7 @@
 
   <!-- Results Area -->
   <div id="results">
-    {{if .HasBookmarksAtAll}}
-      <div class="space-y-2">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Bookmarks</h2>
-        {{range .Bookmarks}}
-          <div class="flex items-start space-x-4 px-4 py-3 hover:bg-blue-50 hover:border-blue-200 rounded-lg transition-all duration-200 border border-transparent">
-            <div class="w-6 h-6 flex-shrink-0 mt-0.5">
-              <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="{{.Title}}" class="w-full h-full" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-              <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center hidden">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <h3 class="font-medium text-gray-900 mb-1">
-                    <a href="/bookmarks/{{.Id}}/edit" class="hover:text-blue-600 transition-colors">{{.Title}}</a>
-                  </h3>
-                  <p class="text-sm text-gray-500 mb-2">
-                    <a href="{{.Link}}" target="_blank" class="hover:text-blue-600 transition-colors">{{.Link}}</a>
-                  </p>
-                  {{if .Excerpt}}
-                    <p class="text-sm text-gray-600 leading-relaxed">{{.Excerpt}}</p>
-                  {{end}}
-                </div>
-                <div class="ml-4 text-right">
-                  <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        {{end}}
-      </div>
-      
-      <div class="mt-8 text-center">
-        <a href="/bookmarks" class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
-          View All Bookmarks
-        </a>
-      </div>
-    {{else}}
-      <div class="text-center py-16">
-        <div class="text-gray-500 text-lg mb-4">No bookmarks yet</div>
-        <div class="text-gray-400 text-sm mb-6">Start by adding your first bookmark!</div>
-        <a href="/bookmarks/new" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-          Add Your First Bookmark
-        </a>
-      </div>
-    {{end}}
+    {{template "recent-results" .}}
   </div>
 </div>
 

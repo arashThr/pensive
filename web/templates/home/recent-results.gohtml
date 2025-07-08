@@ -1,3 +1,4 @@
+{{define "recent-results"}}
 {{if .HasBookmarksAtAll}}
   <div class="space-y-2">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Recent Bookmarks</h2>
@@ -12,8 +13,8 @@
           </div>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
+          <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+            <div class="flex-1 mb-2 lg:mb-0">
               <h3 class="font-medium text-gray-900 mb-1">
                 <a href="/bookmarks/{{.Id}}/edit" class="hover:text-blue-600 transition-colors">{{.Title}}</a>
               </h3>
@@ -23,8 +24,11 @@
               {{if .Excerpt}}
                 <p class="text-sm text-gray-600 leading-relaxed">{{.Excerpt}}</p>
               {{end}}
+              <div class="mt-2 lg:hidden">
+                <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
+              </div>
             </div>
-            <div class="ml-4 text-right">
+            <div class="hidden lg:block lg:ml-4 lg:text-right">
               <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
             </div>
           </div>
@@ -47,3 +51,4 @@
     </a>
   </div>
 {{end}} 
+{{end}}

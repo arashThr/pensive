@@ -87,6 +87,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 			Link:      r.Link,
 			Headline:  r.Headline,
 			Thumbnail: r.ImageUrl,
+			CreatedAt: r.CreatedAt,
 		})
 	}
 

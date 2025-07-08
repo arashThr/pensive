@@ -282,6 +282,7 @@ type SearchResult struct {
 	Link       string
 	Excerpt    string
 	ImageUrl   string
+	CreatedAt  time.Time
 	Rank       float32
 }
 
@@ -291,12 +292,13 @@ func (model *BookmarkModel) Search(userId types.UserId, query string) ([]SearchR
 		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
 	)
 	SELECT
-		ts_headline(content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS excerpt,
-		ub.bookmark_id,
-		ub.title,
-		link,
-		ub.excerpt,
-		image_url,
+		ts_headline(content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
+		ub.bookmark_id AS bookmark_id,
+		ub.title AS title,
+		link AS link,
+		ub.excerpt AS excerpt,
+		image_url AS image_url,
+		ub.created_at AS created_at,
 		ts_rank(search_vector, sq.query) AS rank
 	FROM users_bookmarks ub
 	JOIN bookmarks_contents bc ON ub.bookmark_id = bc.bookmark_id
@@ -310,19 +312,9 @@ func (model *BookmarkModel) Search(userId types.UserId, query string) ([]SearchR
 		return nil, fmt.Errorf("search bookmarks: %w", err)
 	}
 
-	defer rows.Close()
-	var results []SearchResult
-	// Iterate through the result set
-	for rows.Next() {
-		var result SearchResult
-		err := rows.Scan(&result.Headline, &result.BookmarkId, &result.Title, &result.Link, &result.Excerpt, &result.ImageUrl, &result.Rank)
-		if err != nil {
-			return nil, fmt.Errorf("scan bookmark: %w", err)
-		}
-		results = append(results, result)
-	}
-	if rows.Err() != nil {
-		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
+	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
+	if err != nil {
+		return nil, fmt.Errorf("collect bookmark search rows: %w", err)
 	}
 	return results, nil
 }

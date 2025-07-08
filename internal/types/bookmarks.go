@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type BookmarkId string
 
 type BookmarkSearchResult struct {
@@ -8,4 +10,5 @@ type BookmarkSearchResult struct {
 	Link      string
 	Headline  string
 	Thumbnail string
+	CreatedAt time.Time
 }

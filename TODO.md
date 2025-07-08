@@ -3,6 +3,7 @@
 - Get `recollectra.com` domain
 
 ## Fixes
+- [ ] Does not check for duplicates when importing links from pocket
 - [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
     - URLs without https
 - [ ] Limit size of Excerpt:

@@ -126,7 +126,7 @@ func run(cfg *config.AppConfig) error {
 	homeController := service.Home{
 		BookmarkModel: bookmarksModel,
 	}
-	homeController.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml"))
+	homeController.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml", "home/recent-results.gohtml"))
 	homeController.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml"))
 	homeController.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml"))
 
