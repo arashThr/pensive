@@ -102,6 +102,12 @@
         border-color: #dc2626;
         box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
       }
+      .info-text {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-top: 16px;
+        line-height: 1.5;
+      }
     </style>
   </head>
   <body>
@@ -120,13 +126,14 @@
         <h2>Settings</h2>
         <div style="margin-bottom: 16px;">
           <label for="endpoint">Endpoint URL:</label>
-          <input type="text" id="endpoint">
-        </div>
-        <div style="margin-bottom: 16px;">
-          <label for="folderName">Folder Name:</label>
-          <input type="text" id="folderName">
+          <input type="text" id="endpoint" placeholder="http://localhost:8000">
         </div>
         <button id="save">Save Settings</button>
+        
+        <div class="info-text">
+          <p><strong>How to use:</strong></p>
+          <p>After connecting, click the Pensieve icon in your browser toolbar to save the current page. The popup will show if the page is already saved and allow you to remove it instantly.</p>
+        </div>
       </div>
     </div>
 

@@ -4,7 +4,6 @@
     "version": "1.0",
     "description": "Save and organize your bookmarks with Pensieve",
     "permissions": [
-      "bookmarks",
       "storage",
       "activeTab"
     ],
@@ -20,7 +19,8 @@
       "default_icon": {
         "48": "img.png"
       },
-      "default_title": "Pensieve Settings"
+      "default_title": "Pensieve - Save this page",
+      "default_popup": "popup.html"
     },
     "background": {
       "service_worker": "background.js"
