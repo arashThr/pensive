@@ -173,7 +173,7 @@
       color: #2563eb;
     }
     
-    .loading {
+    .spinner {
       display: inline-block;
       width: 16px;
       height: 16px;
@@ -181,6 +181,8 @@
       border-radius: 50%;
       border-top-color: #2563eb;
       animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      flex-shrink: 0;
     }
     
     @keyframes spin {
@@ -201,7 +203,7 @@
     </div>
     
     <div class="status loading" id="status">
-      <div class="loading"></div>
+      <div class="spinner"></div>
       <span>Checking status...</span>
     </div>
     

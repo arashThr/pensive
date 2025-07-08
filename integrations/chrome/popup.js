@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       if (!endpoint || !apiToken) {
         updateStatus('error', 'Extension not configured');
+        saveBtn.disabled = false;
         return;
       }
       
@@ -182,6 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       if (!endpoint || !apiToken) {
         updateStatus('error', 'Extension not configured');
+        removeBtn.disabled = false;
         return;
       }
       
@@ -239,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (type === 'loading') {
       statusElement.innerHTML = `
-        <div class="loading"></div>
+        <div class="spinner"></div>
         <span>${message}</span>
       `;
     } else {
