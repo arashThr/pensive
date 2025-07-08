@@ -4,9 +4,10 @@
     "version": "1.0",
     "description": "Save and organize your bookmarks with Pensieve",
     "permissions": [
-      "<all_urls>",
       "storage",
-      "activeTab"
+      "activeTab",
+      "http://localhost:8000/*",
+      "https://apps.arashtaher.com/*"
     ],
     "options_ui": {
       "page": "options.html",
