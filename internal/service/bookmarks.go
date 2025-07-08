@@ -20,11 +20,10 @@ import (
 
 type Bookmarks struct {
 	Templates struct {
-		New    web.Template
-		Edit   web.Template
-		Index  web.Template
-		Show   web.Template
-		Search web.Template
+		New   web.Template
+		Edit  web.Template
+		Index web.Template
+		Show  web.Template
 	}
 	BookmarkModel *models.BookmarkModel
 }
@@ -188,45 +187,6 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/home", http.StatusFound)
-}
-
-func (b Bookmarks) Search(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	query := r.FormValue("query")
-	if query == "" {
-		http.Error(w, "Query is required", http.StatusBadRequest)
-		return
-	}
-	user := context.User(r.Context())
-
-	results, err := b.BookmarkModel.Search(user.ID, query)
-	if err != nil {
-		logger.Error("searching bookmarks", "error", err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	var data struct {
-		Bookmarks []types.BookmarkSearchResult
-	}
-	for _, r := range results {
-		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
-			Id:        r.BookmarkId,
-			Title:     r.Title,
-			Link:      r.Link,
-			Headline:  r.Headline,
-			Thumbnail: r.ImageUrl,
-		})
-	}
-	if len(data.Bookmarks) == 0 {
-		w.Write([]byte(`<p class="text-gray-500">Not found</p>`))
-		return
-	}
-
-	logger.Info("searched bookmarks",
-		"query", query,
-		"count", len(data.Bookmarks))
-	b.Templates.Search.Execute(w, r, data)
 }
 
 // GetFullBookmark handles GET /v1/bookmarks/{id}/full and returns the full content of a bookmark.

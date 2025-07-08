@@ -122,7 +122,13 @@ func run(cfg *config.AppConfig) error {
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
-	bookmarksController.Templates.Search = views.Must(views.ParseTemplate("bookmarks/search.gohtml", "tailwind.gohtml"))
+
+	homeController := service.Home{
+		BookmarkModel: bookmarksModel,
+	}
+	homeController.Templates.Home = views.Must(views.ParseTemplate("user/home.gohtml", "tailwind.gohtml"))
+	homeController.Templates.SearchResults = views.Must(views.ParseTemplate("user/search-results.gohtml"))
+	homeController.Templates.RecentResults = views.Must(views.ParseTemplate("user/recent-results.gohtml"))
 
 	importerController := service.Importer{
 		ImportJobModel: importJobModel,
@@ -213,9 +219,8 @@ func run(cfg *config.AppConfig) error {
 		r.Post("/reset-password", usersController.ProcessResetPassword)
 		r.Route("/home", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Get("/", web.StaticHandler(
-				views.Must(views.ParseTemplate("user/home.gohtml", "tailwind.gohtml")),
-			))
+			r.Get("/", homeController.Index)
+			r.Get("/search", homeController.Search)
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
@@ -276,7 +281,6 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/{id}/edit", bookmarksController.Edit)
 				r.Post("/{id}", bookmarksController.Update)
 				r.Post("/{id}/delete", bookmarksController.Delete)
-				r.Get("/search", bookmarksController.Search)
 				r.Get("/{id}/full", bookmarksController.GetFullBookmark)
 			})
 		})

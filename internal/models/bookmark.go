@@ -207,6 +207,36 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 	return bookmarks, morePages, nil
 }
 
+// GetRecentBookmarks returns the most recent bookmarks for the home page
+func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int) ([]Bookmark, error) {
+	rows, err := model.Pool.Query(context.Background(),
+		`SELECT bookmark_id, title, link, excerpt, image_url, created_at
+		FROM users_bookmarks
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT $2
+		`, userId, limit)
+	if err != nil {
+		return nil, fmt.Errorf("query recent bookmarks: %w", err)
+	}
+	defer rows.Close()
+
+	var bookmarks []Bookmark
+	for rows.Next() {
+		var bookmark Bookmark
+		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("scan recent bookmark: %w", err)
+		}
+		bookmarks = append(bookmarks, bookmark)
+	}
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
+	}
+
+	return bookmarks, nil
+}
+
 func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	rows, err := model.Pool.Query(context.Background(),
 		`SELECT *

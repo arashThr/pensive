@@ -3,6 +3,10 @@
 - Get `recollectra.com` domain
 
 ## Fixes
+- [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
+    - URLs without https
+- [ ] Limit size of Excerpt:
+    - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [ ] Why YouTube is not working?
 - [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] Remove token when endpoint is changed
