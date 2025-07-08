@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const saveBtn = document.getElementById('saveBtn');
   const removeBtn = document.getElementById('removeBtn');
   const settingsLink = document.getElementById('settingsLink');
+  const searchLink = document.getElementById('searchLink');
   
   let currentTab = null;
   let isBookmarked = false;
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   saveBtn.addEventListener('click', saveBookmark);
   removeBtn.addEventListener('click', removeBookmark);
   settingsLink.addEventListener('click', openSettings);
+  searchLink.addEventListener('click', openSearch);
   
   async function checkBookmarkStatus() {
     if (!currentTab) return;
@@ -251,5 +253,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   function openSettings() {
     browserAPI.runtime.openOptionsPage();
+  }
+  
+  async function openSearch() {
+    try {
+      const { endpoint } = await browserAPI.storage.sync.get(['endpoint']);
+      
+      if (!endpoint) {
+        // If no endpoint is configured, show an error or open options
+        browserAPI.runtime.openOptionsPage();
+        return;
+      }
+      
+      // Open the search page in a new tab
+      const searchUrl = new URL('/home', endpoint).href;
+      await browserAPI.tabs.create({ url: searchUrl });
+      
+      // Close the popup
+      window.close();
+    } catch (error) {
+      console.error('Error opening search page:', error);
+      // Fallback to opening options page
+      browserAPI.runtime.openOptionsPage();
+    }
   }
 }); 
