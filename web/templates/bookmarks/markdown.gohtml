@@ -3,18 +3,18 @@
 <div class="px-6 py-12 max-w-4xl mx-auto">
   <div class="bg-white rounded-lg shadow-sm border mb-6">
     <div class="p-6 border-b">
-      <div class="flex items-center justify-between">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex-1">
           <h1 class="text-2xl font-bold text-gray-900 mb-2">{{.Title}}</h1>
           <p class="text-gray-600 text-sm">
             <a href="{{.Link}}" target="_blank" class="hover:text-blue-600 transition-colors">{{.Link}}</a>
           </p>
         </div>
-        <div class="flex gap-2">
-          <a href="/bookmarks/{{.Id}}/edit" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+        <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+          <a href="/bookmarks/{{.Id}}/edit" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-center whitespace-nowrap">
             Back to Bookmark
           </a>
-          <a href="/bookmarks/{{.Id}}/full" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+          <a href="/bookmarks/{{.Id}}/full" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-center whitespace-nowrap">
             View Raw Text
           </a>
         </div>

@@ -6,13 +6,19 @@
     <p class="text-gray-600 mb-4">The AI-generated markdown content for this bookmark is not yet available.</p>
     <p class="text-sm text-gray-500 mb-6">This could be because:</p>
     <ul class="text-sm text-gray-500 mb-6 text-left max-w-md mx-auto">
+      <li>• <strong>This feature is only available for premium users</strong></li>
+      <li>• If you're premium, the AI processing may still be in progress</li>
       <li>• The bookmark was created before the markdown feature was enabled</li>
-      <li>• The AI processing is still in progress</li>
       <li>• The AI processing failed for this bookmark</li>
     </ul>
-    <a href="/bookmarks/{{.Id}}/edit" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-      Back to Bookmark
-    </a>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <a href="/bookmarks/{{.Id}}/edit" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        Back to Bookmark
+      </a>
+      <a href="/users/subscribe" class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        Upgrade to Premium
+      </a>
+    </div>
   </div>
 </div>
 
