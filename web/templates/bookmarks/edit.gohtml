@@ -18,6 +18,9 @@
             <a href="/bookmarks/{{.Id}}/full" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
               Show Text
             </a>
+            <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              View Markdown
+            </a>
             <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"
               onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
               {{csrfField}}

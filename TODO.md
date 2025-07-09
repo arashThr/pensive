@@ -30,6 +30,8 @@
 - [ ] Add premium layer - After alpha release
 - [ ] Export links
 - [ ] Disconnect the extension
+- [ ] Limitation on the tokens for LLM
+    - [ ] Accept user's API key
 - [ ] Upload the extensions
 - [ ] Captcha for Sign in
 - [ ] Feedback link

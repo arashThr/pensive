@@ -1,0 +1,106 @@
+{{template "header" .}}
+
+<div class="px-6 py-12 max-w-4xl mx-auto">
+  <div class="bg-white rounded-lg shadow-sm border mb-6">
+    <div class="p-6 border-b">
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">{{.Title}}</h1>
+          <p class="text-gray-600 text-sm">
+            <a href="{{.Link}}" target="_blank" class="hover:text-blue-600 transition-colors">{{.Link}}</a>
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <a href="/bookmarks/{{.Id}}/edit" class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
+            Back to Bookmark
+          </a>
+          <a href="/bookmarks/{{.Id}}/full" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
+            View Raw Text
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="p-6">
+      <div id="markdown-content" class="markdown-content prose max-w-none"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  const markdownText = {{.MarkdownContent}};
+  document.getElementById('markdown-content').innerHTML = marked.parse(markdownText);
+</script>
+
+<style>
+  .markdown-content {
+    line-height: 1.6;
+  }
+  .markdown-content h1, .markdown-content h2, .markdown-content h3,
+  .markdown-content h4, .markdown-content h5, .markdown-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  .markdown-content h1 { font-size: 2rem; }
+  .markdown-content h2 { font-size: 1.5rem; }
+  .markdown-content h3 { font-size: 1.25rem; }
+  .markdown-content p { margin-bottom: 1rem; }
+  .markdown-content ul, .markdown-content ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+  }
+  .markdown-content li { margin-bottom: 0.5rem; }
+  .markdown-content blockquote {
+    border-left: 4px solid #e5e7eb;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+  }
+  .markdown-content pre {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+  }
+  .markdown-content code {
+    background-color: #f3f4f6;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+  }
+  .markdown-content pre code {
+    background-color: transparent;
+    padding: 0;
+  }
+  .markdown-content a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  .markdown-content a:hover {
+    color: #1d4ed8;
+  }
+  .markdown-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+  }
+  .markdown-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+  }
+  .markdown-content th, .markdown-content td {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem;
+    text-align: left;
+  }
+  .markdown-content th {
+    background-color: #f9fafb;
+    font-weight: bold;
+  }
+</style>
+
+{{template "footer" .}} 

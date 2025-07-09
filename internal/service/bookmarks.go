@@ -20,10 +20,12 @@ import (
 
 type Bookmarks struct {
 	Templates struct {
-		New   web.Template
-		Edit  web.Template
-		Index web.Template
-		Show  web.Template
+		New                  web.Template
+		Edit                 web.Template
+		Index                web.Template
+		Show                 web.Template
+		Markdown             web.Template
+		MarkdownNotAvailable web.Template
 	}
 	BookmarkModel *models.BookmarkModel
 }
@@ -237,6 +239,45 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 		logger.Error("encoding response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
+}
+
+// GetBookmarkMarkdown handles GET /bookmarks/{id}/markdown and returns the AI-generated markdown content
+func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
+	if err != nil {
+		return
+	}
+
+	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.BookmarkId)
+	if err != nil {
+		if errors.Is(err, errors.ErrNotFound) {
+			// If no markdown content is found, show a user-friendly message
+			var data struct {
+				Id types.BookmarkId
+			}
+			data.Id = bookmark.BookmarkId
+			b.Templates.MarkdownNotAvailable.Execute(w, r, data)
+			return
+		}
+		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.BookmarkId)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Render the markdown content using template
+	var data struct {
+		Id              types.BookmarkId
+		Title           string
+		Link            string
+		MarkdownContent string
+	}
+	data.Id = bookmark.BookmarkId
+	data.Title = bookmark.Title
+	data.Link = bookmark.Link
+	data.MarkdownContent = markdownContent
+
+	b.Templates.Markdown.Execute(w, r, data)
 }
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {

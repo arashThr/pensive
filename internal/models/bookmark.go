@@ -119,15 +119,19 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 	// TODO: It's not working as expected and escapes the HTML
 	content := validations.CleanUpText(article.TextContent)
 
-	// Do this in a goroutine
+	// Generate the markdown content using Gemini
 	go func() {
 		// Clean up HTML content to reduce LLM costs
 		htmlContent := cleanHTMLForLLM(article.Content)
+		// Log the duration of the function and size of the content
+		start := time.Now()
+		slog.Info("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
 		markdownContent, err := model.convertHTMLToMarkdown(htmlContent)
 		if err != nil {
 			slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
 			return
 		}
+		slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(markdownContent))
 		// Update the bookmark with the markdown content
 		_, err = model.Pool.Exec(context.Background(), `
 			UPDATE users_bookmarks SET ai_markdown = $1 WHERE bookmark_id = $2`,
@@ -341,7 +345,7 @@ HTML content to convert:
 	ctx := context.Background()
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-2.5-flash",
+		"gemini-2.5-flash-lite-preview-06-17",
 		genai.Text(prompt),
 		nil,
 	)
@@ -438,6 +442,36 @@ func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, err
 		return "", fmt.Errorf("iterating rows: %w", rows.Err())
 	}
 	return content, nil
+}
+
+// GetBookmarkMarkdown retrieves the AI-generated markdown content for a bookmark
+func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, error) {
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT ai_markdown
+		FROM users_bookmarks
+		WHERE bookmark_id = $1
+		LIMIT 1`, id)
+	if err != nil {
+		return "", fmt.Errorf("query bookmark markdown by id: %w", err)
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return "", errors.ErrNotFound
+	}
+	var markdown sql.NullString
+	err = rows.Scan(&markdown)
+	if err != nil {
+		return "", fmt.Errorf("scan bookmark markdown: %w", err)
+	}
+	if rows.Err() != nil {
+		return "", fmt.Errorf("iterating rows: %w", rows.Err())
+	}
+
+	if !markdown.Valid {
+		return "", errors.ErrNotFound
+	}
+
+	return markdown.String, nil
 }
 
 func (model *BookmarkModel) GetFullBookmark(id types.BookmarkId) (*BookmarkWithContent, error) {
