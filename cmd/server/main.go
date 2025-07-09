@@ -20,6 +20,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/genai"
 )
 
 func setupDb(cfg db.PostgresConfig) (*pgxpool.Pool, error) {
@@ -49,12 +50,20 @@ func main() {
 }
 
 func run(cfg *config.AppConfig) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Database
 	pool, err := setupDb(cfg.PSQL)
 	if err != nil {
 		return err
 	}
 	defer pool.Close()
+
+	genAIClient, err := genai.NewClient(ctx, nil)
+	if err != nil {
+		return err
+	}
 
 	// Services
 	userService := &models.UserModel{
@@ -75,7 +84,8 @@ func run(cfg *config.AppConfig) error {
 		Pool: pool,
 	}
 	bookmarksModel := &models.BookmarkModel{
-		Pool: pool,
+		Pool:        pool,
+		GenAIClient: genAIClient,
 	}
 	telegramModel := &models.TelegramService{
 		Pool: pool,
@@ -161,8 +171,6 @@ func run(cfg *config.AppConfig) error {
 
 	// Start import processor in background
 	importProcessor := importer.NewImportProcessor(importJobModel, bookmarksModel, slog.Default())
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	go importProcessor.Start(ctx)
 
 	// Middlewares

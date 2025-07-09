@@ -1,0 +1,1 @@
+ALTER TABLE users_bookmarks DROP COLUMN ai_markdown;

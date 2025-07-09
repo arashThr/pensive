@@ -10,6 +10,8 @@
     - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [ ] Why YouTube is not working?
 - [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
+- [ ] We're stuck in index page when the page does not have a title:
+    -  https://apps.arashtaher.com/home 
 - [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
 - [ ] failed to collect row: bookmark by link: too many rows in result set
@@ -22,22 +24,25 @@
 
 ## Features
 - [ ] Ping server from Telegram bot to check the validity of the token
-- [ ] Use Pupeteer and playwright for getting the pages
-- [ ] Feedback link
 - [ ] Google login
-- [ ] Disconnect the extension
-- [ ] Upload the extensions
 - [ ] Separate text extraction service
 - [ ] Extension: Future search
+- [ ] Add premium layer - After alpha release
+- [ ] Export links
+- [ ] Disconnect the extension
+- [ ] Upload the extensions
+- [ ] Captcha for Sign in
+- [ ] Feedback link
+- [ ] Use Pupeteer and playwright for getting the pages
+- [ ] Use Gemeni
+    - [ ] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
+    - [ ] Generate markdown page for future
 - [ ] Premium: Get YouTube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
-- [ ] Add premium layer
-- [ ] Extension: Click to save
 - [ ] Limit search result to 10
-- [ ] Captcha for Sign in
-- [ ] Export links
-- [ ] Parse Pocket export
+- [x] Extension: Click to save
+- [x] Parse Pocket export
 - [x] Show the raw content
 - [x] Multiple sessions for the user
 - [x] Get token for extension without copy paste by redirect from website
@@ -63,20 +68,19 @@
 
 ## Changes
 - [ ] "Failed to parse image URL"
-- [ ] Email only users - No password
 - [ ] Use temp dir for pocket imports
-- [ ] Keep the token name
-- [ ] Clear the search results when text box is cleared
-- [ ] Remove password and just use email
-- [ ] Keep the token, and not the token hash
 - [ ] Apply rate limit on requests
-- [ ] Does user really need API key?
+- [ ] Don't let user to create API token, or only one
+    - [ ] Show the orginator of the token and date
+    - [ ] Updating extension/bot should overwrite previous token
+- [ ] Rename users_bookmarks table to bookmarks
+- [ ] Remove password - Use email validation
+- [ ] Use zap for logging
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase or Cloudflare
-- [ ] Only one API token
-- [ ] Rename users_bookmarks table to bookmarks
-- [ ] Remove password - Email validation
-- [ ] Use zap for logging
+- [x] Clear the search results when text box is cleared
+- [x] Does user really need API key?
+    - No
 - [x] Remove token from extensions settings page
 - [x] Hid API Tokens and Subscriptions. Redirect to bookmarks after login
 - [x] Rename api in model and service to avoid confusion

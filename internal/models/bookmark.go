@@ -20,6 +20,7 @@ import (
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/genai"
 )
 
 type BookmarkSource = int
@@ -60,7 +61,8 @@ type BookmarkWithContent struct {
 }
 
 type BookmarkModel struct {
-	Pool *pgxpool.Pool
+	Pool        *pgxpool.Pool
+	GenAIClient *genai.Client
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
@@ -116,6 +118,24 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 	}
 	// TODO: It's not working as expected and escapes the HTML
 	content := validations.CleanUpText(article.TextContent)
+
+	// Do this in a goroutine
+	go func() {
+		// Clean up HTML content to reduce LLM costs
+		htmlContent := cleanHTMLForLLM(article.Content)
+		markdownContent, err := model.convertHTMLToMarkdown(htmlContent)
+		if err != nil {
+			slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
+			return
+		}
+		// Update the bookmark with the markdown content
+		_, err = model.Pool.Exec(context.Background(), `
+			UPDATE users_bookmarks SET ai_markdown = $1 WHERE bookmark_id = $2`,
+			markdownContent, bookmarkId)
+		if err != nil {
+			slog.Warn("Failed to update bookmark content", "error", err)
+		}
+	}()
 
 	// TODO: Add excerpt to bookmarks_content table
 	_, err = model.Pool.Exec(context.Background(), `
@@ -253,6 +273,83 @@ func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookma
 		return nil, fmt.Errorf("bookmark by link: %w", err)
 	}
 	return &bookmark, nil
+}
+
+// cleanHTMLForLLM removes unnecessary HTML elements and attributes to reduce LLM costs
+func cleanHTMLForLLM(htmlContent string) string {
+	// Remove script and style tags completely
+	scriptRe := regexp.MustCompile(`(?i)<script[^>]*>.*?</script>`)
+	styleRe := regexp.MustCompile(`(?i)<style[^>]*>.*?</style>`)
+
+	// Remove comments
+	commentRe := regexp.MustCompile(`<!--.*?-->`)
+
+	// Remove common tracking and analytics elements
+	trackingRe := regexp.MustCompile(`(?i)<[^>]*(?:data-track|data-analytics|onclick|onload|onerror)[^>]*>`)
+
+	// Remove most attributes except essential ones for content structure
+	attrRe := regexp.MustCompile(`(?i)\s+(?:class|id|style|data-[^=]*|onclick|onload|onerror|width|height|align|bgcolor|border|cellpadding|cellspacing|valign)="[^"]*"`)
+
+	// Remove empty lines and extra whitespace
+	whitespaceRe := regexp.MustCompile(`\s+`)
+
+	cleaned := htmlContent
+	cleaned = scriptRe.ReplaceAllString(cleaned, "")
+	cleaned = styleRe.ReplaceAllString(cleaned, "")
+	cleaned = commentRe.ReplaceAllString(cleaned, "")
+	cleaned = trackingRe.ReplaceAllString(cleaned, "")
+	cleaned = attrRe.ReplaceAllString(cleaned, "")
+	cleaned = whitespaceRe.ReplaceAllString(cleaned, " ")
+
+	return strings.TrimSpace(cleaned)
+}
+
+// convertHTMLToMarkdown uses Gemini to convert HTML content to markdown format
+func (model *BookmarkModel) convertHTMLToMarkdown(htmlContent string) (string, error) {
+	if model.GenAIClient == nil {
+		return "", fmt.Errorf("GenAI client not initialized")
+	}
+
+	// Limit content length to avoid excessive costs (roughly 8000 characters = ~2000 tokens)
+	if len(htmlContent) > 8000 {
+		htmlContent = htmlContent[:8000] + "..."
+	}
+
+	prompt := `You are an expert at converting HTML content to clean, well-formatted Markdown. Your task is to convert the provided HTML content to Markdown format while preserving the main content structure and readability.
+
+Instructions:
+1. Convert HTML headings (h1-h6) to appropriate Markdown headings (# to ######)
+2. Convert HTML lists (ul, ol, li) to Markdown lists (-, *, 1.)
+3. Convert HTML links (<a>) to Markdown links [text](url)
+4. Convert HTML emphasis (<em>, <i>) to *italic*
+5. Convert HTML strong (<strong>, <b>) to **bold**
+6. Convert HTML code blocks (<pre>, <code>) to Markdown code blocks
+7. Convert HTML blockquotes to Markdown blockquotes (>)
+8. Convert HTML tables to Markdown tables when possible
+9. Convert HTML images to Markdown images ![alt](src)
+10. Remove all HTML tags that don't contribute to content structure
+11. Preserve paragraph breaks and line spacing for readability
+12. Remove navigation menus, sidebars, footers, and other non-content elements
+13. Focus on the main article/content body
+14. Ensure the output is clean and properly formatted Markdown
+
+Only return the converted Markdown content, no explanations or additional text.
+
+HTML content to convert:
+` + htmlContent
+
+	ctx := context.Background()
+	result, err := model.GenAIClient.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash",
+		genai.Text(prompt),
+		nil,
+	)
+	if err != nil {
+		return "", fmt.Errorf("generate content with Gemini: %w", err)
+	}
+
+	return result.Text(), nil
 }
 
 func (model *BookmarkModel) Update(bookmark *Bookmark) error {
