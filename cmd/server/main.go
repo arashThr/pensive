@@ -62,7 +62,7 @@ func run(cfg *config.AppConfig) error {
 
 	genAIClient, err := genai.NewClient(ctx, nil)
 	if err != nil {
-		return err
+		slog.Error("failed to create Gemini client", "error", err)
 	}
 
 	// Services
