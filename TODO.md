@@ -42,6 +42,7 @@
 - [ ] Premium: Get YouTube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
+- [ ] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
 - [ ] Limit search result to 10
 - [x] Extension: Click to save
 - [x] Parse Pocket export

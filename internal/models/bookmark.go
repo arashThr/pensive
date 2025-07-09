@@ -67,7 +67,11 @@ type BookmarkModel struct {
 
 // TODO: Add validation of the db query inputs (Like Id)
 // TODO: When LLMs are inlcuded, don't use them for imports, such as pocket
-func (model *BookmarkModel) Create(link string, userId types.UserId, source BookmarkSource) (*Bookmark, error) {
+func (model *BookmarkModel) Create(
+	link string,
+	userId types.UserId,
+	source BookmarkSource,
+	subscriptionStatus SubscriptionStatus) (*Bookmark, error) {
 	// Check if the link already exists
 	bookmark, err := model.GetByLink(userId, link)
 	if err != nil {
@@ -119,27 +123,10 @@ func (model *BookmarkModel) Create(link string, userId types.UserId, source Book
 	// TODO: It's not working as expected and escapes the HTML
 	content := validations.CleanUpText(article.TextContent)
 
-	// Generate the markdown content using Gemini
-	go func() {
-		// Clean up HTML content to reduce LLM costs
-		htmlContent := cleanHTMLForLLM(article.Content)
-		// Log the duration of the function and size of the content
-		start := time.Now()
-		slog.Info("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
-		markdownContent, err := model.convertHTMLToMarkdown(htmlContent)
-		if err != nil {
-			slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
-			return
-		}
-		slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(markdownContent))
-		// Update the bookmark with the markdown content
-		_, err = model.Pool.Exec(context.Background(), `
-			UPDATE users_bookmarks SET ai_markdown = $1 WHERE bookmark_id = $2`,
-			markdownContent, bookmarkId)
-		if err != nil {
-			slog.Warn("Failed to update bookmark content", "error", err)
-		}
-	}()
+	if subscriptionStatus == SubscriptionStatusPremium {
+		// Generate the markdown content using Gemini
+		go model.generateMarkdown(content, link, bookmarkId)
+	}
 
 	// TODO: Add excerpt to bookmarks_content table
 	_, err = model.Pool.Exec(context.Background(), `
@@ -306,6 +293,27 @@ func cleanHTMLForLLM(htmlContent string) string {
 	cleaned = whitespaceRe.ReplaceAllString(cleaned, " ")
 
 	return strings.TrimSpace(cleaned)
+}
+
+func (model *BookmarkModel) generateMarkdown(content string, link string, bookmarkId string) {
+	// Clean up HTML content to reduce LLM costs
+	htmlContent := cleanHTMLForLLM(content)
+	// Log the duration of the function and size of the content
+	start := time.Now()
+	slog.Info("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
+	markdownContent, err := model.convertHTMLToMarkdown(htmlContent)
+	if err != nil {
+		slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
+		return
+	}
+	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(markdownContent))
+	// Update the bookmark with the markdown content
+	_, err = model.Pool.Exec(context.Background(), `
+		UPDATE users_bookmarks SET ai_markdown = $1 WHERE bookmark_id = $2`,
+		markdownContent, bookmarkId)
+	if err != nil {
+		slog.Warn("Failed to update bookmark content", "error", err)
+	}
 }
 
 // convertHTMLToMarkdown uses Gemini to convert HTML content to markdown format

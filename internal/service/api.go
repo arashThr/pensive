@@ -74,7 +74,8 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	data.UserId = context.User(r.Context()).ID
+	user := context.User(r.Context())
+	data.UserId = user.ID
 
 	if !validations.IsURLValid(data.Link) {
 		slog.Error("[api] invalid URL", "link", data.Link)
@@ -86,7 +87,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId)
-	bookmark, err := a.BookmarkModel.Create(data.Link, data.UserId, models.Api)
+	bookmark, err := a.BookmarkModel.Create(data.Link, data.UserId, models.Api, user.SubscriptionStatus)
 	if err != nil {
 		slog.Error("[api] failed to create bookmark", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{

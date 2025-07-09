@@ -43,7 +43,8 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		UserId types.UserId
 		Link   string
 	}
-	data.UserId = context.User(r.Context()).ID
+	user := context.User(r.Context())
+	data.UserId = user.ID
 	data.Link = r.FormValue("link")
 	slog.Debug("creating bookmark", "link", data.Link, "userId", data.UserId)
 
@@ -53,7 +54,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := b.BookmarkModel.Create(data.Link, data.UserId, models.WebSource)
+	bookmark, err := b.BookmarkModel.Create(data.Link, data.UserId, models.WebSource, user.SubscriptionStatus)
 	if err != nil {
 		b.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: err.Error(),

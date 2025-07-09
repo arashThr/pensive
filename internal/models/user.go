@@ -12,11 +12,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type SubscriptionStatus string
+
+const (
+	SubscriptionStatusFree    SubscriptionStatus = "free"
+	SubscriptionStatusPremium SubscriptionStatus = "premium"
+)
+
 type User struct {
 	ID                 types.UserId
 	Email              string
 	PasswordHash       string
-	SubscriptionStatus string
+	SubscriptionStatus SubscriptionStatus
 }
 
 type UserModel struct {
