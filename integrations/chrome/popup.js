@@ -51,41 +51,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       
-      // Check if bookmark exists by trying to create it
-      // If it already exists, the API should return an error or the existing bookmark
-      const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href;
-      const response = await fetch(createEndpoint, {
-        method: 'POST',
+      // Use the new check endpoint to see if bookmark exists
+      const checkUrl = new URL("/api/v1/bookmarks/check", endpoint);
+      checkUrl.searchParams.set('url', currentTab.url);
+      
+      const response = await fetch(checkUrl.href, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiToken}`
-        },
-        body: JSON.stringify({ link: currentTab.url })
+        }
       });
       
       if (response.ok) {
-        // Bookmark was created (or already existed), so it's now bookmarked
-        isBookmarked = true;
+        const data = await response.json();
+        isBookmarked = data.exists;
         updateBookmarkStatus();
       } else {
-        // Check if it failed because it already exists
-        const contentType = response.headers.get('Content-Type');
-        if (contentType?.includes('application/json')) {
-          const errorData = await response.json();
-          // If it's a duplicate error, it means the bookmark already exists
-          if (errorData.errorCode === 'DUPLICATE_BOOKMARK' || response.status === 409) {
-            isBookmarked = true;
-            updateBookmarkStatus();
-          } else {
-            // Other error, assume not bookmarked
-            isBookmarked = false;
-            updateBookmarkStatus();
-          }
-        } else {
-          // Non-JSON error, assume not bookmarked
+        console.error('Error checking bookmark status:', response.status);
+        // Default to not bookmarked on error
           isBookmarked = false;
           updateBookmarkStatus();
-        }
       }
       
     } catch (error) {
