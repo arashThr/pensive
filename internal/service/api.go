@@ -32,6 +32,63 @@ type Bookmark struct {
 	Excerpt string
 }
 
+// CheckBookmarkByLinkAPI checks if a bookmark exists by URL without creating it
+//
+// @Accept json
+// @Produce json
+// @Param url query string true "URL to check"
+// @Success 200 {object} struct{exists bool, bookmark Bookmark} "Bookmark exists"
+// @Failure 404 {object} ErrorResponse "Bookmark not found"
+// @Failure 400 {object} ErrorResponse "Invalid URL"
+// @Router /v1/api/bookmarks/check [get]
+func (a *Api) CheckBookmarkByLinkAPI(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	link := r.URL.Query().Get("url")
+
+	if link == "" {
+		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_REQUEST",
+			Message: "URL parameter is required",
+		})
+		return
+	}
+
+	if !validations.IsURLValid(link) {
+		slog.Error("[api] invalid URL", "link", link)
+		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+			Code:    "INVALID_URL",
+			Message: fmt.Sprintf("Invalid URL: %v", link),
+		})
+		return
+	}
+
+	bookmark, err := a.BookmarkModel.GetByLink(user.ID, link)
+	if err != nil {
+		if errors.Is(err, errors.ErrNotFound) {
+			var data struct {
+				Exists bool `json:"exists"`
+			}
+			data.Exists = false
+			writeResponse(w, data)
+			return
+		}
+		slog.Error("[api] failed to check bookmark", "error", err, "link", link)
+		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
+			Code:    "INTERNAL_ERROR",
+			Message: "api: Something went wrong",
+		})
+		return
+	}
+
+	var data struct {
+		Exists   bool     `json:"exists"`
+		Bookmark Bookmark `json:"bookmark"`
+	}
+	data.Exists = true
+	data.Bookmark = mapModelToBookmark(bookmark)
+	writeResponse(w, data)
+}
+
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
