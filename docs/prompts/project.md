@@ -1,4 +1,12 @@
-## Project
+# Project
+
+## Define
+Everything you read, hear, and watch should be indexed and searchable
+Pensive is a web application helps you to seamlessly capture content without disrupting your workflow. To do so, it integrates with your browser and messaging apps.
+It's kind of a bookmarking application, but it's also aware of the bookmark context.
+The name is coming from Pensieve from the Harry Potter books. Just like in the book you could preseve your precious memories, in here you can have a collection of the knowledge you already gained.
+
+## Prompt
 
 In our conversations, consider the following context: I am developing a web service that helps users to index and preserve everything they read online. There are different way for users to specifiy a page as something they've read and want to find later. One example of it, is a browser extension: User can mark the pages they read to be indexed by clicking on the extension icon. Another way is to send the link to the Telegram bot of the application.
 When we receive the link in our backend service, we will fetch the the full page content to a Go-based backend. We extract and store the content in PostgreSQL with full-text search capabilities. Users can later search through everything they’ve saved.

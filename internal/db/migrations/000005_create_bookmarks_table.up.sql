@@ -24,6 +24,7 @@ CREATE TABLE bookmarks_contents (
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   excerpt TEXT NOT NULL,
+  ai_markdown TEXT,
   search_vector tsvector GENERATED ALWAYS AS (immutable_to_tsvector(title || ' ' || excerpt || ' ' ||content)) STORED
 );
 CREATE INDEX search_vector_idx ON bookmarks_contents USING GIN(search_vector);

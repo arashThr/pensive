@@ -1,1 +1,0 @@
-ALTER TABLE users_bookmarks ADD COLUMN ai_markdown TEXT;

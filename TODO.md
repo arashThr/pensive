@@ -17,6 +17,7 @@
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
+- [x] Move ai_content to content table
 - [x] failed to get page: failed to perform request: Get "www.defmacro.org/2006/06/19/fp.html": unsupported protocol scheme ""
 - [x] Fix redirects: http://www.defmacro.org/ramblings/fp.html
 - [x] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
@@ -39,11 +40,17 @@
 - [ ] Use Gemeni
     - [ ] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
     - [ ] Generate markdown page for future
-- [ ] Premium: Get YouTube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
 - [ ] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
+- [ ] Limitations configs (Free vs. Premium):
+    - Bookmarks
+    - AI and YouTube
 - [ ] Limit search result to 10
+- [ ] Premium: Get YouTube
+- [ ] Add recaptcha
+- [ ] Send the HTML from exntension
+    - [ ] Clean up the HTML in extension
 - [x] Extension: Click to save
 - [x] Parse Pocket export
 - [x] Show the raw content
@@ -81,6 +88,7 @@
 - [ ] Use zap for logging
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase or Cloudflare
+- [ ] Move tokens from sync to local
 - [x] Clear the search results when text box is cleared
 - [x] Does user really need API key?
     - No
@@ -122,6 +130,12 @@
 - [x] Fix the HTTP issue on production 
     - tls: failed to verify certificate: x509: certificate signed by unknown authority: Scratch did not have ce-certificates
 - [ ] Remove telebot: Thousands of dependecies
+
+## Integrations
+
+### YouTube
+- `ytplayer.config.args.raw_player_response.captions.playerCaptionsTracklistRenderer.captionTracks[0].languageCode`
+- `yt-dlp --convert-subs=srt  --write-auto-sub --write-sub --sub-lang "en,en-us,en-GB,automatic-caption-en" --skip-download "<Link>"`
 
 # Proposals
 

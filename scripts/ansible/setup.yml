@@ -14,6 +14,8 @@
           - git
           - ufw
           - aptitude
+          - ffmpeg
+          - yt-dlp
         state: latest # noqa package-latest
         update_cache: true
 
@@ -29,8 +31,3 @@
           - python3-setuptools
         state: latest # noqa package-latest
         update_cache: true
-
-    - name: Install pip packages
-      ansible.builtin.pip:
-        name:
-          - youtube-transcript-api
