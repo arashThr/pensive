@@ -358,7 +358,7 @@ func (model *BookmarkModel) generateMarkdown(content string, link string, bookma
 	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(markdownContent))
 	// Update the bookmark with the markdown content
 	_, err = model.Pool.Exec(context.Background(), `
-		UPDATE users_bookmarks SET ai_markdown = $1 WHERE bookmark_id = $2`,
+		UPDATE bookmarks_contents SET ai_markdown = $1 WHERE bookmark_id = $2`,
 		markdownContent, bookmarkId)
 	if err != nil {
 		slog.Warn("Failed to update bookmark content", "error", err)
@@ -505,7 +505,7 @@ func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, err
 func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT ai_markdown
-		FROM users_bookmarks
+		FROM bookmarks_contents
 		WHERE bookmark_id = $1
 		LIMIT 1`, id)
 	if err != nil {
