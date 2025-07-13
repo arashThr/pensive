@@ -72,6 +72,19 @@ func (model *BookmarkModel) Create(
 	userId types.UserId,
 	source BookmarkSource,
 	subscriptionStatus SubscriptionStatus) (*Bookmark, error) {
+	return model.CreateWithContent(link, userId, source, subscriptionStatus, "", "")
+}
+
+// CreateWithContent creates a bookmark with provided HTML and text content
+// If htmlContent and textContent are provided, they will be used instead of fetching the page
+func (model *BookmarkModel) CreateWithContent(
+	link string,
+	userId types.UserId,
+	source BookmarkSource,
+	subscriptionStatus SubscriptionStatus,
+	htmlContent string,
+	textContent string) (*Bookmark, error) {
+
 	// Check if the link already exists
 	bookmark, err := model.GetByLink(userId, link)
 	if err != nil {
@@ -87,17 +100,50 @@ func (model *BookmarkModel) Create(
 		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
 
-	resp, err := getPage(link)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get page: %w", err)
-	}
-	defer resp.Body.Close()
-	finalURL := resp.Request.URL
+	var article *readability.Article
+	var content string
 
-	article, err := readability.FromReader(resp.Body, finalURL)
-	// TODO: Check for the language
-	if err != nil {
-		return nil, fmt.Errorf("readability: %w", err)
+	// If HTML content is provided, use it instead of fetching the page
+	if htmlContent != "" && textContent != "" {
+		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "textSize", len(textContent))
+
+		// Parse the provided HTML content with readability
+		finalURL, err := url.Parse(link)
+		if err != nil {
+			return nil, fmt.Errorf("parse URL for provided content: %w", err)
+		}
+
+		articleValue, err := readability.FromReader(strings.NewReader(htmlContent), finalURL)
+		if err != nil {
+			slog.Warn("Failed to parse provided HTML with readability, using text content", "error", err, "link", link)
+			// Fallback: create a basic article structure from the provided text
+			article = &readability.Article{
+				Title:       "", // We'll extract title from the page if possible
+				Content:     htmlContent,
+				TextContent: textContent,
+				Excerpt:     textContent[:min(200, len(textContent))], // Use first 200 chars as excerpt
+			}
+		} else {
+			article = &articleValue
+		}
+		content = validations.CleanUpText(textContent)
+	} else {
+		// Fallback to the original method of fetching the page
+		slog.Info("Fetching page content", "link", link)
+		resp, err := getPage(link)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get page: %w", err)
+		}
+		defer resp.Body.Close()
+		finalURL := resp.Request.URL
+
+		articleValue, err := readability.FromReader(resp.Body, finalURL)
+		// TODO: Check for the language
+		if err != nil {
+			return nil, fmt.Errorf("readability: %w", err)
+		}
+		article = &articleValue
+		content = validations.CleanUpText(article.TextContent)
 	}
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
@@ -120,12 +166,15 @@ func (model *BookmarkModel) Create(
 		slog.Warn("Failed to parse image URL", "error", err)
 		bookmark.ImageUrl = ""
 	}
-	// TODO: It's not working as expected and escapes the HTML
-	content := validations.CleanUpText(article.TextContent)
 
 	if subscriptionStatus == SubscriptionStatusPremium {
+		// Use the provided HTML content for markdown generation if available, otherwise use extracted content
+		contentForMarkdown := content
+		if htmlContent != "" {
+			contentForMarkdown = htmlContent
+		}
 		// Generate the markdown content using Gemini
-		go model.generateMarkdown(content, link, bookmarkId)
+		go model.generateMarkdown(contentForMarkdown, link, bookmarkId)
 	}
 
 	// TODO: Add excerpt to bookmarks_content table

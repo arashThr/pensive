@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         console.error('Error checking bookmark status:', response.status);
         // Default to not bookmarked on error
-          isBookmarked = false;
-          updateBookmarkStatus();
+        isBookmarked = false;
+        updateBookmarkStatus();
       }
       
     } catch (error) {
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
       saveBtn.disabled = true;
-      updateStatus('loading', 'Saving...');
+      updateStatus('loading', 'Extracting page content...');
       
       const { endpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
       
@@ -107,19 +107,82 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveBtn.disabled = false;
         return;
       }
+
+      // Extract page content from the active tab
+      let pageContent = null;
+      try {
+        updateStatus('loading', 'Extracting page content...');
+        
+        // Use chrome.scripting to inject and execute content extraction
+        const results = await browserAPI.scripting.executeScript({
+          target: { tabId: currentTab.id },
+          func: () => {
+            // Function to extract page content (executed in the page context)
+            try {
+              // Get the full HTML of the page
+              const htmlContent = document.documentElement.outerHTML;
+              
+              // Get the text content of the page
+              const textContent = document.body ? document.body.innerText || document.body.textContent : '';
+              
+              // Clean up text content by removing excessive whitespace
+              const cleanTextContent = textContent.replace(/\s+/g, ' ').trim();
+              
+              return {
+                success: true,
+                content: {
+                  htmlContent: htmlContent,
+                  textContent: cleanTextContent
+                }
+              };
+            } catch (error) {
+              return {
+                success: false,
+                error: error.message
+              };
+            }
+          }
+        });
+        
+        if (results && results[0] && results[0].result) {
+          const result = results[0].result;
+          if (result.success) {
+            console.log("Content extracted successfully", result);
+            pageContent = result.content;
+          } else {
+            throw new Error(result.error || 'Failed to extract content');
+          }
+        } else {
+          throw new Error('No result from content script');
+        }
+      } catch (contentError) {
+        console.warn('Failed to extract page content, saving without content:', contentError);
+        // Continue without content if extraction fails
+      }
+
+      updateStatus('loading', 'Saving...');
       
+      // Prepare the request body
+      const requestBody = { link: currentTab.url };
+      if (pageContent) {
+        requestBody.htmlContent = pageContent.htmlContent;
+        requestBody.textContent = pageContent.textContent;
+      }
+      
+      console.log("requestBody", requestBody);
       const response = await fetch(new URL("/api/v1/bookmarks", endpoint).href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiToken}`
         },
-        body: JSON.stringify({ link: currentTab.url })
+        body: JSON.stringify(requestBody)
       });
       
       if (response.ok) {
         isBookmarked = true;
-        updateStatus('saved', 'Page saved successfully!');
+        const successMessage = pageContent ? 'Page saved with content!' : 'Page saved successfully!';
+        updateStatus('saved', successMessage);
         saveBtn.disabled = true;
         removeBtn.disabled = false;
         
@@ -262,4 +325,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       browserAPI.runtime.openOptionsPage();
     }
   }
-}); 
+});

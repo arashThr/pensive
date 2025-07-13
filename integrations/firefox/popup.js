@@ -51,41 +51,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       
-      // Check if bookmark exists by trying to create it
-      // If it already exists, the API should return an error or the existing bookmark
-      const createEndpoint = new URL("/api/v1/bookmarks", endpoint).href;
-      const response = await fetch(createEndpoint, {
-        method: 'POST',
+      // Use the new check endpoint to see if bookmark exists
+      const checkUrl = new URL("/api/v1/bookmarks/check", endpoint);
+      checkUrl.searchParams.set('url', currentTab.url);
+      
+      const response = await fetch(checkUrl.href, {
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiToken}`
-        },
-        body: JSON.stringify({ link: currentTab.url })
+        }
       });
       
       if (response.ok) {
-        // Bookmark was created (or already existed), so it's now bookmarked
-        isBookmarked = true;
+        const data = await response.json();
+        isBookmarked = data.exists;
         updateBookmarkStatus();
       } else {
-        // Check if it failed because it already exists
-        const contentType = response.headers.get('Content-Type');
-        if (contentType?.includes('application/json')) {
-          const errorData = await response.json();
-          // If it's a duplicate error, it means the bookmark already exists
-          if (errorData.errorCode === 'DUPLICATE_BOOKMARK' || response.status === 409) {
-            isBookmarked = true;
-            updateBookmarkStatus();
-          } else {
-            // Other error, assume not bookmarked
-            isBookmarked = false;
-            updateBookmarkStatus();
-          }
-        } else {
-          // Non-JSON error, assume not bookmarked
-          isBookmarked = false;
-          updateBookmarkStatus();
-        }
+        console.error('Error checking bookmark status:', response.status);
+        // Default to not bookmarked on error
+        isBookmarked = false;
+        updateBookmarkStatus();
       }
       
     } catch (error) {
@@ -113,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     try {
       saveBtn.disabled = true;
-      updateStatus('loading', 'Saving...');
+      updateStatus('loading', 'Extracting page content...');
       
       const { endpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
       
@@ -122,6 +107,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveBtn.disabled = false;
         return;
       }
+
+      // Extract page content from the active tab
+      let pageContent = null;
+      try {
+        updateStatus('loading', 'Extracting page content...');
+        
+        // Use browser.tabs.executeScript to inject and execute content extraction
+        const results = await browserAPI.tabs.executeScript(currentTab.id, {
+          code: `
+            (() => {
+              try {
+                // Get the full HTML of the page
+                const htmlContent = document.documentElement.outerHTML;
+                
+                // Get the text content of the page
+                const textContent = document.body ? document.body.innerText || document.body.textContent : '';
+                
+                // Clean up text content by removing excessive whitespace
+                const cleanTextContent = textContent.replace(/\\s+/g, ' ').trim();
+                
+                return {
+                  success: true,
+                  content: {
+                    htmlContent: htmlContent,
+                    textContent: cleanTextContent
+                  }
+                };
+              } catch (error) {
+                return {
+                  success: false,
+                  error: error.message
+                };
+              }
+            })();
+          `
+        });
+        
+        if (results && results[0]) {
+          const result = results[0];
+          if (result.success) {
+            console.log("Content extracted successfully", result);
+            pageContent = result.content;
+          } else {
+            throw new Error(result.error || 'Failed to extract content');
+          }
+        } else {
+          throw new Error('No result from content script');
+        }
+      } catch (contentError) {
+        console.warn('Failed to extract page content, saving without content:', contentError);
+        // Continue without content if extraction fails
+      }
+
+      updateStatus('loading', 'Saving...');
+      
+      // Prepare the request body
+      const requestBody = { link: currentTab.url };
+      if (pageContent) {
+        requestBody.htmlContent = pageContent.htmlContent;
+        requestBody.textContent = pageContent.textContent;
+      }
       
       const response = await fetch(new URL("/api/v1/bookmarks", endpoint).href, {
         method: 'POST',
@@ -129,12 +175,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiToken}`
         },
-        body: JSON.stringify({ link: currentTab.url })
+        body: JSON.stringify(requestBody)
       });
       
       if (response.ok) {
         isBookmarked = true;
-        updateStatus('saved', 'Page saved successfully!');
+        const successMessage = pageContent ? 'Page saved with content!' : 'Page saved successfully!';
+        updateStatus('saved', successMessage);
         saveBtn.disabled = true;
         removeBtn.disabled = false;
         
@@ -277,4 +324,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       browserAPI.runtime.openOptionsPage();
     }
   }
-}); 
+});

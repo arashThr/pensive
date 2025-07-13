@@ -89,6 +89,8 @@
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase or Cloudflare
 - [ ] Move tokens from sync to local
+- [ ] Use readability on the client side in extension
+- [ ] checkBookmarkStatus: Change the icon
 - [x] Clear the search results when text box is cleared
 - [x] Does user really need API key?
     - No

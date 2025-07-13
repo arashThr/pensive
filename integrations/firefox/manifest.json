@@ -12,6 +12,8 @@
     "permissions": [
       "storage",
       "activeTab",
+      "tabs",
+      "<all_urls>",
       "http://localhost:8000/*",
       "https://apps.arashtaher.com/*"
     ],

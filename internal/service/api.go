@@ -113,15 +113,17 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 //
 // @Accept json
 // @Produce json
-// @Param bookmark body struct{Link string} true "Bookmark link"
+// @Param bookmark body struct{Link string; HtmlContent string; TextContent string} true "Bookmark link and content"
 // @Success 200 {object} Bookmark
 // @Failure 400 {object} ErrorResponse "Invalid request body or invalid URL"
 // @Failure 500 {object} ErrorResponse "Failed to create bookmark"
 // @Router /v1/api/bookmarks [post]
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		UserId types.UserId
-		Link   string
+		UserId      types.UserId
+		Link        string
+		HtmlContent string `json:"htmlContent,omitempty"`
+		TextContent string `json:"textContent,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		slog.Error("[api] decoding request body", "error", err)
@@ -143,8 +145,8 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId)
-	bookmark, err := a.BookmarkModel.Create(data.Link, data.UserId, models.Api, user.SubscriptionStatus)
+	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId, "hasHtmlContent", data.HtmlContent != "", "hasTextContent", data.TextContent != "")
+	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, data.UserId, models.Api, user.SubscriptionStatus, data.HtmlContent, data.TextContent)
 	if err != nil {
 		slog.Error("[api] failed to create bookmark", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
