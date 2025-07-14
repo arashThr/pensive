@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Get current tab information
   try {
-    const tabs = await browserAPI.tabs.query({active: true, currentWindow: true});
+    const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
     currentTab = tabs[0];
 
     // Update page info
@@ -109,22 +109,50 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Extract page content from the active tab
-      let pageContent = null;
+      let pageContent = {link: currentTab.url};
       try {
         updateStatus('loading', 'Extracting page content...');
+
+        await browserAPI.scripting.executeScript({
+          target: { tabId: currentTab.id },
+          files: ['Readability-readerable.js', 'Readability.js'],
+        });
+        
+        const readabilityResults = await browserAPI.scripting.executeScript({
+          target: { tabId: currentTab.id },
+          func: parseWithReadability
+        });
+
+        if (readabilityResults && readabilityResults[0] && readabilityResults[0].result) {
+          const result = readabilityResults[0].result;
+          if (result.success) {
+            pageContent.title = result.content.title;
+            pageContent.excerpt = result.content.excerpt;
+            pageContent.lang = result.content.lang;
+            pageContent.siteName = result.content.siteName;
+            pageContent.publishedTime = result.content.publishedTime;
+            pageContent.imageUrl = result.content.imageUrl;
+            pageContent.textContent = result.content.textContent;
+            pageContent.textContent = result.content.textContent;
+            // We do not use Readability.js to extract the html content and instead
+            // use the content extraction script to extract the html content.
+            // pageContent.htmlContent = result.content.htmlContent;
+          }
+        }
+
 
         // Use chrome.scripting to inject and execute content extraction
         const contentResults = await browserAPI.scripting.executeScript({
           target: { tabId: currentTab.id },
-          func: extractContent         
+          func: extractContent
         });
 
         if (contentResults && contentResults[0] && contentResults[0].result) {
           const result = contentResults[0].result;
           if (result.success) {
             console.log("Content extracted successfully", result);
-            pageContent = result.content;
-
+            pageContent.htmlContent = result.htmlContent;
+            
             updateStatus('loading', 'Content cleaned and processed...');
           } else {
             throw new Error(result.error || 'Failed to extract content');
@@ -140,15 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateStatus('loading', 'Saving...');
 
       // Prepare the request body
-      const requestBody = { link: currentTab.url };
-      if (pageContent) {
-        requestBody.htmlContent = pageContent.htmlContent;
-        if (pageContent.title) {
-          requestBody.title = pageContent.title;
-        }
-      }
-
-      console.log("requestBody", requestBody);
+      let requestBody = pageContent;
       const response = await fetch(new URL("/api/v1/bookmarks", endpoint).href, {
         method: 'POST',
         headers: {
@@ -160,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (response.ok) {
         isBookmarked = true;
-        const successMessage = pageContent ? 'Page saved with content!' : 'Page saved successfully!';
+        const successMessage = pageContent.htmlContent ? 'Page saved with content!' : 'Page saved successfully!';
         updateStatus('saved', successMessage);
         saveBtn.disabled = true;
         removeBtn.disabled = false;
@@ -196,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (error) {
       console.error('Error saving bookmark:', error);
-      updateStatus('error', 'Network error occurred');
+      updateStatus('error', 'Network error occurred: ' + error.message);
       saveBtn.disabled = false;
     }
   }
@@ -550,20 +570,62 @@ function extractContent() {
     console.log(`Total reduction: ${totalReduction}% (${originalSize} → ${finalSize} characters)`);
 
     // Get page title
-    const title = document.title || '';
 
-    console.log('Successfully extracted clean HTML', title);
     return {
       success: true,
-      content: {
-        htmlContent: htmlContentWhitelist,
-        title: title
-      }
+      htmlContent: htmlContentWhitelist,
     };
   } catch (error) {
     return {
       success: false,
       error: error.message
+    };
+  }
+}
+
+function parseWithReadability() {
+  let article;
+  console.log("parseWithReadability");
+  try {
+    // Check if the page is probably readable
+    const isReadable = isProbablyReaderable(document);
+    if (!isReadable) {
+      console.log('Page is not readable');
+      return {
+        success: false,
+        error: 'Page is not readable'
+      };
+    }
+
+    // Use Readability to extract the article content
+    // clone the document
+    const documentClone = document.cloneNode(true);
+    const reader = new Readability(documentClone);
+    article = reader.parse();
+  } catch (error) {
+    console.error('Error extracting page content:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+
+  if (article && article.content) {
+    console.log('Successfully extracted article with Readability');
+    return {
+      success: true,
+      isReadable: true,
+      content: {
+        title: article.title,
+        // content: article.content,
+        // htmlContent: article.content,
+        lang: article.lang,
+        siteName: article.siteName,
+        publishedTime: article.publishedTime,
+        imageUrl: article.imageUrl,
+        textContent: article.textContent,
+        excerpt: article.excerpt,
+      }
     };
   }
 }

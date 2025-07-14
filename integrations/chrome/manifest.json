@@ -40,7 +40,7 @@
       }
     ],
     "web_accessible_resources": [{
-      "resources": ["options.js"],
+      "resources": ["options.js", "Readability.js", "Readability-readerable.js"],
       "matches": [
         "http://localhost:8000/*",
         "https://apps.arashtaher.com/*"
