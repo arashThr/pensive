@@ -12,11 +12,13 @@
 - [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] We're stuck in index page when the page does not have a title:
     -  https://apps.arashtaher.com/home 
-- [ ] Remove token when endpoint is changed
     - Check if endpoint is valid
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
+- [ ] Update token in extensions
+    - [ ] Remove token when endpoint is changed
+    - [ ] Ping to make sure the API token in extension is valid (is it deleted?)
 - [x] Move ai_content to content table
 - [x] failed to get page: failed to perform request: Get "www.defmacro.org/2006/06/19/fp.html": unsupported protocol scheme ""
 - [x] Fix redirects: http://www.defmacro.org/ramblings/fp.html
@@ -37,18 +39,21 @@
 - [ ] Captcha for Sign in
 - [ ] Feedback link
 - [ ] Use Pupeteer and playwright for getting the pages
-- [ ] Use Gemeni
-    - [ ] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
-    - [ ] Generate markdown page for future
+- [ ] Landing page: Here's how it works:
+    - Save the link, show the summary
+- Youtube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
-- [ ] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
 - [ ] Limitations configs (Free vs. Premium):
     - Bookmarks
     - AI and YouTube
 - [ ] Limit search result to 10
 - [ ] Premium: Get YouTube
 - [ ] Add recaptcha
+- [ ] Use Gemeni
+    - [ ] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
+    - [ ] Generate markdown page for future
+- [ ] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
 - [ ] Send the HTML from exntension
     - [ ] Clean up the HTML in extension
 - [x] Extension: Click to save
@@ -88,9 +93,12 @@
 - [ ] Use zap for logging
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Move prod to Supabase or Cloudflare
-- [ ] Move tokens from sync to local
+- [ ] Add validation to create bookmark inputs
 - [ ] Use readability on the client side in extension
 - [ ] checkBookmarkStatus: Change the icon
+- [ ] readability.Check for links that don't have HTML
+- [ ] Use the Readability Article meta data - Checl Claude
+- [ ] Move tokens from sync to local
 - [x] Clear the search results when text box is cleared
 - [x] Does user really need API key?
     - No
@@ -112,7 +120,6 @@
 - [ ] Twitter posts
 - [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser
-- [ ] Ping to make sure the API token in extension is valid (is it deleted?)
 - [ ] Slash command for bookmarks in Telegram
 
 ### Stripe
