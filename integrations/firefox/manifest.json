@@ -32,7 +32,7 @@
     "content_scripts": [
       {
         "matches": [
-          "http://localhost:8000/extension/auth",
+          "http://localhost/extension/auth",
           "https://apps.arashtaher.com/extension/auth"
         ],
         "js": ["content.js"]
