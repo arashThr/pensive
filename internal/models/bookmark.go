@@ -72,27 +72,30 @@ func (model *BookmarkModel) Create(
 	userId types.UserId,
 	source BookmarkSource,
 	subscriptionStatus SubscriptionStatus) (*Bookmark, error) {
-	return model.CreateWithContent(link, userId, source, subscriptionStatus, "", "")
+	return model.CreateWithContent(link, userId, source, subscriptionStatus, "", "", nil)
 }
 
 // CreateWithContent creates a bookmark with provided HTML and text content
 // If htmlContent and textContent are provided, they will be used instead of fetching the page
+// If title and excerpt are provided, they will be used instead of extracting from content
 func (model *BookmarkModel) CreateWithContent(
 	link string,
 	userId types.UserId,
 	source BookmarkSource,
 	subscriptionStatus SubscriptionStatus,
 	htmlContent string,
-	textContent string) (*Bookmark, error) {
+	textContent string,
+	bookmark *Bookmark,
+) (*Bookmark, error) {
 
 	// Check if the link already exists
-	bookmark, err := model.GetByLink(userId, link)
+	existingBookmark, err := model.GetByLink(userId, link)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
 		}
 	} else {
-		return bookmark, nil
+		return existingBookmark, nil
 	}
 
 	_, err = url.Parse(link)
@@ -104,29 +107,28 @@ func (model *BookmarkModel) CreateWithContent(
 	var content string
 
 	// If HTML content is provided, use it instead of fetching the page
-	if htmlContent != "" && textContent != "" {
-		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "textSize", len(textContent))
-
-		// Parse the provided HTML content with readability
-		finalURL, err := url.Parse(link)
-		if err != nil {
-			return nil, fmt.Errorf("parse URL for provided content: %w", err)
+	if htmlContent != "" {
+		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "title", bookmark.Title, "excerpt", bookmark.Excerpt)
+		textContent := allTagsRemoved(htmlContent)
+		excerpt := textContent[:min(200, len(textContent))]
+		if bookmark.Excerpt != "" {
+			excerpt = bookmark.Excerpt
+		}
+		title := "Unknown title"
+		if bookmark.Title != "" {
+			title = bookmark.Title
 		}
 
-		articleValue, err := readability.FromReader(strings.NewReader(htmlContent), finalURL)
-		if err != nil {
-			slog.Warn("Failed to parse provided HTML with readability, using text content", "error", err, "link", link)
-			// Fallback: create a basic article structure from the provided text
-			article = &readability.Article{
-				Title:       "", // We'll extract title from the page if possible
-				Content:     htmlContent,
-				TextContent: textContent,
-				Excerpt:     textContent[:min(200, len(textContent))], // Use first 200 chars as excerpt
-			}
-		} else {
-			article = &articleValue
+		article = &readability.Article{
+			Title:         title,
+			Content:       htmlContent,
+			TextContent:   textContent,
+			Excerpt:       excerpt,
+			Image:         bookmark.ImageUrl,
+			Language:      bookmark.ArticleLang,
+			SiteName:      bookmark.SiteName,
+			PublishedTime: bookmark.PublishedTime,
 		}
-		content = validations.CleanUpText(textContent)
 	} else {
 		// Fallback to the original method of fetching the page
 		slog.Info("Fetching page content", "link", link)
@@ -137,14 +139,19 @@ func (model *BookmarkModel) CreateWithContent(
 		defer resp.Body.Close()
 		finalURL := resp.Request.URL
 
+		// ******
+		// TODO: readability.Check
+		// ******
+
 		articleValue, err := readability.FromReader(resp.Body, finalURL)
 		// TODO: Check for the language
 		if err != nil {
 			return nil, fmt.Errorf("readability: %w", err)
 		}
 		article = &articleValue
-		content = validations.CleanUpText(article.TextContent)
 	}
+
+	content = validations.CleanUpText(article.TextContent)
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	bookmark = &Bookmark{
@@ -167,8 +174,7 @@ func (model *BookmarkModel) CreateWithContent(
 		bookmark.ImageUrl = ""
 	}
 
-	if subscriptionStatus == SubscriptionStatusPremium {
-		// Use the provided HTML content for markdown generation if available, otherwise use extracted content
+	if subscriptionStatus == SubscriptionStatusPremium || true {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent
@@ -315,6 +321,29 @@ func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookma
 	return &bookmark, nil
 }
 
+func allTagsRemoved(htmlContent string) string {
+	// Remove everything except the text content
+	// This will be executed after cleanHTMLForLLM, so we already know that the htmlContent is clean
+
+	// Remove all HTML tags
+	tagRe := regexp.MustCompile(`<[^>]*>`)
+	textOnly := tagRe.ReplaceAllString(htmlContent, "")
+
+	// Decode HTML entities
+	textOnly = strings.ReplaceAll(textOnly, "&nbsp;", " ")
+	textOnly = strings.ReplaceAll(textOnly, "&amp;", "&")
+	textOnly = strings.ReplaceAll(textOnly, "&lt;", "<")
+	textOnly = strings.ReplaceAll(textOnly, "&gt;", ">")
+	textOnly = strings.ReplaceAll(textOnly, "&quot;", "\"")
+	textOnly = strings.ReplaceAll(textOnly, "&#39;", "'")
+
+	// Remove extra whitespace and normalize
+	whitespaceRe := regexp.MustCompile(`\s+`)
+	textOnly = whitespaceRe.ReplaceAllString(textOnly, " ")
+
+	return strings.TrimSpace(textOnly)
+}
+
 // cleanHTMLForLLM removes unnecessary HTML elements and attributes to reduce LLM costs
 func cleanHTMLForLLM(htmlContent string) string {
 	// Remove script and style tags completely
@@ -393,6 +422,12 @@ Instructions:
 12. Remove navigation menus, sidebars, footers, and other non-content elements
 13. Focus on the main article/content body
 14. Ensure the output is clean and properly formatted Markdown
+15. Consider the semantic. Only keep the main content of the page and throw away
+	all the meta content. The purpose is to have a clean copy of the content
+	presented in the page. We're not copying the whole website, only the main
+	article and everything (including comments) that are related to that.
+	Everything else, like navigation menus, sidebars, footers, signup forms,
+	etc., should be removed.
 
 Only return the converted Markdown content, no explanations or additional text.
 

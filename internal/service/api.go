@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
@@ -113,17 +114,23 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 //
 // @Accept json
 // @Produce json
-// @Param bookmark body struct{Link string; HtmlContent string; TextContent string} true "Bookmark link and content"
+// @Param data body struct{Link string; HtmlContent string; TextContent string; Title string; Excerpt string; Lang string; SiteName string; PublishedTime string; ImageUrl string} true "Bookmark link and content"
 // @Success 200 {object} Bookmark
 // @Failure 400 {object} ErrorResponse "Invalid request body or invalid URL"
 // @Failure 500 {object} ErrorResponse "Failed to create bookmark"
 // @Router /v1/api/bookmarks [post]
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		UserId      types.UserId
-		Link        string
-		HtmlContent string `json:"htmlContent,omitempty"`
-		TextContent string `json:"textContent,omitempty"`
+		UserId        types.UserId
+		Link          string `json:"link"`
+		HtmlContent   string `json:"htmlContent,omitempty"`
+		Title         string `json:"title,omitempty"`
+		Excerpt       string `json:"excerpt,omitempty"`
+		Lang          string `json:"lang,omitempty"`
+		SiteName      string `json:"siteName,omitempty"`
+		PublishedTime string `json:"publishedTime,omitempty"`
+		ImageUrl      string `json:"imageUrl,omitempty"`
+		TextContent   string `json:"textContent,omitempty"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		slog.Error("[api] decoding request body", "error", err)
@@ -145,8 +152,24 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId, "hasHtmlContent", data.HtmlContent != "", "hasTextContent", data.TextContent != "")
-	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, data.UserId, models.Api, user.SubscriptionStatus, data.HtmlContent, data.TextContent)
+	var publishedTime *time.Time = nil
+	pt, err := time.Parse(time.RFC3339, data.PublishedTime)
+	if err != nil {
+		publishedTime = &pt
+	}
+	inputBookmark := &models.Bookmark{
+		UserId:        user.ID,
+		Link:          data.Link,
+		Title:         data.Title,
+		Excerpt:       data.Excerpt,
+		ImageUrl:      data.ImageUrl,
+		ArticleLang:   data.Lang,
+		SiteName:      data.SiteName,
+		PublishedTime: publishedTime,
+	}
+
+	slog.Info("[api] creating bookmark", "link", data.Link, "userId", data.UserId, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
+	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, data.UserId, models.Api, user.SubscriptionStatus, data.HtmlContent, data.TextContent, inputBookmark)
 	if err != nil {
 		slog.Error("[api] failed to create bookmark", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
