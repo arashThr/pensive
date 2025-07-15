@@ -28,18 +28,14 @@
 
 ## Features
 - [ ] Ping server from Telegram bot to check the validity of the token
-- [ ] Google login
-- [ ] Separate text extraction service
-- [ ] Extension: Future search
-- [ ] Add premium layer - After alpha release
 - [ ] Export links
-- [ ] Disconnect the extension
+- [ ] Upload the extensions
 - [ ] Limitation on the tokens for LLM
     - [ ] Accept user's API key
-- [ ] Upload the extensions
-- [ ] Captcha for Sign in
 - [ ] Feedback link
+- [ ] Back up db
 - [ ] Use Pupeteer and playwright for getting the pages
+- [ ] Add recaptcha
 - [ ] Landing page: Here's how it works:
     - Save the link, show the summary
 - Youtube
@@ -48,15 +44,15 @@
 - [ ] Limitations configs (Free vs. Premium):
     - Bookmarks
     - AI and YouTube
-- [ ] Limit search result to 10
+- [ ] Get excerpt and summaries from Genimi
 - [ ] Premium: Get YouTube
-- [ ] Add recaptcha
-- [ ] Use Gemeni
-    - [ ] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
-    - [ ] Generate markdown page for future
-- [ ] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
-- [ ] Send the HTML from exntension
-    - [ ] Clean up the HTML in extension
+- [x] Limit search result to 10 - Search better!
+- [x] Use Gemeni
+    - [x] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
+    - [x] Generate markdown page for future
+- [x] Reddit and Stackoverflow problem: Send the page text/HTML from the extension?
+- [x] Send the HTML from exntension
+    - [x] Clean up the HTML in extension
 - [x] Extension: Click to save
 - [x] Parse Pocket export
 - [x] Show the raw content
@@ -84,22 +80,20 @@
 
 ## Changes
 - [ ] "Failed to parse image URL"
+- [ ] Remove password - Use email validation
+- [ ] readability.Check for links that don't have HTML
 - [ ] Use temp dir for pocket imports
-- [ ] Apply rate limit on requests
+- [ ] Use zap for logging
+- [ ] If API is not set, or incorrect, don't send the request
+- [ ] Add validation to create bookmark inputs
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
-- [ ] Rename users_bookmarks table to bookmarks
-- [ ] Remove password - Use email validation
-- [ ] Use zap for logging
-- [ ] If API is not set, or incorrect, don't send the request
-- [ ] Move prod to Supabase or Cloudflare
-- [ ] Add validation to create bookmark inputs
-- [ ] Use readability on the client side in extension
-- [ ] checkBookmarkStatus: Change the icon
-- [ ] readability.Check for links that don't have HTML
-- [ ] Use the Readability Article meta data - Checl Claude
-- [ ] Move tokens from sync to local
+- [ ] Apply rate limit on requests
+- [x] Cancelled: Move prod to Supabase or Cloudflare
+    - Too little storage, too much cost. Instead, make the current solution better: backups and extending
+- [x] Use readability on the client side in extension
+- [x] Move tokens from sync to local
 - [x] Clear the search results when text box is cleared
 - [x] Does user really need API key?
     - No
@@ -118,6 +112,9 @@
 - [x] Ids from uint to string
 
 ### Future
+- [ ] Separate text extraction service
+- [ ] Extension: Future search
+- [ ] Google login
 - [ ] Twitter posts
 - [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser

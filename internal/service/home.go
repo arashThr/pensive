@@ -6,6 +6,7 @@ import (
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
+	"github.com/arashthr/go-course/internal/validations"
 	"github.com/arashthr/go-course/web"
 )
 
@@ -18,42 +19,24 @@ type Home struct {
 	BookmarkModel *models.BookmarkModel
 }
 
+type RecentBookmark struct {
+	Id        types.BookmarkId
+	Title     string
+	Link      string
+	Hostname  string
+	Excerpt   string
+	Thumbnail string
+	CreatedAt string
+}
+
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 
-	// Get recent bookmarks (limit to 5)
-	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(user.ID, 5)
+	data, err := h.getRecentBookmarksData(user.ID, 5)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-
-	type RecentBookmark struct {
-		Id        types.BookmarkId
-		Title     string
-		Link      string
-		Excerpt   string
-		Thumbnail string
-		CreatedAt string
-	}
-
-	var data struct {
-		Bookmarks         []RecentBookmark
-		HasBookmarksAtAll bool
-	}
-
-	for _, b := range bookmarks {
-		data.Bookmarks = append(data.Bookmarks, RecentBookmark{
-			Id:        b.BookmarkId,
-			Title:     b.Title,
-			Link:      b.Link,
-			Excerpt:   b.Excerpt,
-			Thumbnail: b.ImageUrl,
-			CreatedAt: b.CreatedAt.Format("Jan 02, 2006"),
-		})
-	}
-
-	data.HasBookmarksAtAll = len(data.Bookmarks) > 0
 
 	h.Templates.Home.Execute(w, r, data)
 }
@@ -85,6 +68,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 			Id:        r.BookmarkId,
 			Title:     r.Title,
 			Link:      r.Link,
+			Hostname:  validations.ExtractHostname(r.Link),
 			Headline:  r.Headline,
 			Thumbnail: r.ImageUrl,
 			CreatedAt: r.CreatedAt,
@@ -99,20 +83,26 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 
-	// Get recent bookmarks (limit to 5)
-	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(user.ID, 5)
+	data, err := h.getRecentBookmarksData(user.ID, 5)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
 
-	type RecentBookmark struct {
-		Id        types.BookmarkId
-		Title     string
-		Link      string
-		Excerpt   string
-		Thumbnail string
-		CreatedAt string
+	h.Templates.RecentResults.Execute(w, r, data)
+}
+
+// getRecentBookmarksData fetches recent bookmarks and returns the data structure
+func (h Home) getRecentBookmarksData(userId types.UserId, limit int) (struct {
+	Bookmarks         []RecentBookmark
+	HasBookmarksAtAll bool
+}, error) {
+	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(userId, limit)
+	if err != nil {
+		return struct {
+			Bookmarks         []RecentBookmark
+			HasBookmarksAtAll bool
+		}{}, err
 	}
 
 	var data struct {
@@ -125,6 +115,7 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 			Id:        b.BookmarkId,
 			Title:     b.Title,
 			Link:      b.Link,
+			Hostname:  validations.ExtractHostname(b.Link),
 			Excerpt:   b.Excerpt,
 			Thumbnail: b.ImageUrl,
 			CreatedAt: b.CreatedAt.Format("Jan 02, 2006"),
@@ -132,6 +123,5 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.HasBookmarksAtAll = len(data.Bookmarks) > 0
-
-	h.Templates.RecentResults.Execute(w, r, data)
+	return data, nil
 }

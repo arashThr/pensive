@@ -6,7 +6,6 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
@@ -84,15 +83,10 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		Thumbnail string
 		Host      string
 	}
-	u, err := url.Parse(bookmark.Link)
-	if err != nil {
-		logger.Error("parsing url for bookmark edit", "error", err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-	logger.Info("editing bookmark", "url", u)
+	host := validations.ExtractHostname(bookmark.Link)
+	logger.Info("editing bookmark", "url", host)
 	data.Link = bookmark.Link
-	data.Host = u.Host
+	data.Host = host
 	data.Title = bookmark.Title
 	data.Id = bookmark.BookmarkId
 	data.Excerpt = bookmark.Excerpt

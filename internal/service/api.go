@@ -287,6 +287,7 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 			Id:        r.BookmarkId,
 			Title:     r.Title,
 			Link:      r.Link,
+			Hostname:  validations.ExtractHostname(r.Link),
 			Headline:  r.Headline,
 			Thumbnail: r.ImageUrl,
 		})
