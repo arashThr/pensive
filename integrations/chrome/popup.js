@@ -39,6 +39,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function checkBookmarkStatus() {
     if (!currentTab) return;
 
+    // if page is not http, return
+    if (!currentTab.url.startsWith('http')) {
+      updateStatus('error', 'Page is not a valid URL');
+      saveBtn.disabled = true;
+      removeBtn.disabled = true;
+      return;
+    }
+
     try {
       updateStatus('loading', 'Checking status...');
 

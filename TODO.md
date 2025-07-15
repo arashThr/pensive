@@ -16,7 +16,7 @@
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
-- [ ] Error checking bookmark status: Don't status check for non-http websites
+- [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
     - [x] Remove token when endpoint is changed
     - [x] Ping to make sure the API token in extension is valid (is it deleted?)
