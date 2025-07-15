@@ -16,9 +16,10 @@
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
-- [ ] Update token in extensions
-    - [ ] Remove token when endpoint is changed
-    - [ ] Ping to make sure the API token in extension is valid (is it deleted?)
+- [ ] Error checking bookmark status: Don't status check for non-http websites
+- [x] Update token in extensions
+    - [x] Remove token when endpoint is changed
+    - [x] Ping to make sure the API token in extension is valid (is it deleted?)
 - [x] Move ai_content to content table
 - [x] failed to get page: failed to perform request: Get "www.defmacro.org/2006/06/19/fp.html": unsupported protocol scheme ""
 - [x] Fix redirects: http://www.defmacro.org/ramblings/fp.html

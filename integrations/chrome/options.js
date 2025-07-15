@@ -33,12 +33,62 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Check if we already have a token
+  // Check if we already have a token and validate it
   browserAPI.storage.local.get(['apiToken']).then((result) => {
     if (result.apiToken) {
-      showConnectedState();
+      validateToken(result.apiToken);
     }
   });
+
+  // Add sign out button functionality
+  function addSignOutButton() {
+    const signOutButton = document.getElementById('signout-button');
+    signOutButton.style.display = 'inline-block';
+    
+    // Add click event listener if not already added
+    if (!signOutButton.hasAttribute('data-listener-added')) {
+      signOutButton.addEventListener('click', function() {
+        // Clear the token
+        browserAPI.storage.local.remove(['apiToken']).then(() => {
+          showDisconnectedState();
+          console.log('Token cleared, user signed out');
+        }).catch((error) => {
+          console.error('Failed to clear token:', error);
+          showError('Failed to sign out');
+        });
+      });
+      signOutButton.setAttribute('data-listener-added', 'true');
+    }
+  }
+
+  // Function to validate token by calling health check endpoint
+  async function validateToken(token) {
+    try {
+      const response = await fetch(`${defaultEndpoint}/api/ping`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        showConnectedState();
+        addSignOutButton();
+      } else {
+        // Token is invalid, clear it and show disconnected state
+        await browserAPI.storage.local.remove(['apiToken']);
+        showDisconnectedState();
+        showError('Authentication token is invalid. Please reconnect.');
+      }
+    } catch (error) {
+      console.error('Failed to validate token:', error);
+      // On network error, assume token might still be valid but show warning
+      showConnectedState();
+      addSignOutButton();
+      statusDiv.textContent = 'Connected to Pensieve (offline)';
+    }
+  }
 
   connectButton.addEventListener('click', function() {
     connectButton.disabled = true;
@@ -61,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (request.type === 'AUTH_TOKEN') {
           // Store the token
           browserAPI.storage.local.set({ apiToken: request.token }).then(() => {
-            showConnectedState();
+            validateToken(request.token);
             // Close the auth tab
             browserAPI.tabs.remove(tab.id);
             // Remove the message listener
@@ -91,14 +141,33 @@ document.addEventListener('DOMContentLoaded', function() {
   function showConnectedState() {
     statusDiv.className = 'status connected';
     statusDiv.textContent = 'Connected to Pensieve';
-    authSection.style.display = 'none';
+    authSection.style.display = 'block';
     
-    connectButton.disabled = true;
+    // Hide the connect button when connected
+    connectButton.style.display = 'none';
+  }
+
+  function showDisconnectedState() {
+    statusDiv.className = 'status disconnected';
+    statusDiv.textContent = 'Not connected to Pensieve';
+    authSection.style.display = 'block';
+    
+    // Show the connect button when disconnected
+    connectButton.style.display = 'inline-block';
+    connectButton.disabled = false;
+    connectButton.textContent = 'Connect to Pensieve';
+    
+    // Hide the sign out button
+    const signOutButton = document.getElementById('signout-button');
+    if (signOutButton) {
+      signOutButton.style.display = 'none';
+    }
   }
 
   function showError(message) {
     statusDiv.className = 'status disconnected';
     statusDiv.textContent = message;
+    connectButton.style.display = 'inline-block';
     connectButton.disabled = false;
     connectButton.textContent = 'Connect to Pensieve';
   }
