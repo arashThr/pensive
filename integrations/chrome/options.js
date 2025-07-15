@@ -10,11 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
   let defaultEndpoint = "http://localhost:8000"
 
   // Load saved settings or use defaults
-  browserAPI.storage.sync.get(["endpoint"]).then((data) => {
+  browserAPI.storage.local.get(["endpoint"]).then((data) => {
     defaultEndpoint = data.endpoint || defaultEndpoint;
     document.getElementById("endpoint").value = defaultEndpoint;
 
-    browserAPI.storage.sync.set({ endpoint: defaultEndpoint }).then(() => {
+    browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
       console.log("Default settings saved");
     })
   });
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("save").addEventListener("click", () => {
     defaultEndpoint = document.getElementById("endpoint").value || defaultEndpoint;
     
-    browserAPI.storage.sync.set({ endpoint: defaultEndpoint }).then(() => {
+    browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
       const status = document.getElementById("status");
       const originalText = status.textContent;
       status.textContent = "Settings saved!";
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Check if we already have a token
-  browserAPI.storage.sync.get(['apiToken']).then((result) => {
+  browserAPI.storage.local.get(['apiToken']).then((result) => {
     if (result.apiToken) {
       showConnectedState();
     }
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Received message", request)
         if (request.type === 'AUTH_TOKEN') {
           // Store the token
-          browserAPI.storage.sync.set({ apiToken: request.token }).then(() => {
+          browserAPI.storage.local.set({ apiToken: request.token }).then(() => {
             showConnectedState();
             // Close the auth tab
             browserAPI.tabs.remove(tab.id);

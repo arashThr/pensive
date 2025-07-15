@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       updateStatus('loading', 'Checking status...');
       
-      const { endpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
+      const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
       
       if (!endpoint || !apiToken) {
         updateStatus('error', 'Extension not configured');
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveBtn.disabled = true;
       updateStatus('loading', 'Extracting page content...');
       
-      const { endpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
+      const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
       
       if (!endpoint || !apiToken) {
         updateStatus('error', 'Extension not configured');
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       removeBtn.disabled = true;
       updateStatus('loading', 'Removing...');
       
-      const { endpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
+      const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
       
       if (!endpoint || !apiToken) {
         updateStatus('error', 'Extension not configured');
@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   async function openSearch() {
     try {
-      const { endpoint } = await browserAPI.storage.sync.get(['endpoint']);
+      const { endpoint } = await browserAPI.storage.local.get(['endpoint']);
       
       if (!endpoint) {
         // If no endpoint is configured, show an error or open options

@@ -5,7 +5,7 @@ const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "AUTH_TOKEN") {
     // Store the authentication token
-    browserAPI.storage.sync.set({ apiToken: message.token }, () => {
+    browserAPI.storage.local.set({ apiToken: message.token }, () => {
       console.log("Authentication token stored successfully");
     });
   }
@@ -24,7 +24,7 @@ browserAPI.runtime.onInstalled.addListener((details) => {
 
 // Utility function for making API requests (if needed by popup)
 async function makeApiRequest(endpoint, method = 'GET', body = null) {
-  const { endpoint: baseEndpoint, apiToken } = await browserAPI.storage.sync.get(['endpoint', 'apiToken']);
+  const { endpoint: baseEndpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
   
   if (!baseEndpoint || !apiToken) {
     throw new Error('Extension not configured');
