@@ -89,6 +89,7 @@
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
+- [ ] Remove user id from bookmark table
 - [ ] Apply rate limit on requests
 - [x] Cancelled: Move prod to Supabase or Cloudflare
     - Too little storage, too much cost. Instead, make the current solution better: backups and extending

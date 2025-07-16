@@ -51,6 +51,9 @@ type Bookmark struct {
 	ImageUrl      string
 	ArticleLang   string
 	SiteName      string
+	AISummary     *string
+	AIExcerpt     *string
+	AITags        *string
 	CreatedAt     time.Time
 	PublishedTime *time.Time
 }
@@ -180,22 +183,22 @@ func (model *BookmarkModel) CreateWithContent(
 			contentForMarkdown = htmlContent
 		}
 		// Generate the markdown content using Gemini
-		go model.generateMarkdown(contentForMarkdown, link, bookmarkId)
+		go model.generateAIData(contentForMarkdown, link, bookmarkId)
 	}
 
 	// TODO: Add excerpt to bookmarks_content table
 	_, err = model.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO users_bookmarks (
-				bookmark_id, 
-				user_id, 
-				link, 
+				bookmark_id,
+				user_id,
+				link,
 				title,
 				source,
-				excerpt, 
-				image_url, 
-				article_lang, 
-				site_name, 
+				excerpt,
+				image_url,
+				article_lang,
+				site_name,
 				published_time
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		)
@@ -274,32 +277,37 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 }
 
 // GetRecentBookmarks returns the most recent bookmarks for the home page
-func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int) ([]Bookmark, error) {
-	rows, err := model.Pool.Query(context.Background(),
-		`SELECT bookmark_id, title, link, excerpt, image_url, created_at
+func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int, subscriptionStatus SubscriptionStatus) ([]Bookmark, error) {
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT
+			user_id,
+			bookmark_id,
+			title,
+			link,
+			excerpt,
+			source,
+			article_lang,
+			site_name,
+			published_time,
+			image_url,
+			created_at,
+			ai_summary,
+			ai_excerpt,
+			ai_tags
 		FROM users_bookmarks
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 		LIMIT $2
-		`, userId, limit)
+	`, userId, limit)
 	if err != nil {
 		return nil, fmt.Errorf("query recent bookmarks: %w", err)
 	}
 	defer rows.Close()
 
-	var bookmarks []Bookmark
-	for rows.Next() {
-		var bookmark Bookmark
-		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
-		if err != nil {
-			return nil, fmt.Errorf("scan recent bookmark: %w", err)
-		}
-		bookmarks = append(bookmarks, bookmark)
+	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
+	if err != nil {
+		return nil, fmt.Errorf("collect rows: %w", err)
 	}
-	if rows.Err() != nil {
-		return nil, fmt.Errorf("iterating rows: %w", rows.Err())
-	}
-
 	return bookmarks, nil
 }
 
@@ -373,31 +381,46 @@ func cleanHTMLForLLM(htmlContent string) string {
 	return strings.TrimSpace(cleaned)
 }
 
-func (model *BookmarkModel) generateMarkdown(content string, link string, bookmarkId string) {
+func (model *BookmarkModel) generateAIData(content string, link string, bookmarkId string) {
 	// Clean up HTML content to reduce LLM costs
 	htmlContent := cleanHTMLForLLM(content)
 	// Log the duration of the function and size of the content
 	start := time.Now()
 	slog.Info("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
-	markdownContent, err := model.convertHTMLToMarkdown(htmlContent)
+	aiDataResponse, err := model.promptToGetAIData(htmlContent)
 	if err != nil {
 		slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
 		return
 	}
-	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(markdownContent))
-	// Update the bookmark with the markdown content
+	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
+	// Update the bookmark with all AI-generated content in users_bookmarks table
+	_, err = model.Pool.Exec(context.Background(), `
+		UPDATE users_bookmarks SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE bookmark_id = $4`,
+		aiDataResponse.Summary, aiDataResponse.Excerpt, aiDataResponse.Tags, bookmarkId)
+	if err != nil {
+		slog.Warn("Failed to update bookmark AI content", "error", err)
+	}
+
+	// Also update the markdown content in bookmarks_contents table
 	_, err = model.Pool.Exec(context.Background(), `
 		UPDATE bookmarks_contents SET ai_markdown = $1 WHERE bookmark_id = $2`,
-		markdownContent, bookmarkId)
+		aiDataResponse.Markdown, bookmarkId)
 	if err != nil {
-		slog.Warn("Failed to update bookmark content", "error", err)
+		slog.Warn("Failed to update bookmark markdown content", "error", err)
 	}
 }
 
-// convertHTMLToMarkdown uses Gemini to convert HTML content to markdown format
-func (model *BookmarkModel) convertHTMLToMarkdown(htmlContent string) (string, error) {
+type aiDataResponseType struct {
+	Markdown string `json:"markdown"`
+	Summary  string `json:"summary"`
+	Excerpt  string `json:"excerpt"`
+	Tags     string `json:"tags"`
+}
+
+// promptToGetAIData uses Gemini to convert HTML content to markdown format and generate additional AI content
+func (model *BookmarkModel) promptToGetAIData(htmlContent string) (*aiDataResponseType, error) {
 	if model.GenAIClient == nil {
-		return "", fmt.Errorf("GenAI client not initialized")
+		return nil, fmt.Errorf("GenAI client not initialized")
 	}
 
 	// Limit content length to avoid excessive costs (roughly 8000 characters = ~2000 tokens)
@@ -405,9 +428,27 @@ func (model *BookmarkModel) convertHTMLToMarkdown(htmlContent string) (string, e
 		htmlContent = htmlContent[:8000] + "..."
 	}
 
-	prompt := `You are an expert at converting HTML content to clean, well-formatted Markdown. Your task is to convert the provided HTML content to Markdown format while preserving the main content structure and readability.
+	prompt := `You are an expert at analyzing HTML content and converting it to clean, well-formatted Markdown. Your task is to process the provided HTML content and return FOUR separate outputs using the following structured format:
 
-Instructions:
+===MARKDOWN===
+[Convert the HTML to clean markdown here]
+===END MARKDOWN===
+
+===SUMMARY===
+[Write a concise one-paragraph summary here]
+===END SUMMARY===
+
+===EXCERPT===
+[Extract one representative paragraph from the article here]
+===END EXCERPT===
+
+===TAGS===
+[comma,separated,list,of,relevant,tags]
+===END TAGS===
+
+Instructions for each output:
+
+MARKDOWN:
 1. Convert HTML headings (h1-h6) to appropriate Markdown headings (# to ######)
 2. Convert HTML lists (ul, ol, li) to Markdown lists (-, *, 1.)
 3. Convert HTML links (<a>) to Markdown links [text](url)
@@ -422,16 +463,29 @@ Instructions:
 12. Remove navigation menus, sidebars, footers, and other non-content elements
 13. Focus on the main article/content body
 14. Ensure the output is clean and properly formatted Markdown
-15. Consider the semantic. Only keep the main content of the page and throw away
-	all the meta content. The purpose is to have a clean copy of the content
-	presented in the page. We're not copying the whole website, only the main
-	article and everything (including comments) that are related to that.
-	Everything else, like navigation menus, sidebars, footers, signup forms,
-	etc., should be removed.
+15. Only keep the main content of the page and throw away all the meta content
 
-Only return the converted Markdown content, no explanations or additional text.
+SUMMARY:
+- Write a concise one-paragraph summary (2-3 sentences) of the main content
+- Focus on the key points and main message of the article
+- Use clear, professional language
+- Keep it under 200 words
 
-HTML content to convert:
+EXCERPT:
+- Extract one representative paragraph from the article content
+- Choose a paragraph that best represents the main content
+- Use the exact text as it appears in the article (verbatim)
+- Avoid introductory or concluding paragraphs
+- Keep it under 300 words
+
+TAGS:
+- Generate 5-8 relevant tags that describe the content
+- Use lowercase, single words or short phrases
+- Separate with commas, no spaces after commas
+- Focus on topics, themes, and key concepts
+- Examples: technology,programming,web development,ai,machine learning
+
+HTML content to process:
 ` + htmlContent
 
 	ctx := context.Background()
@@ -442,10 +496,35 @@ HTML content to convert:
 		nil,
 	)
 	if err != nil {
-		return "", fmt.Errorf("generate content with Gemini: %w", err)
+		return nil, fmt.Errorf("generate content with Gemini: %w", err)
 	}
 
-	return result.Text(), nil
+	responseText := result.Text()
+
+	// Parse the structured response
+	aiDataResponse := &aiDataResponseType{}
+
+	// Extract markdown
+	if markdownMatch := regexp.MustCompile(`(?s)===MARKDOWN===\n(.*?)\n===END MARKDOWN===`).FindStringSubmatch(responseText); len(markdownMatch) > 1 {
+		aiDataResponse.Markdown = strings.TrimSpace(markdownMatch[1])
+	}
+
+	// Extract summary
+	if summaryMatch := regexp.MustCompile(`(?s)===SUMMARY===\n(.*?)\n===END SUMMARY===`).FindStringSubmatch(responseText); len(summaryMatch) > 1 {
+		aiDataResponse.Summary = strings.TrimSpace(summaryMatch[1])
+	}
+
+	// Extract excerpt
+	if excerptMatch := regexp.MustCompile(`===EXCERPT===\n(.*?)\n===END EXCERPT===`).FindStringSubmatch(responseText); len(excerptMatch) > 1 {
+		aiDataResponse.Excerpt = strings.TrimSpace(excerptMatch[1])
+	}
+
+	// Extract tags
+	if tagsMatch := regexp.MustCompile(`===TAGS===\n(.*?)\n===END TAGS===`).FindStringSubmatch(responseText); len(tagsMatch) > 1 {
+		aiDataResponse.Tags = strings.TrimSpace(tagsMatch[1])
+	}
+
+	return aiDataResponse, nil
 }
 
 func (model *BookmarkModel) Update(bookmark *Bookmark) error {
@@ -477,29 +556,36 @@ type SearchResult struct {
 	ImageUrl   string
 	CreatedAt  time.Time
 	Rank       float32
+	// AI-generated fields for premium users
+	AISummary *string
+	AIExcerpt *string
+	AITags    *string
 }
 
-func (model *BookmarkModel) Search(userId types.UserId, query string) ([]SearchResult, error) {
+func (model *BookmarkModel) Search(userId types.UserId, query string, subscriptionStatus SubscriptionStatus) ([]SearchResult, error) {
 	rows, err := model.Pool.Query(context.Background(), `
-	WITH search_query AS (
-		SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
-	)
-	SELECT
-		ts_headline(content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
-		ub.bookmark_id AS bookmark_id,
-		ub.title AS title,
-		link AS link,
-		ub.excerpt AS excerpt,
-		image_url AS image_url,
-		ub.created_at AS created_at,
-		ts_rank(search_vector, sq.query) AS rank
-	FROM users_bookmarks ub
-	JOIN bookmarks_contents bc ON ub.bookmark_id = bc.bookmark_id
-	CROSS JOIN search_query sq
-	WHERE ub.user_id = $2
-    	AND bc.search_vector @@ sq.query
-	ORDER BY rank DESC
-	LIMIT 10`, query, userId)
+		WITH search_query AS (
+			SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
+		)
+		SELECT
+			ts_headline(bc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
+			ub.bookmark_id AS bookmark_id,
+			ub.title AS title,
+			ub.link AS link,
+			ub.excerpt AS excerpt,
+			ub.image_url AS image_url,
+			ub.created_at AS created_at,
+			ts_rank(bc.search_vector, sq.query) AS rank,
+			ub.ai_summary AS ai_summary,
+			ub.ai_excerpt AS ai_excerpt,
+			ub.ai_tags AS ai_tags
+		FROM users_bookmarks ub
+		JOIN bookmarks_contents bc ON ub.bookmark_id = bc.bookmark_id
+		CROSS JOIN search_query sq
+		WHERE ub.user_id = $2
+    		AND bc.search_vector @@ sq.query
+		ORDER BY rank DESC
+		LIMIT 10`, query, userId)
 
 	if err != nil {
 		return nil, fmt.Errorf("search bookmarks: %w", err)
@@ -508,6 +594,13 @@ func (model *BookmarkModel) Search(userId types.UserId, query string) ([]SearchR
 	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
 	if err != nil {
 		return nil, fmt.Errorf("collect bookmark search rows: %w", err)
+	}
+	if subscriptionStatus != SubscriptionStatusPremium {
+		for i := range results {
+			results[i].AISummary = nil
+			results[i].AIExcerpt = nil
+			results[i].AITags = nil
+		}
 	}
 	return results, nil
 }

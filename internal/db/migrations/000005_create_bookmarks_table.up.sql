@@ -12,6 +12,9 @@ CREATE TABLE users_bookmarks (
   image_url TEXT,
   article_lang TEXT,
   site_name TEXT,
+  ai_summary TEXT,
+  ai_excerpt TEXT,
+  ai_tags TEXT,
   published_time TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
   -- TODO: Add these columns
