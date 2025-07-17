@@ -113,6 +113,7 @@
 - [x] Ids from uint to string
 
 ### Future
+- [ ] Bookmark only the selected text
 - [ ] Separate text extraction service
 - [ ] Extension: Future search
 - [ ] Google login

@@ -272,7 +272,7 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	user := context.User(r.Context())
 
-	results, err := a.BookmarkModel.Search(user.ID, query)
+	results, err := a.BookmarkModel.Search(user.ID, query, user.SubscriptionStatus)
 	if err != nil {
 		slog.Error("searching bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)

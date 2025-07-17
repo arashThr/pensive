@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/models"
@@ -41,6 +42,12 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		},
 		"safe": func(s string) template.HTML {
 			return template.HTML(s) // Trust ts_headline output
+		},
+		"split": func(s, sep string) []string {
+			return strings.Split(s, sep)
+		},
+		"trim": func(s string) string {
+			return strings.TrimSpace(s)
 		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)

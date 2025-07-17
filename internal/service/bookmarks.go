@@ -74,6 +74,8 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user := context.User(r.Context())
+
 	var data struct {
 		Link      string
 		Title     string
@@ -82,6 +84,11 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		CreatedAt time.Time
 		Thumbnail string
 		Host      string
+		// AI-generated fields for premium users
+		AISummary *string
+		AIExcerpt *string
+		AITags    *string
+		IsPremium bool
 	}
 	host := validations.ExtractHostname(bookmark.Link)
 	logger.Info("editing bookmark", "url", host)
@@ -95,6 +102,17 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 	data.CreatedAt = bookmark.CreatedAt
 	data.Thumbnail = bookmark.ImageUrl
+	data.IsPremium = user.SubscriptionStatus == models.SubscriptionStatusPremium
+
+	logger.Info("Is premiun", "prem", data.IsPremium)
+
+	// For premium users, fetch AI-generated content
+	if data.IsPremium {
+		data.AISummary = bookmark.AISummary
+		data.AIExcerpt = bookmark.AIExcerpt
+		data.AITags = bookmark.AITags
+	}
+
 	b.Templates.Edit.Execute(w, r, data)
 }
 

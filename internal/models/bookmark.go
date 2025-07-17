@@ -217,14 +217,14 @@ func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		BookmarkId: id,
 	}
-	row := model.Pool.QueryRow(context.Background(),
-		`SELECT user_id, title, link, excerpt, image_url, created_at FROM users_bookmarks WHERE bookmark_id = $1;`, id)
-	err := row.Scan(&bookmark.UserId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.ImageUrl, &bookmark.CreatedAt)
+	rows, err := model.Pool.Query(context.Background(),
+		`SELECT * FROM users_bookmarks WHERE bookmark_id = $1;`, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, errors.ErrNotFound
-		}
-		return nil, fmt.Errorf("bookmark by id: %w", err)
+		return nil, fmt.Errorf("query bookmark by id: %w", err)
+	}
+	bookmark, err = pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Bookmark])
+	if err != nil {
+		return nil, fmt.Errorf("collect exactly one row: %w", err)
 	}
 	return &bookmark, nil
 }
@@ -472,11 +472,11 @@ SUMMARY:
 - Keep it under 200 words
 
 EXCERPT:
-- Extract one representative paragraph from the article content
-- Choose a paragraph that best represents the main content
+- Look for what can be considered as the main content of the article
+- The main content is the content that is most relevant to the user
+- Pick the first paragraph of the main content
 - Use the exact text as it appears in the article (verbatim)
-- Avoid introductory or concluding paragraphs
-- Keep it under 300 words
+- Keep it under 200 words
 
 TAGS:
 - Generate 5-8 relevant tags that describe the content

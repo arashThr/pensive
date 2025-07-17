@@ -31,9 +31,11 @@ type RecentBookmark struct {
 
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
+	logger := context.Logger(r.Context())
 
-	data, err := h.getRecentBookmarksData(user.ID, 5)
+	data, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
 	if err != nil {
+		logger.Error("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -42,6 +44,9 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Home) Search(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	logger := context.Logger(r.Context())
+
 	query := r.FormValue("query")
 	if query == "" {
 		// Return recent bookmarks when no query
@@ -49,9 +54,9 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := context.User(r.Context())
-	results, err := h.BookmarkModel.Search(user.ID, query)
+	results, err := h.BookmarkModel.Search(user.ID, query, user.SubscriptionStatus)
 	if err != nil {
+		logger.Error("failed to search bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -82,9 +87,11 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 
 func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
+	logger := context.Logger(r.Context())
 
-	data, err := h.getRecentBookmarksData(user.ID, 5)
+	data, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
 	if err != nil {
+		logger.Error("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -93,11 +100,11 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 }
 
 // getRecentBookmarksData fetches recent bookmarks and returns the data structure
-func (h Home) getRecentBookmarksData(userId types.UserId, limit int) (struct {
+func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptionStatus models.SubscriptionStatus) (struct {
 	Bookmarks         []RecentBookmark
 	HasBookmarksAtAll bool
 }, error) {
-	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(userId, limit)
+	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(userId, limit, subscriptionStatus)
 	if err != nil {
 		return struct {
 			Bookmarks         []RecentBookmark
@@ -111,12 +118,16 @@ func (h Home) getRecentBookmarksData(userId types.UserId, limit int) (struct {
 	}
 
 	for _, b := range bookmarks {
+		excerpt := b.Excerpt
+		if subscriptionStatus == models.SubscriptionStatusPremium && b.AIExcerpt != nil {
+			excerpt = *b.AIExcerpt
+		}
 		data.Bookmarks = append(data.Bookmarks, RecentBookmark{
 			Id:        b.BookmarkId,
 			Title:     b.Title,
 			Link:      b.Link,
 			Hostname:  validations.ExtractHostname(b.Link),
-			Excerpt:   b.Excerpt,
+			Excerpt:   excerpt,
 			Thumbnail: b.ImageUrl,
 			CreatedAt: b.CreatedAt.Format("Jan 02, 2006"),
 		})
