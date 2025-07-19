@@ -1,21 +1,48 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-4xl mx-auto">
-  <div class="bg-white rounded-lg border p-8 text-center">
-    <h1 class="text-2xl font-bold text-gray-900 mb-4">Markdown Content Not Available</h1>
-    <p class="text-gray-600 mb-4">The AI-generated markdown content for this bookmark is not yet available.</p>
-    <p class="text-sm text-gray-600 mb-6">This could be because:</p>
-    <ul class="text-sm text-gray-600 mb-6 text-left max-w-md mx-auto">
-      <li>• <strong>This feature is only available for premium users</strong></li>
-      <li>• If you're premium, the AI processing may still be in progress</li>
-      <li>• The bookmark was created before the markdown feature was enabled</li>
-      <li>• The AI processing failed for this bookmark</li>
-    </ul>
-    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-      <a href="/bookmarks/{{.Id}}/edit" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-        Back to Bookmark
+<div class="px-6 py-8 max-w-2xl mx-auto">
+  <!-- Not Available Card -->
+  <div class="bg-white rounded-xl border border-gray-300 p-8 text-center">
+    <div class="mb-6">
+      <svg class="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+    
+    <h1 class="text-xl font-semibold text-gray-900 mb-3">Markdown Content Not Available</h1>
+    <p class="text-gray-600 mb-6">The AI-powered markdown version of this bookmark isn't ready yet.</p>
+    
+    <!-- Possible Reasons -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+      <h3 class="font-medium text-gray-900 mb-4">This might be because:</h3>
+      <ul class="space-y-2 text-sm text-gray-600">
+        <li class="flex items-start gap-2">
+          <span class="text-blue-600 font-bold">•</span>
+          <span><strong>Premium feature:</strong> AI-generated markdown is only available to premium subscribers</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-blue-600 font-bold">•</span>
+          <span><strong>Processing in progress:</strong> Our AI is still working on this bookmark</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-blue-600 font-bold">•</span>
+          <span><strong>Legacy bookmark:</strong> Added before AI processing was available</span>
+        </li>
+        <li class="flex items-start gap-2">
+          <span class="text-blue-600 font-bold">•</span>
+          <span><strong>Processing failed:</strong> The content couldn't be converted to markdown</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="/bookmarks/{{.Id}}/edit" 
+         class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        ← Back to Bookmark
       </a>
-      <a href="/users/subscribe" class="inline-block bg-gray-900 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+      <a href="/users/subscribe" 
+         class="border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg transition-colors">
         Upgrade to Premium
       </a>
     </div>

@@ -652,6 +652,12 @@
   .ml-auto {
     margin-left: auto;
   }
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
@@ -759,6 +765,9 @@
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
+  }
+  .w-20 {
+    width: calc(var(--spacing) * 20);
   }
   .w-32 {
     width: calc(var(--spacing) * 32);
@@ -1430,6 +1439,13 @@
   .outline-none {
     --tw-outline-style: none;
     outline-style: none;
+  }
+  .group-hover\:text-blue-600 {
+    &:is(:where(.group):hover *) {
+      @media (hover: hover) {
+        color: var(--color-blue-600);
+      }
+    }
   }
   .placeholder\:text-gray-500 {
     &::placeholder {
