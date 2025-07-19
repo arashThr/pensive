@@ -6,52 +6,68 @@
   <style>
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      width: 320px;
+      width: 340px;
       margin: 0;
       padding: 0;
       background-color: #ffffff;
       color: #111827;
+      line-height: 1.5;
     }
     
     .container {
-      padding: 16px;
+      padding: 20px;
     }
     
     .header {
       display: flex;
       align-items: center;
       margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #d1d5db;
     }
     
     .logo {
-      width: 24px;
-      height: 24px;
-      margin-right: 8px;
+      width: 28px;
+      height: 28px;
+      margin-right: 10px;
+      border-radius: 6px;
     }
     
     .title {
       font-size: 16px;
       font-weight: 600;
       color: #111827;
+      flex: 1;
+    }
+    
+    .beta-badge {
+      font-size: 10px;
+      font-weight: 500;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
     
     .page-info {
       margin-bottom: 16px;
-      padding: 12px;
+      padding: 16px;
       background-color: #f9fafb;
       border-radius: 8px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #d1d5db;
     }
     
     .page-title {
       font-size: 14px;
       font-weight: 500;
       color: #111827;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      line-height: 1.4;
     }
     
     .page-url {
@@ -60,6 +76,7 @@
       word-break: break-all;
       display: -webkit-box;
       -webkit-line-clamp: 1;
+      line-clamp: 1;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -68,59 +85,78 @@
       display: flex;
       align-items: center;
       margin-bottom: 16px;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 12px 16px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
     }
     
     .status.saved {
-      background-color: #dcfce7;
-      color: #166534;
-      border: 1px solid #bbf7d0;
+      background-color: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
     }
     
     .status.not-saved {
-      background-color: #fef3c7;
+      background-color: #fffbeb;
       color: #92400e;
       border: 1px solid #fde68a;
     }
     
     .status.loading {
-      background-color: #e0e7ff;
-      color: #3730a3;
-      border: 1px solid #c7d2fe;
+      background-color: #dbeafe;
+      color: #1e40af;
+      border: 1px solid #93c5fd;
     }
     
     .status.error {
-      background-color: #fee2e2;
+      background-color: #fef2f2;
       color: #991b1b;
       border: 1px solid #fecaca;
     }
     
     .status-icon {
-      width: 16px;
-      height: 16px;
-      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    
+    .status.saved .status-icon {
+      color: #059669;
+    }
+    
+    .status.not-saved .status-icon {
+      color: #d97706;
+    }
+    
+    .status.loading .status-icon {
+      color: #2563eb;
+    }
+    
+    .status.error .status-icon {
+      color: #dc2626;
     }
     
     .actions {
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
     
     .btn {
       flex: 1;
-      padding: 8px 16px;
+      padding: 12px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
+      text-decoration: none;
     }
     
     .btn:disabled {
@@ -137,29 +173,37 @@
       background-color: #1d4ed8;
     }
     
+    .btn-success {
+      background-color: #059669;
+      color: white;
+    }
+    
+    .btn-success:hover:not(:disabled) {
+      background-color: #047857;
+    }
+    
     .btn-secondary {
-      background-color: #f3f4f6;
+      background-color: #f9fafb;
       color: #374151;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #d1d5db;
     }
     
     .btn-secondary:hover:not(:disabled) {
-      background-color: #e5e7eb;
+      background-color: #f3f4f6;
     }
     
     .btn-danger {
-      background-color: #ef4444;
+      background-color: #dc2626;
       color: white;
     }
     
     .btn-danger:hover:not(:disabled) {
-      background-color: #dc2626;
+      background-color: #b91c1c;
     }
     
     .footer {
-      margin-top: 16px;
-      padding-top: 12px;
-      border-top: 1px solid #e5e7eb;
+      padding-top: 16px;
+      border-top: 1px solid #d1d5db;
     }
     
     .footer-links {
@@ -172,67 +216,94 @@
       color: #6b7280;
       text-decoration: none;
       font-size: 12px;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
       transition: all 0.2s;
     }
     
     .footer-link:hover {
       color: #2563eb;
-      background-color: #f3f4f6;
+      background-color: #f9fafb;
     }
     
     .footer-link svg {
-      width: 12px;
-      height: 12px;
-      margin-right: 4px;
+      width: 14px;
+      height: 14px;
+      margin-right: 6px;
     }
     
     .spinner {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #e5e7eb;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #d1d5db;
       border-radius: 50%;
       border-top-color: #2563eb;
       animation: spin 1s ease-in-out infinite;
-      margin-right: 8px;
+      margin-right: 10px;
       flex-shrink: 0;
     }
     
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    .connection-required {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      text-align: center;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .connection-required a {
+      color: #d97706;
+      font-weight: 500;
+      text-decoration: underline;
+    }
+    
+    .connection-required a:hover {
+      color: #b45309;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Header -->
     <div class="header">
       <img src="icons/icon48.png" alt="Pensieve" class="logo">
       <div class="title">Pensieve</div>
+      <div class="beta-badge">Beta</div>
     </div>
     
+    <!-- Page Information -->
     <div class="page-info">
       <div class="page-title" id="pageTitle">Loading...</div>
       <div class="page-url" id="pageUrl">Loading...</div>
     </div>
     
+    <!-- Status Display -->
     <div class="status loading" id="status">
       <div class="spinner"></div>
       <span>Checking status...</span>
     </div>
     
+    <!-- Action Buttons -->
     <div class="actions" id="actions">
       <button class="btn btn-primary" id="saveBtn" disabled>
-        <span>Save</span>
+        <span>Save Page</span>
       </button>
       <button class="btn btn-danger" id="removeBtn" disabled>
         <span>Remove</span>
       </button>
     </div>
     
+    <!-- Footer Navigation -->
     <div class="footer">
       <div class="footer-links">
         <a href="#" class="footer-link" id="searchLink">

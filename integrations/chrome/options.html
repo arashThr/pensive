@@ -9,131 +9,228 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         max-width: 600px;
         margin: 0 auto;
-        padding: 20px;
+        padding: 24px;
         color: #111827;
-        background-color: #f3f4f6;
+        background-color: #f9fafb;
         min-height: 100vh;
+        line-height: 1.5;
       }
       .container {
         background: white;
-        padding: 24px;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border: 1px solid #d1d5db;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .header-icon {
+        width: 32px;
+        height: 32px;
+        background: #dbeafe;
         border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        border: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+      }
+      .header-icon svg {
+        width: 18px;
+        height: 18px;
+        color: #2563eb;
       }
       h1 {
-        margin: 0 0 20px;
+        margin: 0;
         color: #111827;
         font-size: 1.5rem;
         font-weight: 600;
+        line-height: 1.25;
       }
       h2 {
-        font-size: 1.25rem;
+        font-size: 1.125rem;
         font-weight: 600;
         color: #111827;
-        margin-bottom: 16px;
+        margin: 0 0 16px 0;
       }
       .status {
-        padding: 12px;
-        border-radius: 6px;
-        margin: 12px 0;
+        display: flex;
+        align-items: center;
+        padding: 16px;
+        border-radius: 8px;
+        margin: 20px 0;
         font-size: 0.875rem;
+        font-weight: 500;
+      }
+      .status-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        flex-shrink: 0;
       }
       .status.connected {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #bbf7d0;
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+      }
+      .status.connected .status-icon {
+        color: #059669;
       }
       .status.disconnected {
-        background: #fee2e2;
+        background: #fef2f2;
         color: #991b1b;
         border: 1px solid #fecaca;
       }
-      button {
-        background: #dc2626;
+      .status.disconnected .status-icon {
+        color: #dc2626;
+      }
+      .btn {
+        background: #2563eb;
         color: white;
         border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
+        padding: 12px 24px;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 0.875rem;
         font-weight: 500;
-        transition: background-color 0.2s;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
       }
-      button:hover {
-        background: #b91c1c;
+      .btn:hover {
+        background: #1d4ed8;
       }
-      button:disabled {
+      .btn:disabled {
         background: #9ca3af;
         cursor: not-allowed;
       }
-      .token-display {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        background: #f9fafb;
-        padding: 12px;
-        border-radius: 6px;
-        word-break: break-all;
-        border: 1px solid #e5e7eb;
-        margin: 12px 0;
-        font-size: 0.875rem;
+      .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: 1px solid #d1d5db;
       }
-      .settings-group {
-        margin-top: 24px;
-        padding-top: 24px;
-        border-top: 1px solid #e5e7eb;
+      .btn-secondary:hover {
+        background: #e5e7eb;
+      }
+      .btn-danger {
+        background: #dc2626;
+        color: white;
+      }
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .settings-section {
+        margin-top: 32px;
+        padding-top: 32px;
+        border-top: 1px solid #d1d5db;
       }
       label {
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         font-size: 0.875rem;
         font-weight: 500;
         color: #374151;
       }
       input[type="text"] {
         width: 100%;
-        padding: 8px 0 8px 8px;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
+        padding: 12px 16px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
         font-size: 0.875rem;
-        transition: border-color 0.2s;
+        transition: all 0.2s;
+        background: white;
+        color: #111827;
+        box-sizing: border-box;
       }
       input[type="text"]:focus {
         outline: none;
-        border-color: #dc2626;
-        box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
-      .info-text {
+      input[type="text"]::placeholder {
+        color: #6b7280;
+      }
+      .info-section {
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 24px;
+      }
+      .info-section h3 {
+        margin: 0 0 12px 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #111827;
+      }
+      .info-section p {
+        margin: 0 0 8px 0;
         font-size: 0.875rem;
         color: #6b7280;
-        margin-top: 16px;
         line-height: 1.5;
+      }
+      .info-section p:last-child {
+        margin-bottom: 0;
+      }
+      .auth-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Pensieve Extension Settings</h1>
+      <!-- Header -->
+      <div class="header">
+        <div class="header-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+        <h1>Pensieve Extension Settings</h1>
+      </div>
       
+      <!-- Connection Status -->
       <div id="status" class="status disconnected">
-        Not connected to Pensieve
+        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <span>Not connected to Pensieve</span>
       </div>
 
-      <div id="auth-section">
-        <button id="connect-button">Connect to Pensieve</button>
-        <button id="signout-button" style="display: none; background: #6b7280;">Sign Out</button>
+      <!-- Authentication Actions -->
+      <div id="auth-section" class="auth-actions">
+        <button id="connect-button" class="btn">
+          Connect to Pensieve
+        </button>
+        <button id="signout-button" class="btn btn-danger" style="display: none;">
+          Sign Out
+        </button>
       </div>
 
-      <div id="settings-section" class="settings-group">
-        <h2>Settings</h2>
-        <div style="margin-bottom: 16px;">
-          <label for="endpoint">Endpoint URL:</label>
+      <!-- Settings Section -->
+      <div id="settings-section" class="settings-section">
+        <h2>Configuration</h2>
+        <div class="form-group">
+          <label for="endpoint">Server Endpoint:</label>
           <input type="text" id="endpoint" placeholder="http://localhost:8000">
         </div>
-        <button id="save">Save Settings</button>
+        <button id="save" class="btn btn-secondary">Save Settings</button>
         
-        <div class="info-text">
-          <p><strong>How to use:</strong></p>
-          <p>After connecting, click the Pensieve icon in your browser toolbar to save the current page. The popup will show if the page is already saved and allow you to remove it instantly.</p>
+        <!-- Usage Instructions -->
+        <div class="info-section">
+          <h3>How to use the extension:</h3>
+          <p><strong>1. Connect your account:</strong> Click "Connect to Pensieve" and sign in with your account credentials.</p>
+          <p><strong>2. Save pages instantly:</strong> Click the Pensieve icon in your browser toolbar to save the current page to your library.</p>
+          <p><strong>3. Manage bookmarks:</strong> The popup shows if a page is already saved and lets you remove it with one click.</p>
+          <p><strong>4. Search and access:</strong> Use the search link to quickly find and access your saved content.</p>
         </div>
       </div>
     </div>
