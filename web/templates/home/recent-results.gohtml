@@ -6,14 +6,14 @@
     <div class="p-6">
       <h2 class="text-xl font-semibold text-gray-900">Recent Bookmarks</h2>
     </div>
-    <div class="divide-y divide-gray-200">
+    <div class="divide-y divide-gray-300">
       {{range .Bookmarks}}
         <a href="/bookmarks/{{.Id}}/edit" class="block">
           <div class="flex items-start space-x-4 px-6 py-4 hover:bg-blue-50 transition-all duration-200 cursor-pointer">
             <div class="w-6 h-6 flex-shrink-0 mt-0.5">
               <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="{{.Title}}" class="w-full h-full" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-              <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center hidden">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-full h-full bg-gray-50 rounded flex items-center justify-center hidden">
+                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
@@ -24,18 +24,18 @@
                   <h3 class="font-medium text-gray-900 mb-1 hover:text-blue-600 transition-colors">
                     {{.Title}}
                   </h3>
-                  <p class="text-sm text-gray-500 mb-2">
+                  <p class="text-sm text-gray-600 mb-2">
                   <a href="{{.Link}}" target="_blank" class="hover:text-blue-600 transition-colors">{{.Hostname}}</a>
                   </p>
                   {{if .Excerpt}}
                     <p class="text-sm text-gray-600 leading-relaxed">{{.Excerpt}}</p>
                   {{end}}
                   <div class="mt-2 lg:hidden">
-                    <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
+                    <span class="text-xs text-gray-600">{{.CreatedAt}}</span>
                   </div>
                 </div>
                 <div class="hidden lg:block lg:ml-4 lg:text-right">
-                  <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
+                  <span class="text-xs text-gray-600">{{.CreatedAt}}</span>
                 </div>
               </div>
             </div>
@@ -52,8 +52,8 @@
   </div>
 {{else}}
   <div class="bg-white rounded-lg p-8 text-center">
-    <div class="text-gray-500 text-lg mb-4">No bookmarks yet</div>
-    <div class="text-gray-400 text-sm mb-6">Start by adding your first bookmark!</div>
+    <div class="text-gray-600 text-lg mb-4">No bookmarks yet</div>
+    <div class="text-gray-600 text-sm mb-6">Start by adding your first bookmark!</div>
     <a href="/bookmarks/new" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
       Add Your First Bookmark
     </a>

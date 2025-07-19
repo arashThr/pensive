@@ -21,7 +21,7 @@
         </svg>
         Create Token
       </button>
-      <span class="htmx-indicator hidden text-gray-500 ml-2">⌛</span>
+      <span class="htmx-indicator hidden text-gray-600 ml-2">⌛</span>
     </form>
   </div>
   
@@ -29,11 +29,11 @@
     Use API tokens to access your bookmarks programmatically through our API.
   </div>
   
-  <div id="token-container" class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+  <div id="token-container" class="bg-gray-50 rounded-lg p-4 border border-gray-300">
     {{if .Tokens}}
       <table class="w-full text-left">
         <thead>
-          <tr class="text-sm font-medium text-gray-500">
+          <tr class="text-sm font-medium text-gray-600">
             <th class="pb-3 pl-2">Token</th>
             <th class="pb-3">Creation Date</th>
             <th class="pb-3 w-16"></th>
@@ -41,14 +41,14 @@
         </thead>
         <tbody>
           {{range $index, $token := .Tokens}}
-          <tr id="token-{{$index}}" class="border-t border-gray-200 hover:bg-gray-100">
+          <tr id="token-{{$index}}" class="border-t border-gray-300 hover:bg-gray-300">
             <td class="py-3 pl-2 text-base text-gray-900 font-mono">{{"***"}}</td>
-            <td class="py-3 text-sm text-gray-700">{{$token.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
+            <td class="py-3 text-sm text-gray-600">{{$token.CreatedAt.Format "2006-01-02 15:04:05"}}</td>
             <td class="py-3 text-right">
               <form id="delete-form-{{$index}}">
                 {{csrfField}}
                 <input type="hidden" name="token_id" value="{{$token.ID}}">
-                <button class="text-gray-500 hover:text-red-500 p-1 rounded-full hover:bg-gray-200" 
+                <button class="text-gray-600 hover:text-red-500 p-1 rounded-full hover:bg-gray-300" 
                   type="button"
                   hx-post="/users/delete-token" 
                   hx-confirm="Are you sure you want to delete this token? This action cannot be undone." 
@@ -65,11 +65,11 @@
           {{end}}
         </tbody>
       </table>
-      <p class="text-xs text-gray-500 mt-3">Deleted tokens cannot be recovered.</p>
+      <p class="text-xs text-gray-600 mt-3">Deleted tokens cannot be recovered.</p>
     {{else}}
       <div class="text-center py-6">
         <p class="text-gray-600">No API tokens generated yet.</p>
-        <p class="text-xs text-gray-500 mt-2">Create a token to integrate with external applications.</p>
+        <p class="text-xs text-gray-600 mt-2">Create a token to integrate with external applications.</p>
       </div>
     {{end}}
   </div>
