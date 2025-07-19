@@ -1,15 +1,19 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-4xl mx-auto">
-  <h1 class="text-3xl font-bold text-gray-900 mb-8 tracking-tight text-center">Your Account</h1>
+<div class="px-6 py-8 max-w-5xl mx-auto">
+  <!-- Page Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">Account Settings</h1>
+    <p class="text-gray-600">Manage your profile, API tokens, and data import/export options.</p>
+  </div>
   
-  <div class="flex flex-col md:flex-row gap-8">
+  <div class="flex flex-col lg:flex-row gap-8">
     <!-- Mobile Tab Selector -->
-    <div class="md:hidden">
+    <div class="lg:hidden">
       <select 
         id="mobile-tab-select"
         name="tab"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600/20 outline-none"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600/20 outline-none transition-colors"
         hx-get="/users/tab-content"
         hx-target="#tab-content"
         hx-swap="innerHTML"
@@ -21,13 +25,13 @@
       </select>
     </div>
 
-    <!-- Desktop Sidebar Menu -->
-    <div class="hidden md:block md:w-64 md:flex-shrink-0">
-      <nav class="bg-white rounded-xl border border-gray-300 p-4">
-        <ul class="space-y-2">
+    <!-- Desktop Sidebar Navigation -->
+    <div class="hidden lg:block lg:w-64 lg:flex-shrink-0">
+      <nav class="bg-white rounded-xl border border-gray-300 p-2">
+        <ul class="space-y-1">
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-300 hover:text-gray-900 flex items-center active"
+              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors active"
               data-tab="profile"
               hx-get="/users/tab-content?tab=profile"
               hx-target="#tab-content"
@@ -41,7 +45,7 @@
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-300 hover:text-gray-900 flex items-center"
+              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors"
               data-tab="tokens"
               hx-get="/users/tab-content?tab=tokens"
               hx-target="#tab-content"
@@ -55,7 +59,7 @@
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-300 hover:text-gray-900 flex items-center"
+              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors"
               data-tab="import-export"
               hx-get="/users/tab-content?tab=import-export"
               hx-target="#tab-content"
@@ -78,7 +82,7 @@
            hx-trigger="load"
            hx-swap="innerHTML">
         <!-- Loading placeholder -->
-        <div class="flex items-center justify-center py-8">
+        <div class="flex items-center justify-center py-12">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <span class="ml-3 text-gray-600">Loading...</span>
         </div>
@@ -87,18 +91,18 @@
   </div>
 </div>
 
+<!-- Tab Navigation Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Handle desktop tab switching
   const tabButtons = document.querySelectorAll('.tab-button');
   const mobileSelect = document.getElementById('mobile-tab-select');
   
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
-      // Remove active class from all buttons
+      // Remove active styles from all buttons
       tabButtons.forEach(btn => btn.classList.remove('active', 'bg-blue-50', 'text-blue-700'));
       
-      // Add active class to clicked button
+      // Add active styles to clicked button
       this.classList.add('active', 'bg-blue-50', 'text-blue-700');
       
       // Update mobile select to match

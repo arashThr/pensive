@@ -1,53 +1,96 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-4xl mx-auto">
-  <div class="bg-white rounded-xl border border-gray-300 p-8">
-    <h1 class="text-3xl font-bold text-gray-900 text-center tracking-tight mb-6">Unlock More with a Subscription</h1>
-    <p class="text-gray-600 text-center text-sm leading-relaxed mb-8">Supercharge your Pensieve experience with exclusive features designed to make bookmarking smarter, faster, and more connected.</p>
+<div class="px-6 py-8 max-w-3xl mx-auto">
+  <!-- Header Section -->
+  <div class="text-center mb-10">
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Unlock Premium Features</h1>
+    <p class="text-gray-600 leading-relaxed">
+      Enhance your knowledge management with AI-powered insights and seamless integrations.
+    </p>
+  </div>
+  
+  <!-- Features Card -->
+  <div class="bg-white rounded-xl border border-gray-300 p-8 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Premium features coming soon</h2>
     
-    <!-- Features Teaser -->
     <div class="space-y-6">
-      <div>
-        <h2 class="text-xl font-semibold text-gray-900">Coming Soon for Subscribers</h2>
-        <ul class="mt-3 space-y-3 text-gray-600 text-sm">
-          <li class="flex items-start">
-            <svg class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span><strong>Telegram Integration:</strong> Save bookmarks directly from Telegram and search your collection via a custom bot.</span>
-          </li>
-          <li class="flex items-start">
-            <svg class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span><strong>AI Summary:</strong> Get instant, concise summaries of your saved pages powered by cutting-edge AI.</span>
-          </li>
-          <li class="flex items-start">
-            <svg class="h-5 w-5 text-blue-600 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span><strong>And More:</strong> Exciting new tools and enhancements rolling out soon—stay tuned!</span>
-          </li>
-        </ul>
+      <!-- Telegram Integration -->
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-medium text-gray-900 mb-2">Telegram Integration</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Save bookmarks directly from Telegram and search your entire collection through our custom bot. 
+            Perfect for capturing content on the go from your mobile device.
+          </p>
+        </div>
+      </div>
+      
+      <!-- AI Summaries -->
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-medium text-gray-900 mb-2">AI-Powered Insights</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Get instant, intelligent summaries of your saved articles powered by advanced AI. 
+            Quickly understand key concepts without re-reading entire pages.
+          </p>
+        </div>
+      </div>
+      
+      <!-- Advanced Features -->
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-medium text-gray-900 mb-2">Enhanced Tools</h3>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Advanced search capabilities, automatic tagging, content recommendations, 
+            and exclusive features designed to maximize your knowledge management efficiency.
+          </p>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Call to Action (Disabled) -->
-    <div class="mt-8">
-        <form action="/payments/create-checkout-session" method="post">
-            {{csrfField}}
-            <button 
-            type="submit" 
-            class="w-full py-2 px-4 bg-gray-300 text-gray-600 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed" 
-            disabled
-            >Subscribe Now</button>
-        </form>
+  <!-- Coming Soon Notice -->
+  <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
+    <div class="mb-4">
+      <svg class="w-8 h-8 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
     </div>
-
-    <!-- Back to Home -->
-    <div class="mt-4 text-center">
-      <a href="/" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">Back to Home</a>
-    </div>
+    <p class="font-medium text-gray-900 mb-2">Premium subscriptions launching soon</p>
+    <p class="text-sm text-gray-600 mb-6">
+      We're putting the finishing touches on these premium features. 
+      Stay tuned for the official launch announcement!
+    </p>
+    
+    <!-- Disabled CTA -->
+    <button 
+      type="button" 
+      class="px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
+      disabled>
+      Subscribe (Coming Soon)
+    </button>
+  </div>
+  
+  <!-- Navigation -->
+  <div class="mt-8 text-center">
+    <a href="/home" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+      ← Back to Search
+    </a>
   </div>
 </div>
 

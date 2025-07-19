@@ -1,58 +1,81 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-2xl mx-auto">
+<div class="px-6 py-8 max-w-2xl mx-auto">
   <div class="text-center">
-    <!-- Processing Icon -->
-    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-6">
-      <svg class="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
+    <!-- Processing Animation -->
+    <div class="mb-8">
+      <div class="mx-auto w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+        <svg class="animate-spin w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
     </div>
 
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Importing Your Data</h1>
-    <p class="text-lg text-gray-600 mb-8">
-      We're processing your {{.Source}} export file. This may take a few minutes depending on the size of your data.
+    <h1 class="text-2xl font-bold text-gray-900 mb-4">Processing Your Import</h1>
+    <p class="text-gray-600 mb-8">
+      We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.
     </p>
 
-    <!-- Progress Info -->
-    <div class="bg-blue-50 rounded-lg p-6 border border-blue-200 text-left mb-8">
-      <h2 class="text-sm font-semibold text-blue-900 mb-3">What's happening:</h2>
-      <ul class="text-sm text-blue-800 space-y-2">
-        <li class="flex items-center">
-          <svg class="w-4 h-4 text-blue-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-          </svg>
-          Validating your upload file
-        </li>
-        <li class="flex items-center">
-          <svg class="w-4 h-4 text-blue-400 mr-2 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Processing bookmarks and metadata
-        </li>
-        <li class="flex items-center text-gray-600">
-          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Adding to your collection
-        </li>
-      </ul>
+    <!-- Progress Steps -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-left mb-8">
+      <h2 class="font-medium text-blue-900 mb-4">Import progress:</h2>
+      <div class="space-y-3">
+        <div class="flex items-center">
+          <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center mr-3 flex-shrink-0">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <span class="text-blue-800">File uploaded and validated</span>
+        </div>
+        
+        <div class="flex items-center">
+          <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center mr-3 flex-shrink-0">
+            <svg class="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <span class="text-blue-800 font-medium">Processing bookmarks and metadata</span>
+        </div>
+        
+        <div class="flex items-center">
+          <div class="w-6 h-6 rounded-full border-2 border-blue-300 mr-3 flex-shrink-0"></div>
+          <span class="text-blue-700">Adding to your library</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Auto Redirect Notice -->
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-300">
-      <p class="text-sm text-gray-600">
-        You'll be automatically redirected when the import is complete, or you can 
-        <a href="/users/bookmarks" class="text-blue-600 hover:text-blue-500 underline">check your bookmarks</a> 
-        in a few minutes.
+    <!-- Status Notice -->
+    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6">
+      <div class="mb-4">
+        <svg class="w-8 h-8 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="text-gray-600 mb-4">
+        You'll be automatically redirected when the import is complete.
       </p>
+      <div class="space-y-2 text-sm text-gray-600">
+        <p>Or check back in a few minutes:</p>
+        <div class="flex flex-col sm:flex-row gap-2 justify-center">
+          <a href="/users/import-status?job_id={{.JobID}}" 
+             class="text-blue-600 hover:text-blue-700 transition-colors">
+            View Import Status
+          </a>
+          <span class="hidden sm:inline text-gray-400">|</span>
+          <a href="/bookmarks" 
+             class="text-blue-600 hover:text-blue-700 transition-colors">
+            View Your Library
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Auto-refresh meta tag to check import status -->
+<!-- Auto-refresh to check import status -->
 <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
 
 {{template "footer" .}}
