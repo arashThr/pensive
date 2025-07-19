@@ -1,17 +1,53 @@
 {{template "header" .}}
 
-<div class="py-12 flex justify-center">
-  <div class="p-8 bg-white rounded-xl border border-gray-300">
-    <h1 class="pt-4 pb-4 text-center text-3xl font-bold text-gray-900 tracking-tight">
-      Checkout canceled
-    </h1>
-    <div class="text-sm text-gray-600 text-center">
-    <p class="pb-4">
-      Your subscription checkout was canceled. You can try subscribing again or continue using the free tier.
-    </p>
-    <p>
-      <a href="/users/me" class="text-blue-600 hover:text-blue-800 underline">Go back to your account page</a>.
-    </p>
+<div class="px-6 py-8 max-w-2xl mx-auto">
+  <!-- Cancel Card -->
+  <div class="bg-white rounded-xl border border-gray-300 p-8 text-center">
+    <!-- Cancel Icon -->
+    <div class="mb-6">
+      <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+        <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-4">Checkout Cancelled</h1>
+    <p class="text-gray-600 mb-8">No worries! Your subscription checkout was cancelled and no payment has been processed.</p>
+
+    <!-- Options -->
+    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 mb-6">
+      <h3 class="font-medium text-gray-900 mb-4">What would you like to do next?</h3>
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+          <span>Continue using Pensieve with the free tier</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+          <span>Try subscribing again when you're ready</span>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+          <span>Learn more about premium features</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="space-y-4">
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/home" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+          Continue with Free Account
+        </a>
+        <a href="/users/subscribe" class="border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg transition-colors">
+          View Premium Features
+        </a>
+      </div>
+      
+      <a href="/users/me" class="inline-block text-gray-600 hover:text-gray-900 text-sm transition-colors">
+        Back to Account Settings
+      </a>
     </div>
   </div>
 </div>
