@@ -116,7 +116,7 @@
   {{if messages}}
     <div class="px-6 py-4 max-w-4xl mx-auto">
       {{range messages}}
-        <div class="flex items-center justify-between px-4 py-3 mb-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm {{if .IsError}}text-red-600{{else}}text-gray-600{{end}}">
+        <div class="flex items-center justify-between px-4 py-3 mb-2 bg-gray-50 border border-gray-300 rounded-lg {{if .IsError}}text-red-600{{else}}text-gray-600{{end}}">
           <span>{{.Message}}</span>
           <button onclick="closeAlert(event)" class="ml-2 hover:opacity-75 transition-opacity">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

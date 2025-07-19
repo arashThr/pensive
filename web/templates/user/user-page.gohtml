@@ -9,7 +9,7 @@
       <select 
         id="mobile-tab-select"
         name="tab"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600/20 outline-none shadow-sm"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-blue-600 focus:ring-1 focus:ring-blue-600/20 outline-none"
         hx-get="/users/tab-content"
         hx-target="#tab-content"
         hx-swap="innerHTML"
@@ -23,7 +23,7 @@
 
     <!-- Desktop Sidebar Menu -->
     <div class="hidden md:block md:w-64 md:flex-shrink-0">
-      <nav class="bg-white rounded-xl shadow-sm border border-gray-300 p-4">
+      <nav class="bg-white rounded-xl border border-gray-300 p-4">
         <ul class="space-y-2">
           <li>
             <button 
@@ -73,7 +73,7 @@
 
     <!-- Tab Content Area -->
     <div class="flex-1">
-      <div id="tab-content" class="bg-white rounded-xl shadow-sm border border-gray-300 p-6"
+      <div id="tab-content" class="bg-white rounded-xl border border-gray-300 p-6"
            hx-get="/users/tab-content?tab=profile"
            hx-trigger="load"
            hx-swap="innerHTML">
