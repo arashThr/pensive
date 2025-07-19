@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/assets/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
@@ -12,19 +11,15 @@
         theme: {
           extend: {
             colors: {
-              'primary': '#1f2937',
-              'secondary': '#f9fafb',
-              'accent': '#7c3aed',
-              'subtle': '#e5e7eb'
           }
         }
       }
     }
   </script>
 </head>
-<body class="min-h-screen bg-secondary text-primary font-sans flex flex-col antialiased">
+<body class="min-h-screen bg-gray-50 text-primary font-sans flex flex-col antialiased">
   <!-- Header -->
-  <header class="pb-6 bg-secondary sticky top-0 z-50">
+  <header class="pb-6 bg-gray-50 sticky top-0 z-50">
     <div class="px-4 sm:px-6 max-w-7xl mx-auto">
       
       <!-- Main Navigation Bar -->
@@ -33,7 +28,7 @@
         <!-- Logo -->
         <div class="text-xl font-semibold tracking-tight">
           <a href="{{if currentUser}}/home{{else}}/{{end}}" class="flex items-center gap-2 hover:opacity-75 transition-all">
-            <svg class="h-5 w-5 text-accent" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg class="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
             </svg>
             <span class="font-bold text-primary">Pensieve</span>
@@ -44,16 +39,16 @@
         {{if currentUser}}
           <!-- Desktop Navigation -->
           <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
-            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
               Library
             </a>
-            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
               Extensions
             </a>
             
             <!-- Account Dropdown -->
             <div class="relative">
-              <button id="account-menu" class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+              <button id="account-menu" class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
                 <div>Account</div>
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -61,12 +56,12 @@
               </button>
               
               <!-- Dropdown Menu -->
-                <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-secondary border border-subtle rounded-lg shadow-lg">
-                <a href="/users/me" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-subtle">Account</a>
-                <hr class="my-1 border-subtle">
+                <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-50 border border-gray-300 rounded-lg shadow-lg">
+                <a href="/users/me" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">Account</a>
+                <hr class="my-1 border-gray-300">
                 <form action="/signout" method="post" class="block">
                   {{csrfField}}
-                  <button type="submit" class="w-full text-left px-4 py-2 text-gray-600 hover:text-primary hover:bg-subtle">
+                  <button type="submit" class="w-full text-left px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">
                   Sign Out
                   </button>
                 </form>
@@ -75,7 +70,7 @@
           </nav>
 
           <!-- Mobile Menu Button -->
-          <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+          <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
             <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -85,7 +80,7 @@
           <!-- Logged Out Navigation -->
           <div class="flex items-center gap-4">
             <a href="/signin" class="text-gray-600 hover:text-primary transition-colors">Sign In</a>
-            <a href="/signup" class="px-4 py-2 bg-primary text-secondary rounded-lg hover:bg-gray-800 transition-colors">Sign Up</a>
+            <a href="/signup" class="px-4 py-2 bg-primary text-gray-50 rounded-lg hover:bg-gray-800 transition-colors">Sign Up</a>
           </div>
         {{end}}
       </div>
@@ -94,19 +89,19 @@
         <!-- Mobile Navigation Menu -->
         <div id="mobile-menu" class="hidden md:hidden pb-4">
           <nav class="flex flex-col gap-1">
-            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
               Library
             </a>
-            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
               Extensions
             </a>
-            <a href="/users/me" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+            <a href="/users/me" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
               Account
             </a>
-            <hr class="my-2 border-subtle">
+            <hr class="my-2 border-gray-300">
             <form action="/signout" method="post">
               {{csrfField}}
-              <button type="submit" class="w-full text-left px-3 py-2 text-gray-600 hover:text-primary hover:bg-subtle rounded-lg transition-colors">
+              <button type="submit" class="w-full text-left px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
                 Sign Out
               </button>
             </form>
@@ -120,7 +115,7 @@
   {{if messages}}
     <div class="px-6 py-4 max-w-4xl mx-auto">
       {{range messages}}
-        <div class="flex items-center justify-between px-4 py-3 mb-2 bg-secondary border border-subtle rounded-lg shadow-sm {{if .IsError}}text-red-600{{else}}text-gray-600{{end}}">
+        <div class="flex items-center justify-between px-4 py-3 mb-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm {{if .IsError}}text-red-600{{else}}text-gray-600{{end}}">
           <span>{{.Message}}</span>
           <button onclick="closeAlert(event)" class="ml-2 hover:opacity-75 transition-opacity">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -137,7 +132,7 @@
 
 {{define "footer"}}
   </main>
-  <footer class="border-t border-subtle bg-secondary py-8">
+  <footer class="border-t border-gray-300 bg-gray-50 py-8">
     <div class="max-w-7xl mx-auto px-6">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-600">
         <p>© 2025 Pensieve</p>
