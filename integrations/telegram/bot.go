@@ -79,7 +79,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if userAPITokens[chatId] != "" {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Your account is already connected. You can send links to save them to Pensieve.",
+			Text:   "✅ Your account is already connected!\n\nYou can now:\n• Send links to save them instantly\n• Search your bookmarks by typing keywords\n• Get AI summaries of saved content",
 		})
 		return
 	}
@@ -87,8 +87,9 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	parts := strings.Split(update.Message.Text, " ")
 	if len(parts) != 2 {
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Please use the link from the Pensieve website to connect your account.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "🔗 <b>Connect your Pensieve account</b>\n\nPlease use the authentication link from your Pensieve integrations page to connect your account.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -98,8 +99,9 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if err != nil {
 		slog.Error("failed to find auth token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Invalid or expired authentication link. Please try again from the Pensieve website.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "❌ <b>Authentication failed</b>\n\nYour link is invalid or expired. Please generate a new link from the Pensieve integrations page.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -108,8 +110,9 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if err != nil {
 		slog.Error("failed to create API token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Failed to create API token. Please try again.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "⚠️ <b>Setup error</b>\n\nFailed to create API token. Please try connecting again.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -118,8 +121,9 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if err != nil {
 		slog.Error("failed to store chat ID", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Failed to connect your account. Please try again.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "⚠️ <b>Connection error</b>\n\nFailed to complete the connection. Please try again.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -127,8 +131,9 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	userAPITokens[chatId] = token.Token
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.Message.Chat.ID,
-		Text:   "Your Telegram account has been connected! You can now send links to save them to Pensieve.",
+		ChatID:    update.Message.Chat.ID,
+		Text:      "🎉 <b>Successfully connected!</b>\n\nYour Pensieve account is now linked to Telegram.\n\n<b>What you can do:</b>\n• Send any link to save it to your library\n• Type keywords to search your bookmarks\n• Get AI summaries and manage your content\n\nStart by sending a link or searching for something!",
+		ParseMode: models.ParseModeHTML,
 	})
 }
 
@@ -143,8 +148,8 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 		fmt.Println(integrationsPath)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      fmt.Sprintf(`Please visit Telegram authentication page for authentication: %s`, integrationsPath),
-			ParseMode: models.ParseModeMarkdown,
+			Text:      fmt.Sprintf("🔐 <b>Account not connected</b>\n\nPlease connect your Pensieve account first:\n%s\n\nClick the link above, then follow the connection instructions.", integrationsPath),
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -153,8 +158,9 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	// Chech message length
 	if len(msg) > 1000 {
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Message is too long. Please shorten it to 1000 characters or less.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "📝 <b>Message too long</b>\n\nPlease keep your message under 1000 characters for better processing.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -173,8 +179,9 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if link == "" && len(parts) > 10 {
 		// Too many search terms
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "Too many search terms. Please provide a shorter query.",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "🔍 <b>Search query too long</b>\n\nPlease use fewer keywords for better search results.",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
@@ -199,14 +206,22 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		slog.Error("failed to send request", "error", err, "link", link, "chatID", chatID)
-		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Failed to save bookmark: " + err.Error()})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    chatID,
+			Text:      "❌ <b>Save failed</b>\n\nNetwork error: " + err.Error(),
+			ParseMode: models.ParseModeHTML,
+		})
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
-		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Failed to save bookmark: " + resp.Status})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    chatID,
+			Text:      "❌ <b>Save failed</b>\n\nServer error: " + resp.Status,
+			ParseMode: models.ParseModeHTML,
+		})
 		return
 	}
 
@@ -218,15 +233,19 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	slog.Info("Saved bookmark", "id", bookmark.Id, "title", bookmark.Title)
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatID,
-		Text:   "Bookmark saved: " + bookmark.Title,
+		ChatID:    chatID,
+		Text:      fmt.Sprintf("✅ <b>Saved successfully!</b>\n\n<a href=\"%s\">%s</a>", bookmark.Link, bookmark.Title),
+		ParseMode: models.ParseModeHTML,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
 			InlineKeyboard: [][]models.InlineKeyboardButton{
 				{
-					{Text: "Delete", CallbackData: "delete|" + bookmark.Id},
-					{Text: "Summary", CallbackData: "summary|" + bookmark.Id},
+					{Text: "🗑 Delete", CallbackData: "delete|" + bookmark.Id},
+					{Text: "📄 Summary", CallbackData: "summary|" + bookmark.Id},
 				},
 			},
+		},
+		LinkPreviewOptions: &models.LinkPreviewOptions{
+			IsDisabled: bot.True(),
 		},
 	})
 }
@@ -242,14 +261,22 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		slog.Error("failed to send request", "error", err, "query", query, "chatID", chatID)
-		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Search failed: " + err.Error()})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    chatID,
+			Text:      "❌ <b>Search failed</b>\n\nNetwork error: " + err.Error(),
+			ParseMode: models.ParseModeHTML,
+		})
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("failed to search bookmarks", "status", resp.Status, "query", query, "chatID", chatID)
-		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "Search failed: " + resp.Status})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    chatID,
+			Text:      "❌ <b>Search failed</b>\n\nServer error: " + resp.Status,
+			ParseMode: models.ParseModeHTML,
+		})
 		return
 	}
 
@@ -260,18 +287,45 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 	}
 
 	if len(result.Bookmarks) == 0 {
-		b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: "No results found."})
+		b.SendMessage(ctx, &bot.SendMessageParams{
+			ChatID:    chatID,
+			Text:      fmt.Sprintf("🔍 <b>No results found</b>\n\nNo bookmarks match <i>\"%s\"</i>\n\nTry:\n• Different keywords\n• Broader search terms\n• Check spelling", query),
+			ParseMode: models.ParseModeHTML,
+		})
 		return
 	}
 
 	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("🔍 <b>Search Results</b> (%d found)\n\n", len(result.Bookmarks)))
+
 	for i, r := range result.Bookmarks {
-		sb.WriteString(fmt.Sprintf("%d. <a href=\"%s\">%s</a>\n%s\n\n", i+1, r.Link, r.Title, r.Headline))
+		if i >= 10 { // Limit to 10 results to avoid long messages
+			break
+		}
+		sb.WriteString(fmt.Sprintf("<b>%d.</b> <a href=\"%s\">%s</a>\n", i+1, r.Link, r.Title))
+		if r.Headline != "" {
+			// Truncate headline if too long
+			headline := r.Headline
+			if len(headline) > 100 {
+				headline = headline[:97] + "..."
+			}
+			sb.WriteString(fmt.Sprintf("<i>%s</i>\n", headline))
+		}
+		sb.WriteString("\n")
 	}
 
-	b.SendMessage(ctx, &bot.SendMessageParams{ChatID: chatID, Text: sb.String(), ParseMode: models.ParseModeHTML, LinkPreviewOptions: &models.LinkPreviewOptions{
-		IsDisabled: bot.True(),
-	}})
+	if len(result.Bookmarks) > 10 {
+		sb.WriteString(fmt.Sprintf("<i>... and %d more results</i>", len(result.Bookmarks)-10))
+	}
+
+	b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:    chatID,
+		Text:      sb.String(),
+		ParseMode: models.ParseModeHTML,
+		LinkPreviewOptions: &models.LinkPreviewOptions{
+			IsDisabled: bot.True(),
+		},
+	})
 }
 
 func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -279,7 +333,7 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 	if !isUserAuthenticated(userId) {
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
-			Text:            "Please send your API token to connect your account.",
+			Text:            "Please connect your account first",
 			ShowAlert:       true,
 		})
 		return
@@ -291,7 +345,7 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 		slog.Error("invalid callback data", "data", data)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
-			Text:            "Invalid callback",
+			Text:            "Invalid action",
 			ShowAlert:       true,
 		})
 		return
@@ -327,12 +381,12 @@ func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, book
 	b.EditMessageText(ctx, &bot.EditMessageTextParams{
 		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
 		MessageID: update.CallbackQuery.Message.Message.ID,
-		Text:      "Bookmark deleted",
+		Text:      "🗑 <b>Deleted</b>\n\nBookmark has been removed from your library.",
+		ParseMode: models.ParseModeHTML,
 	})
 	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 		CallbackQueryID: update.CallbackQuery.ID,
-		Text:            "Bookmark deleted",
-		ShowAlert:       true,
+		Text:            "✅ Bookmark deleted",
 	})
 }
 
@@ -366,9 +420,34 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 	}
 
 	slog.Debug("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
+
+	var summaryText strings.Builder
+	summaryText.WriteString("📄 <b>Summary</b>\n\n")
+	summaryText.WriteString(fmt.Sprintf("<b>%s</b>\n", bookmark.Title))
+	summaryText.WriteString(fmt.Sprintf("<a href=\"%s\">🔗 View original</a>\n\n", bookmark.Link))
+
+	if bookmark.Excerpt != "" {
+		excerpt := bookmark.Excerpt
+		if len(excerpt) > 500 {
+			excerpt = excerpt[:497] + "..."
+		}
+		summaryText.WriteString(fmt.Sprintf("<i>%s</i>", excerpt))
+	} else {
+		summaryText.WriteString("<i>No summary available for this bookmark.</i>")
+	}
+
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: update.CallbackQuery.Message.Message.Chat.ID,
-		Text:   fmt.Sprintf("%s\n%s\n\n%s", bookmark.Title, bookmark.Link, bookmark.Excerpt),
+		ChatID:    update.CallbackQuery.Message.Message.Chat.ID,
+		Text:      summaryText.String(),
+		ParseMode: models.ParseModeHTML,
+		LinkPreviewOptions: &models.LinkPreviewOptions{
+			IsDisabled: bot.True(),
+		},
+	})
+
+	b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+		CallbackQueryID: update.CallbackQuery.ID,
+		Text:            "✅ Summary loaded",
 	})
 }
 
