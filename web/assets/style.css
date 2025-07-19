@@ -1656,6 +1656,11 @@
       margin-bottom: calc(var(--spacing) * 0);
     }
   }
+  .sm\:inline {
+    @media (width >= 40rem) {
+      display: inline;
+    }
+  }
   .sm\:flex-row {
     @media (width >= 40rem) {
       flex-direction: row;

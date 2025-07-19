@@ -6,16 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/assets/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-          }
-        }
-      }
-    }
-  </script>
 </head>
 <body class="min-h-screen bg-gray-50 text-primary font-sans flex flex-col antialiased">
   <!-- Header -->
@@ -37,44 +27,55 @@
         </div>
 
         {{if currentUser}}
-          <!-- Desktop Navigation -->
-          <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
-            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
-              Library
+          <!-- Search Button (Desktop & Mobile) -->
+          <div class="flex items-center gap-4">
+            <!-- Search Button -->
+            <a href="/home" class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors shadow-sm">
+              <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span class="hidden sm:inline text-sm font-medium text-gray-700">Search</span>
             </a>
-            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
-              Extensions
-            </a>
-            
-            <!-- Account Dropdown -->
-            <div class="relative">
-              <button id="account-menu" class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
-                <div>Account</div>
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              <!-- Dropdown Menu -->
-                <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-50 border border-gray-300 rounded-lg shadow-lg">
-                <a href="/users/me" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">Account</a>
-                <hr class="my-1 border-gray-300">
-                <form action="/signout" method="post" class="block">
-                  {{csrfField}}
-                  <button type="submit" class="w-full text-left px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">
-                  Sign Out
-                  </button>
-                </form>
-                </div>
-            </div>
-          </nav>
 
-          <!-- Mobile Menu Button -->
-          <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
+              <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
+                Library
+              </a>
+              <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
+                Extensions
+              </a>
+              
+              <!-- Account Dropdown -->
+              <div class="relative">
+                <button id="account-menu" class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
+                  <div>Account</div>
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                  <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-50 border border-gray-300 rounded-lg shadow-lg">
+                  <a href="/users/me" class="block px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">Account</a>
+                  <hr class="my-1 border-gray-300">
+                  <form action="/signout" method="post" class="block">
+                    {{csrfField}}
+                    <button type="submit" class="w-full text-left px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-300">
+                    Sign Out
+                    </button>
+                  </form>
+                  </div>
+              </div>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-primary hover:bg-gray-300 rounded-lg transition-colors">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
 
         {{else}}
           <!-- Logged Out Navigation -->
