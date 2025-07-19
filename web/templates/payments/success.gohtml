@@ -10,7 +10,7 @@
     <form class="py-6" action="/payments/create-portal-session" method="POST">
       <div class="hidden">{{ csrfField }}</div>
       <input type="hidden" id="session-id" name="session_id" value="{{.SessionId}}" />
-      <button class="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-150 shadow-sm" id="checkout-and-portal-button" type="submit">Manage your billing information</button>
+      <button class="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700" id="checkout-and-portal-button" type="submit">Manage your billing information</button>
     </form>
   </div>
 </div>

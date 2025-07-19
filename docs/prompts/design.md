@@ -18,7 +18,7 @@
 ## Component Styles
 
 ### Containers
-- Main sections: `bg-white rounded-xl shadow-sm border border-gray-300 p-6 mb-8`
+- Main sections: `bg-white rounded-xl border border-gray-300 p-6 mb-8`
 - Nested containers: `bg-gray-50 rounded-lg p-4 border border-gray-200`
 
 ### Typography
@@ -30,9 +30,9 @@
 - Fine print: `text-xs text-gray-500`
 
 ### Buttons
-- Primary: `py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-150 shadow-sm`
-- Secondary: `py-2 px-4 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-150 shadow-sm`
-- Destructive: `py-2 px-4 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors duration-150 shadow-sm`
+- Primary: `py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700`
+- Secondary: `py-2 px-4 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50`
+- Destructive: `py-2 px-4 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600`
 
 ### Icons
 - Section icons: `w-5 h-5 mr-2 text-blue-600`

@@ -9,7 +9,7 @@
     <form action="/users/generate-token" method="post" id="token-generate-container">
       {{csrfField}}
       <button
-        class="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-150 shadow-sm flex items-center"
+        class="py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center"
         hx-post="/users/generate-token"
         hx-target="#token-container"
         hx-swap="innerHTML"
@@ -48,7 +48,7 @@
               <form id="delete-form-{{$index}}">
                 {{csrfField}}
                 <input type="hidden" name="token_id" value="{{$token.ID}}">
-                <button class="text-gray-500 hover:text-red-500 transition-colors p-1 rounded-full hover:bg-gray-200" 
+                <button class="text-gray-500 hover:text-red-500 p-1 rounded-full hover:bg-gray-200" 
                   type="button"
                   hx-post="/users/delete-token" 
                   hx-confirm="Are you sure you want to delete this token? This action cannot be undone." 

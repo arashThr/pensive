@@ -30,7 +30,7 @@
           <!-- Search Button (Desktop & Mobile) -->
           <div class="flex items-center gap-4">
             <!-- Search Button -->
-            <a href="/home" class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors shadow-sm">
+            <a href="/home" class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg">
               <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -194,7 +194,7 @@
   <div class="mt-8 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
       <a href="?page={{.Pages.Previous}}" 
-         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-150 shadow-sm">
+         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
         Previous
       </a>
     {{else}}
@@ -205,7 +205,7 @@
 
     {{if .MorePages}}
       <a href="?page={{.Pages.Next}}" 
-         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors duration-150 shadow-sm">
+         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50">
         Next
       </a>
     {{else}}
