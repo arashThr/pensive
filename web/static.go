@@ -18,15 +18,15 @@ func FAQ(tpl Template) http.HandlerFunc {
 	}{
 		{
 			Question: "Is there a free version?",
-			Answer:   "Yes! We offer a free trial for 30 days on any paid plans.",
+			Answer:   "You can start using Pensieve for free. With premium, you will have higher limits, specially on AI features.",
 		},
 		{
 			Question: "What are your support hours?",
-			Answer:   "We have support staff answering emails 24/7, though response times may be a bit slower on weekends.",
+			Answer:   "You can always contact me by sending email. Response times may be a bit slower on weekends.",
 		},
 		{
-			Question: "How do I contact support?",
-			Answer:   `Email us - <a href="mailto:support@lenslocked.com">support@lenslocked.com</a>`,
+			Question: "How do I contact you?",
+			Answer:   `Email me - <a href="mailto:arashThr@duck.com">arashThr@duck.com</a>`,
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
