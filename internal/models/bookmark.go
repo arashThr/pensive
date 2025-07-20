@@ -178,7 +178,7 @@ func (model *BookmarkModel) CreateWithContent(
 	}
 
 	// Only generate AI content for premium users and not for imports (like Pocket)
-	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket {
+	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket && false {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent

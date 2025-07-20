@@ -14,11 +14,11 @@ browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Handle installation and updates
 browserAPI.runtime.onInstalled.addListener((details) => {
   if (details.reason === "install") {
-    console.log("Pensieve extension installed");
+    console.log("Pensive extension installed");
     // Open options page on first install
     browserAPI.runtime.openOptionsPage();
   } else if (details.reason === "update") {
-    console.log("Pensieve extension updated");
+    console.log("Pensive extension updated");
   }
 });
 

@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "Pensieve",
+    "name": "Pensive",
     "version": "1.0",
     "icons": {
       "16": "icons/icon16.png",
@@ -8,7 +8,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "description": "Save and organize your bookmarks with Pensieve",
+    "description": "Save and organize your bookmarks with Pensive",
     "permissions": [
       "storage",
       "activeTab",
@@ -22,7 +22,7 @@
       "open_in_tab": true
     },
     "browser_action": {
-      "default_title": "Pensieve - Save this page",
+      "default_title": "Pensive - Save this page",
       "default_popup": "popup.html"
     },
     "background": {
@@ -43,7 +43,7 @@
     ],
     "browser_specific_settings": {
       "gecko": {
-        "id": "pensieve-extension@mozilla.org"
+        "id": "pensive-extension@mozilla.org"
       }
     }
   }

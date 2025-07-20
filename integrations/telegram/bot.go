@@ -88,7 +88,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if len(parts) != 2 {
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      "🔗 <b>Connect your Pensieve account</b>\n\nPlease use the authentication link from your Pensieve integrations page to connect your account.",
+			Text:      "🔗 <b>Connect your Pensive account</b>\n\nPlease use the authentication link from your Pensive integrations page to connect your account.",
 			ParseMode: models.ParseModeHTML,
 		})
 		return
@@ -100,7 +100,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		slog.Error("failed to find auth token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      "❌ <b>Authentication failed</b>\n\nYour link is invalid or expired. Please generate a new link from the Pensieve integrations page.",
+			Text:      "❌ <b>Authentication failed</b>\n\nYour link is invalid or expired. Please generate a new link from the Pensive integrations page.",
 			ParseMode: models.ParseModeHTML,
 		})
 		return
@@ -132,7 +132,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    update.Message.Chat.ID,
-		Text:      "🎉 <b>Successfully connected!</b>\n\nYour Pensieve account is now linked to Telegram.\n\n<b>What you can do:</b>\n• Send any link to save it to your library\n• Type keywords to search your bookmarks\n• Get AI summaries and manage your content\n\nStart by sending a link or searching for something!",
+		Text:      "🎉 <b>Successfully connected!</b>\n\nYour Pensive account is now linked to Telegram.\n\n<b>What you can do:</b>\n• Send any link to save it to your library\n• Type keywords to search your bookmarks\n• Get AI summaries and manage your content\n\nStart by sending a link or searching for something!",
 		ParseMode: models.ParseModeHTML,
 	})
 }
@@ -148,7 +148,7 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 		fmt.Println(integrationsPath)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      fmt.Sprintf("🔐 <b>Account not connected</b>\n\nPlease connect your Pensieve account first:\n%s\n\nClick the link above, then follow the connection instructions.", integrationsPath),
+			Text:      fmt.Sprintf("🔐 <b>Account not connected</b>\n\nPlease connect your Pensive account first:\n%s\n\nClick the link above, then follow the connection instructions.", integrationsPath),
 			ParseMode: models.ParseModeHTML,
 		})
 		return

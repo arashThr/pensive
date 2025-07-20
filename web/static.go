@@ -18,7 +18,7 @@ func FAQ(tpl Template) http.HandlerFunc {
 	}{
 		{
 			Question: "Is there a free version?",
-			Answer:   "You can start using Pensieve for free. With premium, you will have higher limits, specially on AI features.",
+			Answer:   "You can start using Pensive for free. With premium, you will have higher limits, specially on AI features.",
 		},
 		{
 			Question: "What are your support hours?",

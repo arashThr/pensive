@@ -1,4 +1,4 @@
-# Design System for Pensieve
+# Design System for Pensive
 
 ## Color Palette
 - **Primary**: Blue-600 (#2563EB) - Buttons, links, icons
@@ -108,7 +108,7 @@
 - Photo placement: `md:w-1/4` and `md:w-3/4`
 
 ## Brand Elements
-- App name: "Pensieve"
+- App name: "Pensive"
 - Beta badge: `text-xs font-medium text-gray-600`
 - Tagline emphasis on personal knowledge preservation
 - Clean, minimal aesthetic with focus on readability

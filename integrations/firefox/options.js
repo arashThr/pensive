@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // On network error, assume token might still be valid but show warning
       showConnectedState();
       addSignOutButton();
-      statusDiv.textContent = 'Connected to Pensieve (offline)';
+      statusDiv.textContent = 'Connected to Pensive (offline)';
     }
   }
 
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showConnectedState() {
     statusDiv.className = 'status connected';
-    statusDiv.textContent = 'Connected to Pensieve';
+    statusDiv.textContent = 'Connected to Pensive';
     authSection.style.display = 'block';
     
     // Hide the connect button when connected
@@ -153,13 +153,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showDisconnectedState() {
     statusDiv.className = 'status disconnected';
-    statusDiv.textContent = 'Not connected to Pensieve';
+    statusDiv.textContent = 'Not connected to Pensive';
     authSection.style.display = 'block';
     
     // Show the connect button when disconnected
     connectButton.style.display = 'inline-block';
     connectButton.disabled = false;
-    connectButton.textContent = 'Connect to Pensieve';
+    connectButton.textContent = 'Connect to Pensive';
     
     // Hide the sign out button
     const signOutButton = document.getElementById('signout-button');
@@ -173,6 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.textContent = message;
     connectButton.style.display = 'inline-block';
     connectButton.disabled = false;
-    connectButton.textContent = 'Connect to Pensieve';
+    connectButton.textContent = 'Connect to Pensive';
   }
 });
