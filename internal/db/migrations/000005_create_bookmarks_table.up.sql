@@ -2,7 +2,7 @@
 CREATE FUNCTION immutable_to_tsvector(text) RETURNS tsvector AS $$
 SELECT to_tsvector('english', $1);
 $$ LANGUAGE SQL IMMUTABLE;
-CREATE TABLE users_bookmarks (
+CREATE TABLE library_items (
   bookmark_id TEXT PRIMARY KEY,
   user_id INT REFERENCES users(id),
   link TEXT NOT NULL,
@@ -22,12 +22,12 @@ CREATE TABLE users_bookmarks (
   -- tags TEXT[],
   -- summary TEXT,
 );
-CREATE TABLE bookmarks_contents (
-  bookmark_id TEXT PRIMARY KEY REFERENCES users_bookmarks(bookmark_id) ON DELETE CASCADE,
+CREATE TABLE library_contents (
+  bookmark_id TEXT PRIMARY KEY REFERENCES library_items(bookmark_id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   excerpt TEXT NOT NULL,
   ai_markdown TEXT,
   search_vector tsvector GENERATED ALWAYS AS (immutable_to_tsvector(title || ' ' || excerpt || ' ' ||content)) STORED
 );
-CREATE INDEX search_vector_idx ON bookmarks_contents USING GIN(search_vector);
+CREATE INDEX search_vector_idx ON library_contents USING GIN(search_vector);
