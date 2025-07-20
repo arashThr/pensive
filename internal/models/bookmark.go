@@ -177,7 +177,8 @@ func (model *BookmarkModel) CreateWithContent(
 		bookmark.ImageUrl = ""
 	}
 
-	if subscriptionStatus == SubscriptionStatusPremium || true {
+	// Only generate AI content for premium users and not for imports (like Pocket)
+	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent

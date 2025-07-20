@@ -9,6 +9,7 @@ This would be a breaking change
 - [x] Separate tables: No need
 - [x] Rename tables
 - [x] Create the exports
+- [ ] Update postgres version
 - [ ] Clean the local db
 - [ ] Unstash changes to get the rename of bookmark id to id
 - [ ] Update the compose file
@@ -30,6 +31,7 @@ This would be a breaking change
     - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [ ] Why YouTube is not working?
 - [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
+- [ ] Use template for export to avoid duplicatin it in tab and export page
 - [ ] We're stuck in index page when the page does not have a title:
     -  https://apps.arashtaher.com/home 
     - Check if endpoint is valid
@@ -110,6 +112,8 @@ This would be a breaking change
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Apply rate limit on requests
 - [ ] Add recaptcha
+- [ ] Remove time from logs
+    - Zap is possible?
 - [ ] Separate tables
     - [ ] Remove user id from bookmark table
 - [x] Cancelled: Move prod to Supabase or Cloudflare

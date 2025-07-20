@@ -129,6 +129,130 @@ document.addEventListener('DOMContentLoaded', function() {
   if (profileButton) {
     profileButton.classList.add('active', 'bg-blue-50', 'text-blue-700');
   }
+  
+  // Import/Export file upload functionality using event delegation
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize) {
+    // Update visual state
+    uploadArea.classList.remove('border-blue-300', 'hover:border-blue-400');
+    uploadArea.classList.add('border-green-500', 'bg-green-50');
+    
+    // Hide upload state, show file selected state
+    uploadState.classList.add('hidden');
+    fileSelected.classList.remove('hidden');
+    
+    // Update file info
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+  }
+
+  function resetUploadState(uploadArea, uploadState, fileSelected, fileInput) {
+    // Reset visual state
+    uploadArea.classList.remove('border-green-500', 'bg-green-50');
+    uploadArea.classList.add('border-blue-300', 'hover:border-blue-400');
+    
+    // Show upload state, hide file selected state
+    uploadState.classList.remove('hidden');
+    fileSelected.classList.add('hidden');
+    
+    // Clear file input
+    fileInput.value = '';
+  }
+
+  // Event delegation for file input changes
+  document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'import-file') {
+      const file = e.target.files[0];
+      if (file) {
+        const uploadArea = document.getElementById('file-upload-area');
+        const uploadState = document.getElementById('upload-state');
+        const fileSelected = document.getElementById('file-selected');
+        const fileName = document.getElementById('file-name');
+        const fileSize = document.getElementById('file-size');
+        
+        if (uploadArea && uploadState && fileSelected && fileName && fileSize) {
+          showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize);
+        }
+      }
+    }
+  });
+
+  // Event delegation for remove file button
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'remove-file') {
+      const uploadArea = document.getElementById('file-upload-area');
+      const uploadState = document.getElementById('upload-state');
+      const fileSelected = document.getElementById('file-selected');
+      const fileInput = document.getElementById('import-file');
+      
+      if (uploadArea && uploadState && fileSelected && fileInput) {
+        resetUploadState(uploadArea, uploadState, fileSelected, fileInput);
+      }
+    }
+  });
+
+  // Event delegation for drag and drop
+  document.addEventListener('dragover', function(e) {
+    if (e.target && e.target.closest('#file-upload-area')) {
+      e.preventDefault();
+      const uploadArea = document.getElementById('file-upload-area');
+      if (uploadArea) {
+        uploadArea.classList.add('border-blue-500', 'bg-blue-50');
+      }
+    }
+  });
+
+  document.addEventListener('dragleave', function(e) {
+    if (e.target && e.target.closest('#file-upload-area')) {
+      e.preventDefault();
+      const uploadArea = document.getElementById('file-upload-area');
+      if (uploadArea) {
+        uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+      }
+    }
+  });
+
+  document.addEventListener('drop', function(e) {
+    if (e.target && e.target.closest('#file-upload-area')) {
+      e.preventDefault();
+      const uploadArea = document.getElementById('file-upload-area');
+      if (uploadArea) {
+        uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+      }
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.name.toLowerCase().endsWith('.zip')) {
+          // Manually set the file to the input
+          const fileInput = document.getElementById('import-file');
+          if (fileInput) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            
+            const uploadState = document.getElementById('upload-state');
+            const fileSelected = document.getElementById('file-selected');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            
+            if (uploadState && fileSelected && fileName && fileSize) {
+              showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize);
+            }
+          }
+        } else {
+          alert('Please select a ZIP file.');
+        }
+      }
+    }
+  });
 });
 </script>
 
