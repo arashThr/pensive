@@ -6,9 +6,19 @@
 
 ### Update DB
 This would be a breaking change
-- [ ] Separate tables
+- [x] Separate tables: No need
+- [x] Rename tables
+- [ ] Create the exports
+- [ ] Clean the local db
+- [ ] Unstash changes to get the rename of bookmark id to id
+- [ ] Update the compose file
+- [ ] Update prod
+    - Cheatsheet for all the required commands for working with docker
 - [ ] Rename all the pensieve to pensive
 - [ ] Setup DB backup
+- [ ] Rename files and folders
+    - integrations to extension
+    - models and services
 - [ ] Caddyfile: getpensive.com
 
 ## Fixes
