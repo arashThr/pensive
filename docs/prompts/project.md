@@ -19,7 +19,7 @@ to create markdown version of the page and generate summary and tags.
 
 Premium features will be extended in the future, including the option to support text extraction from YouTube videos for searchability. Also, I want to add the option to send weekly/monthly summary of the highlights of your readings.
 
-For UI/UX, I'm going to go with a clean, simple, and intuitive design. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI will use a mix of light and dark themes and may include small animations for a modern touch. While I don’t have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal, and does not feel dead (Google products are a good example of dead feeling design).
+For UI/UX, I'm going to go with a clean, simple, and intuitive design. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI will use a mix of light and dark themes. We keep things flat and simple with a modern look. While I don’t have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal, and does not feel dead (Google products are a good example of dead feeling design).
 Since the focus of the app is on text, I want the black and white to be the main essence of the pages.
 In the implementation I'm using HTML templates in the backend side and Tailwind CSS and HTMX on the front-end.
 
