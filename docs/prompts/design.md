@@ -77,6 +77,7 @@
 - Form buttons: `py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700`
 - Success buttons: `bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors`
 - Destructive: `py-2 px-4 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700`
+- Disabled buttons: `px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75`
 
 ### Navigation
 - Header height: `h-16`

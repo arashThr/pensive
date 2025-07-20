@@ -37,6 +37,8 @@ This would be a breaking change
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
+- [ ] Fix import: Links are imported multiple times
+    - [ ] Enable the import
 - [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
     - [x] Remove token when endpoint is changed
