@@ -9,17 +9,16 @@ This would be a breaking change
 - [x] Separate tables: No need
 - [x] Rename tables
 - [x] Create the exports
-- [ ] Update postgres version
+- [x] Update prod
+    - Cheatsheet for all the required commands for working with docker
 - [ ] Clean the local db
 - [ ] Unstash changes to get the rename of bookmark id to id
-- [ ] Update the compose file
-- [ ] Update prod
-    - Cheatsheet for all the required commands for working with docker
-- [ ] Rename all the pensieve to pensive
 - [ ] Setup DB backup
-- [ ] Rename files and folders
-    - integrations to extension
-    - models and services
+- [ ] Separate the tables
+- [ ] Update the compose file
+    - [ ] Update postgres version
+- [ ] Rename all the pensieve to pensive
+- [ ] create new prod db
 - [ ] Caddyfile: getpensive.com
 
 ## Fixes
@@ -116,6 +115,9 @@ This would be a breaking change
     - Zap is possible?
 - [ ] Separate tables
     - [ ] Remove user id from bookmark table
+- [ ] Rename files and folders
+    - integrations to extension
+    - models and services
 - [x] Cancelled: Move prod to Supabase or Cloudflare
     - Too little storage, too much cost. Instead, make the current solution better: backups and extending
 - [x] Use readability on the client side in extension
