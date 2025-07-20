@@ -9,9 +9,35 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set default values
   let defaultEndpoint = "http://localhost:8000"
 
+  // Function to normalize endpoint URL
+  function normalizeEndpoint(endpoint) {
+    if (!endpoint) return defaultEndpoint;
+    
+    // If it's localhost, keep HTTP
+    if (endpoint.includes('localhost') || endpoint.includes('127.0.0.1')) {
+      // Ensure localhost has http:// prefix if no protocol specified
+      if (!endpoint.startsWith('http://') && !endpoint.startsWith('https://')) {
+        return `http://${endpoint}`;
+      }
+      return endpoint;
+    }
+    
+    // For all other hosts, ensure HTTPS
+    if (endpoint.startsWith('http://')) {
+      // Convert HTTP to HTTPS for non-localhost
+      return endpoint.replace('http://', 'https://');
+    } else if (endpoint.startsWith('https://')) {
+      // Already HTTPS, keep as is
+      return endpoint;
+    } else {
+      // No protocol specified, add HTTPS
+      return `https://${endpoint}`;
+    }
+  }
+
   // Load saved settings or use defaults
   browserAPI.storage.local.get(["endpoint"]).then((data) => {
-    defaultEndpoint = data.endpoint || defaultEndpoint;
+    defaultEndpoint = normalizeEndpoint(data.endpoint || defaultEndpoint);
     document.getElementById("endpoint").value = defaultEndpoint;
 
     browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
@@ -21,7 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
-    defaultEndpoint = document.getElementById("endpoint").value || defaultEndpoint;
+    let inputValue = document.getElementById("endpoint").value || defaultEndpoint;
+    defaultEndpoint = normalizeEndpoint(inputValue);
+    
+    // Update the input field to show the normalized URL
+    document.getElementById("endpoint").value = defaultEndpoint;
     
     browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
       const status = document.getElementById("status");

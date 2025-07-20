@@ -4,23 +4,6 @@
 
 ## Tasks
 
-### Update DB
-This would be a breaking change
-- [x] Separate tables: No need
-- [x] Rename tables
-- [x] Create the exports
-- [x] Update prod
-    - Cheatsheet for all the required commands for working with docker
-- [x] Clean the local db
-- [x] Update FAQ
-- [x] Separate the tables: Cancelled
-- [x] Update the compose file
-    - [x] Update postgres version
-- [x] Rename all the pensieve to pensive
-- [x] Unstash changes to get the rename of bookmark id to id
-- [ ] create new prod db
-- [ ] Caddyfile: getpensive.com
-
 ## Fixes
 - [ ] Does not check for duplicates when importing links from pocket
 - [ ] getAllBookmarksForUser
@@ -130,6 +113,21 @@ This would be a breaking change
     - models and services
 - [ ] Remove time from logs
     - Zap is possible?
+- [x] Update DB: This would be a breaking change
+    - [x] Separate tables: No need
+    - [x] Rename tables
+    - [x] Create the exports
+    - [x] Update prod
+        - Cheatsheet for all the required commands for working with docker
+    - [x] Clean the local db
+    - [x] Update FAQ
+    - [x] Separate the tables: Cancelled
+    - [x] Update the compose file
+        - [x] Update postgres version
+    - [x] Rename all the pensieve to pensive
+    - [x] Unstash changes to get the rename of bookmark id to id
+    - [x] create new prod db
+    - [x] Caddyfile: getpensive.com
 - [x] Separate tables
     - [x] Remove user id from bookmark table: No need
 - [x] Cancelled: Move prod to Supabase or Cloudflare

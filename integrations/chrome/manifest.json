@@ -34,7 +34,7 @@
       {
         "matches": [
           "http://localhost:8000/extension/auth",
-          "https://getpensive/extension/auth"
+          "https://getpensive.com/extension/auth"
         ],
         "js": ["content.js"]
       }
