@@ -15,7 +15,7 @@
       "tabs",
       "<all_urls>",
       "http://localhost:8000/*",
-      "https://apps.arashtaher.com/*"
+      "https://getpensive.com/*"
     ],
     "options_ui": {
       "page": "options.html",
@@ -33,7 +33,7 @@
       {
         "matches": [
           "http://localhost/extension/auth",
-          "https://apps.arashtaher.com/extension/auth"
+          "https://getpensive.com/extension/auth"
         ],
         "js": ["content.js"]
       }

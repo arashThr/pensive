@@ -16,7 +16,7 @@
     ],
     "host_permissions": [
       "http://localhost:8000/*",
-      "https://apps.arashtaher.com/*"
+      "https://getpensive.com/*"
     ],
     "options_ui": {
       "page": "options.html",
@@ -34,7 +34,7 @@
       {
         "matches": [
           "http://localhost:8000/extension/auth",
-          "https://apps.arashtaher.com/extension/auth"
+          "https://getpensive/extension/auth"
         ],
         "js": ["content.js"]
       }
@@ -43,7 +43,7 @@
       "resources": ["options.js", "Readability.js", "Readability-readerable.js"],
       "matches": [
         "http://localhost:8000/*",
-        "https://apps.arashtaher.com/*"
+        "https://getpensive.com/*"
       ]
     }]
   }
