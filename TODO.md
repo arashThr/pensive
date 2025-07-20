@@ -2,6 +2,15 @@
 - Check Cloudflare [D1](https://developers.cloudflare.com/d1/) for database
 - Get `recollectra.com` domain
 
+## Tasks
+
+### Update DB
+This would be a breaking change
+- [ ] Separate tables
+- [ ] Rename all the pensieve to pensive
+- [ ] Setup DB backup
+- [ ] Caddyfile: getpensive.com
+
 ## Fixes
 - [ ] Does not check for duplicates when importing links from pocket
 - [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
@@ -28,14 +37,10 @@
 
 ## Features
 - [ ] Ping server from Telegram bot to check the validity of the token
-- [ ] Export links
-- [ ] Upload the extensions
 - [ ] Limitation on the tokens for LLM
     - [ ] Accept user's API key
 - [ ] Feedback link
-- [ ] Back up db
 - [ ] Use Pupeteer and playwright for getting the pages
-- [ ] Add recaptcha
 - [ ] Landing page: Here's how it works:
     - Save the link, show the summary
 - Youtube
@@ -44,8 +49,11 @@
 - [ ] Limitations configs (Free vs. Premium):
     - Bookmarks
     - AI and YouTube
-- [ ] Get excerpt and summaries from Genimi
 - [ ] Premium: Get YouTube
+- [ ] Export links
+- [ ] Upload the extensions
+- [ ] Back up db
+- [x] Get excerpt and summaries from Genimi
 - [x] Limit search result to 10 - Search better!
 - [x] Use Gemeni
     - [x] Getting page text - [Inspiration](https://simedw.com/2025/06/23/introducing-spegel/)
@@ -89,8 +97,10 @@
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
-- [ ] Remove user id from bookmark table
 - [ ] Apply rate limit on requests
+- [ ] Add recaptcha
+- [ ] Separate tables
+    - [ ] Remove user id from bookmark table
 - [x] Cancelled: Move prod to Supabase or Cloudflare
     - Too little storage, too much cost. Instead, make the current solution better: backups and extending
 - [x] Use readability on the client side in extension
