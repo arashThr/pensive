@@ -63,6 +63,7 @@ This would be a breaking change
     - AI and YouTube
 - [ ] Premium: Get YouTube
 - [ ] Upload the extensions
+- [ ] Send logs when extension crashes
 - [ ] Back up db
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi

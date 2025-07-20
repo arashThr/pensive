@@ -134,14 +134,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (readabilityResults && readabilityResults[0] && readabilityResults[0].result) {
           const result = readabilityResults[0].result;
           if (result.success) {
-            pageContent.title = result.content.title;
-            pageContent.excerpt = result.content.excerpt;
-            pageContent.lang = result.content.lang;
-            pageContent.siteName = result.content.siteName;
-            pageContent.publishedTime = result.content.publishedTime;
-            pageContent.imageUrl = result.content.imageUrl;
-            pageContent.textContent = result.content.textContent;
-            pageContent.textContent = result.content.textContent;
+            pageContent.title = result.content.title || currentTab.title;
+            pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || "";
+            pageContent.lang = result.content.lang || document.documentElement.lang;
+            pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
+            pageContent.publishedTime = result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content || new Date().toISOString();
+            pageContent.imageUrl = result.content.imageUrl || document.querySelector('meta[property="og:image"]')?.content || "";
+            pageContent.textContent = result.content.textContent || document.body.textContent;
             // We do not use Readability.js to extract the html content and instead
             // use the content extraction script to extract the html content.
             // pageContent.htmlContent = result.content.htmlContent;
@@ -158,9 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (contentResults && contentResults[0] && contentResults[0].result) {
           const result = contentResults[0].result;
           if (result.success) {
-            console.log("Content extracted successfully", result);
             pageContent.htmlContent = result.htmlContent;
-            
             updateStatus('loading', 'Content cleaned and processed...');
           } else {
             throw new Error(result.error || 'Failed to extract content');
@@ -356,7 +353,7 @@ function extractContent() {
 
     let workingDoc = doc;
 
-    // 1️⃣ Try to find main content area
+    // 1. Try to find main content area
     const contentSelectors = [
       'main',
       'article',
@@ -390,7 +387,7 @@ function extractContent() {
       }
     }
 
-    // 2️⃣ Clean the HTML
+    // 2. Clean the HTML
     if (mainContent) {
       // Work with main content area
       const tempDiv = document.createElement('div');
@@ -449,7 +446,7 @@ function extractContent() {
       }
     }
 
-    // 3️⃣ Serialize cleaned HTML
+    // 3. Serialize cleaned HTML
     let cleanedHtml = workingDoc.body.innerHTML;
 
     // Optional text truncation (based on text content length)
@@ -619,14 +616,11 @@ function parseWithReadability() {
   }
 
   if (article && article.content) {
-    console.log('Successfully extracted article with Readability');
     return {
       success: true,
       isReadable: true,
       content: {
         title: article.title,
-        // content: article.content,
-        // htmlContent: article.content,
         lang: article.lang,
         siteName: article.siteName,
         publishedTime: article.publishedTime,
