@@ -10,6 +10,8 @@ services:
       - POSTGRES_HOST=db
     depends_on:
       - db
+    networks:
+      - app-network
   
   bot:
     build:
@@ -21,3 +23,5 @@ services:
       - DOMAIN=http://server:8000
     depends_on:
       - db
+    networks:
+      - app-network

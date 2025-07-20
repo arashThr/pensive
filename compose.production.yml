@@ -15,7 +15,15 @@ services:
     logging: *highlight-logging
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   bot:
     build:
@@ -24,14 +32,20 @@ services:
     logging: *highlight-logging
     restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
 
   caddy:
     image: caddy:2.9-alpine
     restart: unless-stopped
     logging: *highlight-logging
-    cap_add:
-      - NET_ADMIN
     ports:
       - "80:80"
       - "443:443"
@@ -40,11 +54,20 @@ services:
       - $PWD/caddy:/etc/caddy
       - ~/caddy/caddy_data:/data
       - ~/caddy/caddy_config:/config
-  
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
   db:
     logging: *highlight-logging
-    environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
     volumes:
-      - ~/data/apps.arashtaher.com/psql:/var/lib/postgresql/data/pgdata
-  
+      - ~/data/getpensive.com/psql:/var/lib/postgresql/

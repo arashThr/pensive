@@ -11,6 +11,8 @@ services:
       ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
     ports:
       - 3333:8080
+    networks:
+      - app-network
 
   tailwind:
     build:
@@ -22,3 +24,5 @@ services:
       - ./tailwind:/src:ro
       - ./web/templates:/templates:ro
       - ./web/assets:/dst:rw
+    networks:
+      - app-network

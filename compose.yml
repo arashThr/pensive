@@ -1,13 +1,24 @@
 services:
-  db: # The service will be named db.
-    image: postgres:15-alpine
+  db:
+    image: postgres:17-alpine
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    env_file:
+      - .env
     environment:
+      PGDATA: /var/lib/postgresql/17/docker
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASS}
       POSTGRES_DB: ${DB_NAME}
+    networks:
+      - app-network
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - ./data:/var/lib/postgresql/
 
-volumes:
-  db-data:
+networks:
+  app-network:
+    driver: bridge
