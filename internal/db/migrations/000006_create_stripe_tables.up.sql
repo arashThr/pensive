@@ -8,6 +8,7 @@ CREATE TABLE stripe_customers (
 
 -- Subscriptions table
 CREATE TABLE subscriptions (
+    id SERIAL PRIMARY KEY,
     stripe_subscription_id TEXT,
     user_id INTEGER NOT NULL REFERENCES users(id),
     status TEXT NOT NULL,
@@ -40,3 +41,14 @@ CREATE INDEX idx_invoices_stripe_subscription_id ON invoices(stripe_subscription
 CREATE INDEX idx_invoices_stripe_invoice_id ON invoices(stripe_invoice_id);
 CREATE INDEX idx_invoices_status ON invoices(status);
 CREATE INDEX idx_invoices_created_at ON invoices(created_at);
+
+-- Stripe sessions table
+CREATE TABLE stripe_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    stripe_session_id TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_stripe_sessions_user_id ON stripe_sessions(user_id);
+CREATE INDEX idx_stripe_sessions_stripe_session_id ON stripe_sessions(stripe_session_id);
