@@ -1,3 +1,3 @@
-apps.arashtaher.com
-getpensive.com
-reverse_proxy server:8000
+getpensive.com apps.arashtaher.com {
+    reverse_proxy server:8000
+}

@@ -25,6 +25,7 @@ This would be a breaking change
 - [ ] Does not check for duplicates when importing links from pocket
 - [ ] getAllBookmarksForUser
 - [ ] Getting non-existant bookmark: Something went wrong
+- [ ] Faster build
 - [ ] Send email for reset password takes time. Do we wait for sending email?
 - [ ] Adding bookmark from website brings the image, but the extension does not:
     - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771
@@ -71,6 +72,7 @@ This would be a breaking change
     - AI and YouTube
 - [ ] Premium: Get YouTube
 - [ ] Upload the extensions
+- [ ] Add metrics
 - [ ] Send logs when extension crashes
 - [ ] Back up db
 - [x] Export links
@@ -122,6 +124,7 @@ This would be a breaking change
 - [ ] Apply rate limit on requests
 - [ ] Add recaptcha
 - [ ] Move markdown from menu to the edit page as a button
+- [ ] Go to search page after signup
 - [ ] Rename files and folders
     - integrations to extension
     - models and services
