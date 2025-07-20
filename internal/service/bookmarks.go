@@ -63,7 +63,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Load the same page with the message: Bookmark added
-	editPath := fmt.Sprintf("/bookmarks/%s/edit", bookmark.BookmarkId)
+	editPath := fmt.Sprintf("/bookmarks/%s/edit", bookmark.Id)
 	http.Redirect(w, r, editPath, http.StatusFound)
 }
 
@@ -95,7 +95,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Link = bookmark.Link
 	data.Host = host
 	data.Title = bookmark.Title
-	data.Id = bookmark.BookmarkId
+	data.Id = bookmark.Id
 	data.Excerpt = bookmark.Excerpt
 	if len(data.Excerpt) > 200 {
 		data.Excerpt = data.Excerpt[:200] + "..."
@@ -104,7 +104,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Thumbnail = bookmark.ImageUrl
 	data.IsPremium = user.SubscriptionStatus == models.SubscriptionStatusPremium
 
-	logger.Info("Is premiun", "prem", data.IsPremium)
+	logger.Info("Subscription status", "status", user.SubscriptionStatus, "isPremium", data.IsPremium, "user", user.ID)
 
 	// For premium users, fetch AI-generated content
 	if data.IsPremium {
@@ -137,7 +137,7 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 	}{
 		Link:      bookmark.Link,
 		Title:     bookmark.Title,
-		Id:        bookmark.BookmarkId,
+		Id:        bookmark.Id,
 		Excerpt:   bookmark.Excerpt,
 		CreatedAt: bookmark.CreatedAt,
 	}
@@ -181,7 +181,7 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	data.MorePages = morePages
 	for _, b := range bookmarks {
 		data.Bookmarks = append(data.Bookmarks, Bookmark{
-			Id:        b.BookmarkId,
+			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
 			CreatedAt: b.CreatedAt.Format("Jan 02"),
@@ -196,7 +196,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = b.BookmarkModel.Delete(bookmark.BookmarkId)
+	err = b.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
@@ -211,13 +211,13 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	fullContent, err := b.BookmarkModel.GetBookmarkContent(bookmark.BookmarkId)
+	fullContent, err := b.BookmarkModel.GetBookmarkContent(bookmark.Id)
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
-			http.Error(w, fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.BookmarkId), http.StatusNotFound)
+			http.Error(w, fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.Id), http.StatusNotFound)
 			return
 		}
-		logger.Error("[bookmarks] get bookmark content by ID", "error", err, "id", bookmark.BookmarkId)
+		logger.Error("[bookmarks] get bookmark content by ID", "error", err, "id", bookmark.Id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -235,7 +235,7 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 		Content     string           `json:"content"`
 	}
 	resp := Response{
-		Id:          bookmark.BookmarkId,
+		Id:          bookmark.Id,
 		Title:       bookmark.Title,
 		Link:        bookmark.Link,
 		Excerpt:     bookmark.Excerpt,
@@ -262,18 +262,18 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.BookmarkId)
+	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.Id)
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
 			// If no markdown content is found, show a user-friendly message
 			var data struct {
 				Id types.BookmarkId
 			}
-			data.Id = bookmark.BookmarkId
+			data.Id = bookmark.Id
 			b.Templates.MarkdownNotAvailable.Execute(w, r, data)
 			return
 		}
-		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.BookmarkId)
+		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -285,7 +285,7 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 		Link            string
 		MarkdownContent string
 	}
-	data.Id = bookmark.BookmarkId
+	data.Id = bookmark.Id
 	data.Title = bookmark.Title
 	data.Link = bookmark.Link
 	data.MarkdownContent = markdownContent

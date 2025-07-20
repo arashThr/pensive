@@ -13,18 +13,21 @@ This would be a breaking change
     - Cheatsheet for all the required commands for working with docker
 - [x] Clean the local db
 - [x] Update FAQ
+- [x] Separate the tables: Cancelled
+- [x] Update the compose file
+    - [x] Update postgres version
+- [x] Rename all the pensieve to pensive
 - [ ] Unstash changes to get the rename of bookmark id to id
 - [ ] Setup DB backup
-- [ ] Separate the tables
-- [ ] Update the compose file
-    - [ ] Update postgres version
-- [ ] Rename all the pensieve to pensive
 - [ ] create new prod db
 - [ ] Caddyfile: getpensive.com
 
 ## Fixes
 - [ ] Does not check for duplicates when importing links from pocket
 - [ ] getAllBookmarksForUser
+- [ ] Getting non-existant bookmark: Something went wrong
+- [ ] Adding bookmark from website brings the image, but the extension does not:
+    - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771
 - [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
     - URLs without https
 - [ ] Limit size of Excerpt:
@@ -40,6 +43,8 @@ This would be a breaking change
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] Fix import: Links are imported multiple times
     - [ ] Enable the import
+- [ ] Fix API token key SVG and the button alignment
+- [ ] Fix setting user premium after success
 - [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
     - [x] Remove token when endpoint is changed
@@ -110,11 +115,13 @@ This would be a breaking change
 - [ ] Use zap for logging
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Add validation to create bookmark inputs
+- [ ] Add ping call from extension to an authorized endpoint
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Apply rate limit on requests
 - [ ] Add recaptcha
+- [ ] Move markdown from menu to the edit page as a button
 - [ ] Remove time from logs
     - Zap is possible?
 - [ ] Separate tables

@@ -178,7 +178,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	slog.Info("[api] created bookmark", "bookmarkId", bookmark.BookmarkId)
+	slog.Info("[api] created bookmark", "bookmarkId", bookmark.Id)
 	writeResponse(w, mapModelToBookmark(bookmark))
 }
 
@@ -225,7 +225,7 @@ func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := a.BookmarkModel.Delete(bookmark.BookmarkId)
+	err := a.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
@@ -234,7 +234,7 @@ func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeResponse(w, mapModelToBookmark(bookmark))
-	slog.Info("[api] deleted bookmark", "bookmarkId", bookmark.BookmarkId)
+	slog.Info("[api] deleted bookmark", "bookmarkId", bookmark.Id)
 }
 
 func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
@@ -242,7 +242,7 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	if bookmark == nil {
 		return
 	}
-	err := a.BookmarkModel.Delete(bookmark.BookmarkId)
+	err := a.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
@@ -253,7 +253,7 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Id types.BookmarkId `json:"id"`
 	}
-	data.Id = bookmark.BookmarkId
+	data.Id = bookmark.Id
 	writeResponse(w, &data)
 }
 
@@ -284,7 +284,7 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, r := range results {
 		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
-			Id:        r.BookmarkId,
+			Id:        r.Id,
 			Title:     r.Title,
 			Link:      r.Link,
 			Hostname:  validations.ExtractHostname(r.Link),
@@ -397,7 +397,7 @@ func writeErrorResponse(w http.ResponseWriter, statusCode int, errResp ErrorResp
 
 func mapModelToBookmark(b *models.Bookmark) Bookmark {
 	return Bookmark{
-		Id:      b.BookmarkId,
+		Id:      b.Id,
 		Title:   b.Title,
 		Link:    b.Link,
 		Excerpt: b.Excerpt,

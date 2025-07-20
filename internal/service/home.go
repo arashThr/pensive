@@ -70,7 +70,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	data.Query = query
 	for _, r := range results {
 		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
-			Id:        r.BookmarkId,
+			Id:        r.Id,
 			Title:     r.Title,
 			Link:      r.Link,
 			Hostname:  validations.ExtractHostname(r.Link),
@@ -123,7 +123,7 @@ func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptio
 			excerpt = *b.AIExcerpt
 		}
 		data.Bookmarks = append(data.Bookmarks, RecentBookmark{
-			Id:        b.BookmarkId,
+			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
 			Hostname:  validations.ExtractHostname(b.Link),

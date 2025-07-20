@@ -3,7 +3,7 @@ CREATE FUNCTION immutable_to_tsvector(text) RETURNS tsvector AS $$
 SELECT to_tsvector('english', $1);
 $$ LANGUAGE SQL IMMUTABLE;
 CREATE TABLE library_items (
-  bookmark_id TEXT PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   user_id INT REFERENCES users(id),
   link TEXT NOT NULL,
   title TEXT NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE library_items (
   -- summary TEXT,
 );
 CREATE TABLE library_contents (
-  bookmark_id TEXT PRIMARY KEY REFERENCES library_items(bookmark_id) ON DELETE CASCADE,
+  id TEXT PRIMARY KEY REFERENCES library_items(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   excerpt TEXT NOT NULL,

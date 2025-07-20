@@ -38,12 +38,12 @@ type BookmarkResponse struct {
 }
 
 type SearchResult struct {
-	Headline   string  `json:"headline"`
-	BookmarkId string  `json:"bookmarkId"`
-	Title      string  `json:"title"`
-	Link       string  `json:"link"`
-	Excerpt    string  `json:"excerpt"`
-	Rank       float32 `json:"rank"`
+	Headline string  `json:"headline"`
+	Id       string  `json:"id"`
+	Title    string  `json:"title"`
+	Link     string  `json:"link"`
+	Excerpt  string  `json:"excerpt"`
+	Rank     float32 `json:"rank"`
 }
 
 type SearchResponse struct {
@@ -398,7 +398,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "bookmarkID", bookmarkID)
+		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "ID", bookmarkID)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Failed to get summary",
@@ -410,7 +410,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 
 	var bookmark BookmarkResponse
 	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
-		slog.Error("failed to decode bookmark", "error", err, "bookmarkID", bookmarkID)
+		slog.Error("failed to decode bookmark", "error", err, "ID", bookmarkID)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Failed to get summary",

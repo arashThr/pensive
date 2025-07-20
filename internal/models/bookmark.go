@@ -42,7 +42,7 @@ var sourceMapping = map[BookmarkSource]string{
 }
 
 type Bookmark struct {
-	BookmarkId    types.BookmarkId
+	Id            types.BookmarkId
 	UserId        types.UserId
 	Title         string
 	Link          string
@@ -158,7 +158,7 @@ func (model *BookmarkModel) CreateWithContent(
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	bookmark = &Bookmark{
-		BookmarkId:    types.BookmarkId(bookmarkId),
+		Id:            types.BookmarkId(bookmarkId),
 		UserId:        userId,
 		Title:         validations.CleanUpText(article.Title),
 		Link:          link,
@@ -178,7 +178,7 @@ func (model *BookmarkModel) CreateWithContent(
 	}
 
 	// Only generate AI content for premium users and not for imports (like Pocket)
-	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket && false {
+	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent
@@ -191,7 +191,7 @@ func (model *BookmarkModel) CreateWithContent(
 	_, err = model.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO library_items (
-				bookmark_id,
+				id,
 				user_id,
 				link,
 				title,
@@ -203,7 +203,7 @@ func (model *BookmarkModel) CreateWithContent(
 				published_time
 			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		)
-		INSERT INTO library_contents (bookmark_id, title, excerpt, content)
+		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $11);`,
 		bookmarkId, userId, link, article.Title, sourceMapping[source], bookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
@@ -216,10 +216,10 @@ func (model *BookmarkModel) CreateWithContent(
 
 func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
-		BookmarkId: id,
+		Id: id,
 	}
 	rows, err := model.Pool.Query(context.Background(),
-		`SELECT * FROM library_items WHERE bookmark_id = $1;`, id)
+		`SELECT * FROM library_items WHERE id = $1;`, id)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by id: %w", err)
 	}
@@ -247,7 +247,7 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 	}
 	page -= 1
 	rows, err := model.Pool.Query(context.Background(),
-		`SELECT bookmark_id, title, link, excerpt, created_at
+		`SELECT id, title, link, excerpt, created_at
 		FROM library_items
 		WHERE user_id = $1
 		ORDER BY created_at DESC
@@ -263,7 +263,7 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 	// Iterate through the result set
 	for rows.Next() {
 		var bookmark Bookmark
-		err := rows.Scan(&bookmark.BookmarkId, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
+		err := rows.Scan(&bookmark.Id, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
 		if err != nil {
 			return nil, false, fmt.Errorf("scan bookmark: %w", err)
 		}
@@ -282,7 +282,7 @@ func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int, s
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT
 			user_id,
-			bookmark_id,
+			id,
 			title,
 			link,
 			excerpt,
@@ -396,7 +396,7 @@ func (model *BookmarkModel) generateAIData(content string, link string, bookmark
 	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
 	// Update the bookmark with all AI-generated content in library_items table
 	_, err = model.Pool.Exec(context.Background(), `
-		UPDATE library_items SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE bookmark_id = $4`,
+		UPDATE library_items SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE id = $4`,
 		aiDataResponse.Summary, aiDataResponse.Excerpt, aiDataResponse.Tags, bookmarkId)
 	if err != nil {
 		slog.Warn("Failed to update bookmark AI content", "error", err)
@@ -404,7 +404,7 @@ func (model *BookmarkModel) generateAIData(content string, link string, bookmark
 
 	// Also update the markdown content in library_contents table
 	_, err = model.Pool.Exec(context.Background(), `
-		UPDATE library_contents SET ai_markdown = $1 WHERE bookmark_id = $2`,
+		UPDATE library_contents SET ai_markdown = $1 WHERE id = $2`,
 		aiDataResponse.Markdown, bookmarkId)
 	if err != nil {
 		slog.Warn("Failed to update bookmark markdown content", "error", err)
@@ -530,8 +530,8 @@ HTML content to process:
 
 func (model *BookmarkModel) Update(bookmark *Bookmark) error {
 	_, err := model.Pool.Exec(context.Background(),
-		`UPDATE library_items SET link = $1, title = $2 WHERE bookmark_id = $3`,
-		bookmark.Link, bookmark.Title, bookmark.BookmarkId,
+		`UPDATE library_items SET link = $1, title = $2 WHERE id = $3`,
+		bookmark.Link, bookmark.Title, bookmark.Id,
 	)
 	if err != nil {
 		return fmt.Errorf("update bookmark: %w", err)
@@ -541,7 +541,7 @@ func (model *BookmarkModel) Update(bookmark *Bookmark) error {
 
 func (model *BookmarkModel) Delete(id types.BookmarkId) error {
 	_, err := model.Pool.Exec(context.Background(),
-		`DELETE FROM library_items WHERE bookmark_id = $1;`, id)
+		`DELETE FROM library_items WHERE id = $1;`, id)
 	if err != nil {
 		return fmt.Errorf("delete bookmark: %w", err)
 	}
@@ -549,14 +549,14 @@ func (model *BookmarkModel) Delete(id types.BookmarkId) error {
 }
 
 type SearchResult struct {
-	Headline   string
-	BookmarkId types.BookmarkId
-	Title      string
-	Link       string
-	Excerpt    string
-	ImageUrl   string
-	CreatedAt  time.Time
-	Rank       float32
+	Headline  string
+	Id        types.BookmarkId
+	Title     string
+	Link      string
+	Excerpt   string
+	ImageUrl  string
+	CreatedAt time.Time
+	Rank      float32
 	// AI-generated fields for premium users
 	AISummary *string
 	AIExcerpt *string
@@ -569,22 +569,22 @@ func (model *BookmarkModel) Search(userId types.UserId, query string, subscripti
 			SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
 		)
 		SELECT
-			ts_headline(bc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
-			ub.bookmark_id AS bookmark_id,
-			ub.title AS title,
-			ub.link AS link,
-			ub.excerpt AS excerpt,
-			ub.image_url AS image_url,
-			ub.created_at AS created_at,
-			ts_rank(bc.search_vector, sq.query) AS rank,
-			ub.ai_summary AS ai_summary,
-			ub.ai_excerpt AS ai_excerpt,
-			ub.ai_tags AS ai_tags
-		FROM library_items ub
-		JOIN library_contents bc ON ub.bookmark_id = bc.bookmark_id
+			ts_headline(lc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
+			li.id AS id,
+			li.title AS title,
+			li.link AS link,
+			li.excerpt AS excerpt,
+			li.image_url AS image_url,
+			li.created_at AS created_at,
+			ts_rank(lc.search_vector, sq.query) AS rank,
+			li.ai_summary AS ai_summary,
+			li.ai_excerpt AS ai_excerpt,
+			li.ai_tags AS ai_tags
+		FROM library_items li
+		JOIN library_contents lc ON li.id = lc.id
 		CROSS JOIN search_query sq
-		WHERE ub.user_id = $2
-    		AND bc.search_vector @@ sq.query
+		WHERE li.user_id = $2
+    		AND lc.search_vector @@ sq.query
 		ORDER BY rank DESC
 		LIMIT 10`, query, userId)
 
@@ -610,7 +610,7 @@ func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, err
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT content
 		FROM library_contents
-		WHERE bookmark_id = $1
+		WHERE id = $1
 		LIMIT 1`, id)
 	if err != nil {
 		return "", fmt.Errorf("query bookmark content by id: %w", err)
@@ -635,7 +635,7 @@ func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, er
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT ai_markdown
 		FROM library_contents
-		WHERE bookmark_id = $1
+		WHERE id = $1
 		LIMIT 1`, id)
 	if err != nil {
 		return "", fmt.Errorf("query bookmark markdown by id: %w", err)
@@ -663,21 +663,21 @@ func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, er
 func (model *BookmarkModel) GetFullBookmark(id types.BookmarkId) (*BookmarkWithContent, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 	SELECT
-		ub.bookmark_id,
-		ub.user_id,
-		ub.title,
-		ub.link,
-		ub.source,
-		bc.excerpt,
-		bc.content,
-		ub.image_url,
-		bc.article_lang,
-		ub.site_name,
-		ub.created_at,
-		bc.published_time
-	FROM library_items ub
-	JOIN library_contents bc ON ub.bookmark_id = bc.bookmark_id
-	WHERE ub.bookmark_id = $1`, id)
+	li.id,
+		li.user_id,
+		li.title,
+		li.link,
+		li.source,
+		lc.excerpt,
+		lc.content,
+		li.image_url,
+		lc.article_lang,
+		li.site_name,
+		li.created_at,
+		lc.published_time
+	FROM library_items li
+	JOIN library_contents lc ON li.id = lc.id
+	WHERE li.id = $1`, id)
 
 	if err != nil {
 		return nil, fmt.Errorf("query full bookmark by id: %w", err)
