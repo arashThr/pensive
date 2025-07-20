@@ -17,6 +17,14 @@ func FAQ(tpl Template) http.HandlerFunc {
 		Answer   template.HTML
 	}{
 		{
+			Question: "What is Pensive?",
+			Answer:   "Pensive is a tool that helps you save and organize your bookmarks. It is a browser extension that allows you to save articles to your Pensive account.",
+		},
+		{
+			Question: "Why you named it Pensive?",
+			Answer:   "The name was actually supposed to be <a href='https://en.wikipedia.org/wiki/Pensieve'>Pensieve</a>, but I wasn't sure if I have the right to use it, also I didn't find a proper domain for it.",
+		},
+		{
 			Question: "Is there a free version?",
 			Answer:   "You can start using Pensive for free. With premium, you will have higher limits, specially on AI features.",
 		},

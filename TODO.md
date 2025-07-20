@@ -11,7 +11,8 @@ This would be a breaking change
 - [x] Create the exports
 - [x] Update prod
     - Cheatsheet for all the required commands for working with docker
-- [ ] Clean the local db
+- [x] Clean the local db
+- [x] Update FAQ
 - [ ] Unstash changes to get the rename of bookmark id to id
 - [ ] Setup DB backup
 - [ ] Separate the tables
