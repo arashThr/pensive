@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to validate token by calling health check endpoint
   async function validateToken(token) {
     try {
-      const response = await fetch(`${defaultEndpoint}/api/ping`, {
+      const response = await fetch(new URL('/api/ping', defaultEndpoint).href, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,6 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
     connectButton.disabled = true;
     connectButton.textContent = 'Connecting...';
 
+    // Track authentication state
+    let authCompleted = false;
+
     // Open a new tab with the auth URL
     browserAPI.tabs.create({
       url: new URL('/extension/auth', defaultEndpoint).toString(),
@@ -109,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const messageListener = function(request, sender, sendResponse) {
         console.log("Received message", request)
         if (request.type === 'AUTH_TOKEN') {
+          authCompleted = true;
           // Store the token
           browserAPI.storage.local.set({ apiToken: request.token }).then(() => {
             validateToken(request.token);
@@ -128,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Set a timeout to handle cases where the auth page doesn't respond
       setTimeout(() => {
         browserAPI.runtime.onMessage.removeListener(messageListener);
-        if (authSection.style.display !== 'none') {
+        if (!authCompleted) {
           showError('Authentication timed out. Please try again.');
         }
       }, 10000); // 10 seconds timeout
