@@ -2,14 +2,20 @@ package service
 
 import (
 	"archive/zip"
+	"encoding/csv"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service/importer"
+	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/web"
 )
 
@@ -20,6 +26,7 @@ type Importer struct {
 		ImportStatus     web.Template
 	}
 	ImportJobModel *models.ImportJobModel
+	BookmarkModel  *models.BookmarkModel
 }
 
 // ImportExport displays the import/export page
@@ -139,9 +146,183 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 
 	logger.Info("export requested", "user_id", user.ID)
 
-	// TODO: Implement actual export functionality
-	// For now, just return an error indicating it's not implemented yet
-	http.Error(w, "Export functionality coming soon", http.StatusNotImplemented)
+	// Get all bookmarks for the user
+	bookmarks, err := p.getAllBookmarksForUser(user.ID)
+	if err != nil {
+		logger.Error("get all bookmarks for export", "error", err)
+		http.Error(w, "Failed to retrieve bookmarks", http.StatusInternalServerError)
+		return
+	}
+
+	if len(bookmarks) == 0 {
+		http.Error(w, "No bookmarks found to export", http.StatusNotFound)
+		return
+	}
+
+	// Create temporary directory for export files
+	tempDir, err := os.MkdirTemp("", "export_*")
+	if err != nil {
+		logger.Error("create temp directory", "error", err)
+		http.Error(w, "Failed to create export", http.StatusInternalServerError)
+		return
+	}
+	defer os.RemoveAll(tempDir)
+
+	// Create CSV file
+	csvPath := filepath.Join(tempDir, "part_000000.csv")
+	err = p.createCSV(csvPath, bookmarks)
+	if err != nil {
+		logger.Error("create CSV file", "error", err)
+		http.Error(w, "Failed to create export file", http.StatusInternalServerError)
+		return
+	}
+
+	// Create ZIP file
+	zipPath := filepath.Join(tempDir, "bookmarks_export.zip")
+	err = p.createZip(zipPath, csvPath)
+	if err != nil {
+		logger.Error("create ZIP file", "error", err)
+		http.Error(w, "Failed to create export archive", http.StatusInternalServerError)
+		return
+	}
+
+	// Serve the ZIP file
+	file, err := os.Open(zipPath)
+	if err != nil {
+		logger.Error("open export file", "error", err)
+		http.Error(w, "Failed to open export file", http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+
+	// Get file info for Content-Length
+	fileInfo, err := file.Stat()
+	if err != nil {
+		logger.Error("get file info", "error", err)
+		http.Error(w, "Failed to get export file info", http.StatusInternalServerError)
+		return
+	}
+
+	// Generate filename with timestamp
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	filename := fmt.Sprintf("bookmarks_export_%s.zip", timestamp)
+
+	// Set headers for file download
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	w.Header().Set("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
+
+	// Copy file to response
+	_, err = io.Copy(w, file)
+	if err != nil {
+		logger.Error("copy export file to response", "error", err)
+		return
+	}
+
+	logger.Info("export completed successfully", "user_id", user.ID, "bookmark_count", len(bookmarks), "file_size", fileInfo.Size())
+}
+
+// getAllBookmarksForUser retrieves all bookmarks for a user by paginating through all pages
+// TODO: Improve so it gets all the bookmarks in one go
+func (p Importer) getAllBookmarksForUser(userID types.UserId) ([]models.Bookmark, error) {
+	var allBookmarks []models.Bookmark
+	page := 1
+
+	for {
+		bookmarks, morePages, err := p.BookmarkModel.GetByUserId(userID, page)
+		if err != nil {
+			return nil, fmt.Errorf("get bookmarks page %d: %w", page, err)
+		}
+
+		allBookmarks = append(allBookmarks, bookmarks...)
+
+		if !morePages {
+			break
+		}
+
+		page++
+	}
+
+	return allBookmarks, nil
+}
+
+// createCSV creates a CSV file in the format expected by the Pocket importer
+func (p Importer) createCSV(csvPath string, bookmarks []models.Bookmark) error {
+	file, err := os.Create(csvPath)
+	if err != nil {
+		return fmt.Errorf("create CSV file: %w", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// Write CSV header matching Pocket import format
+	header := []string{"url", "title", "time_added", "status"}
+	if err := writer.Write(header); err != nil {
+		return fmt.Errorf("write CSV header: %w", err)
+	}
+
+	// Write bookmark records
+	for _, bookmark := range bookmarks {
+		record := []string{
+			bookmark.Link,
+			bookmark.Title,
+			strconv.FormatInt(bookmark.CreatedAt.Unix(), 10), // Unix timestamp
+			"archive", // Status - using "archive" so it gets imported
+		}
+
+		if err := writer.Write(record); err != nil {
+			return fmt.Errorf("write CSV record: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// createZip creates a ZIP file containing the CSV
+func (p Importer) createZip(zipPath, csvPath string) error {
+	zipFile, err := os.Create(zipPath)
+	if err != nil {
+		return fmt.Errorf("create ZIP file: %w", err)
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Add CSV file to ZIP
+	csvFile, err := os.Open(csvPath)
+	if err != nil {
+		return fmt.Errorf("open CSV file: %w", err)
+	}
+	defer csvFile.Close()
+
+	csvInfo, err := csvFile.Stat()
+	if err != nil {
+		return fmt.Errorf("get CSV file info: %w", err)
+	}
+
+	// Create file header
+	header, err := zip.FileInfoHeader(csvInfo)
+	if err != nil {
+		return fmt.Errorf("create file header: %w", err)
+	}
+	header.Name = "part_000000.csv" // Exact name expected by importer
+	header.Method = zip.Deflate
+
+	// Add file to ZIP
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return fmt.Errorf("create ZIP entry: %w", err)
+	}
+
+	_, err = io.Copy(writer, csvFile)
+	if err != nil {
+		return fmt.Errorf("copy CSV to ZIP: %w", err)
+	}
+
+	return nil
 }
 
 // ImportStatus checks the status of an import job

@@ -8,7 +8,7 @@
 This would be a breaking change
 - [x] Separate tables: No need
 - [x] Rename tables
-- [ ] Create the exports
+- [x] Create the exports
 - [ ] Clean the local db
 - [ ] Unstash changes to get the rename of bookmark id to id
 - [ ] Update the compose file
@@ -23,6 +23,7 @@ This would be a breaking change
 
 ## Fixes
 - [ ] Does not check for duplicates when importing links from pocket
+- [ ] getAllBookmarksForUser
 - [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
     - URLs without https
 - [ ] Limit size of Excerpt:
@@ -60,9 +61,9 @@ This would be a breaking change
     - Bookmarks
     - AI and YouTube
 - [ ] Premium: Get YouTube
-- [ ] Export links
 - [ ] Upload the extensions
 - [ ] Back up db
+- [x] Export links
 - [x] Get excerpt and summaries from Genimi
 - [x] Limit search result to 10 - Search better!
 - [x] Use Gemeni

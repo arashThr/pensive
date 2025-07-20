@@ -144,6 +144,7 @@ func run(cfg *config.AppConfig) error {
 
 	importerController := service.Importer{
 		ImportJobModel: importJobModel,
+		BookmarkModel:  bookmarksModel,
 	}
 	importerController.Templates.ImportExport = views.Must(views.ParseTemplate("user/import-export.gohtml", "tailwind.gohtml"))
 	importerController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
