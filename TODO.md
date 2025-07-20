@@ -17,8 +17,7 @@ This would be a breaking change
 - [x] Update the compose file
     - [x] Update postgres version
 - [x] Rename all the pensieve to pensive
-- [ ] Unstash changes to get the rename of bookmark id to id
-- [ ] Setup DB backup
+- [x] Unstash changes to get the rename of bookmark id to id
 - [ ] create new prod db
 - [ ] Caddyfile: getpensive.com
 
@@ -26,6 +25,7 @@ This would be a breaking change
 - [ ] Does not check for duplicates when importing links from pocket
 - [ ] getAllBookmarksForUser
 - [ ] Getting non-existant bookmark: Something went wrong
+- [ ] Send email for reset password takes time. Do we wait for sending email?
 - [ ] Adding bookmark from website brings the image, but the extension does not:
     - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771
 - [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
@@ -122,13 +122,13 @@ This would be a breaking change
 - [ ] Apply rate limit on requests
 - [ ] Add recaptcha
 - [ ] Move markdown from menu to the edit page as a button
-- [ ] Remove time from logs
-    - Zap is possible?
-- [ ] Separate tables
-    - [ ] Remove user id from bookmark table
 - [ ] Rename files and folders
     - integrations to extension
     - models and services
+- [ ] Remove time from logs
+    - Zap is possible?
+- [x] Separate tables
+    - [x] Remove user id from bookmark table: No need
 - [x] Cancelled: Move prod to Supabase or Cloudflare
     - Too little storage, too much cost. Instead, make the current solution better: backups and extending
 - [x] Use readability on the client side in extension

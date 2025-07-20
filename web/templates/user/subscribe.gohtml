@@ -64,6 +64,31 @@
     </div>
   </div>
 
+  {{if false}}
+  <!-- Active Subscription Form -->
+  <div class="bg-white border border-gray-300 rounded-lg p-6 text-center">
+    <div class="mb-4">
+      <svg class="w-8 h-8 text-blue-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    </div>
+    <p class="font-medium text-gray-900 mb-2">Ready to unlock premium features?</p>
+    <p class="text-sm text-gray-600 mb-6">
+      Get instant access to AI-powered insights, Telegram integration, and advanced tools 
+      to supercharge your knowledge management.
+    </p>
+    
+    <!-- Subscription Form -->
+    <form action="/payments/create-checkout-session" method="post">
+      {{csrfField}}
+      <button 
+        type="submit" 
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+        Subscribe Now
+      </button>
+    </form>
+  </div>
+  {{else}}
   <!-- Coming Soon Notice -->
   <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
     <div class="mb-4">
@@ -85,6 +110,7 @@
       Subscribe (Coming Soon)
     </button>
   </div>
+  {{end}}
   
   <!-- Navigation -->
   <div class="mt-8 text-center">
