@@ -1,12 +1,16 @@
 package auth
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service"
@@ -32,27 +36,46 @@ type Users struct {
 	PasswordResetService *models.PasswordResetService
 	EmailService         *service.EmailService
 	TokenModel           *models.TokenModel
+	TurnstileConfig      config.TurnstileConfig
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
-	u.Templates.New.Execute(w, r, nil)
+	data := struct {
+		TurnstileSiteKey string
+	}{
+		TurnstileSiteKey: u.TurnstileConfig.SiteKey,
+	}
+	u.Templates.New.Execute(w, r, data)
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
-	var data struct {
-		Email    string
-		Password string
-	}
-	data.Email = r.FormValue("email")
-	data.Password = r.FormValue("password")
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+	token := r.FormValue("cf-turnstile-response")
 
-	user, err := u.UserService.Create(data.Email, data.Password)
+	var signupTemplateData = struct {
+		TurnstileSiteKey string
+	}{
+		TurnstileSiteKey: u.TurnstileConfig.SiteKey,
+	}
+
+	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
+	if err != nil {
+		logger.Error("turnstile siteverify on sign up", "error", err)
+		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
+			Message: "Verification failed",
+			IsError: true,
+		})
+		return
+	}
+
+	user, err := u.UserService.Create(email, password)
 	if err != nil {
 		if errors.Is(err, errors.ErrEmailTaken) {
 			err = errors.Public(err, "That email address is already taken")
 		}
-		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
+		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: err.Error(),
 			IsError: true,
 		})
@@ -62,7 +85,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
 		logger.Error("create user failed", "error", err)
-		u.Templates.New.Execute(w, r, data, web.NavbarMessage{
+		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Creating session failed",
 			IsError: true,
 		})
@@ -74,14 +97,30 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
-	u.Templates.SignIn.Execute(w, r, nil)
+	var data struct {
+		TurnstileSiteKey string
+	}
+	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
+	u.Templates.SignIn.Execute(w, r, data)
 }
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	email := r.FormValue("email")
 	password := r.FormValue("password")
+	token := r.FormValue("cf-turnstile-response")
+
+	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
+	if err != nil {
+		logger.Error("turnstile siteverify on sign in", "error", err)
+		u.Templates.SignIn.Execute(w, r, nil, web.NavbarMessage{
+			Message: "Verification failed",
+			IsError: true,
+		})
+		return
+	}
+
 	user, err := u.UserService.Authenticate(email, password)
-	logger := context.Logger(r.Context())
 	if err != nil {
 		logger.Info("sign in failed", "error", err)
 		u.Templates.SignIn.Execute(w, r, nil, web.NavbarMessage{
@@ -376,4 +415,38 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func validateTurnstileToken(token string, secretKey string, remoteIP string) error {
+	if token == "" {
+		return fmt.Errorf("turnstile token is required")
+	}
+
+	values := url.Values{
+		"secret":   {secretKey},
+		"response": {token},
+		"remoteip": {remoteIP},
+	}
+	resp, err := http.PostForm("https://challenges.cloudflare.com/turnstile/v0/siteverify", values)
+	if err != nil {
+		return fmt.Errorf("turnstile siteverify: %w", err)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("turnstile siteverify read body: %w", err)
+	}
+
+	var turnstileResponse struct {
+		Success bool `json:"success"`
+	}
+	err = json.Unmarshal(body, &turnstileResponse)
+	if err != nil {
+		return fmt.Errorf("turnstile siteverify unmarshal body: %w", err)
+	}
+
+	if !turnstileResponse.Success {
+		return fmt.Errorf("turnstile verification failed")
+	}
+
+	return nil
 }

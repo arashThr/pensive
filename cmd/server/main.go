@@ -109,6 +109,7 @@ func run(cfg *config.AppConfig) error {
 
 	// Controllers
 	usersController := auth.Users{
+		TurnstileConfig:      cfg.Turnstile,
 		UserService:          userService,
 		SessionService:       sessionService,
 		PasswordResetService: passwordResetService,

@@ -23,6 +23,11 @@ type TelegramConfig struct {
 	Token   string
 }
 
+type TurnstileConfig struct {
+	SiteKey   string
+	SecretKey string
+}
+
 type AppConfig struct {
 	Environment string
 	Domain      string
@@ -35,8 +40,9 @@ type AppConfig struct {
 	Server struct {
 		Address string
 	}
-	Stripe   StripeConfig
-	Telegram TelegramConfig
+	Stripe    StripeConfig
+	Telegram  TelegramConfig
+	Turnstile TurnstileConfig
 }
 
 func LoadEnvConfig() (*AppConfig, error) {
@@ -82,6 +88,11 @@ func LoadEnvConfig() (*AppConfig, error) {
 	cfg.Telegram = TelegramConfig{
 		BotName: validations.GetEnvOrDie("TELEGRAM_BOT_NAME"),
 		Token:   validations.GetEnvOrDie("TELEGRAM_BOT_TOKEN"),
+	}
+
+	cfg.Turnstile = TurnstileConfig{
+		SiteKey:   validations.GetEnvOrDie("TURNSTILE_SITE_KEY"),
+		SecretKey: validations.GetEnvOrDie("TURNSTILE_SECRET_KEY"),
 	}
 
 	return &cfg, nil
