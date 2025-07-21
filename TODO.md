@@ -54,10 +54,12 @@
     - Bookmarks
     - AI and YouTube
 - [ ] Premium: Get YouTube
-- [ ] Upload the extensions
 - [ ] Add metrics
 - [ ] Send logs when extension crashes
 - [ ] Back up db
+- [ ] Add analytics
+- [ ] Upload the extensions
+    - [ ] Create the extension logo for Chrome store
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi
 - [x] Limit search result to 10 - Search better!
@@ -97,18 +99,18 @@
 - [ ] Remove password - Use email validation
 - [ ] readability.Check for links that don't have HTML
 - [ ] Use temp dir for pocket imports
-- [ ] Use zap for logging
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Add validation to create bookmark inputs
 - [ ] Add ping call from extension to an authorized endpoint
+- [ ] Remove time from logs
+    - Zap is possible?
+- [ ] Apply rate limit on requests
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
-- [ ] Apply rate limit on requests
-- [ ] Add recaptcha
-- [ ] Remove time from logs
-    - Zap is possible?
-- [ ] Move markdown from menu to the edit page as a button
+- [x] Move markdown from menu to the edit page as a button
+    - Load it in the same page. It's good enough for now
+- [x] Add recaptcha
 - [x] Go to search page after signup
 - [x] Rename files and folders: To much work for no reason
     - integrations to extension
