@@ -75,7 +75,7 @@ func (model *BookmarkModel) Create(
 	userId types.UserId,
 	source BookmarkSource,
 	subscriptionStatus SubscriptionStatus) (*Bookmark, error) {
-	return model.CreateWithContent(link, userId, source, subscriptionStatus, "", "", nil)
+	return model.CreateWithContent(link, userId, source, subscriptionStatus, nil)
 }
 
 // CreateWithContent creates a bookmark with provided HTML and text content
@@ -86,9 +86,7 @@ func (model *BookmarkModel) CreateWithContent(
 	userId types.UserId,
 	source BookmarkSource,
 	subscriptionStatus SubscriptionStatus,
-	htmlContent string,
-	textContent string,
-	bookmark *Bookmark,
+	bookmarkRequest *types.CreateBookmarkRequest,
 ) (*Bookmark, error) {
 
 	// Check if the link already exists
@@ -106,58 +104,52 @@ func (model *BookmarkModel) CreateWithContent(
 		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
 
-	var article *readability.Article
 	var content string
 
-	// If HTML content is provided, use it instead of fetching the page
+	// Fallback to the original method of fetching the page
+	article, err := fetchLink(link)
+	if err != nil {
+		slog.Warn("Failed to fetch page on server", "error", err, "link", link)
+		// Neither Readability nor the extension provided content
+		// So we can't create a bookmark
+		if bookmarkRequest == nil {
+			slog.Warn("Page content inaccessible", "link", link, "userId", userId)
+			return nil, fmt.Errorf("page content inaccessible")
+		}
+	}
+
+	// Input coming from the extension get higher priority than the fetched page
+	htmlContent := ""
+	if bookmarkRequest != nil {
+		switch {
+		case bookmarkRequest.Title != "":
+			article.Title = bookmarkRequest.Title
+		case bookmarkRequest.Excerpt != "":
+			article.Excerpt = bookmarkRequest.Excerpt
+		case bookmarkRequest.Lang != "":
+			article.Language = bookmarkRequest.Lang
+		case bookmarkRequest.SiteName != "":
+			article.SiteName = bookmarkRequest.SiteName
+		case bookmarkRequest.PublishedTime != nil:
+			article.PublishedTime = bookmarkRequest.PublishedTime
+		}
+		htmlContent = bookmarkRequest.HtmlContent
+	}
+
+	// If HTML content is provided, use it instead of what Readability fetched
 	if htmlContent != "" {
-		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "title", bookmark.Title, "excerpt", bookmark.Excerpt)
+		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "readabilityHtmlSize", len(article.Content))
 		textContent := allTagsRemoved(htmlContent)
-		excerpt := textContent[:min(200, len(textContent))]
-		if bookmark.Excerpt != "" {
-			excerpt = bookmark.Excerpt
+		article.TextContent = textContent
+		if article.Excerpt == "" {
+			article.Excerpt = textContent[:min(200, len(textContent))]
 		}
-		title := "Unknown title"
-		if bookmark.Title != "" {
-			title = bookmark.Title
-		}
-
-		article = &readability.Article{
-			Title:         title,
-			Content:       htmlContent,
-			TextContent:   textContent,
-			Excerpt:       excerpt,
-			Image:         bookmark.ImageUrl,
-			Language:      bookmark.ArticleLang,
-			SiteName:      bookmark.SiteName,
-			PublishedTime: bookmark.PublishedTime,
-		}
-	} else {
-		// Fallback to the original method of fetching the page
-		slog.Info("Fetching page content", "link", link)
-		resp, err := getPage(link)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get page: %w", err)
-		}
-		defer resp.Body.Close()
-		finalURL := resp.Request.URL
-
-		// ******
-		// TODO: readability.Check
-		// ******
-
-		articleValue, err := readability.FromReader(resp.Body, finalURL)
-		// TODO: Check for the language
-		if err != nil {
-			return nil, fmt.Errorf("readability: %w", err)
-		}
-		article = &articleValue
 	}
 
 	content = validations.CleanUpText(article.TextContent)
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
-	bookmark = &Bookmark{
+	inputBookmark := Bookmark{
 		Id:            types.BookmarkId(bookmarkId),
 		UserId:        userId,
 		Title:         validations.CleanUpText(article.Title),
@@ -170,11 +162,11 @@ func (model *BookmarkModel) CreateWithContent(
 		Source:        sourceMapping[source],
 	}
 
-	if article.Image == "" {
-		bookmark.ImageUrl = ""
-	} else if _, err := url.ParseRequestURI(article.Image); err != nil {
-		slog.Warn("Failed to parse image URL", "error", err)
-		bookmark.ImageUrl = ""
+	if article.Image != "" {
+		if _, err := url.ParseRequestURI(article.Image); err != nil {
+			slog.Warn("Failed to parse image URL", "error", err)
+			inputBookmark.ImageUrl = ""
+		}
 	}
 
 	// Only generate AI content for premium users and not for imports (like Pocket)
@@ -187,7 +179,6 @@ func (model *BookmarkModel) CreateWithContent(
 		go model.generateAIData(contentForMarkdown, link, bookmarkId)
 	}
 
-	// TODO: Add excerpt to bookmarks_content table
 	_, err = model.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO library_items (
@@ -205,13 +196,36 @@ func (model *BookmarkModel) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $11);`,
-		bookmarkId, userId, link, article.Title, sourceMapping[source], bookmark.Excerpt,
+		bookmarkId, userId, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 
-	return bookmark, nil
+	return &inputBookmark, nil
+}
+
+func fetchLink(link string) (readability.Article, error) {
+	slog.Info("Fetching page content", "link", link)
+	resp, err := getPage(link)
+	if err != nil {
+		slog.Warn("Failed to fetch page", "error", err, "link", link)
+		return readability.Article{}, fmt.Errorf("fetch page on server: %w", err)
+	}
+	defer resp.Body.Close()
+	finalURL := resp.Request.URL
+
+	// ******
+	// TODO: readability.Check
+	// ******
+
+	article, err := readability.FromReader(resp.Body, finalURL)
+	// TODO: Check for the language
+	if err != nil {
+		slog.Warn("Failed to parse page", "error", err, "link", link)
+		return readability.Article{}, fmt.Errorf("parse page on server: %w", err)
+	}
+	return article, nil
 }
 
 func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {

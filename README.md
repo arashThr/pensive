@@ -35,3 +35,6 @@ Run these for testing the payments locally:
 - Listen to events: `stripe listen`
 - Forward webhooks to local: `stripe listen --forward-to localhost:8000/api/stripe-webhooks`
 - Trigger a payment: `stripe trigger payment_intent.succeeded`
+
+## Services
+- Metrcis: [Umami](https://cloud.umami.is/settings/websites)

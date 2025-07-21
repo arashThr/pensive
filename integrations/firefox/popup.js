@@ -141,7 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             pageContent.lang = result.content.lang || document.documentElement.lang;
             pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
             pageContent.publishedTime = result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content || new Date().toISOString();
-            pageContent.imageUrl = result.content.imageUrl || document.querySelector('meta[property="og:image"]')?.content || "";
             pageContent.textContent = result.content.textContent || document.body.textContent;
             // We do not use Readability.js to extract the html content and instead
             // use the content extraction script to extract the html content.
@@ -617,7 +616,7 @@ function parseWithReadability() {
   }
 
   if (article && article.content) {
-    return {
+    result = {
       success: true,
       isReadable: true,
       content: {
@@ -625,10 +624,10 @@ function parseWithReadability() {
         lang: article.lang,
         siteName: article.siteName,
         publishedTime: article.publishedTime,
-        imageUrl: article.imageUrl,
         textContent: article.textContent,
         excerpt: article.excerpt,
       }
-    };
+    }
+    return result;
   }
 }

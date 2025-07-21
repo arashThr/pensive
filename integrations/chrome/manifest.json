@@ -1,14 +1,16 @@
 {
     "manifest_version": 3,
-    "name": "Pensive",
-    "version": "1.0",
+    "name": "Pensive: Save & Search What You Read",
+    "short_name": "Pensive",
+    "version": "0.1.0",
+    "version_name": "0.1.0 beta",
     "icons": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "description": "Save and organize your bookmarks with Pensive",
+    "description": "Save the best of what you read online and build your own searchable memory of the web",
     "permissions": [
       "storage",
       "activeTab",
