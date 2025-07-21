@@ -106,13 +106,13 @@
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Apply rate limit on requests
 - [ ] Add recaptcha
-- [ ] Move markdown from menu to the edit page as a button
-- [ ] Go to search page after signup
-- [ ] Rename files and folders
-    - integrations to extension
-    - models and services
 - [ ] Remove time from logs
     - Zap is possible?
+- [ ] Move markdown from menu to the edit page as a button
+- [x] Go to search page after signup
+- [x] Rename files and folders: To much work for no reason
+    - integrations to extension
+    - models and services
 - [x] Update DB: This would be a breaking change
     - [x] Separate tables: No need
     - [x] Rename tables
