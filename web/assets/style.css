@@ -976,6 +976,9 @@
   .border-emerald-300 {
     border-color: var(--color-emerald-300);
   }
+  .border-gray-200 {
+    border-color: var(--color-gray-200);
+  }
   .border-gray-300 {
     border-color: var(--color-gray-300);
   }
@@ -1219,6 +1222,9 @@
   .text-gray-400 {
     color: var(--color-gray-400);
   }
+  .text-gray-500 {
+    color: var(--color-gray-500);
+  }
   .text-gray-600 {
     color: var(--color-gray-600);
   }
@@ -1233,6 +1239,9 @@
   }
   .text-green-600 {
     color: var(--color-green-600);
+  }
+  .text-purple-600 {
+    color: var(--color-purple-600);
   }
   .text-red-600 {
     color: var(--color-red-600);
@@ -1433,6 +1442,13 @@
     &:hover {
       @media (hover: hover) {
         color: var(--color-emerald-700);
+      }
+    }
+  }
+  .hover\:text-gray-700 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-gray-700);
       }
     }
   }

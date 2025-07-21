@@ -293,6 +293,40 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 	b.Templates.Markdown.Execute(w, r, data)
 }
 
+// GetBookmarkMarkdownHTMX handles HTMX requests for GET /bookmarks/{id}/markdown-content and returns just the markdown content
+func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
+	if err != nil {
+		return
+	}
+
+	// Check if user is premium
+	user := context.User(r.Context())
+	if user.SubscriptionStatus != models.SubscriptionStatusPremium {
+		http.Error(w, "Premium subscription required", http.StatusForbidden)
+		return
+	}
+
+	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.Id)
+	if err != nil {
+		if errors.Is(err, errors.ErrNotFound) {
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(`<div class="p-4 text-center text-gray-500">
+				<p>No markdown content available for this bookmark.</p>
+			</div>`))
+			return
+		}
+		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Return raw markdown content for client-side rendering
+	w.Header().Set("Content-Type", "text/plain")
+	w.Write([]byte(markdownContent))
+}
+
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
 	id := chi.URLParam(r, "id")
 	bookmark, err := b.BookmarkModel.GetById(types.BookmarkId(id))

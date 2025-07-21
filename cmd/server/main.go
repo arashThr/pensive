@@ -130,7 +130,7 @@ func run(cfg *config.AppConfig) error {
 		BookmarkModel: bookmarksModel,
 	}
 	bookmarksController.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
-	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml"))
+	bookmarksController.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml", "bookmarks/markdown.gohtml"))
 	bookmarksController.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.Markdown = views.Must(views.ParseTemplate("bookmarks/markdown.gohtml", "tailwind.gohtml"))
 	bookmarksController.Templates.MarkdownNotAvailable = views.Must(views.ParseTemplate("bookmarks/markdown-not-available.gohtml", "tailwind.gohtml"))
@@ -295,6 +295,7 @@ func run(cfg *config.AppConfig) error {
 				r.Post("/{id}/delete", bookmarksController.Delete)
 				r.Get("/{id}/full", bookmarksController.GetFullBookmark)
 				r.Get("/{id}/markdown", bookmarksController.GetBookmarkMarkdown)
+				r.Get("/{id}/markdown-content", bookmarksController.GetBookmarkMarkdownHTMX)
 			})
 		})
 	})
