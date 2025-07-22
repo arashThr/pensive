@@ -29,6 +29,7 @@
     - [ ] Enable the import
 - [ ] Fix API token key SVG and the button alignment
 - [ ] Fix setting user premium after success
+- [ ] Verification failure when we return to sing in/up after failed attempt
 - [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
     - [x] Remove token when endpoint is changed
@@ -56,10 +57,13 @@
 - [ ] Premium: Get YouTube
 - [ ] Add metrics
 - [ ] Send logs when extension crashes
-- [ ] Back up db
 - [ ] Add analytics
 - [ ] Upload the extensions
     - [ ] Create the extension logo for Chrome store
+- [ ] Add like and dislike buttons
+- [ ] Send verification email
+- [ ] Setup hooks for payment in production
+- [ ] Back up db
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi
 - [x] Limit search result to 10 - Search better!
