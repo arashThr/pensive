@@ -595,9 +595,6 @@
   .mt-12 {
     margin-top: calc(var(--spacing) * 12);
   }
-  .mr-1 {
-    margin-right: calc(var(--spacing) * 1);
-  }
   .mr-2 {
     margin-right: calc(var(--spacing) * 2);
   }
@@ -666,9 +663,6 @@
   }
   .hidden {
     display: none;
-  }
-  .inline {
-    display: inline;
   }
   .inline-block {
     display: inline-block;
@@ -964,18 +958,6 @@
   .border-amber-200 {
     border-color: var(--color-amber-200);
   }
-  .border-blue-200 {
-    border-color: var(--color-blue-200);
-  }
-  .border-blue-300 {
-    border-color: var(--color-blue-300);
-  }
-  .border-blue-500 {
-    border-color: var(--color-blue-500);
-  }
-  .border-blue-600 {
-    border-color: var(--color-blue-600);
-  }
   .border-emerald-200 {
     border-color: var(--color-emerald-200);
   }
@@ -991,29 +973,26 @@
   .border-green-500 {
     border-color: var(--color-green-500);
   }
-  .border-purple-200 {
-    border-color: var(--color-purple-200);
-  }
-  .border-purple-300 {
-    border-color: var(--color-purple-300);
-  }
   .border-red-200 {
     border-color: var(--color-red-200);
+  }
+  .border-sky-200 {
+    border-color: var(--color-sky-200);
+  }
+  .border-sky-300 {
+    border-color: var(--color-sky-300);
+  }
+  .border-sky-500 {
+    border-color: var(--color-sky-500);
+  }
+  .border-sky-600 {
+    border-color: var(--color-sky-600);
   }
   .border-transparent {
     border-color: transparent;
   }
   .bg-amber-50 {
     background-color: var(--color-amber-50);
-  }
-  .bg-blue-50 {
-    background-color: var(--color-blue-50);
-  }
-  .bg-blue-100 {
-    background-color: var(--color-blue-100);
-  }
-  .bg-blue-600 {
-    background-color: var(--color-blue-600);
   }
   .bg-emerald-50 {
     background-color: var(--color-emerald-50);
@@ -1042,14 +1021,20 @@
   .bg-green-600 {
     background-color: var(--color-green-600);
   }
-  .bg-purple-50 {
-    background-color: var(--color-purple-50);
-  }
   .bg-red-50 {
     background-color: var(--color-red-50);
   }
   .bg-red-100 {
     background-color: var(--color-red-100);
+  }
+  .bg-sky-50 {
+    background-color: var(--color-sky-50);
+  }
+  .bg-sky-100 {
+    background-color: var(--color-sky-100);
+  }
+  .bg-sky-600 {
+    background-color: var(--color-sky-600);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -1204,21 +1189,6 @@
   .text-amber-900 {
     color: var(--color-amber-900);
   }
-  .text-blue-400 {
-    color: var(--color-blue-400);
-  }
-  .text-blue-600 {
-    color: var(--color-blue-600);
-  }
-  .text-blue-700 {
-    color: var(--color-blue-700);
-  }
-  .text-blue-800 {
-    color: var(--color-blue-800);
-  }
-  .text-blue-900 {
-    color: var(--color-blue-900);
-  }
   .text-emerald-600 {
     color: var(--color-emerald-600);
   }
@@ -1258,12 +1228,6 @@
   .text-purple-600 {
     color: var(--color-purple-600);
   }
-  .text-purple-700 {
-    color: var(--color-purple-700);
-  }
-  .text-purple-800 {
-    color: var(--color-purple-800);
-  }
   .text-red-600 {
     color: var(--color-red-600);
   }
@@ -1275,6 +1239,21 @@
   }
   .text-red-900 {
     color: var(--color-red-900);
+  }
+  .text-sky-400 {
+    color: var(--color-sky-400);
+  }
+  .text-sky-600 {
+    color: var(--color-sky-600);
+  }
+  .text-sky-700 {
+    color: var(--color-sky-700);
+  }
+  .text-sky-800 {
+    color: var(--color-sky-800);
+  }
+  .text-sky-900 {
+    color: var(--color-sky-900);
   }
   .text-white {
     color: var(--color-white);
@@ -1326,10 +1305,10 @@
     --tw-outline-style: none;
     outline-style: none;
   }
-  .group-hover\:text-blue-600 {
+  .group-hover\:text-sky-600 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
-        color: var(--color-blue-600);
+        color: var(--color-sky-600);
       }
     }
   }
@@ -1344,9 +1323,9 @@
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
-  .focus-within\:ring-blue-500 {
+  .focus-within\:ring-sky-500 {
     &:focus-within {
-      --tw-ring-color: var(--color-blue-500);
+      --tw-ring-color: var(--color-sky-500);
     }
   }
   .focus-within\:ring-offset-2 {
@@ -1361,13 +1340,6 @@
       outline-style: none;
     }
   }
-  .hover\:border-blue-400 {
-    &:hover {
-      @media (hover: hover) {
-        border-color: var(--color-blue-400);
-      }
-    }
-  }
   .hover\:border-gray-300 {
     &:hover {
       @media (hover: hover) {
@@ -1375,10 +1347,10 @@
       }
     }
   }
-  .hover\:bg-blue-700 {
+  .hover\:border-sky-400 {
     &:hover {
       @media (hover: hover) {
-        background-color: var(--color-blue-700);
+        border-color: var(--color-sky-400);
       }
     }
   }
@@ -1424,13 +1396,6 @@
       }
     }
   }
-  .hover\:bg-purple-50 {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-purple-50);
-      }
-    }
-  }
   .hover\:bg-red-50 {
     &:hover {
       @media (hover: hover) {
@@ -1438,31 +1403,10 @@
       }
     }
   }
-  .hover\:text-blue-500 {
+  .hover\:bg-sky-700 {
     &:hover {
       @media (hover: hover) {
-        color: var(--color-blue-500);
-      }
-    }
-  }
-  .hover\:text-blue-600 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-blue-600);
-      }
-    }
-  }
-  .hover\:text-blue-700 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-blue-700);
-      }
-    }
-  }
-  .hover\:text-blue-800 {
-    &:hover {
-      @media (hover: hover) {
-        color: var(--color-blue-800);
+        background-color: var(--color-sky-700);
       }
     }
   }
@@ -1501,6 +1445,34 @@
       }
     }
   }
+  .hover\:text-sky-500 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-sky-500);
+      }
+    }
+  }
+  .hover\:text-sky-600 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-sky-600);
+      }
+    }
+  }
+  .hover\:text-sky-700 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-sky-700);
+      }
+    }
+  }
+  .hover\:text-sky-800 {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-sky-800);
+      }
+    }
+  }
   .hover\:no-underline {
     &:hover {
       @media (hover: hover) {
@@ -1522,9 +1494,9 @@
       }
     }
   }
-  .focus\:border-blue-600 {
+  .focus\:border-sky-600 {
     &:focus {
-      border-color: var(--color-blue-600);
+      border-color: var(--color-sky-600);
     }
   }
   .focus\:ring-1 {
@@ -1539,14 +1511,14 @@
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
   }
-  .focus\:ring-blue-500 {
+  .focus\:ring-sky-500 {
     &:focus {
-      --tw-ring-color: var(--color-blue-500);
+      --tw-ring-color: var(--color-sky-500);
     }
   }
-  .focus\:ring-blue-600\/20 {
+  .focus\:ring-sky-600\/20 {
     &:focus {
-      --tw-ring-color: color-mix(in oklab, var(--color-blue-600) 20%, transparent);
+      --tw-ring-color: color-mix(in oklab, var(--color-sky-600) 20%, transparent);
     }
   }
   .focus\:ring-offset-2 {
@@ -1651,6 +1623,21 @@
       flex-direction: row;
     }
   }
+}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+.ibm-plex-sans {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+.ibm-plex-sans-bold {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 700;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
 @keyframes spin {
   to {

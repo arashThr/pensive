@@ -2,7 +2,7 @@
   <!-- Header -->
   <div>
     <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
       </svg>
       Import & Export
@@ -62,16 +62,16 @@
   </div>
 
   <!-- Import Section -->
-  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+  <div class="bg-sky-50 border border-sky-200 rounded-lg p-6">
     <div class="flex items-start gap-4 mb-6">
-      <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
         </svg>
       </div>
       <div class="flex-1">
-        <h3 class="font-medium text-blue-900 mb-2">Import from Pocket</h3>
-        <p class="text-sm text-blue-800">
+        <h3 class="font-medium text-sky-900 mb-2">Import from Pocket</h3>
+        <p class="text-sm text-sky-800">
           Upload your Pocket export file to migrate all your saved articles.
         </p>
       </div>
@@ -83,25 +83,25 @@
       
       <!-- File Upload Area -->
       <div>
-        <label for="import-file" class="block text-sm font-medium text-blue-900 mb-3">
+        <label for="import-file" class="block text-sm font-medium text-sky-900 mb-3">
           Select Pocket Export File (ZIP format)
         </label>
-        <div id="file-upload-area" class="border-2 border-dashed border-blue-300 hover:border-blue-400 rounded-lg p-2 text-center transition-colors">
+        <div id="file-upload-area" class="border-2 border-dashed border-sky-300 hover:border-sky-400 rounded-lg p-2 text-center transition-colors">
           <!-- Default upload state -->
           <div id="upload-state">
-            <svg id="upload-icon" class="w-12 h-12 text-blue-400 mx-auto mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <svg id="upload-icon" class="w-12 h-12 text-sky-400 mx-auto mb-4" stroke="currentColor" fill="none" viewBox="0 0 48 48">
               <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             
             <div id="upload-text" class="mb-2">
               <label for="import-file" class="cursor-pointer">
-                <span class="font-medium text-blue-600 hover:text-blue-500">Upload a file</span>
-                <span class="text-blue-700"> or drag and drop</span>
+                <span class="font-medium text-sky-600 hover:text-sky-500">Upload a file</span>
+                <span class="text-sky-700"> or drag and drop</span>
                 <input id="import-file" name="import-file" type="file" accept=".zip" required class="sr-only">
               </label>
             </div>
             
-            <p id="upload-hint" class="text-sm text-blue-700">ZIP files only</p>
+            <p id="upload-hint" class="text-sm text-sky-700">ZIP files only</p>
           </div>
           
           <!-- File selected state (hidden by default) -->
@@ -111,8 +111,8 @@
             </svg>
             
             <div class="mb-4">
-              <p id="file-name" class="text-sm font-medium text-blue-900 mb-1"></p>
-              <p id="file-size" class="text-xs text-blue-700 mb-2"></p>
+              <p id="file-name" class="text-sm font-medium text-sky-900 mb-1"></p>
+              <p id="file-size" class="text-xs text-sky-700 mb-2"></p>
               <button type="button" id="remove-file" class="text-xs text-red-600 hover:text-red-500 underline">Remove file</button>
             </div>
           </div>
@@ -135,12 +135,12 @@
     <!-- Help Instructions -->
     <div class="mt-6 bg-white/80 rounded-lg p-4">
       <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+        <svg class="w-5 h-5 text-sky-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
         </svg>
         <div>
-          <h4 class="text-sm font-medium text-blue-900 mb-2">How to export from Pocket</h4>
-          <ol class="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+          <h4 class="text-sm font-medium text-sky-900 mb-2">How to export from Pocket</h4>
+          <ol class="text-sm text-sky-800 space-y-1 list-decimal list-inside">
             <li>Visit <a href="https://getpocket.com/export" target="_blank" rel="noopener" class="underline hover:no-underline">getpocket.com/export</a></li>
             <li>Click "Export CSV file"</li>
             <li>Download the ZIP file when ready</li>

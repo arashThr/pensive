@@ -59,6 +59,7 @@
 - Warning cards: `bg-amber-50 border border-amber-200`
 
 ### Typography
+- Font family: IBM Plex Sans
 - Hero heading: `text-4xl font-bold tracking-tight text-gray-900`
 - Main heading: `text-2xl font-bold tracking-tight text-gray-900`
 - Section headings: `text-xl font-semibold text-gray-900`
@@ -69,12 +70,12 @@
 - Fine print: `text-xs font-medium text-gray-600`
 
 ### Buttons
-- Primary CTA: `bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors`
+- Primary CTA: `bg-sky-600 hover:bg-sky-700 text-white font-medium py-3 px-6 rounded-lg transition-colors`
 - Secondary CTA: `bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 px-6 rounded-lg transition-colors`
 - Search button: `px-3 py-2 bg-gray-100 hover:bg-gray-300 border border-gray-300 rounded-lg`
 - Navigation buttons: `px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors`
-- Signup button: `px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors`
-- Form buttons: `py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700`
+- Signup button: `px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors`
+- Form buttons: `py-2 px-4 bg-sky-600 text-white rounded-lg text-sm font-medium hover:bg-sky-700`
 - Success buttons: `bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors`
 - Destructive: `py-2 px-4 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700`
 - Disabled buttons: `px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75`
@@ -87,18 +88,18 @@
 - Account dropdown: `w-48` with `px-4 py-2` items
 
 ### Icons
-- Logo icon: `h-5 w-5 text-blue-600`
-- Feature icons: `h-6 w-6` in `h-12 w-12 rounded-md bg-blue-100 text-blue-600`
-- Step numbers: `h-8 w-8 text-blue-600 font-bold` in `rounded-full bg-blue-100 p-3`
+- Logo icon: `h-5 w-5 text-sky-600`
+- Feature icons: `h-6 w-6` in `h-12 w-12 rounded-md bg-sky-100 text-sky-600`
+- Step numbers: `h-8 w-8 text-sky-600 font-bold` in `rounded-full bg-sky-100 p-3`
 - Navigation icons: `w-4 h-4 text-gray-600`
 - Mobile menu icon: `w-6 h-6`
 - Social icons: `h-5 w-5`
-- Profile placeholder: `h-32 w-32 rounded-full bg-blue-100 text-blue-600`
+- Profile placeholder: `h-32 w-32 rounded-full bg-sky-100 text-sky-600`
 - Status icons: `w-5 h-5` (success: `text-emerald-600`, error: `text-red-600`, warning: `text-amber-600`)
 
 ### Interactive Elements
 - Hover transitions: `transition-colors` or `transition-all`
-- Links: `text-blue-600 hover:text-blue-700` with optional `hover:underline`
+- Links: `text-sky-600 hover:text-sky-700` with optional `hover:underline`
 - Mobile menu toggle: Uses JavaScript to toggle `hidden` class
 
 ### Grid & Layout

@@ -44,7 +44,7 @@
   <!-- Import Section -->
   <section class="bg-white rounded-xl border border-gray-300 p-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
       </svg>
       Import Your Data
@@ -88,7 +88,7 @@
               </svg>
               
               <div id="upload-text" class="flex text-sm text-gray-600">
-                <label for="import-file" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                <label for="import-file" class="relative cursor-pointer bg-white rounded-md font-medium text-sky-600 hover:text-sky-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-sky-500">
                   <span>Upload a file</span>
                   <input id="import-file" name="import-file" type="file" accept=".zip" required class="sr-only">
                 </label>
@@ -111,7 +111,7 @@
         <div class="pt-4">
           <button
             type="submit"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
           >
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
@@ -122,16 +122,16 @@
       </form>
 
       <!-- Help Text -->
-      <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <div class="mt-6 p-4 bg-sky-50 rounded-lg border border-sky-200">
         <div class="flex">
           <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="h-5 w-5 text-sky-400" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
             </svg>
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-blue-800">How to export from Pocket</h3>
-            <div class="mt-2 text-sm text-blue-700">
+            <h3 class="text-sm font-medium text-sky-800">How to export from Pocket</h3>
+            <div class="mt-2 text-sm text-sky-700">
               <ol class="list-decimal list-inside space-y-1">
                 <li>Go to <a href="https://getpocket.com/export" target="_blank" class="underline hover:no-underline">getpocket.com/export</a></li>
                 <li>Click "Export CSV file"</li>
@@ -220,17 +220,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle drag and drop
   uploadArea.addEventListener('dragover', function(e) {
     e.preventDefault();
-    uploadArea.classList.add('border-blue-500', 'bg-blue-50');
+    uploadArea.classList.add('border-sky-500', 'bg-sky-50');
   });
 
   uploadArea.addEventListener('dragleave', function(e) {
     e.preventDefault();
-    uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+    uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
   });
 
   uploadArea.addEventListener('drop', function(e) {
     e.preventDefault();
-    uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
+    uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {

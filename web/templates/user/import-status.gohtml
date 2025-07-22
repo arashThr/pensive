@@ -64,7 +64,7 @@
       <div class="space-y-4">
         <a
           href="/users/me?tab=import-export"
-          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -76,8 +76,8 @@
     {{else}}
       <!-- Still Processing State -->
       <div class="mb-8">
-        <div class="mx-auto w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
-          <svg class="animate-spin w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+        <div class="mx-auto w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center">
+          <svg class="animate-spin w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -89,14 +89,14 @@
         Your {{.Source}} import is still being processed. Please wait a moment while we add your bookmarks to the library.
       </p>
 
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+      <div class="bg-sky-50 border border-sky-200 rounded-lg p-6 mb-6">
         <div class="flex items-center justify-center mb-3">
-          <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-sky-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span class="text-blue-800 font-medium">This page will refresh automatically</span>
+          <span class="text-sky-800 font-medium">This page will refresh automatically</span>
         </div>
-        <p class="text-sm text-blue-700">
+        <p class="text-sm text-sky-700">
           Large imports may take several minutes to complete.
         </p>
       </div>
