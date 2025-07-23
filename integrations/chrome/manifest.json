@@ -2,8 +2,8 @@
     "manifest_version": 3,
     "name": "Pensive: Save & Search What You Read",
     "short_name": "Pensive",
-    "version": "0.1.0",
-    "version_name": "0.1.0 beta",
+    "version": "0.1.1",
+    "version_name": "0.1.1 beta",
     "icons": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -11,15 +11,14 @@
       "128": "icons/icon128.png"
     },
     "description": "Save the best of what you read online and build your own searchable memory of the web",
-    "permissions": [
-      "storage",
-      "activeTab",
-      "scripting"
-    ],
+      "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
   "optional_host_permissions": [
-      "http://localhost:8000/*",
-      "https://getpensive.com/*"
-    ],
+    "https://getpensive.com/*"
+  ],
     "options_ui": {
       "page": "options.html",
       "open_in_tab": true
@@ -35,7 +34,6 @@
     "content_scripts": [
       {
         "matches": [
-          "http://localhost:8000/extension/auth",
           "https://getpensive.com/extension/auth"
         ],
         "js": ["content.js"]
@@ -44,7 +42,6 @@
     "web_accessible_resources": [{
       "resources": ["options.js", "Readability.js", "Readability-readerable.js"],
       "matches": [
-        "http://localhost:8000/*",
         "https://getpensive.com/*"
       ]
     }]
