@@ -124,6 +124,21 @@ document.addEventListener('DOMContentLoaded', function () {
     connectButton.disabled = true;
     connectButton.textContent = 'Connecting...';
 
+    const granted = await browserAPI.permissions.contains({
+      origins: grantOrigins,
+    });
+
+    if (!granted) {
+      const granted = await browserAPI.permissions.request({
+        origins: grantOrigins,
+      });
+
+      if (!granted) {
+        showError('Permissions not granted. Please allow access to Pensive in the extension settings.');
+        return
+      }
+    }
+
     // Track authentication state
     let authCompleted = false;
 
