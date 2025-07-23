@@ -110,10 +110,15 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
 
+	var data struct {
+		TurnstileSiteKey string
+	}
+	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
+
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
 		logger.Error("turnstile siteverify on sign in", "error", err)
-		u.Templates.SignIn.Execute(w, r, nil, web.NavbarMessage{
+		u.Templates.SignIn.Execute(w, r, data, web.NavbarMessage{
 			Message: "Verification failed",
 			IsError: true,
 		})
@@ -123,7 +128,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Authenticate(email, password)
 	if err != nil {
 		logger.Info("sign in failed", "error", err)
-		u.Templates.SignIn.Execute(w, r, nil, web.NavbarMessage{
+		u.Templates.SignIn.Execute(w, r, data, web.NavbarMessage{
 			Message: "Email address or password is incorrect",
 			IsError: true,
 		})
