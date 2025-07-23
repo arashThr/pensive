@@ -1,7 +1,7 @@
 // For cross-browser compatibility (Firefox prefers 'browser', Chrome uses 'chrome')
 const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to normalize endpoint URL
   function normalizeEndpoint(endpoint) {
     if (!endpoint) return defaultEndpoint;
-    
+
     // If it's localhost, keep HTTP
     if (endpoint.includes('localhost') || endpoint.includes('127.0.0.1')) {
       // Ensure localhost has http:// prefix if no protocol specified
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return endpoint;
     }
-    
+
     // For all other hosts, ensure HTTPS
     if (endpoint.startsWith('http://')) {
       // Convert HTTP to HTTPS for non-localhost
@@ -49,10 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("save").addEventListener("click", () => {
     let inputValue = document.getElementById("endpoint").value || defaultEndpoint;
     defaultEndpoint = normalizeEndpoint(inputValue);
-    
+
     // Update the input field to show the normalized URL
     document.getElementById("endpoint").value = defaultEndpoint;
-    
+
     browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
       const status = document.getElementById("status");
       const originalText = status.textContent;
@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', function() {
   function addSignOutButton() {
     const signOutButton = document.getElementById('signout-button');
     signOutButton.style.display = 'inline-block';
-    
+
     // Add click event listener if not already added
     if (!signOutButton.hasAttribute('data-listener-added')) {
-      signOutButton.addEventListener('click', function() {
+      signOutButton.addEventListener('click', function () {
         // Clear the token
         browserAPI.storage.local.remove(['apiToken']).then(() => {
           showDisconnectedState();
@@ -120,18 +120,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  connectButton.addEventListener('click', function() {
+  connectButton.addEventListener('click', async function () {
     connectButton.disabled = true;
     connectButton.textContent = 'Connecting...';
 
     // Track authentication state
     let authCompleted = false;
 
-    // Open a new tab with the auth URL
-    browserAPI.tabs.create({
-      url: new URL('/extension/auth', defaultEndpoint).toString(),
-      active: true
-    }).then((tab) => {
+    try {
+      // Open a new tab with the auth URL
+      const tab = await browserAPI.tabs.create({
+        url: new URL('/extension/auth', defaultEndpoint).toString(),
+        active: true
+      });
+
       if (browserAPI.runtime.lastError) {
         console.error('Failed to create tab:', browserAPI.runtime.lastError);
         showError('Failed to open authentication page');
@@ -139,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       // Listen for messages from the content script
-      const messageListener = function(request, sender, sendResponse) {
+      const messageListener = function (request, sender, sendResponse) {
         console.log("Received message", request)
         if (request.type === 'AUTH_TOKEN') {
           authCompleted = true;
@@ -166,17 +168,17 @@ document.addEventListener('DOMContentLoaded', function() {
           showError('Authentication timed out. Please try again.');
         }
       }, 10000); // 10 seconds timeout
-    }).catch((error) => {
+    } catch (error) {
       console.error('Failed to create tab:', error);
       showError('Failed to open authentication page');
-    });
+    }
   });
 
   function showConnectedState() {
     statusDiv.className = 'status connected';
     statusDiv.textContent = 'Connected to Pensive';
     authSection.style.display = 'block';
-    
+
     // Hide the connect button when connected
     connectButton.style.display = 'none';
   }
@@ -185,12 +187,12 @@ document.addEventListener('DOMContentLoaded', function() {
     statusDiv.className = 'status disconnected';
     statusDiv.textContent = 'Not connected to Pensive';
     authSection.style.display = 'block';
-    
+
     // Show the connect button when disconnected
     connectButton.style.display = 'inline-block';
     connectButton.disabled = false;
     connectButton.textContent = 'Connect to Pensive';
-    
+
     // Hide the sign out button
     const signOutButton = document.getElementById('signout-button');
     if (signOutButton) {
