@@ -1,6 +1,7 @@
 # Project
 
 ## Define
+Build your own searchable memory of the web
 Everything you read, hear, and watch should be indexed and searchable
 Pensive is a web application helps you to seamlessly capture content without disrupting your workflow. To do so, it integrates with your browser and messaging apps.
 It's kind of a bookmarking application, but it's also aware of the bookmark context.

@@ -29,6 +29,8 @@
     - [ ] Enable the import
 - [ ] Fix API token key SVG and the button alignment
 - [ ] Fix setting user premium after success
+- [ ] `Invalid request body: parsing time "2025-01-29" as "2006-01-02T15:04:05Z07:00": cannot parse "" as "T"` 
+    - https://www.granola.ai/blog/dont-animate-height
 - [ ] Verification failure when we return to sing in/up after failed attempt
 - [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
@@ -46,6 +48,12 @@
     - [ ] Accept user's API key
 - [ ] Feedback link
 - [ ] Use Pupeteer and playwright for getting the pages
+- [ ] For Telegram/URL-only ingestion:
+	• Maintain domain whitelist/blacklist
+	• Or do HEAD request and reject:
+	• Non-200
+	• Login redirects
+	• Cloudflare pages (__cf_bm cookies, JS challenges)
 - [ ] Landing page: Here's how it works:
     - Save the link, show the summary
 - Youtube
@@ -63,6 +71,7 @@
 - [ ] Add like and dislike buttons
 - [ ] Send verification email
 - [ ] Setup hooks for payment in production
+- [ ] Add: Warn me about personal pages
 - [ ] Back up db
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi
@@ -112,6 +121,7 @@
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
+- [ ] Optional host permission + explicit user permission
 - [x] Move markdown from menu to the edit page as a button
     - Load it in the same page. It's good enough for now
 - [x] Add recaptcha

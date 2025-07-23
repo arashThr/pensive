@@ -219,6 +219,9 @@ func run(cfg *config.AppConfig) error {
 		r.Get("/faq", web.FAQ(
 			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 		))
+		r.Get("/privacy", web.StaticHandler(
+			views.Must(views.ParseTemplate("privacy.gohtml", "tailwind.gohtml")),
+		))
 		r.Get("/integrations", web.StaticHandler(
 			views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml")),
 		))
