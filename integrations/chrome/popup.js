@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let currentTab = null;
   let isBookmarked = false;
+  let htmlContentCleanupEnabled = false;
 
   // Get current tab information
   try {
@@ -142,28 +143,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             pageContent.textContent = result.content.textContent || document.body.textContent;
             // We do not use Readability.js to extract the html content and instead
             // use the content extraction script to extract the html content.
-            // pageContent.htmlContent = result.content.htmlContent;
-          }
-        }
-
-
-        // Use chrome.scripting to inject and execute content extraction
-        const contentResults = await browserAPI.scripting.executeScript({
-          target: { tabId: currentTab.id },
-          func: extractContent
-        });
-
-        if (contentResults && contentResults[0] && contentResults[0].result) {
-          const result = contentResults[0].result;
-          if (result.success) {
-            pageContent.htmlContent = result.htmlContent;
-            updateStatus('loading', 'Content cleaned and processed...');
+            pageContent.htmlContent = result.content.htmlContent;
           } else {
-            throw new Error(result.error || 'Failed to extract content');
+            updateStatus('error', 'Failed to extract page content');
+            saveBtn.disabled = false;
+            return;
           }
         } else {
-          throw new Error('No result from content script');
+          updateStatus('error', 'Failed to extract page content');
+          saveBtn.disabled = false;
+          return;
         }
+
+
+        // TODO: This might need more work
+        // Create a black and white list
+        if (htmlContentCleanupEnabled) {
+          // Use chrome.scripting to inject and execute content extraction
+          const contentResults = await browserAPI.scripting.executeScript({
+            target: { tabId: currentTab.id },
+            func: extractContent
+          });
+
+          if (contentResults && contentResults[0] && contentResults[0].result) {
+            const result = contentResults[0].result;
+            if (result.success) {
+              pageContent.htmlContent = result.htmlContent;
+              updateStatus('loading', 'Content cleaned and processed...');
+            } else {
+              throw new Error(result.error || 'Failed to extract content');
+            }
+          } else {
+            throw new Error('No result from content script');
+          }
+        }
+
       } catch (contentError) {
         console.warn('Failed to extract page content, saving without content:', contentError);
         // Continue without content if extraction fails

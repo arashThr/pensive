@@ -1,13 +1,21 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
 const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+const devMode = false
 
 document.addEventListener('DOMContentLoaded', function () {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
 
+
+
+  let grantOrigins = ['https://getpensive.com/*'];
+  if (devMode) {
+    grantOrigins.push('http://localhost:8000/*');
+  }
+
   // Set default values
-  let defaultEndpoint = "http://localhost:8000"
+  let defaultEndpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
 
   // Function to normalize endpoint URL
   function normalizeEndpoint(endpoint) {
