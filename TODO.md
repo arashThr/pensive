@@ -28,10 +28,10 @@
 - [ ] Fix import: Links are imported multiple times
     - [ ] Enable the import
 - [ ] Fix API token key SVG and the button alignment
-- [ ] Fix setting user premium after success
-- [ ] `Invalid request body: parsing time "2025-01-29" as "2006-01-02T15:04:05Z07:00": cannot parse "" as "T"` 
+- [x] Fix setting user premium after success: Listener had to be running
+- [x] `Invalid request body: parsing time "2025-01-29" as "2006-01-02T15:04:05Z07:00": cannot parse "" as "T"` 
     - https://www.granola.ai/blog/dont-animate-height
-- [ ] Verification failure when we return to sing in/up after failed attempt
+- [x] Verification failure when we return to sing in/up after failed attempt
 - [x] Error checking bookmark status: Don't status check for non-http websites
 - [x] Update token in extensions
     - [x] Remove token when endpoint is changed

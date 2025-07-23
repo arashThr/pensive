@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         isBookmarked = data.exists;
         updateBookmarkStatus();
       } else {
-        console.error('Error checking bookmark status:', response.status);
         // Default to not bookmarked on error
         isBookmarked = false;
         updateBookmarkStatus();
@@ -105,7 +104,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function saveBookmark() {
     if (!currentTab) return;
 
-    try {
       saveBtn.disabled = true;
       updateStatus('loading', 'Extracting page content...');
 
@@ -135,11 +133,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (readabilityResults && readabilityResults[0] && readabilityResults[0].result) {
           const result = readabilityResults[0].result;
           if (result.success) {
+            let publishedDate = Date.parse(result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content)
+            if (isNaN(publishedDate)) {
+              publishedDate = Date.now()
+            }
+
             pageContent.title = result.content.title || currentTab.title;
             pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || "";
             pageContent.lang = result.content.lang || document.documentElement.lang;
             pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
-            pageContent.publishedTime = result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content || new Date().toISOString();
+            pageContent.publishedTime = new Date(publishedDate).toISOString()
             pageContent.textContent = result.content.textContent || document.body.textContent;
             // We do not use Readability.js to extract the html content and instead
             // use the content extraction script to extract the html content.
@@ -183,11 +186,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Continue without content if extraction fails
       }
 
+    let response = null;
+    try {
       updateStatus('loading', 'Saving...');
 
       // Prepare the request body
       let requestBody = pageContent;
-      const response = await fetch(new URL("/api/v1/bookmarks", endpoint).href, {
+      response = await fetch(new URL("/api/v1/bookmarks", endpoint).href, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,7 +200,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         body: JSON.stringify(requestBody)
       });
+    } catch (error) {
+      if (response && response.status === 401) {
+        updateStatus('error', 'Unauthorized - Go to setting and re-connect');
+      } else {
+        updateStatus('error', 'Network error occurred: ' + error.message);
+      }
+      saveBtn.disabled = false;
+      return
+    }
 
+    try {
       if (response.ok) {
         isBookmarked = true;
         const successMessage = pageContent.htmlContent ? 'Page saved with content!' : 'Page saved successfully!';
@@ -228,13 +243,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           errorMessage = await response.text() || errorMessage;
         }
 
-        updateStatus('error', errorMessage);
+        if (response.status === 401) {
+          updateStatus('error', 'Unauthorized - Go to setting and re-connect');
+        } else {
+          updateStatus('error', errorMessage);
+        }
         saveBtn.disabled = false;
       }
 
     } catch (error) {
-      console.error('Error saving bookmark:', error);
-      updateStatus('error', 'Network error occurred: ' + error.message);
+      updateStatus('error', 'Network error occurred: ' + error.message + ' ' + error.stack);
       saveBtn.disabled = false;
     }
   }
