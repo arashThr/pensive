@@ -176,6 +176,7 @@
 - [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser
 - [ ] Slash command for bookmarks in Telegram
+- [ ] Blue/green deployment
 
 ### Stripe
 - [x] change `IsSubscribed` to subStatus

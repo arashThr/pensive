@@ -118,6 +118,74 @@
     </div>
   </div>
 
+  <!-- Screenshots Slider Section -->
+  <div class="mb-16 bg-white rounded-xl border border-gray-300 p-8">
+    <h2 class="text-2xl font-bold tracking-tight text-gray-900 mb-6 text-center">See Pensive in Action</h2>
+    <p class="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
+      Explore how Pensive makes it easy to save, organize, and search through your online discoveries.
+    </p>
+
+    <div class="relative max-w-4xl mx-auto">
+      <!-- Slider Container -->
+      <div class="overflow-hidden rounded-lg border border-gray-300">
+        <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
+          <!-- Slide 1: Library View -->
+          <div class="w-full flex-shrink-0">
+            <img src="/assets/promo/screenshots/library.png" alt="Pensive Library - Your personal collection of saved content" class="w-full h-auto">
+          </div>
+          <!-- Slide 2: Search Interface -->
+          <div class="w-full flex-shrink-0">
+            <img src="/assets/promo/screenshots/search.png" alt="Powerful search through your saved content" class="w-full h-auto">
+          </div>
+          <!-- Slide 3: Search Results -->
+          <div class="w-full flex-shrink-0">
+            <img src="/assets/promo/screenshots/search-recent.png" alt="Recent search results showing relevant content" class="w-full h-auto">
+          </div>
+          <!-- Slide 4: Individual Link Page -->
+          <div class="w-full flex-shrink-0">
+            <img src="/assets/promo/screenshots/link-page.png" alt="Detailed view of saved content with full text search" class="w-full h-auto">
+          </div>
+          <!-- Slide 5: Extension Saving -->
+          <div class="w-full flex-shrink-0">
+            <img src="/assets/promo/screenshots/extension-saved.jpg" alt="Browser extension seamlessly saving content" class="w-full h-auto">
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Arrows -->
+      <button id="prev-btn" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-gray-50 border border-gray-300 rounded-full p-2 shadow-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+      <button id="next-btn" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-gray-50 border border-gray-300 rounded-full p-2 shadow-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
+
+      <!-- Dot Indicators -->
+      <div class="flex justify-center mt-6 gap-2">
+        <button class="slider-dot w-3 h-3 rounded-full bg-sky-600 transition-colors" data-slide="0"></button>
+        <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors" data-slide="1"></button>
+        <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors" data-slide="2"></button>
+        <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors" data-slide="3"></button>
+        <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors" data-slide="4"></button>
+      </div>
+
+      <!-- Slide Captions -->
+      <div class="text-center mt-4">
+        <div id="slide-caption" class="text-gray-600">
+          <span data-slide="0">Your personal library of saved content, beautifully organized and searchable</span>
+          <span data-slide="1" class="hidden">Powerful search that finds exactly what you're looking for</span>
+          <span data-slide="2" class="hidden">Recent searches help you quickly access frequently needed content</span>
+          <span data-slide="3" class="hidden">Full content capture means every word is searchable and accessible</span>
+          <span data-slide="4" class="hidden">Browser extension makes saving content effortless and automatic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Beta Notice -->
   <div class="mb-12 bg-amber-50 border border-amber-200 rounded-lg p-6">
     <div class="flex items-start gap-3 max-w-4xl mx-auto">
@@ -184,5 +252,107 @@
       Started — It's Free</a>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sliderTrack = document.getElementById('slider-track');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const dots = document.querySelectorAll('.slider-dot');
+  const captions = document.querySelectorAll('#slide-caption span');
+  
+  let currentSlide = 0;
+  const totalSlides = 5;
+  
+  function updateSlider() {
+    // Move the slider
+    const translateX = -(currentSlide * 100);
+    sliderTrack.style.transform = `translateX(${translateX}%)`;
+    
+    // Update dots
+    dots.forEach((dot, index) => {
+      if (index === currentSlide) {
+        dot.classList.remove('bg-gray-300', 'hover:bg-gray-400');
+        dot.classList.add('bg-sky-600');
+      } else {
+        dot.classList.remove('bg-sky-600');
+        dot.classList.add('bg-gray-300', 'hover:bg-gray-400');
+      }
+    });
+    
+    // Update captions
+    captions.forEach((caption, index) => {
+      if (index === currentSlide) {
+        caption.classList.remove('hidden');
+      } else {
+        caption.classList.add('hidden');
+      }
+    });
+  }
+  
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateSlider();
+  }
+  
+  function prevSlide() {
+    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+    updateSlider();
+  }
+  
+  function goToSlide(slideIndex) {
+    currentSlide = slideIndex;
+    updateSlider();
+  }
+  
+  // Event listeners
+  nextBtn.addEventListener('click', nextSlide);
+  prevBtn.addEventListener('click', prevSlide);
+  
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => goToSlide(index));
+  });
+  
+  // Auto-play functionality (optional - pauses on hover)
+  let autoPlayInterval = setInterval(nextSlide, 5000);
+  
+  const sliderContainer = document.querySelector('.relative.max-w-4xl');
+  sliderContainer.addEventListener('mouseenter', () => {
+    clearInterval(autoPlayInterval);
+  });
+  
+  sliderContainer.addEventListener('mouseleave', () => {
+    autoPlayInterval = setInterval(nextSlide, 5000);
+  });
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      prevSlide();
+    } else if (e.key === 'ArrowRight') {
+      nextSlide();
+    }
+  });
+  
+  // Touch/swipe support for mobile
+  let startX = 0;
+  let endX = 0;
+  
+  sliderTrack.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+  });
+  
+  sliderTrack.addEventListener('touchend', (e) => {
+    endX = e.changedTouches[0].clientX;
+    const threshold = 50; // minimum swipe distance
+    
+    if (startX - endX > threshold) {
+      nextSlide(); // swipe left - go to next
+    } else if (endX - startX > threshold) {
+      prevSlide(); // swipe right - go to previous
+    }
+  });
+});
+</script>
 
 {{template "footer" .}}
