@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -415,6 +416,7 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := context.User(r.Context())
 		if user == nil {
+			slog.Info("unauthorized request", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

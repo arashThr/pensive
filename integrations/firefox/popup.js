@@ -590,7 +590,6 @@ function extractContent() {
 
 function parseWithReadability() {
   let article;
-  console.log("parseWithReadability");
   try {
     // Check if the page is probably readable
     const isReadable = isProbablyReaderable(document);
