@@ -27,7 +27,8 @@
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] Fix import: Links are imported multiple times
     - [ ] Enable the import
-- [ ] Fix API token key SVG and the button alignment
+- [ ] `resetUrl := "http://localhost:8000/reset-password?" + values.Encode()`
+- [x] Fix API token key SVG and the button alignment
 - [x] Fix setting user premium after success: Listener had to be running
 - [x] `Invalid request body: parsing time "2025-01-29" as "2006-01-02T15:04:05Z07:00": cannot parse "" as "T"` 
     - https://www.granola.ai/blog/dont-animate-height
@@ -114,6 +115,7 @@
 - [ ] Use temp dir for pocket imports
 - [ ] If API is not set, or incorrect, don't send the request
 - [ ] Add validation to create bookmark inputs
+- [ ] Send payments to Amazon Eventbridge
 - [ ] Add ping call from extension to an authorized endpoint
 - [ ] Remove time from logs
     - Zap is possible?

@@ -126,6 +126,7 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.ProfileTab = views.Must(views.ParseTemplate("user/profile-tab.gohtml"))
 	usersController.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
 	usersController.Templates.ImportExportTab = views.Must(views.ParseTemplate("user/import-export-tab.gohtml"))
+	usersController.Templates.Subscribe = views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksModel,
@@ -241,9 +242,7 @@ func run(cfg *config.AppConfig) error {
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
 			// Subscriptions
-			r.Get("/subscribe", web.StaticHandler(
-				views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml")),
-			))
+			r.Get("/subscribe", usersController.Subscribe)
 			// Auth
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)

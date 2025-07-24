@@ -44,14 +44,17 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"safe": func(s string) template.HTML {
 			return template.HTML(s) // Trust ts_headline output
 		},
+		"isProduction": func() (template.HTML, error) {
+			return "", fmt.Errorf("isProduction not implemented")
+		},
+		"isSubscriptionEnabled": func() (template.HTML, error) {
+			return "", fmt.Errorf("isSubscriptionEnabled not implemented")
+		},
 		"split": func(s, sep string) []string {
 			return strings.Split(s, sep)
 		},
 		"trim": func(s string) string {
 			return strings.TrimSpace(s)
-		},
-		"isProduction": func() (template.HTML, error) {
-			return "", fmt.Errorf("isProduction not implemented")
 		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)
@@ -83,6 +86,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 			},
 			"isProduction": func() bool {
 				return os.Getenv("ENVIRONMENT") == "production"
+			},
+			"isSubscriptionEnabled": func() bool {
+				return os.Getenv("SUBSCRIPTION_ENABLED") == "true"
 			},
 		},
 	)

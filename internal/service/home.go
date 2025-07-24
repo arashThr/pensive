@@ -19,25 +19,23 @@ type Home struct {
 	BookmarkModel *models.BookmarkModel
 }
 
-type RecentBookmark struct {
-	Id        types.BookmarkId
-	Title     string
-	Link      string
-	Hostname  string
-	Excerpt   string
-	Thumbnail string
-	CreatedAt string
-}
-
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	logger := context.Logger(r.Context())
 
-	data, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
+	recent, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
 	if err != nil {
 		logger.Error("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
+	}
+
+	data := struct {
+		IsUserPremium  bool
+		RecentBookmark types.RecentBookmarksType
+	}{
+		IsUserPremium:  user.SubscriptionStatus == models.SubscriptionStatusPremium,
+		RecentBookmark: recent,
 	}
 
 	h.Templates.Home.Execute(w, r, data)
@@ -100,20 +98,17 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 }
 
 // getRecentBookmarksData fetches recent bookmarks and returns the data structure
-func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptionStatus models.SubscriptionStatus) (struct {
-	Bookmarks         []RecentBookmark
-	HasBookmarksAtAll bool
-}, error) {
+func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptionStatus models.SubscriptionStatus) (types.RecentBookmarksType, error) {
 	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(userId, limit, subscriptionStatus)
 	if err != nil {
 		return struct {
-			Bookmarks         []RecentBookmark
+			Bookmarks         []types.RecentBookmark
 			HasBookmarksAtAll bool
 		}{}, err
 	}
 
 	var data struct {
-		Bookmarks         []RecentBookmark
+		Bookmarks         []types.RecentBookmark
 		HasBookmarksAtAll bool
 	}
 
@@ -122,7 +117,7 @@ func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptio
 		if subscriptionStatus == models.SubscriptionStatusPremium && b.AIExcerpt != nil {
 			excerpt = *b.AIExcerpt
 		}
-		data.Bookmarks = append(data.Bookmarks, RecentBookmark{
+		data.Bookmarks = append(data.Bookmarks, types.RecentBookmark{
 			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,

@@ -33,15 +33,17 @@
     <a href="/bookmarks" class="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
       All Bookmarks
     </a>
-    <span class="text-gray-300">|</span>
-    <a href="/users/subscribe" class="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
-      Subscribe
-    </a>
+    {{if and isSubscriptionEnabled (not .IsUserPremium)}}
+      <span class="text-gray-300">|</span>
+      <a href="/users/subscribe" class="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
+        Subscribe
+      </a>
+    {{end}}
   </div>
 
   <!-- Results Area -->
   <div id="results">
-    {{template "recent-results" .}}
+    {{template "recent-results" .RecentBookmark}}
   </div>
 </div>
 

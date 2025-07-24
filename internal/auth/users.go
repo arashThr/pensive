@@ -27,6 +27,7 @@ type Users struct {
 		CheckYourEmail  web.Template
 		ResetPassword   web.Template
 		UserPage        web.Template
+		Subscribe       web.Template
 		Token           web.Template
 		ProfileTab      web.Template
 		TokensTab       web.Template
@@ -162,6 +163,15 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/signin", http.StatusFound)
 }
 
+func (u Users) Subscribe(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		IsSubscribed bool
+	}
+	user := context.User(r.Context())
+	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
+	u.Templates.Subscribe.Execute(w, r, data)
+}
+
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	logger := context.Logger(r.Context())
@@ -171,7 +181,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		Tokens       []models.ApiToken
 	}
 	data.Email = user.Email
-	data.IsSubscribed = user.SubscriptionStatus == "premium"
+	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
 	validTokens, err := u.TokenModel.Get(user.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -311,7 +321,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		Tokens       []models.ApiToken
 	}
 	data.Email = user.Email
-	data.IsSubscribed = user.SubscriptionStatus == "premium"
+	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
 
 	// Get tokens for tokens tab
 	if tab == "tokens" {

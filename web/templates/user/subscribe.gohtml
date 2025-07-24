@@ -1,115 +1,228 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-3xl mx-auto">
+<div class="px-6 py-8 max-w-4xl mx-auto">
   <!-- Header Section -->
   <div class="text-center mb-10">
-    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Unlock Premium Features</h1>
-    <p class="text-gray-600 leading-relaxed">
-      Enhance your knowledge management with AI-powered insights and seamless integrations.
-    </p>
+    {{if .IsSubscribed}}
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Your Premium Plan</h1>
+      <p class="text-gray-600 leading-relaxed">
+        You're getting the most out of Pensive with full access to all premium features.
+      </p>
+    {{else}}
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Choose Your Plan</h1>
+      <p class="text-gray-600 leading-relaxed">
+        Build your searchable memory of the web. Everything you read should be indexed and findable.
+      </p>
+    {{end}}
   </div>
-  
-  <!-- Features Card -->
-  <div class="bg-white rounded-xl border border-gray-300 p-8 mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-6">Premium features coming soon</h2>
-    
-    <div class="space-y-6">
-      <!-- Telegram Integration -->
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
+
+  <!-- Comparison Table -->
+  <div class="bg-white rounded-xl border border-gray-300 overflow-hidden mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2">
+      <!-- Free Plan -->
+      <div class="p-8 border-r border-gray-200 {{if .IsSubscribed}}opacity-75{{end}}">
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Free</h2>
+          <div class="text-3xl font-bold text-gray-900 mb-1">$0</div>
+          <p class="text-sm text-gray-600">Forever free</p>
         </div>
-        <div>
-          <h3 class="font-medium text-gray-900 mb-2">Telegram Integration</h3>
-          <p class="text-sm text-gray-600 leading-relaxed">
-            Save bookmarks directly from Telegram and search your entire collection through our custom bot. 
-            Perfect for capturing content on the go from your mobile device.
-          </p>
+        
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700">Save up to 100 bookmarks per day</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700">Full-text search across all saved content</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700">Browser extension for seamless saving</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700">Basic organization and tagging</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700">Import bookmarks from Pocket</span>
+          </li>
+        </ul>
+        
+        {{if not .IsSubscribed}}
+        <div class="mt-8">
+          <a href="/signup" class="w-full inline-flex justify-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors">
+            Get Started Free
+          </a>
         </div>
+        {{end}}
       </div>
       
-      <!-- AI Summaries -->
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-          </svg>
+      <!-- Premium Plan -->
+      <div class="p-8 bg-gradient-to-br from-sky-50 to-blue-50 relative {{if .IsSubscribed}}ring-2 ring-sky-600{{end}}">
+        {{if .IsSubscribed}}
+        <div class="absolute top-4 right-4">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-600 text-white">
+            Your Plan
+          </span>
         </div>
-        <div>
-          <h3 class="font-medium text-gray-900 mb-2">AI-Powered Insights</h3>
-          <p class="text-sm text-gray-600 leading-relaxed">
-            Get instant, intelligent summaries of your saved articles powered by advanced AI. 
-            Quickly understand key concepts without re-reading entire pages.
-          </p>
+        {{end}}
+        
+        <div class="text-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">Premium</h2>
+          <div class="text-3xl font-bold text-gray-900 mb-1">$5</div>
+          <p class="text-sm text-gray-600">per month</p>
         </div>
-      </div>
-      
-      <!-- Advanced Features -->
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+        
+        <p class="text-sm text-sky-700 font-medium mb-4">Everything in Free, plus:</p>
+        
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700"><strong>AI-powered summaries</strong> - Get instant insights without re-reading</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700"><strong>Telegram integration</strong> - Save bookmarks on the go from mobile</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700"><strong>Clean markdown extraction</strong> - Perfect reading experience</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700"><strong>Higher daily limits</strong> - Save more content without restrictions</span>
+          </li>
+          <li class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="text-sm text-gray-700"><strong>Future features</strong> - YouTube video text search & weekly summaries</span>
+          </li>
+        </ul>
+        
+        {{if .IsSubscribed}}
+        <div class="mt-8">
+          <a href="/payments/portal-session" class="w-full inline-flex justify-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors">
+            Manage Subscription
+          </a>
         </div>
-        <div>
-          <h3 class="font-medium text-gray-900 mb-2">Enhanced Tools</h3>
-          <p class="text-sm text-gray-600 leading-relaxed">
-            Advanced search capabilities, automatic tagging, content recommendations, 
-            and exclusive features designed to maximize your knowledge management efficiency.
-          </p>
-        </div>
+        {{else}}
+          {{if isSubscriptionEnabled}}
+          <div class="mt-8">
+            <form action="/payments/create-checkout-session" method="post">
+              {{csrfField}}
+              <button 
+                type="submit" 
+                class="w-full inline-flex justify-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
+                Subscribe Now
+              </button>
+            </form>
+          </div>
+          {{else}}
+          <div class="mt-8">
+            <button 
+              type="button" 
+              class="w-full inline-flex justify-center px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
+              disabled>
+              Subscribe (Coming Soon)
+            </button>
+          </div>
+          {{end}}
+        {{end}}
       </div>
     </div>
   </div>
 
-  {{if false}}
-  <!-- Active Subscription Form -->
-  <div class="bg-white border border-gray-300 rounded-lg p-6 text-center">
-    <div class="mb-4">
-      <svg class="w-8 h-8 text-sky-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg>
+  {{if not .IsSubscribed}}
+    {{if isSubscriptionEnabled}}
+    <!-- Active Subscription Form -->
+    <div class="bg-white border border-gray-300 rounded-lg p-6 text-center">
+      <div class="mb-4">
+        <svg class="w-8 h-8 text-sky-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+      <p class="font-medium text-gray-900 mb-2">Ready to unlock premium features?</p>
+      <p class="text-sm text-gray-600 mb-6">
+        Get instant access to AI-powered insights, Telegram integration, and advanced tools 
+        to supercharge your knowledge management.
+      </p>
+      
+      <!-- Subscription Form -->
+      <form action="/payments/create-checkout-session" method="post">
+        {{csrfField}}
+        <button 
+          type="submit" 
+          class="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
+          Subscribe Now
+        </button>
+      </form>
     </div>
-    <p class="font-medium text-gray-900 mb-2">Ready to unlock premium features?</p>
-    <p class="text-sm text-gray-600 mb-6">
-      Get instant access to AI-powered insights, Telegram integration, and advanced tools 
-      to supercharge your knowledge management.
-    </p>
-    
-    <!-- Subscription Form -->
-    <form action="/payments/create-checkout-session" method="post">
-      {{csrfField}}
+    {{else}}
+    <!-- Coming Soon Notice -->
+    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
+      <div class="mb-4">
+        <svg class="w-8 h-8 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="font-medium text-gray-900 mb-2">Premium subscriptions launching soon</p>
+      <p class="text-sm text-gray-600 mb-6">
+        We're putting the finishing touches on these premium features. 
+        Stay tuned for the official launch announcement!
+      </p>
+      
+      <!-- Disabled CTA -->
       <button 
-        type="submit" 
-        class="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
-        Subscribe Now
+        type="button" 
+        class="px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
+        disabled>
+        Subscribe (Coming Soon)
       </button>
-    </form>
-  </div>
-  {{else}}
-  <!-- Coming Soon Notice -->
-  <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
-    <div class="mb-4">
-      <svg class="w-8 h-8 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
     </div>
-    <p class="font-medium text-gray-900 mb-2">Premium subscriptions launching soon</p>
-    <p class="text-sm text-gray-600 mb-6">
-      We're putting the finishing touches on these premium features. 
-      Stay tuned for the official launch announcement!
-    </p>
-    
-    <!-- Disabled CTA -->
-    <button 
-      type="button" 
-      class="px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
-      disabled>
-      Subscribe (Coming Soon)
-    </button>
-  </div>
+    {{end}}
+  {{else}}
+    <!-- Already Subscribed Notice -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
+      <div class="mb-4">
+        <svg class="w-8 h-8 text-emerald-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <p class="font-medium text-emerald-900 mb-2">You're all set with Premium!</p>
+      <p class="text-sm text-emerald-700 mb-6">
+        Enjoy unlimited bookmarks, AI summaries, Telegram integration, and all the premium features shown above.
+      </p>
+      
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/payments/portal-session" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
+          Manage Billing
+        </a>
+        <a href="/home" class="px-6 py-3 border border-emerald-300 text-emerald-700 hover:bg-emerald-50 rounded-lg font-medium transition-colors">
+          Start Exploring
+        </a>
+      </div>
+    </div>
   {{end}}
   
   <!-- Navigation -->
