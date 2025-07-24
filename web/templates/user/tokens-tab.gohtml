@@ -1,36 +1,18 @@
 <div class="space-y-6">
   <!-- Header Section -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="flex flex-col gap-4">
     <div class="flex flex-col gap-2">
-      <h2 class="text-xl font-semibold text-gray-900 flex items-center mb-2 basis-1/3">
+      <h2 class="text-xl font-semibold text-gray-900 flex items-center mb-2">
         <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M8 14v6m3-3H5M3 12l6-6 6 6 6-6"/>
         </svg>
-        API Tokens
+        Connected Integrations
       </h2>
-      <p class="text-sm text-gray-600">Manage tokens for accessing your bookmarks through integrations and API.</p>
+      <p class="text-sm text-gray-600">Apps and services that are connected to your Pensive account.</p>
     </div>
-    
-    <form action="/users/generate-token" method="post" id="token-generate-container">
-      {{csrfField}}
-      <button
-        class="flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-medium transition-colors"
-        hx-post="/users/generate-token"
-        hx-target="#token-container"
-        hx-swap="innerHTML"
-        hx-indicator=".htmx-indicator"
-        type="submit"
-      >
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Create New Token
-        <span class="htmx-indicator hidden ml-2">⌛</span>
-      </button>
-    </form>
   </div>
   
-  <!-- Tokens List -->
+  <!-- Integrations List -->
   <div id="token-container">
     {{if .Tokens}}
       <div class="bg-white border border-gray-300 rounded-lg overflow-hidden">
@@ -40,7 +22,7 @@
             <thead class="bg-gray-50 border-b border-gray-300">
               <tr>
                 <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Integration</th>
-                <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Created</th>
+                <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Connected</th>
                 <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Last Used</th>
                 <th class="w-16 px-6 py-3"></th>
               </tr>
@@ -56,7 +38,7 @@
                         </svg>
                         <div>
                           <div class="text-sm font-medium text-gray-900">Browser Extension</div>
-                          <div class="text-xs text-gray-600">Chrome/Firefox extension access</div>
+                          <div class="text-xs text-gray-600">Chrome/Firefox extension</div>
                         </div>
                       {{else if eq $token.TokenSource "telegram"}}
                         <svg class="w-5 h-5 mr-3 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
@@ -72,16 +54,16 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                         <div>
-                          <div class="text-sm font-medium text-gray-900">Manual Token</div>
-                          <div class="text-xs text-gray-600">Custom API integration</div>
+                          <div class="text-sm font-medium text-gray-900">Custom Integration</div>
+                          <div class="text-xs text-gray-600">Legacy connection</div>
                         </div>
                       {{else}}
                         <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"/>
                         </svg>
                         <div>
                           <div class="text-sm font-medium text-gray-900">Unknown Integration</div>
-                          <div class="text-xs text-gray-600">Legacy token</div>
+                          <div class="text-xs text-gray-600">Legacy connection</div>
                         </div>
                       {{end}}
                     </div>
@@ -102,12 +84,12 @@
                         type="button"
                         class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                         hx-post="/users/delete-token" 
-                        hx-confirm="Are you sure you want to delete this token? This will disconnect the integration and cannot be undone." 
+                        hx-confirm="Are you sure you want to disconnect this integration? This action cannot be undone." 
                         hx-target="#token-{{$index}}" 
                         hx-swap="outerHTML"
-                        title="Delete token">
+                        title="Disconnect integration">
                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                     </form>
@@ -130,7 +112,7 @@
                     </svg>
                     <div class="min-w-0 flex-1">
                       <p class="text-sm font-medium text-gray-900">Browser Extension</p>
-                      <p class="text-xs text-gray-600 mb-1">Chrome/Firefox extension access</p>
+                      <p class="text-xs text-gray-600 mb-1">Chrome/Firefox extension</p>
                     </div>
                   {{else if eq $token.TokenSource "telegram"}}
                     <svg class="w-5 h-5 mt-0.5 text-sky-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
@@ -146,20 +128,20 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                     <div class="min-w-0 flex-1">
-                      <p class="text-sm font-medium text-gray-900">Manual Token</p>
-                      <p class="text-xs text-gray-600 mb-1">Custom API integration</p>
+                      <p class="text-sm font-medium text-gray-900">Custom Integration</p>
+                      <p class="text-xs text-gray-600 mb-1">Legacy connection</p>
                     </div>
                   {{else}}
                     <svg class="w-5 h-5 mt-0.5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"/>
                     </svg>
                     <div class="min-w-0 flex-1">
                       <p class="text-sm font-medium text-gray-900">Unknown Integration</p>
-                      <p class="text-xs text-gray-600 mb-1">Legacy token</p>
+                      <p class="text-xs text-gray-600 mb-1">Legacy connection</p>
                     </div>
                   {{end}}
                   <div class="text-xs text-gray-600 mt-1">
-                    <div>Created {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
+                    <div>Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
                     <div>
                       Last used: 
                       {{if $token.LastUsedAt}}
@@ -177,12 +159,12 @@
                     type="button"
                     class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                     hx-post="/users/delete-token" 
-                    hx-confirm="Are you sure you want to delete this token? This will disconnect the integration and cannot be undone." 
+                    hx-confirm="Are you sure you want to disconnect this integration? This action cannot be undone." 
                     hx-target="#token-{{$index}}" 
                     hx-swap="outerHTML"
-                    title="Delete token">
+                    title="Disconnect integration">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </form>
@@ -193,18 +175,24 @@
       </div>
       
       <p class="text-xs text-gray-600 mt-3">
-        ⚠️ Deleting tokens will disconnect the associated integrations. Deleted tokens cannot be recovered.
+        ⚠️ Disconnecting integrations will stop them from working. This action cannot be undone.
       </p>
     {{else}}
       <!-- Empty State -->
       <div class="bg-gray-50 border border-gray-300 rounded-lg p-8 text-center">
         <div class="mb-4">
           <svg class="w-12 h-12 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 14v6m-3-3h6M8 14v6m3-3H5M3 12l6-6 6 6 6-6"/>
           </svg>
         </div>
         <h3 class="font-medium text-gray-900 mb-2">No integrations connected</h3>
-        <p class="text-sm text-gray-600">Create a token to integrate with external applications, or connect through the integrations page.</p>
+        <p class="text-sm text-gray-600 mb-4">Connect apps and services to automatically save and access your bookmarks.</p>
+        <a href="/integrations" class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M8 14v6m3-3H5M3 12l6-6 6 6 6-6"/>
+          </svg>
+          View Integrations
+        </a>
       </div>
     {{end}}
   </div>
