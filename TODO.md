@@ -27,7 +27,7 @@
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
 - [ ] Fix import: Links are imported multiple times
     - [ ] Enable the import
-- [ ] `resetUrl := "http://localhost:8000/reset-password?" + values.Encode()`
+- [x] `resetUrl := "http://localhost:8000/reset-password?" + values.Encode()`
 - [x] Fix API token key SVG and the button alignment
 - [x] Fix setting user premium after success: Listener had to be running
 - [x] `Invalid request body: parsing time "2025-01-29" as "2006-01-02T15:04:05Z07:00": cannot parse "" as "T"` 

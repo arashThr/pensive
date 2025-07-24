@@ -20,7 +20,9 @@ import (
 )
 
 type Users struct {
-	Templates struct {
+	Domain          string
+	TurnstileConfig config.TurnstileConfig
+	Templates       struct {
 		New             web.Template
 		SignIn          web.Template
 		ForgotPassword  web.Template
@@ -38,7 +40,6 @@ type Users struct {
 	PasswordResetService *models.PasswordResetService
 	EmailService         *service.EmailService
 	TokenModel           *models.TokenModel
-	TurnstileConfig      config.TurnstileConfig
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -220,8 +221,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	values := url.Values{
 		"token": {pwReset.Token},
 	}
-	// TODO
-	resetUrl := "http://localhost:8000/reset-password?" + values.Encode()
+	resetUrl := fmt.Sprintf("%s/reset-password?", u.Domain) + values.Encode()
 	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
 	if err != nil {
 		log.Println(err)
