@@ -106,7 +106,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	token, err := TokenModel.Create(userId)
+	token, err := TokenModel.Create(userId, "telegram")
 	if err != nil {
 		slog.Error("failed to create API token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{

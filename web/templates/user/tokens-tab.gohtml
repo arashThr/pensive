@@ -8,7 +8,7 @@
         </svg>
         API Tokens
       </h2>
-      <p class="text-sm text-gray-600">Generate tokens to access your bookmarks programmatically through our API.</p>
+      <p class="text-sm text-gray-600">Manage tokens for accessing your bookmarks through integrations and API.</p>
     </div>
     
     <form action="/users/generate-token" method="post" id="token-generate-container">
@@ -39,16 +39,61 @@
           <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-300">
               <tr>
-                <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Token</th>
+                <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Integration</th>
                 <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Created</th>
+                <th class="text-left px-6 py-3 text-sm font-medium text-gray-900">Last Used</th>
                 <th class="w-16 px-6 py-3"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-300">
               {{range $index, $token := .Tokens}}
                 <tr id="token-{{$index}}" class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 text-sm font-mono text-gray-600">{{"•••••••••••••••••••••••••••••••"}}</td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center">
+                      {{if eq $token.TokenSource "extension"}}
+                        <svg class="w-5 h-5 mr-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M8 14v6m3-3H5M3 12l6-6 6 6 6-6"/>
+                        </svg>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">Browser Extension</div>
+                          <div class="text-xs text-gray-600">Chrome/Firefox extension access</div>
+                        </div>
+                      {{else if eq $token.TokenSource "telegram"}}
+                        <svg class="w-5 h-5 mr-3 text-sky-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        </svg>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">Telegram Bot</div>
+                          <div class="text-xs text-gray-600">Telegram chat integration</div>
+                        </div>
+                      {{else if eq $token.TokenSource "manual"}}
+                        <svg class="w-5 h-5 mr-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">Manual Token</div>
+                          <div class="text-xs text-gray-600">Custom API integration</div>
+                        </div>
+                      {{else}}
+                        <svg class="w-5 h-5 mr-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                        </svg>
+                        <div>
+                          <div class="text-sm font-medium text-gray-900">Unknown Integration</div>
+                          <div class="text-xs text-gray-600">Legacy token</div>
+                        </div>
+                      {{end}}
+                    </div>
+                  </td>
                   <td class="px-6 py-4 text-sm text-gray-600">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
+                  <td class="px-6 py-4 text-sm text-gray-600">
+                    {{if $token.LastUsedAt}}
+                      {{$token.LastUsedAt.Format "Jan 2, 2006"}}
+                    {{else}}
+                      <span class="text-gray-400">Never</span>
+                    {{end}}
+                  </td>
                   <td class="px-6 py-4 text-right">
                     <form id="delete-form-{{$index}}">
                       {{csrfField}}
@@ -57,7 +102,7 @@
                         type="button"
                         class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                         hx-post="/users/delete-token" 
-                        hx-confirm="Are you sure you want to delete this token? This action cannot be undone." 
+                        hx-confirm="Are you sure you want to delete this token? This will disconnect the integration and cannot be undone." 
                         hx-target="#token-{{$index}}" 
                         hx-swap="outerHTML"
                         title="Delete token">
@@ -77,19 +122,62 @@
         <div class="md:hidden divide-y divide-gray-300">
           {{range $index, $token := .Tokens}}
             <div id="token-{{$index}}" class="p-4">
-              <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-mono text-gray-600 truncate">{{"•••••••••••••••••••••••••••••••"}}</p>
-                  <p class="text-xs text-gray-600 mt-1">Created {{$token.CreatedAt.Format "Jan 2, 2006"}}</p>
+              <div class="flex items-start justify-between">
+                <div class="flex items-start space-x-3 flex-1 min-w-0">
+                  {{if eq $token.TokenSource "extension"}}
+                    <svg class="w-5 h-5 mt-0.5 text-sky-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M8 14v6m3-3H5M3 12l6-6 6 6 6-6"/>
+                    </svg>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900">Browser Extension</p>
+                      <p class="text-xs text-gray-600 mb-1">Chrome/Firefox extension access</p>
+                    </div>
+                  {{else if eq $token.TokenSource "telegram"}}
+                    <svg class="w-5 h-5 mt-0.5 text-sky-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900">Telegram Bot</p>
+                      <p class="text-xs text-gray-600 mb-1">Telegram chat integration</p>
+                    </div>
+                  {{else if eq $token.TokenSource "manual"}}
+                    <svg class="w-5 h-5 mt-0.5 text-sky-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900">Manual Token</p>
+                      <p class="text-xs text-gray-600 mb-1">Custom API integration</p>
+                    </div>
+                  {{else}}
+                    <svg class="w-5 h-5 mt-0.5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-sm font-medium text-gray-900">Unknown Integration</p>
+                      <p class="text-xs text-gray-600 mb-1">Legacy token</p>
+                    </div>
+                  {{end}}
+                  <div class="text-xs text-gray-600 mt-1">
+                    <div>Created {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
+                    <div>
+                      Last used: 
+                      {{if $token.LastUsedAt}}
+                        {{$token.LastUsedAt.Format "Jan 2, 2006"}}
+                      {{else}}
+                        <span class="text-gray-400">Never</span>
+                      {{end}}
+                    </div>
+                  </div>
                 </div>
-                <form id="delete-form-{{$index}}" class="ml-4">
+                <form id="delete-form-{{$index}}" class="ml-4 flex-shrink-0">
                   {{csrfField}}
                   <input type="hidden" name="token_id" value="{{$token.ID}}">
                   <button 
                     type="button"
                     class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                     hx-post="/users/delete-token" 
-                    hx-confirm="Are you sure you want to delete this token? This action cannot be undone." 
+                    hx-confirm="Are you sure you want to delete this token? This will disconnect the integration and cannot be undone." 
                     hx-target="#token-{{$index}}" 
                     hx-swap="outerHTML"
                     title="Delete token">
@@ -105,7 +193,7 @@
       </div>
       
       <p class="text-xs text-gray-600 mt-3">
-        ⚠️ Deleted tokens cannot be recovered. Store tokens securely as they won't be shown again.
+        ⚠️ Deleting tokens will disconnect the associated integrations. Deleted tokens cannot be recovered.
       </p>
     {{else}}
       <!-- Empty State -->
@@ -115,8 +203,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
           </svg>
         </div>
-        <h3 class="font-medium text-gray-900 mb-2">No API tokens yet</h3>
-        <p class="text-sm text-gray-600">Create a token to integrate with external applications and access your bookmarks programmatically.</p>
+        <h3 class="font-medium text-gray-900 mb-2">No integrations connected</h3>
+        <p class="text-sm text-gray-600">Create a token to integrate with external applications, or connect through the integrations page.</p>
       </div>
     {{end}}
   </div>

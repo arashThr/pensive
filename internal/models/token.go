@@ -22,11 +22,12 @@ const ApiTokenBytes = 32
 const MaxTokens = 5
 
 type ApiToken struct {
-	ID         int
-	UserId     types.UserId
-	TokenHash  string
-	CreatedAt  time.Time
-	LastUsedAt *time.Time
+	ID          int
+	UserId      types.UserId
+	TokenHash   string
+	TokenSource string
+	CreatedAt   time.Time
+	LastUsedAt  *time.Time
 }
 
 type GeneratedApiToken struct {
@@ -34,7 +35,7 @@ type GeneratedApiToken struct {
 	Token string
 }
 
-func (as *TokenModel) Create(userId types.UserId) (*GeneratedApiToken, error) {
+func (as *TokenModel) Create(userId types.UserId, source string) (*GeneratedApiToken, error) {
 	token, err := rand.String(ApiTokenBytes)
 	if err != nil {
 		return nil, fmt.Errorf("api token: %w", err)
@@ -67,16 +68,17 @@ func (as *TokenModel) Create(userId types.UserId) (*GeneratedApiToken, error) {
 
 	apiToken := GeneratedApiToken{
 		ApiToken: ApiToken{
-			UserId:    userId,
-			TokenHash: as.hash(token),
+			UserId:      userId,
+			TokenHash:   as.hash(token),
+			TokenSource: source,
 		},
 		Token: token,
 	}
 	row = as.Pool.QueryRow(context.Background(), `
-		INSERT INTO api_tokens (user_id, token_hash)
-		VALUES ($1, $2)
-		RETURNING id`, userId, apiToken.TokenHash)
-	err = row.Scan(&apiToken.ID)
+		INSERT INTO api_tokens (user_id, token_hash, token_source)
+		VALUES ($1, $2, $3)
+		RETURNING id, created_at`, userId, apiToken.TokenHash, source)
+	err = row.Scan(&apiToken.ID, &apiToken.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("api token create: %w", err)
 	}
@@ -95,10 +97,10 @@ func (as *TokenModel) Delete(userId types.UserId, tokenId string) error {
 
 func (as *TokenModel) Get(userId types.UserId) ([]ApiToken, error) {
 	rows, err := as.Pool.Query(context.Background(), `
-		SELECT *
+		SELECT id, user_id, token_hash, token_source, created_at, last_used_at
 		FROM api_tokens
 		WHERE user_id = $1
-		ORDER BY created_at`, userId)
+		ORDER BY created_at DESC`, userId)
 	if err != nil {
 		return nil, fmt.Errorf("api token rows get: %w", err)
 	}

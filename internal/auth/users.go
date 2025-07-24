@@ -280,7 +280,7 @@ func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage string
 	}
 	user := context.User(r.Context())
-	token, err := u.TokenModel.Create(user.ID)
+	token, err := u.TokenModel.Create(user.ID, "manual")
 	if err != nil {
 		logger.Error("generate token", "error", err)
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)

@@ -39,7 +39,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := e.TokenModel.Create(user.ID)
+	token, err := e.TokenModel.Create(user.ID, "extension")
 	if err != nil {
 		slog.Error("failed to create extension token", "error", err, "user", user.ID)
 		w.Header().Set("Content-Type", "text/html")
