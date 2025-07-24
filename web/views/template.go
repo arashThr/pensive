@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 
@@ -49,6 +50,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"trim": func(s string) string {
 			return strings.TrimSpace(s)
 		},
+		"isProduction": func() (template.HTML, error) {
+			return "", fmt.Errorf("isProduction not implemented")
+		},
 	})
 	tpl, err := tpl.ParseFS(templates.FS, filePaths...)
 	if err != nil {
@@ -76,6 +80,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 			},
 			"messages": func() []web.NavbarMessage {
 				return navMsgs
+			},
+			"isProduction": func() bool {
+				return os.Getenv("ENVIRONMENT") == "production"
 			},
 		},
 	)
