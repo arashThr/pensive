@@ -46,7 +46,7 @@ func FAQ(tpl Template) http.HandlerFunc {
 		},
 		{
 			Question: "How do I contact you?",
-			Answer:   `Email me - <a href="mailto:arashThr@duck.com">arashThr@duck.com</a>`,
+			Answer:   `Email me - <a href="mailto:arash.thr@live.com">arash.thr@live.com</a>`,
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
