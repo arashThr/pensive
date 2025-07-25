@@ -95,6 +95,17 @@ func (as *TokenModel) Delete(userId types.UserId, tokenId string) error {
 	return nil
 }
 
+func (as *TokenModel) DeleteByToken(token string) error {
+	tokenHash := as.hash(token)
+	_, err := as.Pool.Exec(context.Background(), `
+		DELETE FROM api_tokens
+		WHERE token_hash = $1`, tokenHash)
+	if err != nil {
+		return fmt.Errorf("api token delete by token: %w", err)
+	}
+	return nil
+}
+
 func (as *TokenModel) Get(userId types.UserId) ([]ApiToken, error) {
 	rows, err := as.Pool.Query(context.Background(), `
 		SELECT id, user_id, token_hash, token_source, created_at, last_used_at

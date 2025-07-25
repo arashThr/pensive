@@ -157,6 +157,10 @@ func run(cfg *config.AppConfig) error {
 		BookmarkModel: bookmarksModel,
 	}
 
+	tokenController := service.Token{
+		TokenModel: tokenModel,
+	}
+
 	stripController := service.Stripe{
 		Domain:              cfg.Domain,
 		PriceId:             cfg.Stripe.PriceId,
@@ -195,6 +199,10 @@ func run(cfg *config.AppConfig) error {
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)
+			r.Get("/ping", tokenController.AuthenticatedPing)
+			r.Route("/tokens", func(r chi.Router) {
+				r.Delete("/current", tokenController.DeleteToken)
+			})
 			r.Route("/bookmarks", func(r chi.Router) {
 				r.Get("/", apiController.IndexAPI)
 				r.Post("/", apiController.CreateAPI)
