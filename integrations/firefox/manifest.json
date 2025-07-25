@@ -2,8 +2,8 @@
     "manifest_version": 2,
     "name": "Pensive: Save & Search What You Read",
     "short_name": "Pensive",
-    "version": "0.1.0",
-    "version_name": "0.1.0 beta",
+    "version": "0.2.1",
+    "version_name": "0.2.1 beta",
     "icons": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png",
@@ -16,7 +16,6 @@
       "activeTab",
       "tabs",
       "<all_urls>",
-      "http://localhost:8000/*",
       "https://getpensive.com/*"
     ],
     "options_ui": {
@@ -34,7 +33,6 @@
     "content_scripts": [
       {
         "matches": [
-          "http://localhost/extension/auth",
           "https://getpensive.com/extension/auth"
         ],
         "js": ["content.js"]

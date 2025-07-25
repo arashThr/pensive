@@ -4,6 +4,15 @@ import "time"
 
 type BookmarkId string
 
+// Extraction method constants
+type ExtractionMethod string
+
+const (
+	ExtractionMethodServer      ExtractionMethod = "server-side"
+	ExtractionMethodReadability ExtractionMethod = "client-readability"
+	ExtractionMethodHTML        ExtractionMethod = "client-html-extraction"
+)
+
 type BookmarkSearchResult struct {
 	Id        BookmarkId
 	Title     string
