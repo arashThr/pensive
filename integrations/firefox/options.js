@@ -2,10 +2,15 @@
 const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 const devMode = false
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
+  const saveMethodButton = document.getElementById('save-method');
+  const learnMoreButton = document.getElementById('learn-more-btn');
+  const modal = document.getElementById('method-modal');
+  const modalClose = document.getElementById('modal-close');
+  const modalOk = document.getElementById('modal-ok');
 
   let grantOrigins = ['https://getpensive.com/*'];
   if (devMode) {
@@ -14,13 +19,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Use fixed endpoint based on dev mode
   const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
+  let extractionMethod = 'client-readability'
 
-  // Check if we already have a token and validate it
-  browserAPI.storage.local.get(['apiToken']).then((result) => {
-    if (result.apiToken) {
-      validateToken(result.apiToken);
+  const result = await browserAPI.storage.local.get(['endpoint', 'extractionMethod']);
+  if (result.endpoint !== endpoint) {
+    browserAPI.storage.local.set({ endpoint: endpoint });
+  }
+  if (!result.extractionMethod) {
+    browserAPI.storage.local.set({ extractionMethod: 'client-readability' });
+  } else {
+    extractionMethod = result.extractionMethod
+  }
+
+  // Load saved extraction method
+  const radioButton = document.querySelector(`input[name="extractionMethod"][value="${extractionMethod}"]`);
+  if (radioButton) {
+    radioButton.checked = true;
+  }
+
+  // Save extraction method
+  saveMethodButton.addEventListener('click', async () => {
+    const selectedMethod = document.querySelector('input[name="extractionMethod"]:checked').value;
+    await browserAPI.storage.local.set({ extractionMethod: selectedMethod });
+    const originalText = saveMethodButton.textContent;
+    saveMethodButton.textContent = 'Saved!';
+    setTimeout(() => {
+      saveMethodButton.textContent = originalText;
+    }, 2000);
+  });
+
+  // Modal functionality
+  learnMoreButton.addEventListener('click', () => {
+    modal.style.display = 'block';
+  });
+
+  modalClose.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  modalOk.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  // Close modal when clicking outside of it
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
     }
   });
+
+  // Check if we already have a token and validate it
+  const tokenResult = await browserAPI.storage.local.get(['apiToken']);
+  if (tokenResult.apiToken) {
+    validateToken(tokenResult.apiToken);
+  }
 
   // Add sign out button functionality
   function addSignOutButton() {
@@ -29,15 +81,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add click event listener if not already added
     if (!signOutButton.hasAttribute('data-listener-added')) {
-      signOutButton.addEventListener('click', function () {
-        // Clear the token
-        browserAPI.storage.local.remove(['apiToken']).then(() => {
+      signOutButton.addEventListener('click', async function () {
+        try {
+          // Get the current token
+          const result = await browserAPI.storage.local.get(['apiToken']);
+          const token = result.apiToken;
+          
+          if (token) {
+            // Delete token from server first
+            try {
+              await fetch(new URL('/api/v1/tokens/current', endpoint).href, {
+                method: 'DELETE',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                }
+              });
+              console.log('Token deleted from server');
+            } catch (error) {
+              console.error('Failed to delete token from server:', error);
+              // Continue with local deletion even if server deletion fails
+            }
+          }
+          
+          // Clear the token locally
+          await browserAPI.storage.local.remove(['apiToken']);
           showDisconnectedState();
-          console.log('Token cleared, user signed out');
-        }).catch((error) => {
-          console.error('Failed to clear token:', error);
+          console.log('Token cleared locally, user signed out');
+        } catch (error) {
+          console.error('Failed to sign out:', error);
           showError('Failed to sign out');
-        });
+        }
       });
       signOutButton.setAttribute('data-listener-added', 'true');
     }
@@ -46,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Function to validate token by calling health check endpoint
   async function validateToken(token) {
     try {
-      const response = await fetch(new URL('/api/ping', endpoint).href, {
+      const response = await fetch(new URL('/api/v1/ping', endpoint).href, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -61,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Token is invalid, clear it and show disconnected state
         await browserAPI.storage.local.remove(['apiToken']);
         showDisconnectedState();
-        showError('Authentication token is invalid. Please reconnect.');
+        showError('Connect to Pensive to continue');
       }
     } catch (error) {
       console.error('Failed to validate token:', error);

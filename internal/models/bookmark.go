@@ -42,20 +42,21 @@ var sourceMapping = map[BookmarkSource]string{
 }
 
 type Bookmark struct {
-	Id            types.BookmarkId
-	UserId        types.UserId
-	Title         string
-	Link          string
-	Source        string
-	Excerpt       string
-	ImageUrl      string
-	ArticleLang   string
-	SiteName      string
-	AISummary     *string
-	AIExcerpt     *string
-	AITags        *string
-	CreatedAt     time.Time
-	PublishedTime *time.Time
+	Id               types.BookmarkId
+	UserId           types.UserId
+	Title            string
+	Link             string
+	Source           string
+	Excerpt          string
+	ImageUrl         string
+	ArticleLang      string
+	SiteName         string
+	AISummary        *string
+	AIExcerpt        *string
+	AITags           *string
+	ExtractionMethod types.ExtractionMethod
+	CreatedAt        time.Time
+	PublishedTime    *time.Time
 }
 
 type BookmarkWithContent struct {
@@ -104,6 +105,13 @@ func (model *BookmarkModel) CreateWithContent(
 
 	var content string
 
+	extractionMethod := types.ExtractionMethodServer
+	if bookmarkRequest != nil && bookmarkRequest.TextContent != "" {
+		extractionMethod = types.ExtractionMethodReadability
+	} else if bookmarkRequest != nil && bookmarkRequest.HtmlContent != "" {
+		extractionMethod = types.ExtractionMethodHTML
+	}
+
 	// Fallback to the original method of fetching the page
 	article, err := fetchLink(link)
 	if err != nil {
@@ -148,16 +156,17 @@ func (model *BookmarkModel) CreateWithContent(
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	inputBookmark := Bookmark{
-		Id:            types.BookmarkId(bookmarkId),
-		UserId:        user.ID,
-		Title:         validations.CleanUpText(article.Title),
-		Link:          link,
-		Excerpt:       validations.CleanUpText(article.Excerpt),
-		ImageUrl:      article.Image,
-		PublishedTime: article.PublishedTime,
-		ArticleLang:   article.Language,
-		SiteName:      article.SiteName,
-		Source:        sourceMapping[source],
+		Id:               types.BookmarkId(bookmarkId),
+		UserId:           userId,
+		Title:            validations.CleanUpText(article.Title),
+		Link:             link,
+		Excerpt:          validations.CleanUpText(article.Excerpt),
+		ImageUrl:         article.Image,
+		PublishedTime:    article.PublishedTime,
+		ArticleLang:      article.Language,
+		SiteName:         article.SiteName,
+		Source:           sourceMapping[source],
+		ExtractionMethod: extractionMethod,
 	}
 
 	if article.Image != "" {
@@ -189,13 +198,14 @@ func (model *BookmarkModel) CreateWithContent(
 				image_url,
 				article_lang,
 				site_name,
-				published_time
-			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+				published_time,
+				extraction_method
+			) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
-		VALUES ($1, $4, $6, $11);`,
-		bookmarkId, user.ID, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
-		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
+		VALUES ($1, $4, $6, $12);`,
+		bookmarkId, userId, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
+		article.Image, article.Language, article.SiteName, article.PublishedTime, extractionMethod, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
@@ -292,22 +302,7 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 // GetRecentBookmarks returns the most recent bookmarks for the home page
 func (model *BookmarkModel) GetRecentBookmarks(user *User, limit int) ([]Bookmark, error) {
 	rows, err := model.Pool.Query(context.Background(), `
-		SELECT
-			user_id,
-			id,
-			title,
-			link,
-			excerpt,
-			source,
-			article_lang,
-			site_name,
-			published_time,
-			image_url,
-			created_at,
-			ai_summary,
-			ai_excerpt,
-			ai_tags
-		FROM library_items
+		SELECT * FROM library_items
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 		LIMIT $2

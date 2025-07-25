@@ -73,6 +73,7 @@
 - [ ] Send verification email
 - [ ] Setup hooks for payment in production
 - [ ] Add: Warn me about personal pages
+- [ ] Monitoring
 - [ ] Back up db
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi
@@ -182,6 +183,7 @@
 - [ ] Tags from browser
 - [ ] Slash command for bookmarks in Telegram
 - [ ] Blue/green deployment
+- [ ] Accept Postgres connection strings so people can own their data
 
 ### Stripe
 - [x] change `IsSubscribed` to subStatus
