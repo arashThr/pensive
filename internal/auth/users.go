@@ -272,24 +272,6 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/signin", http.StatusFound)
 }
 
-func (u Users) GenerateToken(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	w.Header().Set("Content-Type", "text/html")
-	type TokenResponse struct {
-		APIToken     string
-		ErrorMessage string
-	}
-	user := context.User(r.Context())
-	token, err := u.TokenModel.Create(user.ID, "manual")
-	if err != nil {
-		logger.Error("generate token", "error", err)
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
-		return
-	}
-	data := TokenResponse{APIToken: token.Token}
-	u.Templates.Token.Execute(w, r, data)
-}
-
 func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	tokenId := r.FormValue("token_id")

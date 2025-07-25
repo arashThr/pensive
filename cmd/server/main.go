@@ -257,7 +257,6 @@ func run(cfg *config.AppConfig) error {
 				r.Use(umw.RequireUser)
 				r.Get("/me", usersController.CurrentUser)
 				r.Get("/tab-content", usersController.TabContent)
-				r.Post("/generate-token", usersController.GenerateToken)
 				r.Post("/delete-token", usersController.DeleteToken)
 			})
 			// Import/export
