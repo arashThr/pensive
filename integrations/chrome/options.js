@@ -1,5 +1,5 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
-const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 const devMode = false
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -7,69 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
 
-
-
   let grantOrigins = ['https://getpensive.com/*'];
   if (devMode) {
     grantOrigins.push('http://localhost:8000/*');
   }
 
-  // Set default values
-  let defaultEndpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
-
-  // Function to normalize endpoint URL
-  function normalizeEndpoint(endpoint) {
-    if (!endpoint) return defaultEndpoint;
-
-    // If it's localhost, keep HTTP
-    if (endpoint.includes('localhost') || endpoint.includes('127.0.0.1')) {
-      // Ensure localhost has http:// prefix if no protocol specified
-      if (!endpoint.startsWith('http://') && !endpoint.startsWith('https://')) {
-        return `http://${endpoint}`;
-      }
-      return endpoint;
-    }
-
-    // For all other hosts, ensure HTTPS
-    if (endpoint.startsWith('http://')) {
-      // Convert HTTP to HTTPS for non-localhost
-      return endpoint.replace('http://', 'https://');
-    } else if (endpoint.startsWith('https://')) {
-      // Already HTTPS, keep as is
-      return endpoint;
-    } else {
-      // No protocol specified, add HTTPS
-      return `https://${endpoint}`;
-    }
-  }
-
-  // Load saved settings or use defaults
-  browserAPI.storage.local.get(["endpoint"]).then((data) => {
-    defaultEndpoint = normalizeEndpoint(data.endpoint || defaultEndpoint);
-    document.getElementById("endpoint").value = defaultEndpoint;
-
-    browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
-      console.log("Default settings saved");
-    })
-  });
-
-  // Save settings
-  document.getElementById("save").addEventListener("click", () => {
-    let inputValue = document.getElementById("endpoint").value || defaultEndpoint;
-    defaultEndpoint = normalizeEndpoint(inputValue);
-
-    // Update the input field to show the normalized URL
-    document.getElementById("endpoint").value = defaultEndpoint;
-
-    browserAPI.storage.local.set({ endpoint: defaultEndpoint }).then(() => {
-      const status = document.getElementById("status");
-      const originalText = status.textContent;
-      status.textContent = "Settings saved!";
-      setTimeout(() => {
-        status.textContent = originalText;
-      }, 2000);
-    });
-  });
+  // Use fixed endpoint based on dev mode
+  const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
 
   // Check if we already have a token and validate it
   browserAPI.storage.local.get(['apiToken']).then((result) => {
@@ -102,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Function to validate token by calling health check endpoint
   async function validateToken(token) {
     try {
-      const response = await fetch(new URL('/api/ping', defaultEndpoint).href, {
+      const response = await fetch(new URL('/api/ping', endpoint).href, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -153,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       // Open a new tab with the auth URL
       const tab = await browserAPI.tabs.create({
-        url: new URL('/extension/auth', defaultEndpoint).toString(),
+        url: new URL('/extension/auth', endpoint).toString(),
         active: true
       });
 

@@ -124,6 +124,9 @@
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
+- [ ] Extension
+    - Check auth endpoint
+    - Delete token when siging out    
 - [x] Move markdown from menu to the edit page as a button
     - Load it in the same page. It's good enough for now
 - [x] Add recaptcha

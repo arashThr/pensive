@@ -122,39 +122,39 @@
       .btn-danger:hover {
         background: #b91c1c;
       }
-      .form-group {
-        margin-bottom: 20px;
+      .auth-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 32px;
       }
-      .settings-section {
-        margin-top: 32px;
-        padding-top: 32px;
-        border-top: 1px solid #d1d5db;
-      }
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #374151;
-      }
-      input[type="text"] {
-        width: 100%;
-        padding: 12px 16px;
+      .website-link {
+        background: #f9fafb;
         border: 1px solid #d1d5db;
         border-radius: 8px;
+        padding: 20px;
+        margin: 24px 0;
+        text-align: center;
+      }
+      .website-link h3 {
+        margin: 0 0 8px 0;
         font-size: 0.875rem;
-        transition: all 0.2s;
-        background: white;
+        font-weight: 600;
         color: #111827;
-        box-sizing: border-box;
       }
-      input[type="text"]:focus {
-        outline: none;
-        border-color: #2563eb;
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-      }
-      input[type="text"]::placeholder {
+      .website-link p {
+        margin: 0 0 16px 0;
+        font-size: 0.875rem;
         color: #6b7280;
+        line-height: 1.5;
+      }
+      .website-link a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .website-link a:hover {
+        text-decoration: underline;
       }
       .info-section {
         background: #f9fafb;
@@ -178,11 +178,6 @@
       .info-section p:last-child {
         margin-bottom: 0;
       }
-      .auth-actions {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
     </style>
   </head>
   <body>
@@ -191,7 +186,7 @@
       <div class="header">
         <div class="header-icon">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
           </svg>
         </div>
         <h1>Pensive Extension Settings</h1>
@@ -215,26 +210,19 @@
         </button>
       </div>
 
-      <!-- Settings Section -->
-      <div id="settings-section" class="settings-section">
-        <h2>Configuration</h2>
-        <div class="form-group">
-          <label for="endpoint">Server Endpoint:</label>
-          <input type="text" id="endpoint" placeholder="getpensive.com">
-          <small style="color: #6b7280; font-size: 0.875rem; margin-top: 4px; display: block;">
-            HTTPS will be used automatically (except for localhost)
-          </small>
-        </div>
-        <button id="save" class="btn btn-secondary">Save Settings</button>
-        
-        <!-- Usage Instructions -->
-        <div class="info-section">
-          <h3>How to use the extension:</h3>
-          <p><strong>1. Connect your account:</strong> Click "Connect to Pensive" and sign in with your account credentials.</p>
-          <p><strong>2. Save pages instantly:</strong> Click the Pensive icon in your browser toolbar to save the current page to your library.</p>
-          <p><strong>3. Manage bookmarks:</strong> The popup shows if a page is already saved and lets you remove it with one click.</p>
-          <p><strong>4. Search and access:</strong> Use the search link to quickly find and access your saved content.</p>
-        </div>
+      <!-- Website Link -->
+      <div class="website-link">
+        <h3>New to Pensive?</h3>
+        <p>Build your own searchable memory of the web. Save and index everything you read online.</p>
+        <a href="https://getpensive.com" target="_blank">Visit getpensive.com →</a>
+      </div>
+
+      <!-- Usage Instructions -->
+      <div class="info-section">
+        <h3>Quick Start:</h3>
+        <p><strong>1.</strong> Connect your account by clicking "Connect to Pensive" above</p>
+        <p><strong>2.</strong> Click the Pensive icon on any page to save it to your library</p>
+        <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
       </div>
     </div>
 
