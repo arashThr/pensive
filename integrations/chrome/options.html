@@ -193,42 +193,6 @@
         color: #6b7280;
         margin-bottom: 16px;
       }
-      .method-options {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        margin-bottom: 24px;
-      }
-      .method-option {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .method-option:hover {
-        background: #f3f4f6;
-      }
-      .method-option input {
-        margin-top: 4px;
-      }
-      .method-info {
-        flex-grow: 1;
-      }
-      .method-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
-      }
-      .method-name {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #111827;
-      }
       .recommended-tag {
         background: #e0f2fe;
         color: #1d4ed8;
@@ -238,84 +202,116 @@
         font-weight: 600;
         margin-left: 8px;
       }
-      .method-desc {
-        font-size: 0.875rem;
-        color: #6b7280;
-        line-height: 1.5;
+      /* Advanced settings styles */
+      .advanced-settings {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid #e5e7eb;
       }
-      .method-actions {
+      /* Checkbox option styles */
+      .checkbox-option {
         display: flex;
-        justify-content: space-between;
-        gap: 12px;
-      }
-      .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        padding-top: 60px;
-      }
-      .modal-content {
-        background-color: #fefefe;
-        margin: 5% auto; /* 15% from the top and centered */
-        padding: 24px;
-        border: 1px solid #888;
-        width: 80%; /* Could be more or less, depending on screen size */
-        max-width: 600px;
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      }
-      .modal-header {
-        display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-      }
-      .modal-header h3 {
-        margin: 0;
-        color: #111827;
-        font-size: 1.25rem;
-        font-weight: 600;
-      }
-      .modal-close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .modal-close:hover,
-      .modal-close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-      }
-      .modal-body {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #eee;
-      }
-      .modal-body h4 {
-        margin-top: 0;
-        margin-bottom: 10px;
-        color: #111827;
-      }
-      .modal-body p {
-        margin-bottom: 10px;
-        color: #6b7280;
-        line-height: 1.6;
-      }
-      .modal-footer {
-        display: flex;
-        justify-content: flex-end;
         gap: 12px;
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .checkbox-option:hover {
+        background: #f9fafb;
+      }
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-grow: 1;
+      }
+      .checkbox-label input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+      .checkmark {
+        height: 18px;
+        width: 18px;
+        background-color: #eee;
+        border-radius: 3px;
+        border: 1px solid #d1d5db;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .checkbox-label input:checked ~ .checkmark {
+        background-color: #2563eb;
+        border-color: #2563eb;
+      }
+      .checkmark:after {
+        content: "";
+        display: none;
+        width: 4px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .checkbox-label input:checked ~ .checkmark:after {
+        display: block;
+      }
+      .checkbox-info {
+        flex-grow: 1;
+      }
+      .checkbox-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 2px;
+      }
+      .checkbox-desc {
+        font-size: 0.75rem;
+        color: #6b7280;
+        line-height: 1.4;
+      }
+      /* Warning box styles */
+      .warning-box {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 12px;
+        margin-bottom: 16px;
+      }
+      .warning-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .warning-header svg {
+        width: 16px;
+        height: 16px;
+        color: #d97706;
+      }
+      .warning-header strong {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #d97706;
+      }
+      .warning-content p {
+        margin-bottom: 6px;
+        font-size: 0.75rem;
+        color: #6b7280;
+        line-height: 1.4;
+      }
+      .warning-content p:last-child {
+        margin-bottom: 0;
+      }
+      .warning-content strong {
+        color: #374151;
       }
     </style>
   </head>
@@ -356,50 +352,6 @@
         <a href="https://getpensive.com" target="_blank">Visit getpensive.com →</a>
       </div>
 
-      <!-- Extraction Method Selection -->
-      <div class="extraction-method-section">
-        <h2>Content Extraction Method</h2>
-        <p class="method-description">Choose how Pensive should extract content from web pages:</p>
-        
-        <div class="method-options">
-          <label class="method-option">
-            <input type="radio" name="extractionMethod" value="server-side">
-            <div class="method-info">
-              <div class="method-header">
-                <span class="method-name">Server-Side Extraction</span>
-              </div>
-              <p class="method-desc">Only the URL is sent to Pensive servers, which then fetch and process the page content. Best for public articles and news sites.</p>
-            </div>
-          </label>
-
-          <label class="method-option recommended">
-            <input type="radio" name="extractionMethod" value="client-readability" checked>
-            <div class="method-info">
-              <div class="method-header">
-                <span class="method-name">Smart Article Extraction</span>
-                <span class="recommended-tag">Recommended</span>
-              </div>
-              <p class="method-desc">Detects the main article in the page and extracts a clean version of it. Works well for most articles and blog posts.</p>
-            </div>
-          </label>
-
-          <label class="method-option">
-            <input type="radio" name="extractionMethod" value="client-html-extraction">
-            <div class="method-info">
-              <div class="method-header">
-                <span class="method-name">Full Page Extraction</span>
-              </div>
-              <p class="method-desc">Captures complete page content and sends clean HTML. Needed for sites like Reddit or complex layouts where article detection fails. Be mindful of what content you're sharing.</p>
-            </div>
-          </label>
-        </div>
-
-        <div class="method-actions">
-          <button id="learn-more-btn" class="btn btn-secondary">Learn More About Methods</button>
-          <button id="save-method" class="btn">Save Method</button>
-        </div>
-      </div>
-
       <!-- Usage Instructions -->
       <div class="info-section">
         <h3>Quick Start:</h3>
@@ -407,42 +359,34 @@
         <p><strong>2.</strong> Click the Pensive icon on any page to save it to your library</p>
         <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
       </div>
-    </div>
 
-    <!-- Explanation Modal -->
-    <div id="method-modal" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Content Extraction Methods Explained</h3>
-          <button id="modal-close" class="modal-close">&times;</button>
+      <!-- Advanced Settings -->
+      <div class="advanced-settings">
+        <div class="checkbox-option">
+          <label class="checkbox-label">
+            <input type="checkbox" id="fullPageCapture" name="fullPageCapture">
+            <span class="checkmark"></span>
+            <div class="checkbox-info">
+              <span class="checkbox-title">(Experimental) Full page content capture</span>
+              <p class="checkbox-desc">For sites where standard processing doesn't work well (like Reddit, Stack Overflow, or forums).</p>
+            </div>
+          </label>
         </div>
-        <div class="modal-body">
-          <div class="method-explanation">
-            <h4>🔒 Server-Side Extraction</h4>
-            <p><strong>How it works:</strong> Extension sends only the page URL to Pensive servers. Servers then fetch and process the page content.</p>
-            <p><strong>Data shared:</strong> Only the URL - no page content leaves your browser</p>
-            <p><strong>Quality:</strong> Excellent - Uses advanced server-side processing</p>
-            <p><strong>Best for:</strong> Public articles, news sites, blog posts</p>
-            <hr>
-            
-            <h4>📄 Smart Article Extraction (Recommended)</h4>
-            <p><strong>How it works:</strong> Browser uses Mozilla Readability to extract clean article content locally, then sends only the main text to Pensive.</p>
-            <p><strong>Data shared:</strong> Clean article content - ads and navigation removed</p>
-            <p><strong>Quality:</strong> Excellent - Focuses on main content, removes noise</p>
-            <p><strong>Best for:</strong> Most articles, blog posts, news stories</p>
-            <hr>
-            
-            <h4>⚠️ Full Page Extraction</h4>
-            <p><strong>How it works:</strong> Browser captures entire page content, cleans it locally, then sends processed HTML to Pensive.</p>
-            <p><strong>Data shared:</strong> Complete page content after cleaning</p>
-            <p><strong>Quality:</strong> Most complete - Captures everything, including content that article detection might miss</p>
-            <p><strong>Best for:</strong> Reddit posts, forums, complex layouts where article detection fails</p>
-            <p><strong>⚠️ Your responsibility:</strong> Be mindful of what content you're sharing. Don't use for pages with personal information, emails, or private data you don't want stored.</p>
+
+        <!-- Warning that appears when checkbox is checked -->
+        <div id="fullPageWarning" class="warning-box" style="display: none;">
+          <div class="warning-header">
+            <svg class="warning-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+            <strong>Note</strong>
+          </div>
+          <div class="warning-content">
+            <p>This captures all visible content on the page. Don't use on pages with personal information or private data.</p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button id="modal-ok" class="btn">Got it!</button>
-        </div>
+
+        <button id="save-content-settings" class="btn btn-secondary">Save</button>
       </div>
     </div>
 

@@ -1,16 +1,15 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
-const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
+const isChrome = !(window.browser && browser.runtime)
+const browserAPI = isChrome ? chrome : browser;
 const devMode = false
 
 document.addEventListener('DOMContentLoaded', async function () {
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
-  const saveMethodButton = document.getElementById('save-method');
-  const learnMoreButton = document.getElementById('learn-more-btn');
-  const modal = document.getElementById('method-modal');
-  const modalClose = document.getElementById('modal-close');
-  const modalOk = document.getElementById('modal-ok');
+  const fullPageCaptureCheckbox = document.getElementById('fullPageCapture');
+  const fullPageWarning = document.getElementById('fullPageWarning');
+  const saveContentSettingsButton = document.getElementById('save-content-settings');
 
   let grantOrigins = ['https://getpensive.com/*'];
   if (devMode) {
@@ -19,60 +18,41 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Use fixed endpoint based on dev mode
   const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
-  let extractionMethod = 'client-readability'
 
-  const result = await browserAPI.storage.local.get(['endpoint', 'extractionMethod']);
+  const result = await browserAPI.storage.local.get(['endpoint', 'extractionMethod', 'fullPageCapture']);
   if (result.endpoint !== endpoint) {
     browserAPI.storage.local.set({ endpoint: endpoint });
   }
-  if (!result.extractionMethod) {
-    browserAPI.storage.local.set({ extractionMethod: 'client-readability' });
-  } else {
-    extractionMethod = result.extractionMethod
-  }
-
-  // Load saved extraction method
-  const radioButton = document.querySelector(`input[name="extractionMethod"][value="${extractionMethod}"]`);
-  if (radioButton) {
-    radioButton.checked = true;
-  }
-
-  // Save extraction method
-  saveMethodButton.addEventListener('click', async () => {
-    const selectedMethod = document.querySelector('input[name="extractionMethod"]:checked').value;
-    await browserAPI.storage.local.set({ extractionMethod: selectedMethod });
-    const originalText = saveMethodButton.textContent;
-    saveMethodButton.textContent = 'Saved!';
-    setTimeout(() => {
-      saveMethodButton.textContent = originalText;
-    }, 2000);
-  });
-
-  // Modal functionality
-  learnMoreButton.addEventListener('click', () => {
-    modal.style.display = 'block';
-  });
-
-  modalClose.addEventListener('click', () => {
-    modal.style.display = 'none';
-  });
-
-  modalOk.addEventListener('click', () => {
-    modal.style.display = 'none';
-  });
-
-  // Close modal when clicking outside of it
-  window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-      modal.style.display = 'none';
-    }
-  });
 
   // Check if we already have a token and validate it
-  const tokenResult = await browserAPI.storage.local.get(['apiToken']);
-  if (tokenResult.apiToken) {
-    validateToken(tokenResult.apiToken);
+  if (result.apiToken) {
+    validateToken(result.apiToken);
   }
+
+  const enabled = result.fullPageCapture || false;
+  fullPageCaptureCheckbox.checked = enabled;
+  toggleWarningVisibility(enabled);
+
+  // Handle checkbox toggle
+  fullPageCaptureCheckbox.addEventListener('change', function() {
+    toggleWarningVisibility(checked);
+  });
+
+  // Show/hide warning based on checkbox state
+  function toggleWarningVisibility(show) {
+    fullPageWarning.style.display = show ? 'block' : 'none';
+  }
+
+  // Save content processing settings
+  saveContentSettingsButton.addEventListener('click', async () => {
+    const enabled = fullPageCaptureCheckbox.checked;
+    await browserAPI.storage.local.set({ fullPageCapture: enabled })
+    const originalText = saveContentSettingsButton.textContent;
+    saveContentSettingsButton.textContent = 'Saved!';
+    setTimeout(() => {
+      saveContentSettingsButton.textContent = originalText;
+    }, 2000);
+  });
 
   // Add sign out button functionality
   function addSignOutButton() {
@@ -149,6 +129,23 @@ document.addEventListener('DOMContentLoaded', async function () {
   connectButton.addEventListener('click', async function () {
     connectButton.disabled = true;
     connectButton.textContent = 'Connecting...';
+
+    if (isChrome) {
+      const granted = await browserAPI.permissions.contains({
+        origins: grantOrigins,
+      });
+
+      if (!granted) {
+        const granted = await browserAPI.permissions.request({
+          origins: grantOrigins,
+        });
+
+        if (!granted) {
+          showError('Permissions not granted. Please allow access to Pensive in the extension settings.');
+          return
+        }
+      }
+    }
 
     // Track authentication state
     let authCompleted = false;

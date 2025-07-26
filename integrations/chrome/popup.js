@@ -1,5 +1,5 @@
 // For cross-browser compatibility
-const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const statusElement = document.getElementById('status');
@@ -104,87 +104,78 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function saveBookmark() {
     if (!currentTab) return;
 
-      saveBtn.disabled = true;
+    saveBtn.disabled = true;
+    updateStatus('loading', 'Extracting page content...');
+
+    const { endpoint, apiToken, fullPageCapture } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
+
+    if (!endpoint || !apiToken) {
+      updateStatus('error', 'Extension not configured');
+      saveBtn.disabled = false;
+      return;
+    }
+
+    let pageContent = {
+      link: currentTab.url,
+      extractionMethod: 'server-side'
+    };
+
+    let readabilitySucceeded = false;
+
+    try {
       updateStatus('loading', 'Extracting page content...');
 
-      const { endpoint, apiToken, extractionMethod } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'extractionMethod']);
+      await browserAPI.scripting.executeScript({
+        target: { tabId: currentTab.id },
+        files: ['Readability-readerable.js', 'Readability.js'],
+      });
+      
+      const readabilityResults = await browserAPI.scripting.executeScript({
+        target: { tabId: currentTab.id },
+        func: parseWithReadability
+      });
 
-      if (!endpoint || !apiToken) {
-        updateStatus('error', 'Extension not configured');
-        saveBtn.disabled = false;
-        return;
+      const result = readabilityResults?.[0]?.result;
+      if (result?.success) {
+        readabilitySucceeded = true;
+        let publishedDate = Date.parse(result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content)
+        if (isNaN(publishedDate)) {
+          publishedDate = Date.now()
+        }
+        pageContent.title = result.content.title || currentTab.title;
+        pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || "";
+        pageContent.lang = result.content.lang || document.documentElement.lang;
+        pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
+        pageContent.publishedTime = new Date(publishedDate).toISOString()
+        pageContent.textContent = result.content.textContent || document.body.textContent;
+        pageContent.extractionMethod = 'client-readability';
       }
 
-      const selectedMethod = extractionMethod || 'client-readability';
-      let pageContent = {
-        link: currentTab.url,
-        extractionMethod: selectedMethod
-      };
-
-      let readabilitySucceeded = false;
-
-      // Handle different extraction methods
-      if (selectedMethod === 'server-side') {
-        // Server-side extraction - only send the URL
-        updateStatus('loading', 'Saving (server will fetch content)...');
-      } else {
-        // Client-side extraction methods
-        try {
-          updateStatus('loading', 'Extracting page content...');
-
-          await browserAPI.scripting.executeScript({
+      // If full page capture is enabled and Readability failed, show warning and use full page extraction
+      // TODO: Experiment - Let's see how many times we endup here
+      if (fullPageCapture && !readabilitySucceeded) {
+        // Show warning if Readability failed and user chose full HTML extraction
+        const shouldContinue = await showReadabilityWarning(currentTab.url);
+        if (shouldContinue) {
+          // Use chrome.scripting to inject and execute content extraction
+          const contentResults = await browserAPI.scripting.executeScript({
             target: { tabId: currentTab.id },
-            files: ['Readability-readerable.js', 'Readability.js'],
-          });
-          
-          const readabilityResults = await browserAPI.scripting.executeScript({
-            target: { tabId: currentTab.id },
-            func: parseWithReadability
+            func: extractContent
           });
 
-          const result = readabilityResults?.[0]?.result;
-          if (result?.success) {
-            readabilitySucceeded = true;
-            let publishedDate = Date.parse(result.content.publishedTime || document.querySelector('meta[property="article:published_time"]')?.content)
-            if (isNaN(publishedDate)) {
-              publishedDate = Date.now()
-            }
-
-            pageContent.title = result.content.title || currentTab.title;
-            pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || "";
-            pageContent.lang = result.content.lang || document.documentElement.lang;
-            pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
-            pageContent.publishedTime = new Date(publishedDate).toISOString()
-            pageContent.textContent = result.content.textContent || document.body.textContent;
-            pageContent.extractionMethod = 'client-readability';
+          const result = contentResults?.[0]?.result;
+          if (result?.sucess) {
+            pageContent.htmlContent = result.htmlContent;
+            updateStatus('loading', 'Content cleaned and processed...');
+            pageContent.extractionMethod = 'client-html-extraction';
           }
-
-          // Handle full HTML extraction or fallback when Readability fails
-          // TODO: Experiment - Let's see how many times we endup here
-          if (selectedMethod === 'client-html-extraction' && !readabilitySucceeded) {
-            // Show warning if Readability failed and user chose full HTML extraction
-            const shouldContinue = await showReadabilityWarning(currentTab.url);
-            if (shouldContinue) {
-              // Use chrome.scripting to inject and execute content extraction
-              const contentResults = await browserAPI.scripting.executeScript({
-                target: { tabId: currentTab.id },
-                func: extractContent
-              });
-
-              const result = contentResults?.[0]?.result;
-              if (result?.sucess) {
-                pageContent.htmlContent = result.htmlContent;
-                updateStatus('loading', 'Content cleaned and processed...');
-                pageContent.extractionMethod = 'client-html-extraction';
-              }
-            }
-          }
-
-        } catch (contentError) {
-          // TODO: Add stats - Let's see how many times we endup here
-          updateStatus('error', 'Failed to extract page content. Continue with server-side extraction...');
         }
       }
+
+    } catch (contentError) {
+      // TODO: Add stats - Let's see how many times we endup here
+      updateStatus('error', 'Failed to extract page content. Continue with server-side extraction...');
+    }
 
     let response = null;
     try {
