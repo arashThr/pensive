@@ -352,13 +352,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateStatus(type, message) {
     statusElement.className = `status ${type}`;
 
+    // Clear existing content
+    statusElement.innerHTML = '';
+
     if (type === 'loading') {
-      statusElement.innerHTML = `
-        <div class="spinner"></div>
-        <span>${message}</span>
-      `;
+      const spinner = document.createElement('div');
+      spinner.className = 'spinner';
+      
+      const span = document.createElement('span');
+      span.textContent = message;
+      
+      statusElement.appendChild(spinner);
+      statusElement.appendChild(span);
     } else {
-      statusElement.innerHTML = `<span>${message}</span>`;
+      const span = document.createElement('span');
+      span.textContent = message;
+      statusElement.appendChild(span);
     }
   }
 
