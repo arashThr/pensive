@@ -161,7 +161,7 @@ func (model *BookmarkModel) CreateWithContent(
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	inputBookmark := Bookmark{
 		Id:               types.BookmarkId(bookmarkId),
-		UserId:           userId,
+		UserId:           user.ID,
 		Title:            validations.CleanUpText(article.Title),
 		Link:             link,
 		Excerpt:          validations.CleanUpText(article.Excerpt),
@@ -208,7 +208,7 @@ func (model *BookmarkModel) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $12);`,
-		bookmarkId, userId, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
+		bookmarkId, user.ID, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, extractionMethod, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
