@@ -146,7 +146,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	slog.Info("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
-	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, user.ID, models.Api, user.SubscriptionStatus, &data)
+	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, user, models.Api, &data)
 	if err != nil {
 		slog.Error("[api] failed to create bookmark", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
@@ -249,7 +249,7 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	user := context.User(r.Context())
 
-	results, err := a.BookmarkModel.Search(user.ID, query, user.SubscriptionStatus)
+	results, err := a.BookmarkModel.Search(user, query)
 	if err != nil {
 		slog.Error("searching bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)

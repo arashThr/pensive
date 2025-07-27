@@ -169,7 +169,7 @@ func (u Users) Subscribe(w http.ResponseWriter, r *http.Request) {
 		IsSubscribed bool
 	}
 	user := context.User(r.Context())
-	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
+	data.IsSubscribed = user.IsSubscriptionPremium()
 	u.Templates.Subscribe.Execute(w, r, data)
 }
 
@@ -182,7 +182,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		Tokens       []models.ApiToken
 	}
 	data.Email = user.Email
-	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
+	data.IsSubscribed = user.IsSubscriptionPremium()
 	validTokens, err := u.TokenModel.Get(user.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -303,7 +303,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		Tokens       []models.ApiToken
 	}
 	data.Email = user.Email
-	data.IsSubscribed = user.SubscriptionStatus == models.SubscriptionStatusPremium
+	data.IsSubscribed = user.IsSubscriptionPremium()
 
 	// Get tokens for tokens tab
 	if tab == "tokens" {

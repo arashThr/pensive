@@ -23,7 +23,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	logger := context.Logger(r.Context())
 
-	recent, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
+	recent, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {
 		logger.Error("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -34,7 +34,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		IsUserPremium  bool
 		RecentBookmark types.RecentBookmarksType
 	}{
-		IsUserPremium:  user.SubscriptionStatus == models.SubscriptionStatusPremium,
+		IsUserPremium:  user.IsSubscriptionPremium(),
 		RecentBookmark: recent,
 	}
 
@@ -52,7 +52,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	results, err := h.BookmarkModel.Search(user.ID, query, user.SubscriptionStatus)
+	results, err := h.BookmarkModel.Search(user, query)
 	if err != nil {
 		logger.Error("failed to search bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -87,7 +87,7 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	logger := context.Logger(r.Context())
 
-	data, err := h.getRecentBookmarksData(user.ID, 5, user.SubscriptionStatus)
+	data, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {
 		logger.Error("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -98,8 +98,8 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 }
 
 // getRecentBookmarksData fetches recent bookmarks and returns the data structure
-func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptionStatus models.SubscriptionStatus) (types.RecentBookmarksType, error) {
-	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(userId, limit, subscriptionStatus)
+func (h Home) getRecentBookmarksData(user *models.User, limit int) (types.RecentBookmarksType, error) {
+	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(user, limit)
 	if err != nil {
 		return struct {
 			Bookmarks         []types.RecentBookmark
@@ -114,7 +114,7 @@ func (h Home) getRecentBookmarksData(userId types.UserId, limit int, subscriptio
 
 	for _, b := range bookmarks {
 		excerpt := b.Excerpt
-		if subscriptionStatus == models.SubscriptionStatusPremium && b.AIExcerpt != nil {
+		if user.IsSubscriptionPremium() && b.AIExcerpt != nil {
 			excerpt = *b.AIExcerpt
 		}
 		data.Bookmarks = append(data.Bookmarks, types.RecentBookmark{

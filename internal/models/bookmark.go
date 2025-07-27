@@ -72,10 +72,9 @@ type BookmarkModel struct {
 // TODO: When LLMs are inlcuded, don't use them for imports, such as pocket
 func (model *BookmarkModel) Create(
 	link string,
-	userId types.UserId,
-	source BookmarkSource,
-	subscriptionStatus SubscriptionStatus) (*Bookmark, error) {
-	return model.CreateWithContent(link, userId, source, subscriptionStatus, nil)
+	user *User,
+	source BookmarkSource) (*Bookmark, error) {
+	return model.CreateWithContent(link, user, source, nil)
 }
 
 // CreateWithContent creates a bookmark with provided HTML and text content
@@ -83,14 +82,13 @@ func (model *BookmarkModel) Create(
 // If title and excerpt are provided, they will be used instead of extracting from content
 func (model *BookmarkModel) CreateWithContent(
 	link string,
-	userId types.UserId,
+	user *User,
 	source BookmarkSource,
-	subscriptionStatus SubscriptionStatus,
 	bookmarkRequest *types.CreateBookmarkRequest,
 ) (*Bookmark, error) {
 
 	// Check if the link already exists
-	existingBookmark, err := model.GetByLink(userId, link)
+	existingBookmark, err := model.GetByLink(user.ID, link)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
@@ -113,7 +111,7 @@ func (model *BookmarkModel) CreateWithContent(
 		// Neither Readability nor the extension provided content
 		// So we can't create a bookmark
 		if bookmarkRequest == nil {
-			slog.Warn("Page content inaccessible", "link", link, "userId", userId)
+			slog.Warn("Page content inaccessible", "link", link, "userId", user.ID)
 			return nil, fmt.Errorf("page content inaccessible")
 		}
 	}
@@ -151,7 +149,7 @@ func (model *BookmarkModel) CreateWithContent(
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	inputBookmark := Bookmark{
 		Id:            types.BookmarkId(bookmarkId),
-		UserId:        userId,
+		UserId:        user.ID,
 		Title:         validations.CleanUpText(article.Title),
 		Link:          link,
 		Excerpt:       validations.CleanUpText(article.Excerpt),
@@ -170,7 +168,7 @@ func (model *BookmarkModel) CreateWithContent(
 	}
 
 	// Only generate AI content for premium users and not for imports (like Pocket)
-	if subscriptionStatus == SubscriptionStatusPremium && source != Pocket {
+	if user.IsSubscriptionPremium() && source != Pocket {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent
@@ -196,7 +194,7 @@ func (model *BookmarkModel) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $11);`,
-		bookmarkId, userId, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
+		bookmarkId, user.ID, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
@@ -292,7 +290,7 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 }
 
 // GetRecentBookmarks returns the most recent bookmarks for the home page
-func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int, subscriptionStatus SubscriptionStatus) ([]Bookmark, error) {
+func (model *BookmarkModel) GetRecentBookmarks(user *User, limit int) ([]Bookmark, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT
 			user_id,
@@ -313,7 +311,7 @@ func (model *BookmarkModel) GetRecentBookmarks(userId types.UserId, limit int, s
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 		LIMIT $2
-	`, userId, limit)
+	`, user.ID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("query recent bookmarks: %w", err)
 	}
@@ -577,7 +575,7 @@ type SearchResult struct {
 	AITags    *string
 }
 
-func (model *BookmarkModel) Search(userId types.UserId, query string, subscriptionStatus SubscriptionStatus) ([]SearchResult, error) {
+func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		WITH search_query AS (
 			SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
@@ -600,7 +598,7 @@ func (model *BookmarkModel) Search(userId types.UserId, query string, subscripti
 		WHERE li.user_id = $2
     		AND lc.search_vector @@ sq.query
 		ORDER BY rank DESC
-		LIMIT 10`, query, userId)
+		LIMIT 10`, query, user.ID)
 
 	if err != nil {
 		return nil, fmt.Errorf("search bookmarks: %w", err)
@@ -610,7 +608,7 @@ func (model *BookmarkModel) Search(userId types.UserId, query string, subscripti
 	if err != nil {
 		return nil, fmt.Errorf("collect bookmark search rows: %w", err)
 	}
-	if subscriptionStatus != SubscriptionStatusPremium {
+	if !user.IsSubscriptionPremium() {
 		for i := range results {
 			results[i].AISummary = nil
 			results[i].AIExcerpt = nil

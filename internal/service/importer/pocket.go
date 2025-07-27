@@ -23,6 +23,7 @@ const uploadDir = "uploads/imports"
 type ImportProcessor struct {
 	ImportJobModel *models.ImportJobModel
 	BookmarkModel  *models.BookmarkModel
+	UserModel      *models.UserModel
 	Logger         *slog.Logger
 }
 
@@ -31,15 +32,6 @@ type PocketItem struct {
 	URL       string
 	TimeAdded time.Time
 	Status    string
-}
-
-// NewImportProcessor creates a new import processor
-func NewImportProcessor(importJobModel *models.ImportJobModel, bookmarkModel *models.BookmarkModel, logger *slog.Logger) *ImportProcessor {
-	return &ImportProcessor{
-		ImportJobModel: importJobModel,
-		BookmarkModel:  bookmarkModel,
-		Logger:         logger,
-	}
 }
 
 // Start begins processing import jobs in a loop
@@ -135,6 +127,12 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 		slog.Error("update total items count", "error", err)
 	}
 
+	user, err := p.UserModel.Get(job.UserID)
+	if err != nil {
+		slog.Error("get user for import", "error", err, "user_id", job.UserID)
+		return fmt.Errorf("get user for import: %w", err)
+	}
+
 	// Import bookmarks
 	importedCount := 0
 	for i, item := range items {
@@ -143,7 +141,7 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 			slog.Debug("skipping invalid URL", "url", item.URL)
 		} else if item.Status == "archive" {
 			// Do not apply the premium status to the import
-			_, err := p.BookmarkModel.Create(item.URL, job.UserID, models.Pocket, models.SubscriptionStatusFree)
+			_, err := p.BookmarkModel.Create(item.URL, user, models.Pocket)
 			if err != nil {
 				slog.Error("create bookmark failed", "error", err, "url", item.URL)
 			}

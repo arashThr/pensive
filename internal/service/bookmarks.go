@@ -53,7 +53,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := b.BookmarkModel.Create(data.Link, data.UserId, models.WebSource, user.SubscriptionStatus)
+	bookmark, err := b.BookmarkModel.Create(data.Link, user, models.WebSource)
 	if err != nil {
 		b.Templates.New.Execute(w, r, data, web.NavbarMessage{
 			Message: err.Error(),
@@ -102,7 +102,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 	data.CreatedAt = bookmark.CreatedAt
 	data.Thumbnail = bookmark.ImageUrl
-	data.IsPremium = user.SubscriptionStatus == models.SubscriptionStatusPremium
+	data.IsPremium = user.IsSubscriptionPremium()
 
 	logger.Info("Subscription status", "status", user.SubscriptionStatus, "isPremium", data.IsPremium, "user", user.ID)
 
@@ -303,7 +303,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 
 	// Check if user is premium
 	user := context.User(r.Context())
-	if user.SubscriptionStatus != models.SubscriptionStatusPremium {
+	if user.IsSubscriptionPremium() {
 		http.Error(w, "Premium subscription required", http.StatusForbidden)
 		return
 	}

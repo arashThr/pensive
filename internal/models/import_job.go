@@ -25,7 +25,7 @@ type ImportJob struct {
 }
 
 type ImportJobModel struct {
-	DB *pgxpool.Pool
+	Pool *pgxpool.Pool
 }
 
 // Create creates a new import job
@@ -35,7 +35,7 @@ func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at`
 
-	err := m.DB.QueryRow(context.Background(), query,
+	err := m.Pool.QueryRow(context.Background(), query,
 		job.UserID, job.Source, job.FilePath, "pending").
 		Scan(&job.ID, &job.CreatedAt)
 
@@ -58,7 +58,7 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 		ORDER BY created_at ASC 
 		LIMIT $1`
 
-	rows, err := m.DB.Query(context.Background(), query, limit)
+	rows, err := m.Pool.Query(context.Background(), query, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
 		WHERE id = $1`
 
 	var job ImportJob
-	err := m.DB.QueryRow(context.Background(), query, jobID).Scan(
+	err := m.Pool.QueryRow(context.Background(), query, jobID).Scan(
 		&job.ID, &job.UserID, &job.Source, &job.FilePath,
 		&job.Status, &job.TotalItems, &job.ImportedCount,
 		&job.ErrorMessage, &job.CreatedAt, &job.StartedAt, &job.CompletedAt,
@@ -115,7 +115,7 @@ func (m *ImportJobModel) UpdateStatus(jobID, status string, errorMessage *string
 		args = []interface{}{status, jobID}
 	}
 
-	_, err := m.DB.Exec(context.Background(), query, args...)
+	_, err := m.Pool.Exec(context.Background(), query, args...)
 	return err
 }
 
@@ -126,7 +126,7 @@ func (m *ImportJobModel) UpdateProgress(jobID string, totalItems, importedCount 
 		SET total_items = $1, imported_count = $2
 		WHERE id = $3`
 
-	_, err := m.DB.Exec(context.Background(), query, totalItems, importedCount, jobID)
+	_, err := m.Pool.Exec(context.Background(), query, totalItems, importedCount, jobID)
 	return err
 }
 
@@ -141,7 +141,7 @@ func (m *ImportJobModel) GetByUserID(userID types.UserId, limit int) ([]ImportJo
 		ORDER BY created_at DESC 
 		LIMIT $2`
 
-	rows, err := m.DB.Query(context.Background(), query, userID, limit)
+	rows, err := m.Pool.Query(context.Background(), query, userID, limit)
 	if err != nil {
 		return nil, err
 	}

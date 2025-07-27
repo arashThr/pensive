@@ -8,6 +8,7 @@ import (
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,8 +16,9 @@ import (
 type SubscriptionStatus string
 
 const (
-	SubscriptionStatusFree    SubscriptionStatus = "free"
-	SubscriptionStatusPremium SubscriptionStatus = "premium"
+	SubscriptionStatusFree        SubscriptionStatus = "free"
+	SubscriptionStatusPremium     SubscriptionStatus = "premium"
+	SubscriptionStatusFreePremium SubscriptionStatus = "free-premium"
 )
 
 type User struct {
@@ -24,6 +26,7 @@ type User struct {
 	Email              string
 	PasswordHash       string
 	SubscriptionStatus SubscriptionStatus
+	StripeInvoiceId    string
 }
 
 type UserModel struct {
@@ -52,6 +55,11 @@ var InactiveStates = map[string]bool{
 	"incomplete":         true,
 	"incomplete_expired": true,
 	"free":               true,
+}
+
+func (u *User) IsSubscriptionPremium() bool {
+	return u.SubscriptionStatus == SubscriptionStatusPremium ||
+		u.SubscriptionStatus == SubscriptionStatusFreePremium
 }
 
 func (us *UserModel) Create(email, password string) (*User, error) {
@@ -86,6 +94,23 @@ func (us *UserModel) Create(email, password string) (*User, error) {
 		return nil, fmt.Errorf("create user: %w", err)
 	}
 
+	return &user, nil
+}
+
+func (us *UserModel) Get(userId types.UserId) (*User, error) {
+	rows, err := us.Pool.Query(context.Background(), `
+		SELECT * FROM users WHERE id = $1;`, userId)
+
+	if err != nil {
+		return nil, fmt.Errorf("get user: %w", err)
+	}
+	user, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[User])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrNotFound
+		}
+		return nil, fmt.Errorf("get user: %w", err)
+	}
 	return &user, nil
 }
 

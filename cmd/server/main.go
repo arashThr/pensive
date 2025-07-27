@@ -91,7 +91,7 @@ func run(cfg *config.AppConfig) error {
 		Pool: pool,
 	}
 	importJobModel := &models.ImportJobModel{
-		DB: pool,
+		Pool: pool,
 	}
 
 	// Middlewares
@@ -180,7 +180,12 @@ func run(cfg *config.AppConfig) error {
 	}
 
 	// Start import processor in background
-	importProcessor := importer.NewImportProcessor(importJobModel, bookmarksModel, slog.Default())
+	importProcessor := importer.ImportProcessor{
+		ImportJobModel: importJobModel,
+		BookmarkModel:  bookmarksModel,
+		UserModel:      userService,
+		Logger:         slog.Default(),
+	}
 	go importProcessor.Start(ctx)
 
 	// Middlewares
