@@ -303,7 +303,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 
 	// Check if user is premium
 	user := context.User(r.Context())
-	if user.IsSubscriptionPremium() {
+	if !user.IsSubscriptionPremium() {
 		http.Error(w, "Premium subscription required", http.StatusForbidden)
 		return
 	}
