@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Use fixed endpoint based on dev mode
   const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
 
-  const result = await browserAPI.storage.local.get(['endpoint', 'extractionMethod', 'fullPageCapture']);
+  const result = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
   if (result.endpoint !== endpoint) {
-    browserAPI.storage.local.set({ endpoint: endpoint });
+    await browserAPI.storage.local.set({ endpoint: endpoint });
   }
 
   // Check if we already have a token and validate it

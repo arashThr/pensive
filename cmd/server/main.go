@@ -204,10 +204,12 @@ func run(cfg *config.AppConfig) error {
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)
+			// TODO: Remove this
 			r.Get("/ping", tokenController.AuthenticatedPing)
 			r.Route("/tokens", func(r chi.Router) {
 				r.Delete("/current", tokenController.DeleteToken)
 			})
+			r.Get("/user", apiController.CurrentUserAPI)
 			r.Route("/bookmarks", func(r chi.Router) {
 				r.Get("/", apiController.IndexAPI)
 				r.Post("/", apiController.CreateAPI)

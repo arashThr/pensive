@@ -3,397 +3,444 @@
   <head>
     <meta charset="UTF-8">
     <title>Pensive Extension Settings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f9fafb;
+        color: #111827;
+        line-height: 1.5;
+        min-height: 100vh;
+      }
+
+      .container {
         max-width: 600px;
         margin: 0 auto;
-        padding: 24px;
-        color: #111827;
-        background-color: #f9fafb;
-        min-height: 100vh;
-        line-height: 1.5;
+        padding: 32px 24px;
       }
-      .container {
+
+      .card {
         background: white;
-        padding: 32px;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         border: 1px solid #d1d5db;
+        border-radius: 12px;
+        padding: 32px;
       }
+
+      /* Header */
       .header {
         display: flex;
         align-items: center;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
       }
+
       .header-icon {
-        width: 32px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
         border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 12px;
+        margin-right: 16px;
       }
+
       .header-icon svg {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
         color: #2563eb;
       }
-      h1 {
-        margin: 0;
-        color: #111827;
+
+      .header h1 {
         font-size: 1.5rem;
-        font-weight: 600;
-        line-height: 1.25;
-      }
-      h2 {
-        font-size: 1.125rem;
-        font-weight: 600;
+        font-weight: 700;
         color: #111827;
-        margin: 0 0 16px 0;
+        tracking: -0.025em;
       }
+
+      /* Status */
       .status {
         display: flex;
         align-items: center;
         padding: 16px;
         border-radius: 8px;
-        margin: 20px 0;
-        font-size: 0.875rem;
+        margin-bottom: 24px;
         font-weight: 500;
+        font-size: 0.875rem;
       }
+
       .status-icon {
         width: 20px;
         height: 20px;
-        margin-right: 8px;
-        flex-shrink: 0;
+        margin-right: 12px;
       }
+
       .status.connected {
         background: #ecfdf5;
         color: #065f46;
         border: 1px solid #a7f3d0;
       }
+
       .status.connected .status-icon {
         color: #059669;
       }
+
       .status.disconnected {
         background: #fef2f2;
         color: #991b1b;
         border: 1px solid #fecaca;
       }
+
       .status.disconnected .status-icon {
         color: #dc2626;
       }
+
+      /* Buttons */
       .btn {
-        background: #2563eb;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 0.875rem;
-        font-weight: 500;
-        transition: all 0.2s;
         display: inline-flex;
         align-items: center;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
         text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 0.875rem;
       }
-      .btn:hover {
+
+      .btn-primary {
+        background: #2563eb;
+        color: white;
+      }
+
+      .btn-primary:hover {
         background: #1d4ed8;
       }
-      .btn:disabled {
-        background: #9ca3af;
-        cursor: not-allowed;
-      }
+
       .btn-secondary {
-        background: #f3f4f6;
+        background: #f9fafb;
         color: #374151;
         border: 1px solid #d1d5db;
       }
+
       .btn-secondary:hover {
-        background: #e5e7eb;
+        background: #f3f4f6;
       }
+
       .btn-danger {
         background: #dc2626;
         color: white;
       }
+
       .btn-danger:hover {
         background: #b91c1c;
       }
+
+      .btn:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      /* Auth Actions */
       .auth-actions {
         display: flex;
         gap: 12px;
-        align-items: center;
         margin-bottom: 32px;
       }
-      .website-link {
+
+      /* Info Sections */
+      .info-section {
         background: #f9fafb;
         border: 1px solid #d1d5db;
         border-radius: 8px;
-        padding: 20px;
-        margin: 24px 0;
-        text-align: center;
+        padding: 24px;
+        margin-bottom: 24px;
       }
-      .website-link h3 {
-        margin: 0 0 8px 0;
+
+      .info-section h3 {
         font-size: 0.875rem;
         font-weight: 600;
         color: #111827;
+        margin-bottom: 16px;
       }
-      .website-link p {
-        margin: 0 0 16px 0;
+
+      .info-section p {
         font-size: 0.875rem;
-        color: #6b7280;
-        line-height: 1.5;
+        color: #4b5563;
+        margin-bottom: 8px;
       }
+
+      .info-section p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* User Info */
+      #user-info h3::before {
+        content: '👤';
+        margin-right: 8px;
+      }
+
+      #user-info p {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 12px;
+        color: #374151;
+      }
+
+      .subscription-premium {
+        color: #2563eb !important;
+        background: #f8fafc !important;
+        border-color: #dbeafe !important;
+      }
+
+      .subscription-free {
+        color: #059669 !important;
+        background: #ecfdf5 !important;
+        border-color: #a7f3d0 !important;
+      }
+
+      /* Website Link */
+      .website-link {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      .website-link h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 8px;
+      }
+
+      .website-link p {
+        color: #4b5563;
+        margin-bottom: 16px;
+      }
+
       .website-link a {
         color: #2563eb;
         text-decoration: none;
         font-weight: 500;
       }
+
       .website-link a:hover {
+        color: #1d4ed8;
         text-decoration: underline;
       }
-      .info-section {
-        background: #f9fafb;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 20px;
-        margin-top: 24px;
-      }
-      .info-section h3 {
-        margin: 0 0 12px 0;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #111827;
-      }
-      .info-section p {
-        margin: 0 0 8px 0;
-        font-size: 0.875rem;
-        color: #6b7280;
-        line-height: 1.5;
-      }
-      .info-section p:last-child {
-        margin-bottom: 0;
-      }
-      .extraction-method-section {
-        margin-top: 32px;
-        padding: 24px;
-        background: #f9fafb;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-      }
-      .extraction-method-section h2 {
-        margin-bottom: 12px;
-      }
-      .method-description {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin-bottom: 16px;
-      }
-      .recommended-tag {
-        background: #e0f2fe;
-        color: #1d4ed8;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        margin-left: 8px;
-      }
-      /* Advanced settings styles */
+
+      /* Advanced Settings */
       .advanced-settings {
         margin-top: 32px;
         padding-top: 24px;
         border-top: 1px solid #e5e7eb;
       }
-      /* Radio option styles */
-      .radio-group {
-        margin-bottom: 16px;
+
+      .advanced-settings h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 20px;
       }
+
+      /* Radio Options */
+      .radio-group {
+        margin-bottom: 24px;
+      }
+
       .radio-option {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
-        margin-bottom: 12px;
-        padding: 12px;
+        padding: 16px;
         border: 1px solid #e5e7eb;
-        border-radius: 6px;
+        border-radius: 8px;
+        margin-bottom: 12px;
         cursor: pointer;
         transition: all 0.2s;
       }
+
       .radio-option:hover {
         background: #f9fafb;
       }
+
       .radio-option:last-child {
         margin-bottom: 0;
       }
+
       .radio-label {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 12px;
-        flex-grow: 1;
         cursor: pointer;
+        width: 100%;
       }
-      .radio-label input {
+
+      .radio-input {
         position: absolute;
         opacity: 0;
         cursor: pointer;
         height: 0;
         width: 0;
       }
+
       .radio-checkmark {
-        height: 18px;
         width: 18px;
-        min-width: 18px;
-        min-height: 18px;
-        background-color: #fff;
-        border-radius: 50%;
+        height: 18px;
+        background: white;
         border: 2px solid #d1d5db;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         transition: all 0.2s;
         flex-shrink: 0;
+        margin-top: 2px;
       }
-      .radio-label input:checked ~ .radio-checkmark {
+
+      .radio-input:checked ~ .radio-checkmark {
         border-color: #2563eb;
       }
-      .radio-checkmark:after {
+
+      .radio-checkmark::after {
         content: "";
-        display: none;
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background-color: #2563eb;
+        background: #2563eb;
+        display: none;
       }
-      .radio-label input:checked ~ .radio-checkmark:after {
+
+      .radio-input:checked ~ .radio-checkmark::after {
         display: block;
       }
-      .radio-info {
-        flex-grow: 1;
+
+      .radio-content {
+        flex: 1;
       }
+
       .radio-title {
-        font-size: 0.875rem;
         font-weight: 500;
         color: #374151;
-        margin-bottom: 2px;
-      }
-      .radio-desc {
-        font-size: 0.75rem;
-        color: #6b7280;
-        line-height: 1.4;
-      }
-      /* Warning box styles */
-      .warning-box {
-        background: #fef3c7;
-        border: 1px solid #fcd34d;
-        border-radius: 6px;
-        padding: 12px;
-        margin-top: 12px;
-        margin-bottom: 16px;
-      }
-      .warning-header {
+        margin-bottom: 4px;
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
+        gap: 8px;
       }
-      .warning-header svg {
-        width: 16px;
-        height: 16px;
-        color: #d97706;
-      }
-      .warning-header strong {
+
+      .radio-desc {
         font-size: 0.875rem;
-        font-weight: 600;
-        color: #d97706;
-      }
-      .warning-content p {
-        margin-bottom: 6px;
-        font-size: 0.75rem;
         color: #6b7280;
         line-height: 1.4;
       }
-      .warning-content p:last-child {
-        margin-bottom: 0;
+
+      .recommended-tag {
+        background: #dbeafe;
+        color: #1d4ed8;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
       }
-      .warning-content strong {
-        color: #374151;
+
+      /* Utility Classes */
+      .hidden {
+        display: none;
+      }
+
+      .mb-0 {
+        margin-bottom: 0;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-icon">
-          <img src="logo.svg" alt="Chrome" style="width: 32px; height: 32px;">
+      <div class="card">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-icon">
+            <img src="logo.svg" alt="Chrome" style="width: 32px; height: 32px;">
+          </div>
+          <h1>Pensive Extension Settings</h1>
         </div>
-        <h1>Pensive Extension Settings</h1>
-      </div>
-      
-      <!-- Connection Status -->
-      <div id="status" class="status disconnected">
-        <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-        </svg>
-        <span>Not connected to Pensive</span>
-      </div>
-
-      <!-- Authentication Actions -->
-      <div id="auth-section" class="auth-actions">
-        <button id="connect-button" class="btn">
-          Connect to Pensive
-        </button>
-        <button id="signout-button" class="btn btn-danger" style="display: none;">
-          Sign Out
-        </button>
-      </div>
-
-      <!-- Website Link -->
-      <div class="website-link">
-        <h3>New to Pensive?</h3>
-        <p>Build your own searchable memory of the web. Save and index everything you read online.</p>
-        <a href="https://getpensive.com" target="_blank">Visit getpensive.com →</a>
-      </div>
-
-      <!-- Usage Instructions -->
-      <div class="info-section">
-        <h3>Quick Start:</h3>
-        <p><strong>1.</strong> Connect your account by clicking "Connect to Pensive" above</p>
-        <p><strong>2.</strong> Click the Pensive icon on any page to save it to your library</p>
-        <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
-      </div>
-
-      <!-- Content Capture Settings -->
-      <div class="advanced-settings">
-        <h2>Content Capture Settings</h2>
-        <div class="radio-group">
-          <div class="radio-option">
-            <label class="radio-label">
-              <input type="radio" id="enhancedCapture" name="captureMethod" value="enhanced" checked>
-              <span class="radio-checkmark"></span>
-              <div class="radio-info">
-                <span class="radio-title">Enhanced content capture <span class="recommended-tag">Recommended</span></span>
-                <p class="radio-desc">Captures HTML content for better searchability and content preservation. Works best on sites with a complex layout, like forums.</p>
-              </div>
-            </label>
-          </div>
-
-          <div class="radio-option">
-            <label class="radio-label">
-              <input type="radio" id="serverSideOnly" name="captureMethod" value="server-only">
-              <span class="radio-checkmark"></span>
-              <div class="radio-info">
-                <span class="radio-title">Server-side capture only</span>
-                <p class="radio-desc">Only sends the URL to our servers. May not work on sites with paywalls or complex layouts.</p>
-              </div>
-            </label>
-          </div>
+        
+        <!-- Connection Status -->
+        <div id="status" class="status disconnected">
+          <svg class="status-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <span>Not connected to Pensive</span>
         </div>
 
-        <button id="save-content-settings" class="btn btn-secondary">Save Settings</button>
+        <!-- Authentication Actions -->
+        <div id="auth-section" class="auth-actions">
+          <button id="connect-button" class="btn btn-primary">
+            Connect to Pensive
+          </button>
+          <button id="signout-button" class="btn btn-danger hidden">
+            Sign Out
+          </button>
+        </div>
+
+        <!-- User Information -->
+        <div id="user-info" class="info-section hidden">
+          <h3>Account Information</h3>
+          <p id="user-email">Email: N/A</p>
+          <p id="user-subscription">Subscription: N/A</p>
+        </div>
+
+        <!-- Website Link -->
+        <div class="info-section website-link">
+          <h3>New to Pensive?</h3>
+          <p>Build your own searchable memory of the web. Save and index everything you read online.</p>
+          <a href="https://getpensive.com" target="_blank">Visit getpensive.com →</a>
+        </div>
+
+        <!-- Usage Instructions -->
+        <div class="info-section">
+          <h3>Quick Start:</h3>
+          <p><strong>1.</strong> Connect your account by clicking "Connect to Pensive" above</p>
+          <p><strong>2.</strong> Click the Pensive icon on any page to save it to your library</p>
+          <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
+        </div>
+
+        <!-- Content Capture Settings -->
+        <div class="advanced-settings">
+          <h2>Content Capture Settings</h2>
+          <div class="radio-group">
+            <div class="radio-option">
+              <label class="radio-label">
+                <input type="radio" id="enhancedCapture" name="captureMethod" value="enhanced" class="radio-input" checked>
+                <span class="radio-checkmark"></span>
+                <div class="radio-content">
+                  <div class="radio-title">
+                    Enhanced content capture
+                    <span class="recommended-tag">Recommended</span>
+                  </div>
+                  <p class="radio-desc">Captures HTML content for better searchability and content preservation. Works best on sites with a complex layout, like forums.</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="radio-option">
+              <label class="radio-label">
+                <input type="radio" id="serverSideOnly" name="captureMethod" value="server-only" class="radio-input">
+                <span class="radio-checkmark"></span>
+                <div class="radio-content">
+                  <div class="radio-title">Server-side capture only</div>
+                  <p class="radio-desc">Only sends the URL to our servers. May not work on sites with paywalls or complex layouts.</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button id="save-content-settings" class="btn btn-secondary">Save Settings</button>
+        </div>
       </div>
     </div>
 

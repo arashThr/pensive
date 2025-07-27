@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Use fixed endpoint based on dev mode
   const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
 
-  const result = await browserAPI.storage.local.get(['endpoint', 'extractionMethod', 'fullPageCapture']);
+  const result = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
   if (result.endpoint !== endpoint) {
-    browserAPI.storage.local.set({ endpoint: endpoint });
+    await browserAPI.storage.local.set({ endpoint: endpoint });
   }
 
   // Check if we already have a token and validate it
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // Set default values for content capture settings
   const fullPageCapture = result.fullPageCapture ? result.fullPageCapture : false;
-  
+
   // Set radio button states based on stored preferences
   if (fullPageCapture) {
     enhancedCaptureRadio.checked = true;
@@ -106,10 +106,27 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   }
 
-  // Function to validate token by calling health check endpoint
+  // Function to validate token by calling health check endpoint and get user info
   async function validateToken(token) {
     try {
-      const response = await fetch(new URL('/api/v1/ping', endpoint).href, {
+      // First check if server is online with /api/ping
+      const pingResponse = await fetch(new URL('/api/ping', endpoint).href, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!pingResponse.ok) {
+        // Server is not responding
+        showConnectedState();
+        addSignOutButton();
+        statusDiv.textContent = 'Connected to Pensive (server offline)';
+        return;
+      }
+
+      // Server is online, now get user info
+      const userResponse = await fetch(new URL('/api/v1/user', endpoint).href, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -117,8 +134,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
       });
 
-      if (response.ok) {
-        showConnectedState();
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        showConnectedState(userData);
         addSignOutButton();
       } else {
         // Token is invalid, clear it and show disconnected state
@@ -204,13 +222,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
   });
 
-  function showConnectedState() {
+  function showConnectedState(userData) {
     statusDiv.className = 'status connected';
     statusDiv.textContent = 'Connected to Pensive';
     authSection.style.display = 'block';
 
     // Hide the connect button when connected
     connectButton.style.display = 'none';
+
+    // Display user email and subscription status if available
+    if (userData) {
+      const userEmail = userData.Email || 'N/A';
+      const userSubscription = userData.IsSubscribed ? 'Premium' : 'Free';
+      document.getElementById('user-email').textContent = `Email: ${userEmail}`;
+      document.getElementById('user-subscription').textContent = `Subscription: ${userSubscription}`;
+      document.getElementById('user-info').style.display = 'block';
+    } else {
+      document.getElementById('user-info').style.display = 'none';
+    }
   }
 
   function showDisconnectedState() {
@@ -228,6 +257,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (signOutButton) {
       signOutButton.style.display = 'none';
     }
+
+    // Hide the user info section
+    document.getElementById('user-info').style.display = 'none';
   }
 
   function showError(message) {
@@ -236,5 +268,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     connectButton.style.display = 'inline-block';
     connectButton.disabled = false;
     connectButton.textContent = 'Connect to Pensive';
+    
+    // Hide the user info section
+    document.getElementById('user-info').style.display = 'none';
   }
 });

@@ -272,6 +272,23 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 	writeResponse(w, data)
 }
 
+// CurrentUserAPI handles the current user's information.
+// @Produce json
+// @Success 200 {object} struct{Email string; IsSubscribed bool; Tokens []models.ApiToken}
+// @Failure 401 {object} ErrorResponse "Unauthorized"
+// @Failure 500 {object} ErrorResponse "Something went wrong"
+// @Router /v1/api/user/me [get]
+func (a *Api) CurrentUserAPI(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	var data struct {
+		Email        string
+		IsSubscribed bool
+	}
+	data.Email = user.Email
+	data.IsSubscribed = user.IsSubscriptionPremium()
+	writeResponse(w, data)
+}
+
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
 	id := chi.URLParam(r, "id")
 	logger := context.Logger(r.Context())
