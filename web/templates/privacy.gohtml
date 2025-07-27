@@ -31,8 +31,8 @@
         <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
           <li>URLs of web pages you bookmark</li>
           <li>Page titles and metadata</li>
-          <li>Extracted text content from saved pages</li>
-          <li>Clean HTML content (with ads and tracking removed)</li>
+          <li>Extracted text content from saved pages (using Mozilla's Readability.js)</li>
+          <li>Clean HTML content (with ads and tracking removed) when Readability extraction fails</li>
           <li>Generated summaries and tags (premium feature using Google Gemini)</li>
         </ul>
 
@@ -58,30 +58,37 @@
       <section>
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Browser Extension Privacy</h2>
         <p class="text-gray-700 leading-relaxed mb-4">
-          Our browser extension only processes data when you explicitly save a page by clicking the extension icon. The extension offers three content extraction methods:
+          Our browser extension only processes data when you explicitly save a page by clicking the extension icon. Before using the extension, you must provide consent for data collection and choose your preferred content extraction method.
         </p>
         
+        <h3 class="text-xl font-medium text-gray-900 mb-3">Consent and Data Collection</h3>
+        <p class="text-gray-700 leading-relaxed mb-4">
+          When you first install the Pensive extension, you'll be presented with a consent page that explains what data we collect and asks for your permission. You must provide explicit consent before the extension can function.
+        </p>
+
         <h3 class="text-xl font-medium text-gray-900 mb-3">Content Extraction Methods</h3>
         <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
-          <li><strong>Server-Side Extraction:</strong> Extension sends only the page URL to Pensive servers, which fetch and process the content. Best for public articles and news sites.</li>
-          <li><strong>Smart Article Extraction (Recommended):</strong> Extension uses Mozilla's Readability.js library locally to extract clean article content, then sends only the main text. Works well for most articles and blog posts.</li>
-          <li><strong>Full Page Extraction:</strong> Extension captures complete page content locally and sends clean HTML. Needed for sites like Reddit or complex layouts where article detection fails.</li>
+          <li><strong>Enhanced Content Capture (Recommended):</strong> The extension uses Mozilla's Readability.js library locally to extract clean article content. If Readability fails, it captures the full HTML content of the page for better searchability and content preservation. This method works best on sites with complex layouts like forums, Reddit, and Stack Overflow.</li>
+          <li><strong>Server-Side Capture Only:</strong> Extension sends only the page URL to Pensive servers, which fetch and process the content. This method may not work on sites with paywalls or complex layouts.</li>
         </ul>
 
         <p class="text-gray-700 leading-relaxed mb-4">The extension:</p>
         <ul class="list-disc list-inside space-y-2 text-gray-700">
+          <li>Requires explicit consent before collecting any data</li>
           <li>Only accesses the current tab when you click "save"</li>
           <li>Extracts clean content using <a href="https://www.npmjs.com/package/@mozilla/readability">Mozilla's Readability.js library</a> (runs locally)</li>
+          <li>Falls back to HTML content capture when Readability extraction fails</li>
           <li>Sends extracted content directly to your Pensive account</li>
           <li>Stores only your authentication token and extraction method preference locally</li>
           <li>Never tracks your browsing or collects data from pages you don't save</li>
+          <li>Allows you to change your extraction method preference at any time in the extension settings</li>
         </ul>
       </section>
 
       <section>
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">User Responsibility for Shared Content</h2>
         <p class="text-gray-700 leading-relaxed mb-4">
-          When using client-side extraction methods (Smart Article or Full Page), you are responsible for ensuring you do not share content you wish to keep private. While Pensive does not use, analyze, or share your content for any purpose other than providing the bookmarking service, you should exercise caution when using Full Page Extraction on pages containing:
+          When using Enhanced Content Capture, you are responsible for ensuring you do not share content you wish to keep private. While Pensive does not use, analyze, or share your content for any purpose other than providing the bookmarking service, you should exercise caution when saving pages containing:
         </p>
         <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
           <li>Personal information, emails, or private messages</li>
@@ -90,7 +97,7 @@
           <li>Any content you wouldn't want saved to your account</li>
         </ul>
         <p class="text-gray-700 leading-relaxed">
-          You have full control over what content gets saved through your choice of extraction method and which pages you choose to bookmark.
+          You have full control over what content gets saved through your choice of extraction method and which pages you choose to bookmark. You can switch between Enhanced Content Capture and Server-Side Capture Only at any time in the extension settings.
         </p>
       </section>
 
