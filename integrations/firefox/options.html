@@ -30,7 +30,6 @@
       .header-icon {
         width: 32px;
         height: 32px;
-        background: #dbeafe;
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -208,70 +207,79 @@
         padding-top: 24px;
         border-top: 1px solid #e5e7eb;
       }
-      /* Checkbox option styles */
-      .checkbox-option {
+      /* Radio option styles */
+      .radio-group {
+        margin-bottom: 16px;
+      }
+      .radio-option {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         padding: 12px;
         border: 1px solid #e5e7eb;
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.2s;
       }
-      .checkbox-option:hover {
+      .radio-option:hover {
         background: #f9fafb;
       }
-      .checkbox-label {
+      .radio-option:last-child {
+        margin-bottom: 0;
+      }
+      .radio-label {
         display: flex;
         align-items: center;
         gap: 12px;
         flex-grow: 1;
+        cursor: pointer;
       }
-      .checkbox-label input {
+      .radio-label input {
         position: absolute;
         opacity: 0;
         cursor: pointer;
         height: 0;
         width: 0;
       }
-      .checkmark {
+      .radio-checkmark {
         height: 18px;
         width: 18px;
-        background-color: #eee;
-        border-radius: 3px;
-        border: 1px solid #d1d5db;
+        min-width: 18px;
+        min-height: 18px;
+        background-color: #fff;
+        border-radius: 50%;
+        border: 2px solid #d1d5db;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
       }
-      .checkbox-label input:checked ~ .checkmark {
-        background-color: #2563eb;
+      .radio-label input:checked ~ .radio-checkmark {
         border-color: #2563eb;
       }
-      .checkmark:after {
+      .radio-checkmark:after {
         content: "";
         display: none;
-        width: 4px;
+        width: 8px;
         height: 8px;
-        border: solid white;
-        border-width: 0 2px 2px 0;
-        transform: rotate(45deg);
+        border-radius: 50%;
+        background-color: #2563eb;
       }
-      .checkbox-label input:checked ~ .checkmark:after {
+      .radio-label input:checked ~ .radio-checkmark:after {
         display: block;
       }
-      .checkbox-info {
+      .radio-info {
         flex-grow: 1;
       }
-      .checkbox-title {
+      .radio-title {
         font-size: 0.875rem;
         font-weight: 500;
         color: #374151;
         margin-bottom: 2px;
       }
-      .checkbox-desc {
+      .radio-desc {
         font-size: 0.75rem;
         color: #6b7280;
         line-height: 1.4;
@@ -320,9 +328,7 @@
       <!-- Header -->
       <div class="header">
         <div class="header-icon">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-          </svg>
+          <img src="logo.svg" alt="Chrome" style="width: 32px; height: 32px;">
         </div>
         <h1>Pensive Extension Settings</h1>
       </div>
@@ -360,33 +366,34 @@
         <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
       </div>
 
-      <!-- Advanced Settings -->
+      <!-- Content Capture Settings -->
       <div class="advanced-settings">
-        <div class="checkbox-option">
-          <label class="checkbox-label">
-            <input type="checkbox" id="fullPageCapture" name="fullPageCapture">
-            <span class="checkmark"></span>
-            <div class="checkbox-info">
-              <span class="checkbox-title">(Experimental) Full page content capture</span>
-              <p class="checkbox-desc">For sites where standard processing doesn't work well (like Reddit, Stack Overflow, or forums).</p>
-            </div>
-          </label>
+        <h2>Content Capture Settings</h2>
+        <div class="radio-group">
+          <div class="radio-option">
+            <label class="radio-label">
+              <input type="radio" id="enhancedCapture" name="captureMethod" value="enhanced" checked>
+              <span class="radio-checkmark"></span>
+              <div class="radio-info">
+                <span class="radio-title">Enhanced content capture <span class="recommended-tag">Recommended</span></span>
+                <p class="radio-desc">Captures HTML content for better searchability and content preservation. Works best on sites with a complex layout, like forums.</p>
+              </div>
+            </label>
+          </div>
+
+          <div class="radio-option">
+            <label class="radio-label">
+              <input type="radio" id="serverSideOnly" name="captureMethod" value="server-only">
+              <span class="radio-checkmark"></span>
+              <div class="radio-info">
+                <span class="radio-title">Server-side capture only</span>
+                <p class="radio-desc">Only sends the URL to our servers. May not work on sites with paywalls or complex layouts.</p>
+              </div>
+            </label>
+          </div>
         </div>
 
-        <!-- Warning that appears when checkbox is checked -->
-        <div id="fullPageWarning" class="warning-box" style="display: none;">
-          <div class="warning-header">
-            <svg class="warning-icon" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
-            <strong>Note</strong>
-          </div>
-          <div class="warning-content">
-            <p>This captures all visible content on the page. Don't use on pages with personal information or private data.</p>
-          </div>
-        </div>
-
-        <button id="save-content-settings" class="btn btn-secondary">Save</button>
+        <button id="save-content-settings" class="btn btn-secondary">Save Settings</button>
       </div>
     </div>
 
