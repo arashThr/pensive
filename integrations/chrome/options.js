@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', async function () {
   const authSection = document.getElementById('auth-section');
   const enhancedCaptureRadio = document.getElementById('enhancedCapture');
   const serverSideOnlyRadio = document.getElementById('serverSideOnly');
-  const saveContentSettingsButton = document.getElementById('save-content-settings');
 
   let grantOrigins = ['https://getpensive.com/*'];
   if (devMode) {
@@ -54,19 +53,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     enhancedCaptureRadio.checked = false;
   }
 
-  // Save content processing settings
-  saveContentSettingsButton.addEventListener('click', async () => {
-    const fullPageCapture = enhancedCaptureRadio.checked;
-    
-    await browserAPI.storage.local.set({ 
-      fullPageCapture: fullPageCapture
-    });
-    
-    const originalText = saveContentSettingsButton.textContent;
-    saveContentSettingsButton.textContent = 'Saved!';
-    setTimeout(() => {
-      saveContentSettingsButton.textContent = originalText;
-    }, 2000);
+  // Auto-save content processing settings when radio buttons change
+  enhancedCaptureRadio.addEventListener('change', async () => {
+    if (enhancedCaptureRadio.checked) {
+      await browserAPI.storage.local.set({ fullPageCapture: true });
+    }
+  });
+
+  serverSideOnlyRadio.addEventListener('change', async () => {
+    if (serverSideOnlyRadio.checked) {
+      await browserAPI.storage.local.set({ fullPageCapture: false });
+    }
   });
 
   // Add sign out button functionality
