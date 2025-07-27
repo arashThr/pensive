@@ -8,9 +8,10 @@ type BookmarkId string
 type ExtractionMethod string
 
 const (
-	ExtractionMethodServer      ExtractionMethod = "server-side"
-	ExtractionMethodReadability ExtractionMethod = "client-readability"
-	ExtractionMethodHTML        ExtractionMethod = "client-html-extraction"
+	ExtractionMethodServer          ExtractionMethod = "server-side"
+	ExtractionMethodReadability     ExtractionMethod = "client-readability"
+	ExtractionMethodReadabilityHTML ExtractionMethod = "client-readability-html"
+	ExtractionMethodHTML            ExtractionMethod = "client-html"
 )
 
 type BookmarkSearchResult struct {

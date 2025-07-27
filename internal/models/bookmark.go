@@ -106,10 +106,14 @@ func (model *BookmarkModel) CreateWithContent(
 	var content string
 
 	extractionMethod := types.ExtractionMethodServer
-	if bookmarkRequest != nil && bookmarkRequest.TextContent != "" {
-		extractionMethod = types.ExtractionMethodReadability
-	} else if bookmarkRequest != nil && bookmarkRequest.HtmlContent != "" {
-		extractionMethod = types.ExtractionMethodHTML
+	if bookmarkRequest != nil {
+		if bookmarkRequest.TextContent != "" && bookmarkRequest.HtmlContent != "" {
+			extractionMethod = types.ExtractionMethodReadabilityHTML
+		} else if bookmarkRequest.TextContent != "" {
+			extractionMethod = types.ExtractionMethodReadability
+		} else if bookmarkRequest.HtmlContent != "" {
+			extractionMethod = types.ExtractionMethodHTML
+		}
 	}
 
 	// Fallback to the original method of fetching the page

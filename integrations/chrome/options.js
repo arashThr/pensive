@@ -1,14 +1,21 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
 const isChrome = !(window.browser && browser.runtime)
 const browserAPI = isChrome ? chrome : browser;
-const devMode = false
+const devMode = true
 
 document.addEventListener('DOMContentLoaded', async function () {
+  // Check for consent first
+  const consentResult = await browserAPI.storage.local.get(['consentGiven']);
+  if (!consentResult.consentGiven) {
+    window.location.href = 'consent.html';
+    return;
+  }
+
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
-  const fullPageCaptureCheckbox = document.getElementById('fullPageCapture');
-  const fullPageWarning = document.getElementById('fullPageWarning');
+  const enhancedCaptureRadio = document.getElementById('enhancedCapture');
+  const serverSideOnlyRadio = document.getElementById('serverSideOnly');
   const saveContentSettingsButton = document.getElementById('save-content-settings');
 
   let grantOrigins = ['https://getpensive.com/*'];
@@ -29,24 +36,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     validateToken(result.apiToken);
   }
 
-  const enabled = result.fullPageCapture || false;
-  fullPageCaptureCheckbox.checked = enabled;
-  toggleWarningVisibility(enabled);
-
-  // Handle checkbox toggle
-  fullPageCaptureCheckbox.addEventListener('change', function() {
-    toggleWarningVisibility(checked);
-  });
-
-  // Show/hide warning based on checkbox state
-  function toggleWarningVisibility(show) {
-    fullPageWarning.style.display = show ? 'block' : 'none';
+  // Set default values for content capture settings
+  const fullPageCapture = result.fullPageCapture ? result.fullPageCapture : false;
+  
+  // Set radio button states based on stored preferences
+  if (fullPageCapture) {
+    enhancedCaptureRadio.checked = true;
+    serverSideOnlyRadio.checked = false;
+  } else {
+    serverSideOnlyRadio.checked = true;
+    enhancedCaptureRadio.checked = false;
   }
 
   // Save content processing settings
   saveContentSettingsButton.addEventListener('click', async () => {
-    const enabled = fullPageCaptureCheckbox.checked;
-    await browserAPI.storage.local.set({ fullPageCapture: enabled })
+    const fullPageCapture = enhancedCaptureRadio.checked;
+    
+    await browserAPI.storage.local.set({ 
+      fullPageCapture: fullPageCapture
+    });
+    
     const originalText = saveContentSettingsButton.textContent;
     saveContentSettingsButton.textContent = 'Saved!';
     setTimeout(() => {
