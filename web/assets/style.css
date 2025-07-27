@@ -766,8 +766,14 @@
   .w-48 {
     width: calc(var(--spacing) * 48);
   }
+  .w-auto {
+    width: auto;
+  }
   .w-full {
     width: 100%;
+  }
+  .w-xs {
+    width: var(--container-xs);
   }
   .max-w-2xl {
     max-width: var(--container-2xl);
