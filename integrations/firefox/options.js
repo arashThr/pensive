@@ -1,7 +1,13 @@
 // For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
 const isChrome = !(window.browser && browser.runtime)
 const browserAPI = isChrome ? chrome : browser;
-const devMode = true
+
+// Auto-detect dev mode based on manifest permissions
+const manifest = browserAPI.runtime.getManifest();
+const permissions = isChrome ? manifest.optional_host_permissions : manifest.permissions;
+const devMode = permissions.some(permission => 
+  permission.includes('localhost')
+);
 
 document.addEventListener('DOMContentLoaded', async function () {
   // Check for consent first
