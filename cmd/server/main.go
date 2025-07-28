@@ -149,7 +149,7 @@ func run(cfg *config.AppConfig) error {
 		ImportJobModel: importJobModel,
 		BookmarkModel:  bookmarksModel,
 	}
-	importerController.Templates.ImportExport = views.Must(views.ParseTemplate("user/import-export.gohtml", "tailwind.gohtml"))
+	importerController.Templates.PocketImport = views.Must(views.ParseTemplate("user/pocket-import.gohtml", "tailwind.gohtml"))
 	importerController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
 	importerController.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
 
@@ -242,6 +242,9 @@ func run(cfg *config.AppConfig) error {
 		r.Get("/integrations", web.StaticHandler(
 			views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml")),
 		))
+		r.Get("/pocket", web.StaticHandler(
+			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),
+		))
 		r.Get("/signup", usersController.New)
 		r.Get("/signin", usersController.SignIn)
 		r.Post("/signin", usersController.ProcessSignIn)
@@ -269,8 +272,8 @@ func run(cfg *config.AppConfig) error {
 			// Import/export
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
-				r.Get("/import-export", importerController.ImportExport)
-				r.Post("/import", importerController.ProcessImport)
+				r.Get("/pocket-import", importerController.PocketImport)
+				r.Post("/pocket-import", importerController.ProcessImport)
 				r.Post("/export", importerController.ProcessExport)
 				r.Get("/import-status", importerController.ImportStatus)
 			})

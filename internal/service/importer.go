@@ -21,7 +21,7 @@ import (
 
 type Importer struct {
 	Templates struct {
-		ImportExport     web.Template
+		PocketImport     web.Template
 		ImportProcessing web.Template
 		ImportStatus     web.Template
 	}
@@ -29,9 +29,9 @@ type Importer struct {
 	BookmarkModel  *models.BookmarkModel
 }
 
-// ImportExport displays the import/export page
-func (p Importer) ImportExport(w http.ResponseWriter, r *http.Request) {
-	p.Templates.ImportExport.Execute(w, r, nil)
+// PocketImport displays the import/export page
+func (p Importer) PocketImport(w http.ResponseWriter, r *http.Request) {
+	p.Templates.PocketImport.Execute(w, r, nil)
 }
 
 // ProcessImport handles the file upload and creates an import job

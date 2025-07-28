@@ -2,79 +2,30 @@
 
 <div class="px-6 py-12 max-w-4xl mx-auto">
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Import & Export Data</h1>
-    <p class="text-gray-600">Manage your bookmark collection by importing from other services or exporting your data.</p>
+    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Import from Pocket</h1>
+    <p class="text-gray-600">Upload your Pocket export file to migrate your saved articles.</p>
   </div>
 
-  <!-- Export Section -->
-  <section class="bg-white rounded-xl border border-gray-300 p-6 mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-      Export Your Data
-    </h2>
-    <div class="text-sm text-gray-600 mb-4">
-      Download all your bookmarks and data in a portable format.
-    </div>
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-300 mb-4">
-      <p class="text-sm text-gray-600 mb-2">
-        <span class="font-medium">Export includes:</span>
-      </p>
-      <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
-        <li>All bookmarks with metadata</li>
-        <li>Tags and categories</li>
-        <li>Creation dates and notes</li>
-      </ul>
-    </div>
-    <form action="/users/export" method="post">
-      {{csrfField}}
-      <button
-        type="submit"
-        class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700"
-      >
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        Export Data
-      </button>
-    </form>
-  </section>
-
-  <!-- Import Section -->
+    <!-- Import Form -->
   <section class="bg-white rounded-xl border border-gray-300 p-6">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-      </svg>
-      Import Your Data
-    </h2>
-    <div class="text-sm text-gray-600 mb-6">
-      Import bookmarks from other services into your collection.
-    </div>
-
-    <!-- Import from Pocket -->
-    <div class="border border-gray-300 rounded-lg p-6">
       <div class="flex items-center mb-4">
-        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
-          <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18.84 6.45c-.65-.65-1.77-.65-2.42 0l-4.42 4.42-4.42-4.42c-.65-.65-1.77-.65-2.42 0s-.65 1.77 0 2.42l5.63 5.63c.33.33.76.49 1.21.49s.88-.16 1.21-.49l5.63-5.63c.65-.65.65-1.77 0-2.42zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-          </svg>
+        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+          <img src="/assets/icons/pocket.png" alt="Pocket" class="">
         </div>
         <div>
-          <h3 class="text-lg font-medium text-gray-900">Import from Pocket</h3>
-          <p class="text-sm text-gray-600">Upload your Pocket export file (ZIP format)</p>
+          <h3 class="text-lg font-medium text-gray-900">Upload Export File</h3>
+          <p class="text-sm text-gray-600">Select your Pocket ZIP export file</p>
         </div>
       </div>
 
-      <form action="/users/import" method="post" enctype="multipart/form-data" class="space-y-4">
+      <form action="/users/pocket-import" method="post" enctype="multipart/form-data" class="space-y-4">
         {{csrfField}}
         <input type="hidden" name="source" value="pocket">
         
         <!-- File Upload -->
         <div>
           <label for="import-file" class="block text-sm font-medium text-gray-600 mb-2">
-            Select Pocket Export File (ZIP)
+            Choose ZIP file
           </label>
           <div id="file-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-300 transition-all duration-200">
             <div class="space-y-1 text-center">
@@ -102,7 +53,7 @@
                 <button type="button" id="remove-file" class="mt-2 text-xs text-red-600 hover:text-red-500 underline">Remove file</button>
               </div>
               
-              <p id="upload-hint" class="text-xs text-gray-600">ZIP files only</p>
+              <p id="upload-hint" class="text-xs text-gray-600">ZIP format required</p>
             </div>
           </div>
         </div>
@@ -116,7 +67,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
             </svg>
-            Start Import
+            Begin Import
           </button>
         </div>
       </form>
@@ -142,7 +93,6 @@
           </div>
         </div>
       </div>
-    </div>
   </section>
 </div>
 
