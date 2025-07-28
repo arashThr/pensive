@@ -228,21 +228,26 @@ func run(cfg *config.AppConfig) error {
 		r.Use(umw.SetUser)
 
 		r.Get("/", web.StaticHandler(
+			"Home",
 			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/contact", web.StaticHandler(
+			"Contact",
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/faq", web.FAQ(
 			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/privacy", web.StaticHandler(
+			"Privacy",
 			views.Must(views.ParseTemplate("privacy.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/integrations", web.StaticHandler(
+			"Extensions",
 			views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/pocket", web.StaticHandler(
+			"Pocket import",
 			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/signup", usersController.New)

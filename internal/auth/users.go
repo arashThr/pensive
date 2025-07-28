@@ -44,8 +44,10 @@ type Users struct {
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
 	data := struct {
+		Title            string
 		TurnstileSiteKey string
 	}{
+		Title:            "Sign Up",
 		TurnstileSiteKey: u.TurnstileConfig.SiteKey,
 	}
 	u.Templates.New.Execute(w, r, data)
@@ -58,8 +60,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("cf-turnstile-response")
 
 	var signupTemplateData = struct {
+		Title            string
 		TurnstileSiteKey string
 	}{
+		Title:            "Sign Up",
 		TurnstileSiteKey: u.TurnstileConfig.SiteKey,
 	}
 
@@ -101,8 +105,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title            string
 		TurnstileSiteKey string
 	}
+	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
 	u.Templates.SignIn.Execute(w, r, data)
 }
@@ -114,8 +120,10 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("cf-turnstile-response")
 
 	var data struct {
+		Title            string
 		TurnstileSiteKey string
 	}
+	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
@@ -166,8 +174,10 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) Subscribe(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title        string
 		IsSubscribed bool
 	}
+	data.Title = "Subscription"
 	user := context.User(r.Context())
 	data.IsSubscribed = user.IsSubscriptionPremium()
 	u.Templates.Subscribe.Execute(w, r, data)
@@ -177,6 +187,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	logger := context.Logger(r.Context())
 	var data struct {
+		Title        string
 		Email        string
 		IsSubscribed bool
 		Tokens       []models.ApiToken
@@ -195,21 +206,26 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		data.Tokens = validTokens
 	}
+	data.Title = "Account Settings"
 	u.Templates.UserPage.Execute(w, r, data)
 }
 
 func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title string
 		Email string
 	}
+	data.Title = "Forgot Password"
 	data.Email = r.FormValue("email")
 	u.Templates.ForgotPassword.Execute(w, r, data)
 }
 
 func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title string
 		Email string
 	}
+	data.Title = "Check Your Email"
 	data.Email = r.FormValue("email")
 	pwReset, err := u.PasswordResetService.Create(data.Email)
 	if err != nil {
@@ -233,8 +249,10 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title string
 		Token string
 	}
+	data.Title = "Reset Password"
 	data.Token = r.FormValue("token")
 	u.Templates.ResetPassword.Execute(w, r, data)
 }

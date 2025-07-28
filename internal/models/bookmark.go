@@ -98,7 +98,7 @@ func (model *BookmarkModel) CreateWithContent(
 		return existingBookmark, nil
 	}
 
-	_, err = url.Parse(link)
+	parsedURL, err := url.Parse(link)
 	if err != nil {
 		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
@@ -154,6 +154,13 @@ func (model *BookmarkModel) CreateWithContent(
 		if article.Excerpt == "" {
 			article.Excerpt = textContent[:min(200, len(textContent))]
 		}
+	}
+
+	if article.Title == "" {
+		article.Title = parsedURL.String()
+	}
+	if article.Excerpt == "" {
+		article.Excerpt = "(No excerpt available)"
 	}
 
 	content = validations.CleanUpText(article.TextContent)

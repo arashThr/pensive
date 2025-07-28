@@ -31,7 +31,11 @@ type Importer struct {
 
 // PocketImport displays the import/export page
 func (p Importer) PocketImport(w http.ResponseWriter, r *http.Request) {
-	p.Templates.PocketImport.Execute(w, r, nil)
+	var data struct {
+		Title string
+	}
+	data.Title = "Import from Pocket"
+	p.Templates.PocketImport.Execute(w, r, data)
 }
 
 // ProcessImport handles the file upload and creates an import job
@@ -129,9 +133,11 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to processing page
 	data := struct {
+		Title  string
 		Source string
 		JobID  string
 	}{
+		Title:  "Import Processing",
 		Source: strings.ToUpper(source[:1]) + source[1:], // Capitalize first letter
 		JobID:  string(createdJob.ID),
 	}
@@ -354,6 +360,7 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 	logger.Info("import status check", "user_id", user.ID, "job_id", jobID, "status", job.Status)
 
 	data := struct {
+		Title          string
 		JobID          string
 		Source         string
 		ImportComplete bool
@@ -362,6 +369,7 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 		TotalItems     int
 		ErrorMessage   *string
 	}{
+		Title:          "Import Status",
 		JobID:          string(job.ID),
 		Source:         strings.ToUpper(job.Source[:1]) + job.Source[1:], // Capitalize first letter
 		ImportComplete: job.Status == "completed",

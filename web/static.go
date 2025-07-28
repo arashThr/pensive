@@ -5,9 +5,13 @@ import (
 	"net/http"
 )
 
-func StaticHandler(tpl Template) http.HandlerFunc {
+func StaticHandler(title string, tpl Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, r, nil)
+		var data struct {
+			Title string
+		}
+		data.Title = title
+		tpl.Execute(w, r, data)
 	}
 }
 
@@ -54,6 +58,15 @@ func FAQ(tpl Template) http.HandlerFunc {
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, r, questions)
+		var data struct {
+			Title     string
+			Questions []struct {
+				Question string
+				Answer   template.HTML
+			}
+		}
+		data.Title = "Frequently Asked Questions"
+		data.Questions = questions
+		tpl.Execute(w, r, data)
 	}
 }

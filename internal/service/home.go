@@ -31,9 +31,11 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
+		Title          string
 		IsUserPremium  bool
 		RecentBookmark types.RecentBookmarksType
 	}{
+		Title:          "Home",
 		IsUserPremium:  user.IsSubscriptionPremium(),
 		RecentBookmark: recent,
 	}

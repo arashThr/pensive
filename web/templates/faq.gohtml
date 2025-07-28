@@ -7,10 +7,10 @@
     <p class="text-gray-600">Everything you need to know about using Pensive to manage your knowledge collection.</p>
   </div>
 
-  {{if .}}
+  {{if .Questions}}
     <!-- FAQ Grid -->
     <div class="grid md:grid-cols-2 gap-6">
-      {{range .}}
+      {{range .Questions}}
         {{template "qa" .}}
       {{end}}
     </div>

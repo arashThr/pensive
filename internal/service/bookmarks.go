@@ -31,18 +31,22 @@ type Bookmarks struct {
 
 func (b Bookmarks) New(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		Link string
+		Title string
+		Link  string
 	}
+	data.Title = "New Bookmark"
 	data.Link = r.FormValue("link")
 	b.Templates.New.Execute(w, r, data)
 }
 
 func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	var data struct {
+		Title  string
 		UserId types.UserId
 		Link   string
 	}
 	user := context.User(r.Context())
+	data.Title = "New Bookmark"
 	data.UserId = user.ID
 	data.Link = r.FormValue("link")
 	slog.Debug("creating bookmark", "link", data.Link, "userId", data.UserId)
@@ -169,10 +173,12 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 		Next     int
 	}
 	var data struct {
+		Title     string
 		Pages     PagesData
 		MorePages bool
 		Bookmarks []Bookmark
 	}
+	data.Title = "Library"
 	data.Pages = PagesData{
 		Previous: page - 1,
 		Current:  page,
@@ -267,8 +273,10 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, errors.ErrNotFound) {
 			// If no markdown content is found, show a user-friendly message
 			var data struct {
-				Id types.BookmarkId
+				Title string
+				Id    types.BookmarkId
 			}
+			data.Title = "Markdown Not Available"
 			data.Id = bookmark.Id
 			b.Templates.MarkdownNotAvailable.Execute(w, r, data)
 			return

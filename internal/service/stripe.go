@@ -175,14 +175,22 @@ func (s Stripe) Success(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	log.Printf("user %v completed the checkout session", user.ID)
 	// TODO: Should validate subscription here?
-	var data struct{ SessionId string }
+	var data struct {
+		Title     string
+		SessionId string
+	}
+	data.Title = "Payment Successful"
 	data.SessionId = r.URL.Query().Get("session_id")
 	s.Templates.Success.Execute(w, r, data)
 }
 
 func (s Stripe) Cancel(w http.ResponseWriter, r *http.Request) {
 	// TODO: Keep track of payment statuses?
-	s.Templates.Cancel.Execute(w, r, nil)
+	var data struct {
+		Title string
+	}
+	data.Title = "Payment Cancelled"
+	s.Templates.Cancel.Execute(w, r, data)
 }
 
 func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
