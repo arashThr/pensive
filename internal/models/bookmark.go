@@ -527,12 +527,12 @@ HTML content to process:
 	}
 
 	// Extract excerpt
-	if excerptMatch := regexp.MustCompile(`===EXCERPT===\n(.*?)\n===END EXCERPT===`).FindStringSubmatch(responseText); len(excerptMatch) > 1 {
+	if excerptMatch := regexp.MustCompile(`(?s)===EXCERPT===\n(.*?)\n===END EXCERPT===`).FindStringSubmatch(responseText); len(excerptMatch) > 1 {
 		aiDataResponse.Excerpt = strings.TrimSpace(excerptMatch[1])
 	}
 
 	// Extract tags
-	if tagsMatch := regexp.MustCompile(`===TAGS===\n(.*?)\n===END TAGS===`).FindStringSubmatch(responseText); len(tagsMatch) > 1 {
+	if tagsMatch := regexp.MustCompile(`(?s)===TAGS===\n(.*?)\n===END TAGS===`).FindStringSubmatch(responseText); len(tagsMatch) > 1 {
 		aiDataResponse.Tags = strings.TrimSpace(tagsMatch[1])
 	}
 
