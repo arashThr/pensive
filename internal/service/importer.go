@@ -133,7 +133,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 		JobID  string
 	}{
 		Source: strings.ToUpper(source[:1]) + source[1:], // Capitalize first letter
-		JobID:  createdJob.ID,
+		JobID:  string(createdJob.ID),
 	}
 
 	p.Templates.ImportProcessing.Execute(w, r, data)
@@ -329,7 +329,7 @@ func (p Importer) createZip(zipPath, csvPath string) error {
 func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	user := context.User(r.Context())
-	jobID := r.URL.Query().Get("job_id")
+	jobID := types.ImportJobId(r.URL.Query().Get("job_id"))
 
 	if jobID == "" {
 		http.Error(w, "Job ID is required", http.StatusBadRequest)
@@ -362,7 +362,7 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 		TotalItems     int
 		ErrorMessage   *string
 	}{
-		JobID:          job.ID,
+		JobID:          string(job.ID),
 		Source:         strings.ToUpper(job.Source[:1]) + job.Source[1:], // Capitalize first letter
 		ImportComplete: job.Status == "completed",
 		ImportFailed:   job.Status == "failed",

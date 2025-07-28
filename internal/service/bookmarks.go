@@ -104,7 +104,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Thumbnail = bookmark.ImageUrl
 	data.IsPremium = user.IsSubscriptionPremium()
 
-	logger.Info("Subscription status", "status", user.SubscriptionStatus, "isPremium", data.IsPremium, "user", user.ID)
+	logger.Info("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
 
 	// For premium users, fetch AI-generated content
 	if data.IsPremium {

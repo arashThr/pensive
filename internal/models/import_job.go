@@ -5,23 +5,33 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type ImportJobStatus string
+
+const (
+	ImportJobStatusPending    ImportJobStatus = "pending"
+	ImportJobStatusProcessing ImportJobStatus = "processing"
+	ImportJobStatusCompleted  ImportJobStatus = "completed"
+	ImportJobStatusFailed     ImportJobStatus = "failed"
+)
+
 type ImportJob struct {
-	ID            string       `json:"id"`
-	UserID        types.UserId `json:"user_id"`
-	Source        string       `json:"source"`
-	FilePath      string       `json:"file_path"`
-	Status        string       `json:"status"` // pending, processing, completed, failed
-	TotalItems    int          `json:"total_items"`
-	ImportedCount int          `json:"imported_count"`
-	ErrorMessage  *string      `json:"error_message,omitempty"`
-	CreatedAt     time.Time    `json:"created_at"`
-	StartedAt     *time.Time   `json:"started_at,omitempty"`
-	CompletedAt   *time.Time   `json:"completed_at,omitempty"`
+	ID            types.ImportJobId `db:"id"`
+	UserID        types.UserId      `db:"user_id"`
+	Source        string            `db:"source"`
+	FilePath      string            `db:"file_path"`
+	Status        ImportJobStatus   `db:"status"`
+	TotalItems    int               `db:"total_items"`
+	ImportedCount int               `db:"imported_count"`
+	ErrorMessage  *string           `db:"error_message,omitempty"`
+	CreatedAt     time.Time         `db:"created_at"`
+	StartedAt     *time.Time        `db:"started_at,omitempty"`
+	CompletedAt   *time.Time        `db:"completed_at,omitempty"`
 }
 
 type ImportJobModel struct {
@@ -36,35 +46,33 @@ func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 		RETURNING id, created_at`
 
 	err := m.Pool.QueryRow(context.Background(), query,
-		job.UserID, job.Source, job.FilePath, "pending").
+		job.UserID, job.Source, job.FilePath, ImportJobStatusPending).
 		Scan(&job.ID, &job.CreatedAt)
 
 	if err != nil {
 		return nil, fmt.Errorf("insert import job: %w", err)
 	}
 
-	job.Status = "pending"
+	job.Status = ImportJobStatusPending
 	return &job, nil
 }
 
 // GetPendingJobs returns up to limit pending jobs
-func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
+func (m *ImportJobModel) GetPendingJobs(limit int) ([]types.ImportJobId, error) {
 	query := `
-		SELECT id, user_id, source, file_path, status, 
-		       total_items, imported_count, error_message, 
-		       created_at, started_at, completed_at
+		SELECT id
 		FROM import_jobs 
-		WHERE status != 'completed'
+		WHERE status != $1
 		ORDER BY created_at ASC 
-		LIMIT $1`
+		LIMIT $2`
 
-	rows, err := m.Pool.Query(context.Background(), query, limit)
+	rows, err := m.Pool.Query(context.Background(), query, ImportJobStatusCompleted, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	jobs, err := pgx.CollectRows(rows, pgx.RowToStructByName[ImportJob])
+	jobs, err := pgx.CollectRows(rows, pgx.RowTo[types.ImportJobId])
 	if err != nil {
 		return nil, fmt.Errorf("collect jobs rows: %w", err)
 	}
@@ -72,61 +80,81 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]ImportJob, error) {
 	return jobs, rows.Err()
 }
 
-// GetByID returns a job by ID
-func (m *ImportJobModel) GetByID(jobID string) (*ImportJob, error) {
+// PickupJob returns a job by ID
+func (m *ImportJobModel) GetByID(jobID types.ImportJobId) (*ImportJob, error) {
 	query := `
-		SELECT id, user_id, source, file_path, status, 
-		       total_items, imported_count, error_message, 
-		       created_at, started_at, completed_at
+		SELECT *
 		FROM import_jobs 
 		WHERE id = $1`
 
-	var job ImportJob
-	err := m.Pool.QueryRow(context.Background(), query, jobID).Scan(
-		&job.ID, &job.UserID, &job.Source, &job.FilePath,
-		&job.Status, &job.TotalItems, &job.ImportedCount,
-		&job.ErrorMessage, &job.CreatedAt, &job.StartedAt, &job.CompletedAt,
-	)
+	rows, err := m.Pool.Query(context.Background(), query, jobID)
+	if err != nil {
+		return nil, fmt.Errorf("get job by id: %w", err)
+	}
+
+	job, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[ImportJob])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrNotFound
+		}
+		return nil, fmt.Errorf("collect one job row: %w", err)
+	}
+
+	return &job, nil
+}
+
+func PickupJob(tx pgx.Tx, jobID types.ImportJobId) (*ImportJob, error) {
+	rows, err := tx.Query(context.Background(), `
+		SELECT *
+		FROM import_jobs
+		WHERE id = $1 AND status != $2
+		ORDER BY created_at ASC
+		FOR UPDATE SKIP LOCKED`, jobID, ImportJobStatusCompleted)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query rows for pickup job: %w", err)
+	}
+
+	job, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[ImportJob])
+	if err != nil {
+		return nil, fmt.Errorf("collect rows for pickup job: %w", err)
 	}
 
 	return &job, nil
 }
 
 // UpdateStatus updates job status and timestamps
-func (m *ImportJobModel) UpdateStatus(jobID, status string, errorMessage *string) error {
+func UpdateStatus(tx pgx.Tx, jobID types.ImportJobId, status ImportJobStatus, errorMessage *string) error {
 	var query string
-	var args []interface{}
+	var args []any
 
 	switch status {
-	case "processing":
+	case ImportJobStatusProcessing:
 		query = `UPDATE import_jobs SET status = $1, started_at = NOW() WHERE id = $2`
-		args = []interface{}{status, jobID}
-	case "completed":
+		args = []any{status, jobID}
+	case ImportJobStatusCompleted:
 		query = `UPDATE import_jobs SET status = $1, completed_at = NOW() WHERE id = $2`
-		args = []interface{}{status, jobID}
-	case "failed":
+		args = []any{status, jobID}
+	case ImportJobStatusFailed:
 		query = `UPDATE import_jobs SET status = $1, completed_at = NOW(), error_message = $2 WHERE id = $3`
-		args = []interface{}{status, *errorMessage, jobID}
+		args = []any{status, *errorMessage, jobID}
 	default:
 		query = `UPDATE import_jobs SET status = $1 WHERE id = $2`
-		args = []interface{}{status, jobID}
+		args = []any{status, jobID}
 	}
 
-	_, err := m.Pool.Exec(context.Background(), query, args...)
+	_, err := tx.Exec(context.Background(), query, args...)
 	return err
 }
 
 // UpdateProgress updates job progress counters
-func (m *ImportJobModel) UpdateProgress(jobID string, totalItems, importedCount int) error {
+func UpdateProgress(tx pgx.Tx, jobID types.ImportJobId, totalItems, importedCount int) error {
 	query := `
 		UPDATE import_jobs 
 		SET total_items = $1, imported_count = $2
 		WHERE id = $3`
 
-	_, err := m.Pool.Exec(context.Background(), query, totalItems, importedCount, jobID)
+	_, err := tx.Exec(context.Background(), query, totalItems, importedCount, jobID)
 	return err
 }
 

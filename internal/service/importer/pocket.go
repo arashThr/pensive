@@ -16,6 +16,7 @@ import (
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
+	"github.com/jackc/pgx/v5"
 )
 
 const uploadDir = "uploads/imports"
@@ -61,20 +62,37 @@ func (p *ImportProcessor) Start(ctx context.Context) {
 }
 
 // processJob processes a single import job
-func (p *ImportProcessor) processJob(job models.ImportJob) {
-	slog.Info("processing import job", "source", job.Source, "file", job.FilePath)
+func (p *ImportProcessor) processJob(jobID types.ImportJobId) {
+	tx, err := p.ImportJobModel.Pool.Begin(context.Background())
+	if err != nil {
+		slog.Error("begin transaction", "error", err)
+		return
+	}
+	defer tx.Rollback(context.Background())
+
+	job, err := models.PickupJob(tx, jobID)
+	if err != nil {
+		slog.Error("get job by id", "error", err, "job_id", jobID)
+		return
+	}
+
+	if job == nil {
+		slog.Info("no job to process", "job_id", jobID)
+		return
+	}
+
+	slog.Info("processing import job", "source", job.Source, "file", job.FilePath, "job_id", job.ID)
 
 	// Update status to processing
-	if err := p.ImportJobModel.UpdateStatus(job.ID, "processing", nil); err != nil {
+	if err := models.UpdateStatus(tx, job.ID, models.ImportJobStatusProcessing, nil); err != nil {
 		slog.Error("update job status to processing", "error", err)
 		return
 	}
 
 	// Process based on source
-	var err error
 	switch job.Source {
 	case "pocket":
-		err = p.processPocketImport(job)
+		err = p.processPocketImport(tx, job)
 	default:
 		err = fmt.Errorf("unsupported import source: %s", job.Source)
 	}
@@ -83,19 +101,23 @@ func (p *ImportProcessor) processJob(job models.ImportJob) {
 	if err != nil {
 		slog.Error("job processing failed", "error", err)
 		errorMsg := err.Error()
-		if updateErr := p.ImportJobModel.UpdateStatus(job.ID, "failed", &errorMsg); updateErr != nil {
+		if updateErr := models.UpdateStatus(tx, job.ID, models.ImportJobStatusFailed, &errorMsg); updateErr != nil {
 			slog.Error("update job status to failed", "error", updateErr)
 		}
 	} else {
-		slog.Info("job processing completed")
-		if updateErr := p.ImportJobModel.UpdateStatus(job.ID, "completed", nil); updateErr != nil {
+		slog.Info("job processing completed", "job_id", job.ID)
+		if updateErr := models.UpdateStatus(tx, job.ID, models.ImportJobStatusCompleted, nil); updateErr != nil {
 			slog.Error("update job status to completed", "error", updateErr)
 		}
+	}
+
+	if err := tx.Commit(context.Background()); err != nil {
+		slog.Error("commit transaction", "error", err)
 	}
 }
 
 // processPocketImport processes a Pocket ZIP export
-func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
+func (p *ImportProcessor) processPocketImport(tx pgx.Tx, job *models.ImportJob) error {
 	// Open ZIP file
 	reader, err := zip.OpenReader(job.FilePath)
 	if err != nil {
@@ -121,9 +143,10 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 	if err != nil {
 		return fmt.Errorf("parse pocket CSV: %w", err)
 	}
+	slog.Info("parsed pocket CSV", "items", len(items), "user_id", job.UserID)
 
 	// Update total items count
-	if err := p.ImportJobModel.UpdateProgress(job.ID, len(items), 0); err != nil {
+	if err := models.UpdateProgress(tx, job.ID, len(items), 0); err != nil {
 		slog.Error("update total items count", "error", err)
 	}
 
@@ -135,7 +158,7 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 
 	// Import bookmarks
 	importedCount := 0
-	for i, item := range items {
+	for _, item := range items {
 		// Validate URL
 		if !validations.IsURLValid(item.URL) {
 			slog.Debug("skipping invalid URL", "url", item.URL)
@@ -147,11 +170,8 @@ func (p *ImportProcessor) processPocketImport(job models.ImportJob) error {
 			}
 		}
 		importedCount++
-		// Update progress every 10 items or at the end
-		if (i+1)%10 == 0 || i == len(items)-1 {
-			if err := p.ImportJobModel.UpdateProgress(job.ID, len(items), importedCount); err != nil {
-				slog.Error("update progress", "error", err)
-			}
+		if err := models.UpdateProgress(tx, job.ID, len(items), importedCount); err != nil {
+			slog.Error("update progress", "error", err)
 		}
 	}
 
