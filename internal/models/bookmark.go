@@ -87,20 +87,21 @@ func (model *BookmarkModel) CreateWithContent(
 	source BookmarkSource,
 	bookmarkRequest *types.CreateBookmarkRequest,
 ) (*Bookmark, error) {
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
+	}
+
+	cannonilizedLink := validations.CanonicalURL(parsedURL)
 
 	// Check if the link already exists
-	existingBookmark, err := model.GetByLink(user.ID, link)
+	existingBookmark, err := model.GetByLink(user.ID, cannonilizedLink)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
 		}
 	} else {
 		return existingBookmark, nil
-	}
-
-	parsedURL, err := url.Parse(link)
-	if err != nil {
-		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
 
 	var content string
@@ -170,7 +171,7 @@ func (model *BookmarkModel) CreateWithContent(
 		Id:               types.BookmarkId(bookmarkId),
 		UserId:           user.ID,
 		Title:            validations.CleanUpText(article.Title),
-		Link:             link,
+		Link:             cannonilizedLink,
 		Excerpt:          validations.CleanUpText(article.Excerpt),
 		ImageUrl:         article.Image,
 		PublishedTime:    article.PublishedTime,
@@ -205,7 +206,7 @@ func (model *BookmarkModel) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $12);`,
-		bookmarkId, user.ID, link, article.Title, sourceMapping[source], inputBookmark.Excerpt,
+		bookmarkId, user.ID, cannonilizedLink, article.Title, sourceMapping[source], inputBookmark.Excerpt,
 		article.Image, article.Language, article.SiteName, article.PublishedTime, extractionMethod, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
@@ -331,10 +332,15 @@ func (model *BookmarkModel) GetRecentBookmarks(user *User, limit int) ([]Bookmar
 }
 
 func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return nil, fmt.Errorf("parse URL in get bookmark by link: %w", err)
+	}
+	cannonilizedLink := validations.CanonicalURL(parsedURL)
 	rows, err := model.Pool.Query(context.Background(),
 		`SELECT *
 		FROM library_items
-		WHERE user_id = $1 AND link = $2`, userId, link)
+		WHERE user_id = $1 AND link = $2`, userId, cannonilizedLink)
 	if err != nil {
 		return nil, fmt.Errorf("query bookmark by link: %w", err)
 	}

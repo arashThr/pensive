@@ -17,14 +17,13 @@
 - [ ] Limit size of Excerpt:
     - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [ ] Why YouTube is not working?
-- [ ] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
-- [ ] Use template for export to avoid duplicatin it in tab and export page
-- [ ] We're stuck in index page when the page does not have a title:
-    -  https://apps.arashtaher.com/home 
-    - Check if endpoint is valid
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
-- [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
+- [x] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
+- [x] Use template for export to avoid duplicatin it in tab and export page
+- [x] We're stuck in index page when the page does not have a title:
+    -  https://apps.arashtaher.com/home 
+    - Check if endpoint is valid
 - [x] Remove Umami from edit page
 - [x] Fix import: Links are imported multiple times
     - [x] Enable the import
