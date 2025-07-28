@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
-  {{if isProduction}}
+  {{if and isProduction shouldUseAnalytics}}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{else}}
     <script src="https://cdn.tailwindcss.com"></script>

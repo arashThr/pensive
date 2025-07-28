@@ -25,9 +25,9 @@
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Avoid duplicates: https://en.wikipedia.org/wiki/Anthropic_principle
-- [ ] Remove Umami from edit page
-- [ ] Fix import: Links are imported multiple times
-    - [ ] Enable the import
+- [x] Remove Umami from edit page
+- [x] Fix import: Links are imported multiple times
+    - [x] Enable the import
 - [x] `resetUrl := "http://localhost:8000/reset-password?" + values.Encode()`
 - [x] Fix API token key SVG and the button alignment
 - [x] Fix setting user premium after success: Listener had to be running

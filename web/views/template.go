@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/arashthr/go-course/internal/auth/context"
@@ -47,6 +48,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"isProduction": func() (template.HTML, error) {
 			return "", fmt.Errorf("isProduction not implemented")
 		},
+		"shouldUseAnalytics": func() (template.HTML, error) {
+			return "", fmt.Errorf("shouldUseAnalytics not implemented")
+		},
 		"isSubscriptionEnabled": func() (template.HTML, error) {
 			return "", fmt.Errorf("isSubscriptionEnabled not implemented")
 		},
@@ -73,6 +77,13 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 		http.Error(w, "There was an error serving your request", http.StatusInternalServerError)
 		return
 	}
+	disableAnalytics := false
+	requestPath := r.URL.Path
+	re := regexp.MustCompile(`\/bookmarks/\w+\/edit`)
+	if re.MatchString(requestPath) {
+		disableAnalytics = true
+	}
+
 	tpl = tpl.Funcs(
 		template.FuncMap{
 			"csrfField": func() template.HTML {
@@ -89,6 +100,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 			},
 			"isSubscriptionEnabled": func() bool {
 				return os.Getenv("SUBSCRIPTION_ENABLED") == "true"
+			},
+			"shouldUseAnalytics": func() bool {
+				return !disableAnalytics
 			},
 		},
 	)
