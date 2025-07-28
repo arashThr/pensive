@@ -37,6 +37,10 @@ func FAQ(tpl Template) http.HandlerFunc {
 			Answer:   "You can start using Pensive for free. With premium, you will have higher limits, specially on AI features.",
 		},
 		{
+			Question: "What language is Pensive available in?",
+			Answer:   "At this point, Pensive is only available in English and there are no plans to support other languages.",
+		},
+		{
 			Question: "How can I backup my bookmarks?",
 			Answer:   "You can export your bookmarks from your account settings page. We recommend doing this regularly during the beta phase to protect against potential data loss. The export feature allows you to download your saved content in standard formats.",
 		},
