@@ -26,7 +26,7 @@ type User struct {
 	Email              string
 	PasswordHash       string
 	SubscriptionStatus SubscriptionStatus
-	StripeInvoiceId    string
+	StripeInvoiceId    *string
 }
 
 type UserModel struct {
@@ -109,7 +109,7 @@ func (us *UserModel) Get(userId types.UserId) (*User, error) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, errors.ErrNotFound
 		}
-		return nil, fmt.Errorf("get user: %w", err)
+		return nil, fmt.Errorf("collect one user: %w", err)
 	}
 	return &user, nil
 }
