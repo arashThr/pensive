@@ -180,16 +180,6 @@ func (model *BookmarkModel) CreateWithContent(
 		}
 	}
 
-	// Only generate AI content for premium users and not for imports (like Pocket)
-	if user.IsSubscriptionPremium() && source != Pocket {
-		contentForMarkdown := content
-		if htmlContent != "" {
-			contentForMarkdown = htmlContent
-		}
-		// Generate the markdown content using Gemini
-		go model.generateAIData(contentForMarkdown, link, bookmarkId)
-	}
-
 	_, err = model.Pool.Exec(context.Background(), `
 		WITH inserted_bookmark AS (
 			INSERT INTO library_items (
@@ -212,6 +202,16 @@ func (model *BookmarkModel) CreateWithContent(
 		article.Image, article.Language, article.SiteName, article.PublishedTime, extractionMethod, content)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
+	}
+
+	// Only generate AI content for premium users and not for imports (like Pocket)
+	if user.IsSubscriptionPremium() && source != Pocket {
+		contentForMarkdown := content
+		if htmlContent != "" {
+			contentForMarkdown = htmlContent
+		}
+		// Generate the markdown content using Gemini
+		go model.generateAIData(contentForMarkdown, link, bookmarkId)
 	}
 
 	return &inputBookmark, nil
