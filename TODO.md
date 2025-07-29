@@ -5,20 +5,20 @@
 ## Tasks
 
 ## Fixes
-- [ ] Does not check for duplicates when importing links from pocket
 - [ ] getAllBookmarksForUser
 - [ ] Getting non-existant bookmark: Something went wrong
 - [ ] Faster build
 - [ ] Send email for reset password takes time. Do we wait for sending email?
-- [ ] Adding bookmark from website brings the image, but the extension does not:
-    - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771
-- [ ] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
-    - URLs without https
-- [ ] Limit size of Excerpt:
-    - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
+- [x] Does not check for duplicates when importing links from pocket
+- [x] Adding bookmark from website brings the image, but the extension does not:
+    - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771
+- [x] Extension: Uncaught TypeError: Failed to construct 'URL': Invalid base URL
+    - URLs without https
+- [x] Limit size of Excerpt:
+    - http://www.defmacro.org/ramblings/fp.html is the whole article
 - [x] http and https are considered separate: http://en.wikipedia.org/wiki/Anthropic_principle
 - [x] Use template for export to avoid duplicatin it in tab and export page
 - [x] We're stuck in index page when the page does not have a title:
