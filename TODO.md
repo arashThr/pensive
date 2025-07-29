@@ -12,6 +12,7 @@
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
+- [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket
 - [x] Adding bookmark from website brings the image, but the extension does not:
     - https://world.hey.com/dhh/linux-crosses-magic-market-share-threshold-in-us-1f914771

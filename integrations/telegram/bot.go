@@ -167,7 +167,7 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	// Look for a link in the message
 	var link string
-	parts := strings.Split(msg, " ")
+	parts := strings.Fields(msg)
 	for _, part := range parts {
 		if strings.HasPrefix(part, "http://") || strings.HasPrefix(part, "https://") {
 			link = part
@@ -197,7 +197,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	reqBody, _ := json.Marshal(map[string]string{"link": link})
 	req, err := http.NewRequest("POST", apiEndpoint+"/api/v1/bookmarks", bytes.NewBuffer(reqBody))
 	if err != nil {
-		slog.Error("failed to create request", "error", err, "link", link, "chatID", chatID)
+		slog.Error("failed to create save request", "error", err, "link", link, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
@@ -253,7 +253,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string) {
 	req, err := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/search?query="+urlQueryEscape(query), nil)
 	if err != nil {
-		slog.Error("failed to create request", "error", err, "query", query, "chatID", chatID)
+		slog.Error("failed to create search request", "error", err, "query", query, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
@@ -306,8 +306,8 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 		if r.Headline != "" {
 			// Truncate headline if too long
 			headline := r.Headline
-			if len(headline) > 100 {
-				headline = headline[:97] + "..."
+			if len(headline) > 200 {
+				headline = headline[:197] + "..."
 			}
 			sb.WriteString(fmt.Sprintf("<i>%s</i>\n", headline))
 		}
