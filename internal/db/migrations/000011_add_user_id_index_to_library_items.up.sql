@@ -1,0 +1,1 @@
+CREATE INDEX idx_library_items_user_id_created_at ON library_items(user_id, created_at);

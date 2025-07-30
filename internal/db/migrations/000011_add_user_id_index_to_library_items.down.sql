@@ -1,0 +1,1 @@
+DROP INDEX idx_library_items_user_id_created_at;
