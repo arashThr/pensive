@@ -104,6 +104,11 @@ func (model *BookmarkModel) CreateWithContent(
 		return existingBookmark, nil
 	}
 
+	// Check rate limit before creating new bookmark
+	if err := model.checkRateLimit(user); err != nil {
+		return nil, err
+	}
+
 	var content string
 
 	extractionMethod := types.ExtractionMethodServer
@@ -768,4 +773,65 @@ func getPage(link string) (*http.Response, error) {
 	}
 	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	return resp, nil
+}
+
+const (
+	FreeUserDailyLimit    = 100
+	PremiumUserDailyLimit = 300
+)
+
+// checkRateLimit checks if a user has exceeded their daily bookmark limit
+func (model *BookmarkModel) checkRateLimit(user *User) error {
+	today := time.Now().Truncate(24 * time.Hour)
+	tomorrow := today.Add(24 * time.Hour)
+
+	row := model.Pool.QueryRow(context.Background(), `
+		SELECT COUNT(*) FROM library_items 
+		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3
+	`, user.ID, today, tomorrow)
+
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return fmt.Errorf("check rate limit: %w", err)
+	}
+
+	var limit int
+	if user.IsSubscriptionPremium() {
+		limit = PremiumUserDailyLimit
+	} else {
+		limit = FreeUserDailyLimit
+	}
+
+	if count >= limit {
+		return errors.ErrDailyLimitExceeded
+	}
+
+	return nil
+}
+
+// GetRemainingBookmarks returns the number of bookmarks a user can still create today
+func (model *BookmarkModel) GetRemainingBookmarks(user *User) (int, error) {
+	today := time.Now().Truncate(24 * time.Hour)
+	tomorrow := today.Add(24 * time.Hour)
+
+	row := model.Pool.QueryRow(context.Background(), `
+		SELECT COUNT(*) FROM library_items 
+		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3
+	`, user.ID, today, tomorrow)
+
+	var count int
+	if err := row.Scan(&count); err != nil {
+		return 0, fmt.Errorf("get remaining bookmarks: %w", err)
+	}
+
+	var limit int
+	if user.IsSubscriptionPremium() {
+		limit = PremiumUserDailyLimit
+	} else {
+		limit = FreeUserDailyLimit
+	}
+
+	remaining := max(limit-count, 0)
+
+	return remaining, nil
 }

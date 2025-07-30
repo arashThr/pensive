@@ -9,4 +9,7 @@ var (
 
 	// Stripe
 	ErrNoStripeCustomer = errors.New("models: stripe customer not found")
+
+	// Rate limiting
+	ErrDailyLimitExceeded = errors.New("models: daily bookmark limit exceeded")
 )

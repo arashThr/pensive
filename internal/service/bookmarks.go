@@ -59,8 +59,15 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 
 	bookmark, err := b.BookmarkModel.Create(data.Link, user, models.WebSource)
 	if err != nil {
+		var message string
+		if errors.Is(err, errors.ErrDailyLimitExceeded) {
+			message = "Daily bookmark limit exceeded. Please upgrade to premium for higher limits."
+		} else {
+			message = err.Error()
+		}
+
 		b.Templates.New.Execute(w, r, data, web.NavbarMessage{
-			Message: err.Error(),
+			Message: message,
 			IsError: true,
 		})
 		return

@@ -217,9 +217,17 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 
 	if resp.StatusCode != http.StatusOK {
 		slog.Error("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
+
+		var errorMessage string
+		if resp.StatusCode == http.StatusTooManyRequests {
+			errorMessage = "❌ <b>Daily limit exceeded</b>\n\nYou've reached your daily bookmark limit. Please upgrade to premium for higher limits."
+		} else {
+			errorMessage = "❌ <b>Save failed</b>\n\nServer error: " + resp.Status
+		}
+
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    chatID,
-			Text:      "❌ <b>Save failed</b>\n\nServer error: " + resp.Status,
+			Text:      errorMessage,
 			ParseMode: models.ParseModeHTML,
 		})
 		return

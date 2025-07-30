@@ -149,6 +149,16 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, user, models.Api, &data)
 	if err != nil {
 		slog.Error("[api] failed to create bookmark", "error", err)
+
+		// Handle rate limit error specifically
+		if errors.Is(err, errors.ErrDailyLimitExceeded) {
+			writeErrorResponse(w, http.StatusTooManyRequests, ErrorResponse{
+				Code:    "DAILY_LIMIT_EXCEEDED",
+				Message: "Daily bookmark limit exceeded. Please upgrade to premium for higher limits.",
+			})
+			return
+		}
+
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "CREATE_BOOKMARK",
 			Message: fmt.Sprintf("Failed to create bookmark: %v", err),

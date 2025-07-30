@@ -56,28 +56,36 @@
 	• Non-200
 	• Login redirects
 	• Cloudflare pages (__cf_bm cookies, JS challenges)
-- [ ] Landing page: Here's how it works:
+- [ ] Landing page: Here's how it works demo:
     - Save the link, show the summary
 - Youtube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
-- [ ] Limitations configs (Free vs. Premium):
-    - Bookmarks
-    - AI and YouTube
 - [ ] Premium: Get YouTube
-- [ ] Add metrics
-- [ ] Send logs when extension crashes
-- [ ] Add analytics
-- [ ] Upload the extensions
-    - [ ] Create the extension logo for Chrome store
+- [ ] Observability
+    - [ ] Add metrics
+    - [ ] Send logs when extension crashes
+    - [ ] Telegram logging
+    - [ ] Remove time from logs
+    - [ ] Zap is possible?
 - [ ] Add like and dislike buttons
 - [ ] Send verification email
-- [ ] Setup hooks for payment in production
-- [ ] Add: Warn me about personal pages
-- [ ] Monitoring
 - [ ] Tags
     - [ ] Read tags from Pocket
+- [ ] Short key for calling the extension
 - [ ] Back up db
+    - [x] Create backups
+    - [ ] Preserve db backups on a remote server
+    - [ ] Automate db backup
+- [x] Limitations configs (Free vs. Premium):
+    - [x] Bookmarks
+    - [x] Test limits
+    - [x] AI and YouTube
+- [x] Add: Warn me about personal pages
+- [x] Add analytics
+- [x] Upload the extensions
+    - [x] Create the extension logo for Chrome store
+- [x] Setup hooks for payment in production
 - [x] Export links
 - [x] Get excerpt and summaries from Genimi
 - [x] Limit search result to 10 - Search better!
@@ -121,8 +129,6 @@
 - [ ] Add validation to create bookmark inputs
 - [ ] Send payments to Amazon Eventbridge
 - [ ] Add ping call from extension to an authorized endpoint
-- [ ] Remove time from logs
-    - Zap is possible?
 - [ ] Apply rate limit on requests
 - [ ] Don't let user to create API token, or only one
     - [ ] Show the orginator of the token and date
