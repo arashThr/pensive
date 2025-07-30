@@ -54,9 +54,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
 
       if (!endpoint || !apiToken) {
-        updateStatus('error', 'Extension not configured');
-        saveBtn.disabled = true;
-        removeBtn.disabled = true;
+        updateStatus('not-configured', 'Account not connected');
+        // Hide action buttons when not configured
+        document.getElementById('actions').style.display = 'none';
         return;
       }
 
@@ -90,6 +90,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateBookmarkStatus() {
+    // Show action buttons when user is configured
+    document.getElementById('actions').style.display = 'flex';
+    
     if (isBookmarked) {
       updateStatus('saved', 'Page is saved');
       saveBtn.disabled = true;
@@ -110,8 +113,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { endpoint, apiToken, fullPageCapture } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
 
     if (!endpoint || !apiToken) {
-      updateStatus('error', 'Extension not configured');
-      saveBtn.disabled = false;
+      updateStatus('not-configured', 'Account not connected');
+      // Hide action buttons when not configured
+      document.getElementById('actions').style.display = 'none';
       return;
     }
 
@@ -256,8 +260,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
 
       if (!endpoint || !apiToken) {
-        updateStatus('error', 'Extension not configured');
-        removeBtn.disabled = false;
+        updateStatus('not-configured', 'Account not connected');
+        // Hide action buttons when not configured
+        document.getElementById('actions').style.display = 'none';
         return;
       }
 
@@ -325,6 +330,70 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       statusElement.appendChild(spinner);
       statusElement.appendChild(span);
+    } else if (type === 'not-configured') {
+      // Create a container for the not-configured message
+      const container = document.createElement('div');
+      container.style.textAlign = 'center';
+      container.style.padding = '8px 0';
+      
+      // Main message
+      const messageSpan = document.createElement('div');
+      messageSpan.textContent = message;
+      messageSpan.style.marginBottom = '12px';
+      messageSpan.style.fontWeight = '500';
+      messageSpan.style.fontSize = '14px';
+      container.appendChild(messageSpan);
+      
+      // Create a flex container for the links
+      const linksContainer = document.createElement('div');
+      linksContainer.style.display = 'flex';
+      linksContainer.style.justifyContent = 'center';
+      linksContainer.style.alignItems = 'center';
+      linksContainer.style.gap = '8px';
+      linksContainer.style.flexWrap = 'nowrap';
+      linksContainer.style.width = '100%';
+      
+      // Create account link
+      const createAccountLink = document.createElement('a');
+      createAccountLink.href = '#';
+      createAccountLink.textContent = 'Create Account';
+      createAccountLink.style.color = '#d97706';
+      createAccountLink.style.fontWeight = '500';
+      createAccountLink.style.textDecoration = 'underline';
+      createAccountLink.style.fontSize = '13px';
+      createAccountLink.style.whiteSpace = 'nowrap';
+      createAccountLink.style.flex = '0 0 auto';
+      createAccountLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        browserAPI.tabs.create({ url: 'https://getpensive.com/signup' });
+      });
+      linksContainer.appendChild(createAccountLink);
+      
+      // Separator
+      const separator = document.createElement('span');
+      separator.textContent = '•';
+      separator.style.color = '#6b7280';
+      separator.style.fontSize = '13px';
+      separator.style.whiteSpace = 'nowrap';
+      linksContainer.appendChild(separator);
+      
+      // Connect account link
+      const connectLink = document.createElement('a');
+      connectLink.href = '#';
+      connectLink.textContent = 'Connect Account';
+      connectLink.style.color = '#d97706';
+      connectLink.style.fontWeight = '500';
+      connectLink.style.textDecoration = 'underline';
+      connectLink.style.fontSize = '13px';
+      connectLink.style.whiteSpace = 'nowrap';
+      connectLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        browserAPI.runtime.openOptionsPage();
+      });
+      linksContainer.appendChild(connectLink);
+      
+      container.appendChild(linksContainer);
+      statusElement.appendChild(container);
     } else {
       const span = document.createElement('span');
       span.textContent = message;

@@ -115,6 +115,51 @@
       border: 1px solid #fecaca;
     }
     
+    .status.not-configured {
+      background-color: #FFFBEB;
+      color: #92400E;
+      border: 1px solid #FDE68A;
+      padding: 0;
+    }
+    
+    .not-configured-content {
+      text-align: center;
+      padding: 16px;
+    }
+    
+    .not-configured-message {
+      margin-bottom: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #92400E;
+    }
+    
+    .not-configured-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: nowrap;
+    }
+    
+    .not-configured-btn {
+      color: #D97706;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 13px;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background-color: #FFFBEB;
+      border: 1px solid #FDE68A;
+      transition: all 0.2s;
+    }
+    
+    .not-configured-btn:hover {
+      background-color: #FEF3C7;
+      border-color: #D97706;
+    }
+    
     .status-icon {
       width: 18px;
       height: 18px;
@@ -291,6 +336,17 @@
     <div class="status loading" id="status">
       <div class="spinner"></div>
       <span>Checking status...</span>
+    </div>
+    
+    <!-- Not Configured State -->
+    <div class="status not-configured" id="notConfiguredStatus" style="display: none;">
+      <div class="not-configured-content">
+        <div class="not-configured-message">Account not connected</div>
+        <div class="not-configured-actions">
+          <a href="#" class="not-configured-btn" id="createAccountBtn">Create Account</a>
+          <a href="#" class="not-configured-btn" id="connectAccountBtn">Connect Account</a>
+        </div>
+      </div>
     </div>
     
     <!-- Action Buttons -->

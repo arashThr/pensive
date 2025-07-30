@@ -3,12 +3,15 @@ const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const statusElement = document.getElementById('status');
+  const notConfiguredStatus = document.getElementById('notConfiguredStatus');
   const pageTitleElement = document.getElementById('pageTitle');
   const pageUrlElement = document.getElementById('pageUrl');
   const saveBtn = document.getElementById('saveBtn');
   const removeBtn = document.getElementById('removeBtn');
   const settingsLink = document.getElementById('settingsLink');
   const searchLink = document.getElementById('searchLink');
+  const createAccountBtn = document.getElementById('createAccountBtn');
+  const connectAccountBtn = document.getElementById('connectAccountBtn');
 
   let currentTab = null;
   let isBookmarked = false;
@@ -36,6 +39,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   removeBtn.addEventListener('click', removeBookmark);
   settingsLink.addEventListener('click', openSettings);
   searchLink.addEventListener('click', openSearch);
+  createAccountBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    browserAPI.tabs.create({ url: 'https://getpensive.com/signup' });
+  });
+  connectAccountBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    browserAPI.runtime.openOptionsPage();
+  });
 
   async function checkBookmarkStatus() {
     if (!currentTab) return;
@@ -54,9 +65,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
 
       if (!endpoint || !apiToken) {
-        updateStatus('error', 'Extension not configured');
-        saveBtn.disabled = true;
-        removeBtn.disabled = true;
+        updateStatus('not-configured', 'Account not connected');
+        // Hide action buttons when not configured
+        document.getElementById('actions').style.display = 'none';
         return;
       }
 
@@ -90,6 +101,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateBookmarkStatus() {
+    // Show action buttons when user is configured
+    document.getElementById('actions').style.display = 'flex';
+    
     if (isBookmarked) {
       updateStatus('saved', 'Page is saved');
       saveBtn.disabled = true;
@@ -110,8 +124,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { endpoint, apiToken, fullPageCapture } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
 
     if (!endpoint || !apiToken) {
-      updateStatus('error', 'Extension not configured');
-      saveBtn.disabled = false;
+      updateStatus('not-configured', 'Account not connected');
+      // Hide action buttons when not configured
+      document.getElementById('actions').style.display = 'none';
       return;
     }
 
@@ -256,8 +271,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
 
       if (!endpoint || !apiToken) {
-        updateStatus('error', 'Extension not configured');
-        removeBtn.disabled = false;
+        updateStatus('not-configured', 'Account not connected');
+        // Hide action buttons when not configured
+        document.getElementById('actions').style.display = 'none';
         return;
       }
 
@@ -311,6 +327,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateStatus(type, message) {
+    if (type === 'not-configured') {
+      // Hide the regular status and show the not-configured status
+      statusElement.style.display = 'none';
+      notConfiguredStatus.style.display = 'block';
+      return;
+    }
+
+    // Show the regular status and hide the not-configured status
+    statusElement.style.display = 'block';
+    notConfiguredStatus.style.display = 'none';
+    
     statusElement.className = `status ${type}`;
 
     // Clear existing content

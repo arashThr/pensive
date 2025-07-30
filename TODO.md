@@ -69,7 +69,6 @@
     - [ ] Remove time from logs
     - [ ] Zap is possible?
 - [ ] Add like and dislike buttons
-- [ ] Send verification email
 - [ ] Tags
     - [ ] Read tags from Pocket
 - [ ] Short key for calling the extension
@@ -77,6 +76,7 @@
     - [x] Create backups
     - [ ] Preserve db backups on a remote server
     - [ ] Automate db backup
+- [ ] Send verification email
 - [x] Limitations configs (Free vs. Premium):
     - [x] Bookmarks
     - [x] Test limits
