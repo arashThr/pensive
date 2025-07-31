@@ -1,6 +1,13 @@
 ---
+- name: Check if Docker is already installed
+  command: "{% raw %} docker version -f {{.Server.Version}} {% endraw %}"
+  register: docker_version_check
+  failed_when: false
+  changed_when: false
+
 - name: Install Docker
   become: true
+  when: docker_version_check.rc != 0
   block:
     - name: Add Docker GPG apt Key
       ansible.builtin.apt_key:

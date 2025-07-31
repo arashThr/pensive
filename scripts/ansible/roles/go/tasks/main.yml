@@ -1,6 +1,13 @@
 ---
+- name: Check if Go is already installed
+  command: "{{ go_install_path }}/bin/go version"
+  register: go_version_check
+  failed_when: false
+  changed_when: false
+
 - name: Install Go
   become: true
+  when: go_version_check.stdout is not defined or go_version not in go_version_check.stdout
   block:
     - name: Download Go
       ansible.builtin.get_url:

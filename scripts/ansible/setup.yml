@@ -16,6 +16,7 @@
           - aptitude
           - ffmpeg
           - yt-dlp
+          - rclone
         state: latest # noqa package-latest
         update_cache: true
 
