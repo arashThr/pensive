@@ -20,7 +20,15 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="postgres_backup_${TIMESTAMP}.sql.gz"
 BACKUP_PATH="$BACKUP_DIR/$BACKUP_FILE"
 
+# Create a function to send a message to telegram
+function send_telegram_message {
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+         -d "chat_id=$TELEGRAM_CHAT_ID" \
+         -d "text=$1"
+}
+
 echo "🚀 Starting backup at $(date)"
+send_telegram_message "Backup started at $(date)"
 echo "📦 Container: $POSTGRES_CONTAINER"
 
 # Create database dump
@@ -33,6 +41,7 @@ if [ -f "$BACKUP_PATH" ]; then
 	echo "✅ Backup created: $BACKUP_FILE (Size: $BACKUP_SIZE)"
 else
 	echo "❌ ERROR: Backup failed!"
+	send_telegram_message "Backup failed at $(date)"
 	exit 1
 fi
 
@@ -47,5 +56,6 @@ echo "📊 Total backups stored: $BACKUP_COUNT"
 echo "🎉 Backup completed successfully at $(date)"
 echo "📁 Backup location: $BACKUP_PATH"
 
-# Optional: Simple email notification (if mail is configured)
-# echo "PostgreSQL backup completed: $BACKUP_FILE" | mail -s "DB Backup OK" your-email@example.com
+rclone copy "$BACKUP_PATH" "r2_backup_server:pensive"
+
+send_telegram_message "Backup completed successfully at $(date)"
