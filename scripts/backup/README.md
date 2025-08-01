@@ -18,4 +18,4 @@ Env vars are set in `~/.localrc.sh` and are accessible by the application.
 
 Finally, set the crontab:
 
-`0 3 * * * $HOME/Documents/repos/go-web/scripts/backup/db-backup.sh >> /home/arash/postgres-backups/backup.log 2>&1`
+`0 18 * * * $HOME/Documents/repos/go-web/scripts/backup/db-backup.sh >> /home/arash/postgres-backups/backup.log 2>&1`
