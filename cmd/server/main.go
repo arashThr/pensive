@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth"
+	authcontext "github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
@@ -240,10 +241,19 @@ func run(cfg *config.AppConfig) error {
 		r.Use(csrfMw)
 		r.Use(umw.SetUser)
 
-		r.Get("/", web.StaticHandler(
-			"Home",
-			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-		))
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			user := authcontext.User(r.Context())
+			if user != nil {
+				// User is authenticated, redirect to /home
+				http.Redirect(w, r, "/home", http.StatusFound)
+				return
+			}
+			// User is not authenticated, show the regular home page
+			web.StaticHandler(
+				"Home",
+				views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+			)(w, r)
+		})
 		r.Get("/contact", web.StaticHandler(
 			"Contact",
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),

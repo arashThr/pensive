@@ -72,10 +72,11 @@
 - [ ] Tags
     - [ ] Read tags from Pocket
 - [ ] Short key for calling the extension
-- [ ] Google and GitHub auth
 - [ ] Send verification email
     - [ ] Reminder to install Telegram and Extensions
-- [ ] Add Firefox extenions
+- [ ] Create page for "Missing authorization code"
+- [x] Google and GitHub auth
+- [x] Add Firefox extenions
 - [x] Back up db
     - [x] Create backups
     - [x] Preserve db backups on a remote server
