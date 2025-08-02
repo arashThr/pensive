@@ -72,11 +72,14 @@
 - [ ] Tags
     - [ ] Read tags from Pocket
 - [ ] Short key for calling the extension
-- [ ] Back up db
-    - [x] Create backups
-    - [ ] Preserve db backups on a remote server
-    - [ ] Automate db backup
+- [ ] Google and GitHub auth
 - [ ] Send verification email
+    - [ ] Reminder to install Telegram and Extensions
+- [ ] Add Firefox extenions
+- [x] Back up db
+    - [x] Create backups
+    - [x] Preserve db backups on a remote server
+    - [x] Automate db backup
 - [x] Limitations configs (Free vs. Premium):
     - [x] Bookmarks
     - [x] Test limits
@@ -134,11 +137,11 @@
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
-- [ ] Extension
-    - Check auth endpoint
-    - Delete token when siging out    
 - [ ] Add verified to user table
     - [ ] Verify email
+- [x] Extension
+    - Check auth endpoint
+    - Delete token when siging out    
 - [x] Move markdown from menu to the edit page as a button
     - Load it in the same page. It's good enough for now
 - [x] Add recaptcha

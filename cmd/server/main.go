@@ -179,6 +179,9 @@ func run(cfg *config.AppConfig) error {
 		BotName:       cfg.Telegram.BotName,
 	}
 
+	// GitHub OAuth controller
+	githubController := auth.NewGitHubOAuth(cfg.GitHub, cfg.Domain, userService, sessionService)
+
 	// Start import processor in background
 	importProcessor := importer.ImportProcessor{
 		ImportJobModel: importJobModel,
@@ -221,6 +224,12 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/search", apiController.SearchAPI)
 			})
 		})
+	})
+
+	// OAuth routes (no CSRF protection needed for OAuth)
+	r.Route("/oauth", func(r chi.Router) {
+		r.Get("/github", githubController.RedirectToGitHub)
+		r.Get("/github/callback", githubController.HandleCallback)
 	})
 
 	r.Group(func(r chi.Router) {

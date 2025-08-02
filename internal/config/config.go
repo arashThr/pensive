@@ -28,6 +28,11 @@ type TurnstileConfig struct {
 	SecretKey string
 }
 
+type GitHubOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+}
+
 type AppConfig struct {
 	Environment string
 	Domain      string
@@ -43,6 +48,7 @@ type AppConfig struct {
 	Stripe    StripeConfig
 	Telegram  TelegramConfig
 	Turnstile TurnstileConfig
+	GitHub    GitHubOAuthConfig
 }
 
 func LoadEnvConfig() (*AppConfig, error) {
@@ -93,6 +99,11 @@ func LoadEnvConfig() (*AppConfig, error) {
 	cfg.Turnstile = TurnstileConfig{
 		SiteKey:   validations.GetEnvOrDie("TURNSTILE_SITE_KEY"),
 		SecretKey: validations.GetEnvOrDie("TURNSTILE_SECRET_KEY"),
+	}
+
+	cfg.GitHub = GitHubOAuthConfig{
+		ClientID:     validations.GetEnvOrDie("GITHUB_CLIENT_ID"),
+		ClientSecret: validations.GetEnvOrDie("GITHUB_CLIENT_SECRET"),
 	}
 
 	return &cfg, nil
