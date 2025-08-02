@@ -179,8 +179,9 @@ func run(cfg *config.AppConfig) error {
 		BotName:       cfg.Telegram.BotName,
 	}
 
-	// GitHub OAuth controller
+	// OAuth controllers
 	githubController := auth.NewGitHubOAuth(cfg.GitHub, cfg.Domain, userService, sessionService)
+	googleController := auth.NewGoogleOAuth(cfg.Google, cfg.Domain, userService, sessionService)
 
 	// Start import processor in background
 	importProcessor := importer.ImportProcessor{
@@ -230,6 +231,9 @@ func run(cfg *config.AppConfig) error {
 	r.Route("/oauth", func(r chi.Router) {
 		r.Get("/github", githubController.RedirectToGitHub)
 		r.Get("/github/callback", githubController.HandleCallback)
+
+		r.Get("/google", googleController.RedirectToGoogle)
+		r.Get("/google/callback", googleController.HandleCallback)
 	})
 
 	r.Group(func(r chi.Router) {

@@ -14,54 +14,58 @@ import (
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/rand"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/github"
+	"golang.org/x/oauth2/google"
 )
 
-type GitHub struct {
+type GoogleAuth struct {
 	UserService    *models.UserModel
 	SessionService *models.SessionService
 	OAuthConfig    *oauth2.Config
 	Domain         string
 }
 
-type GitHubUser struct {
-	ID        int    `json:"id"`
-	Login     string `json:"login"`
-	Email     string `json:"email"`
-	Name      string `json:"name"`
-	AvatarURL string `json:"avatar_url"`
+type GoogleUser struct {
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	VerifiedEmail bool   `json:"verified_email"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
 }
 
-func NewGitHubOAuth(
-	cfg config.GitHubOAuthConfig,
+func NewGoogleOAuth(
+	cfg config.GoogleOAuthConfig,
 	domain string,
 	userService *models.UserModel,
 	sessionService *models.SessionService,
-) *GitHub {
-	redirectURL, err := url.JoinPath(domain, "/oauth/github/callback")
+) *GoogleAuth {
+	redirectURL, err := url.JoinPath(domain, "/oauth/google/callback")
 	if err != nil {
 		slog.Error("failed to join path", "error", err)
-		redirectURL = fmt.Sprintf("%s/oauth/github/callback", domain)
+		redirectURL = fmt.Sprintf("%s/oauth/google/callback", domain)
 	}
 
 	config := &oauth2.Config{
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		RedirectURL:  redirectURL,
-		Scopes:       []string{"read:user", "user:email"},
-		Endpoint:     github.Endpoint,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
 	}
 
-	return &GitHub{
-		OAuthConfig:    config,
-		Domain:         domain,
+	return &GoogleAuth{
 		UserService:    userService,
 		SessionService: sessionService,
+		OAuthConfig:    config,
+		Domain:         domain,
 	}
 }
 
-// RedirectToGitHub initiates the OAuth flow by redirecting to GitHub
-func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
+func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
@@ -70,8 +74,7 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store state in session or cookie for verification
-	// For simplicity, we'll use a cookie with a short expiration
+	// Store state in cookie for verification
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
@@ -82,13 +85,12 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	// Redirect to GitHub OAuth
+	// Redirect to Google OAuth
 	authURL := g.OAuthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
 }
 
-// HandleCallback processes the OAuth callback from GitHub
-func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
+func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	logger := authcontext.Logger(r.Context())
 
 	// Verify state parameter
@@ -128,21 +130,20 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	token, err := g.OAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
 		logger.Error("failed to exchange code for token", "error", err)
-		http.Error(w, "Failed to authenticate with GitHub", http.StatusInternalServerError)
+		http.Error(w, "Failed to authenticate with Google", http.StatusInternalServerError)
 		return
 	}
 
-	// Get user information from GitHub
-	githubUser, err := g.getGitHubUser(token.AccessToken)
+	// Get user information from Google
+	googleUser, err := g.getGoogleUser(token.AccessToken)
 	if err != nil {
-		logger.Error("failed to get GitHub user", "error", err)
+		logger.Error("failed to get Google user", "error", err)
 		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
 		return
 	}
-	logger.Info("GitHub user", "user", githubUser)
 
 	// Handle user authentication/creation
-	user, err := g.authenticateOrCreateUser(githubUser)
+	user, err := g.authenticateOrCreateUser(googleUser)
 	if err != nil {
 		logger.Error("failed to authenticate or create user", "error", err)
 		http.Error(w, "Failed to authenticate user", http.StatusInternalServerError)
@@ -159,21 +160,20 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Set session cookie
 	setCookie(w, CookieSession, session.Token)
-	logger.Info("GitHub OAuth login successful", "user_id", user.ID, "github_id", githubUser.ID)
+	logger.Info("Google OAuth login successful", "user_id", user.ID, "google_id", googleUser.ID)
 
 	// Redirect to home page
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
-// getGitHubUser fetches user information from GitHub API
-func (g *GitHub) getGitHubUser(accessToken string) (*GitHubUser, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
+// getGoogleUser fetches user information from Google API
+func (g *GoogleAuth) getGoogleUser(accessToken string) (*GoogleUser, error) {
+	req, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v2/userinfo", nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
 	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -183,77 +183,21 @@ func (g *GitHub) getGitHubUser(accessToken string) (*GitHubUser, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("GitHub API returned status: %d", resp.StatusCode)
+		return nil, fmt.Errorf("google api returned status: %d", resp.StatusCode)
 	}
 
-	var user GitHubUser
+	var user GoogleUser
 	if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
-	}
-
-	// If email is not public, try to get it from the emails endpoint
-	if user.Email == "" {
-		user.Email, err = g.getGitHubEmail(accessToken)
-		if err != nil {
-			return nil, fmt.Errorf("get email: %w", err)
-		}
 	}
 
 	return &user, nil
 }
 
-// getGitHubEmail fetches the user's primary email from GitHub
-func (g *GitHub) getGitHubEmail(accessToken string) (string, error) {
-	req, err := http.NewRequest("GET", "https://api.github.com/user/emails", nil)
-	if err != nil {
-		return "", fmt.Errorf("create github email request: %w", err)
-	}
-
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Accept", "application/vnd.github.v3+json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", fmt.Errorf("github email request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("github email API returned status: %d", resp.StatusCode)
-	}
-
-	var emails []struct {
-		Email    string `json:"email"`
-		Primary  bool   `json:"primary"`
-		Verified bool   `json:"verified"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&emails); err != nil {
-		return "", fmt.Errorf("decode github email response: %w", err)
-	}
-
-	// Find the primary verified email
-	for _, email := range emails {
-		if email.Primary && email.Verified {
-			return email.Email, nil
-		}
-	}
-
-	// If no primary verified email, return the first verified email
-	for _, email := range emails {
-		if email.Verified {
-			return email.Email, nil
-		}
-	}
-
-	return "", fmt.Errorf("no verified github email found")
-}
-
 // authenticateOrCreateUser handles user authentication or creation
-func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User, error) {
-	// Try to find existing user by GitHub OAuth ID
-	user, err := g.UserService.GetByOAuth("github", fmt.Sprintf("%d", githubUser.ID))
+func (g *GoogleAuth) authenticateOrCreateUser(googleUser *GoogleUser) (*models.User, error) {
+	// Try to find existing user by Google OAuth ID
+	user, err := g.UserService.GetByOAuth("google", googleUser.ID)
 	if err == nil {
 		// User exists, return them
 		slog.Info("user exists", "user", user)
@@ -268,17 +212,17 @@ func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User,
 
 	// User doesn't exist, try to find by email
 	// First, try to get user by email
-	existingUser, err := g.UserService.GetByEmail(githubUser.Email)
+	existingUser, err := g.UserService.GetByEmail(googleUser.Email)
 	if err == nil {
-		// User exists with this email, link GitHub OAuth to existing account
+		// User exists with this email, link Google OAuth to existing account
 		err = g.UserService.LinkOAuthToExistingUser(
 			existingUser.ID,
-			"github",
-			fmt.Sprintf("%d", githubUser.ID),
-			githubUser.Email,
+			"google",
+			googleUser.ID,
+			googleUser.Email,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("link github oauth to existing user: %w", err)
+			return nil, fmt.Errorf("link oauth to existing user: %w", err)
 		}
 		return existingUser, nil
 	}
@@ -288,15 +232,15 @@ func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User,
 		return nil, err
 	}
 
-	// Create new user with GitHub OAuth
+	// Create new user with Google OAuth
 	user, err = g.UserService.CreateOAuthUser(
-		"github",
-		fmt.Sprintf("%d", githubUser.ID),
-		githubUser.Email,
-		githubUser.Email,
+		"google",
+		googleUser.ID,
+		googleUser.Email,
+		googleUser.Email,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("authenticate or create user with github oauth: %w", err)
+		return nil, fmt.Errorf("create oauth user: %w", err)
 	}
 
 	return user, nil

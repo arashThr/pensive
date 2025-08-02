@@ -33,6 +33,11 @@ type GitHubOAuthConfig struct {
 	ClientSecret string
 }
 
+type GoogleOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+}
+
 type AppConfig struct {
 	Environment string
 	Domain      string
@@ -49,6 +54,7 @@ type AppConfig struct {
 	Telegram  TelegramConfig
 	Turnstile TurnstileConfig
 	GitHub    GitHubOAuthConfig
+	Google    GoogleOAuthConfig
 }
 
 func LoadEnvConfig() (*AppConfig, error) {
@@ -104,6 +110,11 @@ func LoadEnvConfig() (*AppConfig, error) {
 	cfg.GitHub = GitHubOAuthConfig{
 		ClientID:     validations.GetEnvOrDie("GITHUB_CLIENT_ID"),
 		ClientSecret: validations.GetEnvOrDie("GITHUB_CLIENT_SECRET"),
+	}
+
+	cfg.Google = GoogleOAuthConfig{
+		ClientID:     validations.GetEnvOrDie("GOOGLE_CLIENT_ID"),
+		ClientSecret: validations.GetEnvOrDie("GOOGLE_CLIENT_SECRET"),
 	}
 
 	return &cfg, nil
