@@ -781,6 +781,9 @@
   .w-full {
     width: 100%;
   }
+  .w-sm {
+    width: var(--container-sm);
+  }
   .w-xs {
     width: var(--container-xs);
   }
@@ -1204,6 +1207,9 @@
   }
   .text-right {
     text-align: right;
+  }
+  .align-middle {
+    vertical-align: middle;
   }
   .font-mono {
     font-family: var(--font-mono);
