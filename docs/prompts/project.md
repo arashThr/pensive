@@ -12,7 +12,8 @@ The name is coming from Pensieve from the Harry Potter books. Just like in the b
 In our conversations, consider the following context: I am developing a web service that helps users to index and preserve everything they read online. There are different ways for users to specify a page as something they've read and want to find later. One example, and the main way, is a browser extension: the User can mark the pages they read to be indexed by clicking on the extension icon. Another way is to send the link to the Telegram bot of the application.
 When we receive the link in our backend service, we will fetch the full page content to a Go-based backend. We extract and store the content in PostgreSQL with full-text search capabilities. Users can later search through everything they’ve saved.
 In the case of the extension, we send the whole HTML and metadata of the page to avoid scraping issues with sites like
-Reddit and Stack Overflow (This has been paused for now, since I want to investigate the best solution: We don't want to send cirtical information from the logged in page)
+Reddit and Stack Overflow (This has been paused for now, since I want to investigate the best solution: We don't want to send critical information from the logged in page)
+
 
 When the knowledge is captured, user can search for content of what they have saved.
 I'm working on expanding the features: Like the option to send weekly/monthly summary of the highlights of your readings, and importing bookmakrs from Pocket.
