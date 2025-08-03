@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-# Build Chrome and Firefox extensions
 # Usage: ./build.sh chrome|firefox
+# Version is the latest tag in the repo
 
 version=$(git describe --tags --abbrev=0)
 
