@@ -34,6 +34,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if current page is bookmarked
   await checkBookmarkStatus();
 
+  // Auto-save if page is not bookmarked and user is configured
+  if (!isBookmarked) {
+    const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
+    if (endpoint && apiToken && currentTab.url.startsWith('http')) {
+      // Auto-save the page
+      await saveBookmark();
+    } else {
+      // Show auto-save notice if user is not configured
+      const autoSaveNotice = document.getElementById('autoSaveNotice');
+      if (autoSaveNotice) {
+        autoSaveNotice.style.display = 'block';
+      }
+    }
+  }
+
   // Event listeners
   saveBtn.addEventListener('click', saveBookmark);
   removeBtn.addEventListener('click', removeBookmark);
@@ -68,6 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        // Show auto-save notice
+        const autoSaveNotice = document.getElementById('autoSaveNotice');
+        if (autoSaveNotice) {
+          autoSaveNotice.style.display = 'block';
+        }
         return;
       }
 
@@ -104,12 +124,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show action buttons when user is configured
     document.getElementById('actions').style.display = 'flex';
     
+    // Hide auto-save notice
+    const autoSaveNotice = document.getElementById('autoSaveNotice');
+    if (autoSaveNotice) {
+      autoSaveNotice.style.display = 'none';
+    }
+    
     if (isBookmarked) {
       updateStatus('saved', 'Page is saved');
       saveBtn.disabled = true;
       removeBtn.disabled = false;
     } else {
-      updateStatus('not-saved', 'Page not saved');
+      updateStatus('not-saved', 'Click extension icon to save');
       saveBtn.disabled = false;
       removeBtn.disabled = true;
     }
@@ -127,6 +153,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateStatus('not-configured', 'Account not connected');
       // Hide action buttons when not configured
       document.getElementById('actions').style.display = 'none';
+      // Show auto-save notice
+      const autoSaveNotice = document.getElementById('autoSaveNotice');
+      if (autoSaveNotice) {
+        autoSaveNotice.style.display = 'block';
+      }
       return;
     }
 
@@ -259,8 +290,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-
-
   async function removeBookmark() {
     if (!currentTab) return;
 
@@ -274,6 +303,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        // Show auto-save notice
+        const autoSaveNotice = document.getElementById('autoSaveNotice');
+        if (autoSaveNotice) {
+          autoSaveNotice.style.display = 'block';
+        }
         return;
       }
 
@@ -295,13 +329,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Auto-hide success message after 2 seconds
         setTimeout(() => {
           if (!isBookmarked) {
-            updateStatus('not-saved', 'Page not saved');
+            updateStatus('not-saved', 'Click extension icon to save');
           }
         }, 2000);
       } else if (response.status === 404) {
         // Bookmark doesn't exist, which is fine for removal
         isBookmarked = false;
-        updateStatus('not-saved', 'Page not saved');
+        updateStatus('not-saved', 'Click extension icon to save');
         saveBtn.disabled = false;
         removeBtn.disabled = true;
       } else {
