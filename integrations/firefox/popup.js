@@ -3,12 +3,15 @@ const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 
 document.addEventListener('DOMContentLoaded', async () => {
   const statusElement = document.getElementById('status');
+  const notConfiguredStatus = document.getElementById('notConfiguredStatus');
   const pageTitleElement = document.getElementById('pageTitle');
   const pageUrlElement = document.getElementById('pageUrl');
   const saveBtn = document.getElementById('saveBtn');
   const removeBtn = document.getElementById('removeBtn');
   const settingsLink = document.getElementById('settingsLink');
   const searchLink = document.getElementById('searchLink');
+  const createAccountBtn = document.getElementById('createAccountBtn');
+  const connectAccountBtn = document.getElementById('connectAccountBtn');
 
   let currentTab = null;
   let isBookmarked = false;
@@ -31,11 +34,38 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if current page is bookmarked
   await checkBookmarkStatus();
 
+  // Auto-save if page is not bookmarked and user is configured
+  if (!isBookmarked) {
+    const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
+    if (endpoint && apiToken && currentTab.url.startsWith('http')) {
+      // Auto-save the page
+      await saveBookmark();
+    } else {
+      // Show auto-save notice if user is not configured
+      const autoSaveNotice = document.getElementById('autoSaveNotice');
+      if (autoSaveNotice) {
+        autoSaveNotice.style.display = 'block';
+      }
+    }
+  }
+
   // Event listeners
   saveBtn.addEventListener('click', saveBookmark);
   removeBtn.addEventListener('click', removeBookmark);
   settingsLink.addEventListener('click', openSettings);
   searchLink.addEventListener('click', openSearch);
+  if (createAccountBtn) {
+    createAccountBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      browserAPI.tabs.create({ url: 'https://getpensive.com/signup' });
+    });
+  }
+  if (connectAccountBtn) {
+    connectAccountBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      browserAPI.runtime.openOptionsPage();
+    });
+  }
 
   async function checkBookmarkStatus() {
     if (!currentTab) return;
@@ -57,6 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        // Show auto-save notice
+        const autoSaveNotice = document.getElementById('autoSaveNotice');
+        if (autoSaveNotice) {
+          autoSaveNotice.style.display = 'block';
+        }
         return;
       }
 
@@ -93,12 +128,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Show action buttons when user is configured
     document.getElementById('actions').style.display = 'flex';
     
+    // Hide auto-save notice
+    const autoSaveNotice = document.getElementById('autoSaveNotice');
+    if (autoSaveNotice) {
+      autoSaveNotice.style.display = 'none';
+    }
+    
     if (isBookmarked) {
       updateStatus('saved', 'Page is saved');
       saveBtn.disabled = true;
       removeBtn.disabled = false;
     } else {
-      updateStatus('not-saved', 'Page not saved');
+      updateStatus('not-saved', 'Click extension icon to save');
       saveBtn.disabled = false;
       removeBtn.disabled = true;
     }
@@ -116,6 +157,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateStatus('not-configured', 'Account not connected');
       // Hide action buttons when not configured
       document.getElementById('actions').style.display = 'none';
+      // Show auto-save notice
+      const autoSaveNotice = document.getElementById('autoSaveNotice');
+      if (autoSaveNotice) {
+        autoSaveNotice.style.display = 'block';
+      }
       return;
     }
 
@@ -263,6 +309,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        // Show auto-save notice
+        const autoSaveNotice = document.getElementById('autoSaveNotice');
+        if (autoSaveNotice) {
+          autoSaveNotice.style.display = 'block';
+        }
         return;
       }
 
@@ -284,13 +335,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Auto-hide success message after 2 seconds
         setTimeout(() => {
           if (!isBookmarked) {
-            updateStatus('not-saved', 'Page not saved');
+            updateStatus('not-saved', 'Click extension icon to save');
           }
         }, 2000);
       } else if (response.status === 404) {
         // Bookmark doesn't exist, which is fine for removal
         isBookmarked = false;
-        updateStatus('not-saved', 'Page not saved');
+        updateStatus('not-saved', 'Click extension icon to save');
         saveBtn.disabled = false;
         removeBtn.disabled = true;
       } else {
@@ -316,6 +367,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function updateStatus(type, message) {
+    if (type === 'not-configured') {
+      // Hide the regular status and show the not-configured status
+      statusElement.style.display = 'none';
+      if (notConfiguredStatus) {
+        notConfiguredStatus.style.display = 'block';
+      }
+      return;
+    }
+
+    // Show the regular status and hide the not-configured status
+    statusElement.style.display = 'block';
+    if (notConfiguredStatus) {
+      notConfiguredStatus.style.display = 'none';
+    }
+    
     statusElement.className = `status ${type}`;
 
     // Clear existing content
@@ -330,70 +396,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       statusElement.appendChild(spinner);
       statusElement.appendChild(span);
-    } else if (type === 'not-configured') {
-      // Create a container for the not-configured message
-      const container = document.createElement('div');
-      container.style.textAlign = 'center';
-      container.style.padding = '8px 0';
-      
-      // Main message
-      const messageSpan = document.createElement('div');
-      messageSpan.textContent = message;
-      messageSpan.style.marginBottom = '12px';
-      messageSpan.style.fontWeight = '500';
-      messageSpan.style.fontSize = '14px';
-      container.appendChild(messageSpan);
-      
-      // Create a flex container for the links
-      const linksContainer = document.createElement('div');
-      linksContainer.style.display = 'flex';
-      linksContainer.style.justifyContent = 'center';
-      linksContainer.style.alignItems = 'center';
-      linksContainer.style.gap = '8px';
-      linksContainer.style.flexWrap = 'nowrap';
-      linksContainer.style.width = '100%';
-      
-      // Create account link
-      const createAccountLink = document.createElement('a');
-      createAccountLink.href = '#';
-      createAccountLink.textContent = 'Create Account';
-      createAccountLink.style.color = '#d97706';
-      createAccountLink.style.fontWeight = '500';
-      createAccountLink.style.textDecoration = 'underline';
-      createAccountLink.style.fontSize = '13px';
-      createAccountLink.style.whiteSpace = 'nowrap';
-      createAccountLink.style.flex = '0 0 auto';
-      createAccountLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        browserAPI.tabs.create({ url: 'https://getpensive.com/signup' });
-      });
-      linksContainer.appendChild(createAccountLink);
-      
-      // Separator
-      const separator = document.createElement('span');
-      separator.textContent = '•';
-      separator.style.color = '#6b7280';
-      separator.style.fontSize = '13px';
-      separator.style.whiteSpace = 'nowrap';
-      linksContainer.appendChild(separator);
-      
-      // Connect account link
-      const connectLink = document.createElement('a');
-      connectLink.href = '#';
-      connectLink.textContent = 'Connect Account';
-      connectLink.style.color = '#d97706';
-      connectLink.style.fontWeight = '500';
-      connectLink.style.textDecoration = 'underline';
-      connectLink.style.fontSize = '13px';
-      connectLink.style.whiteSpace = 'nowrap';
-      connectLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        browserAPI.runtime.openOptionsPage();
-      });
-      linksContainer.appendChild(connectLink);
-      
-      container.appendChild(linksContainer);
-      statusElement.appendChild(container);
     } else {
       const span = document.createElement('span');
       span.textContent = message;
