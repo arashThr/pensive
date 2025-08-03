@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Auto-save if page is not bookmarked and user is configured
   if (!isBookmarked) {
     const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
-    if (endpoint && apiToken && currentTab.url.startsWith('http')) {
+    if (endpoint && apiToken && currentTab.url.startsWith('http') && !currentTab.url.includes('getpensive.com')) {
       // Auto-save the page
       await saveBookmark();
     } else {
@@ -69,6 +69,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // if page is not http, return
     if (!currentTab.url.startsWith('http')) {
       updateStatus('error', 'Page is not a valid URL');
+      saveBtn.disabled = true;
+      removeBtn.disabled = true;
+      return;
+    }
+
+    // Don't save getpensive.com pages
+    if (currentTab.url.includes('getpensive.com')) {
+      updateStatus('error', 'Cannot save Pensive pages');
       saveBtn.disabled = true;
       removeBtn.disabled = true;
       return;
