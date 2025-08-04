@@ -1,115 +1,114 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-4xl mx-auto">
+<div class="px-8 py-16 max-w-4xl mx-auto">
+  
   <!-- Page Header -->
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold tracking-tight text-gray-900 mb-3">Integrations</h1>
-    <p class="text-gray-600 leading-relaxed">Connect your favorite tools to enhance your bookmarking workflow and make saving content effortless.</p>
+  <div class="mb-16">
+    <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">INTEGRATIONS</h1>
+    <p class="text-lg">Connect your tools to save content from anywhere.</p>
   </div>
 
-  <div class="space-y-6">
+  <div class="space-y-16">
+    
     <!-- Browser Extension -->
-    <div class="bg-white p-8 rounded-xl border border-gray-300">
-      <div class="flex items-start gap-4 mb-6">
-        <div class="w-12 h-12 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-          <img src="/assets/icons/extension.svg" alt="Browser Extension" class="w-6 h-6">
-        </div>
-        <div class="flex-1">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Browser Extension</h2>
-          <p class="text-gray-600">Seamlessly save pages while browsing. One click to add any webpage to your searchable knowledge library.</p>
+    <div class="border-2 border-black p-8 bg-white">
+      <h2 class="text-2xl font-bold mb-6">BROWSER EXTENSION</h2>
+      <p class="text-lg mb-8">One click to save any webpage. Works on Chrome and Firefox.</p>
+
+      <!-- Setup Steps -->
+      <div class="border-l-4 border-black pl-6 mb-8">
+        <h3 class="font-bold mb-4">SETUP:</h3>
+        <div class="space-y-3">
+          <div><strong>1.</strong> Install extension from store</div>
+          <div><strong>2.</strong> Create API token in <a href="/users/me?tab=tokens" class="underline">account settings</a></div>
+          <div><strong>3.</strong> Click extension icon on any page to save</div>
         </div>
       </div>
 
-      <!-- Steps -->
-      <div class="bg-gray-50 rounded-lg p-6 mb-6">
-        <h3 class="font-medium text-gray-900 mb-4">Quick setup:</h3>
-        <div class="space-y-4">
-          <div class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0">
-              <span class="text-sky-600 text-sm font-bold">1</span>
-            </div>
-            <p class="text-gray-600 text-sm">Install the browser extension from the Chrome Web Store</p>
-          </div>
-          <div class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0">
-              <span class="text-sky-600 text-sm font-bold">2</span>
-            </div>
-            <div>
-              <p class="text-gray-600 text-sm">Create an API token in your <a href="/users/me?tab=tokens" class="text-sky-600 hover:text-sky-700 underline">account settings</a></p>
-            </div>
-          </div>
-          <div class="flex items-start gap-3">
-            <div class="w-6 h-6 rounded-full bg-sky-100 flex items-center justify-center flex-shrink-0">
-              <span class="text-sky-600 text-sm font-bold">3</span>
-            </div>
-            <p class="text-gray-600 text-sm">Start bookmarking! Click the extension icon on any page you want to save</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA -->
-       <div class="flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
-        <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd">
-          <img src="/assets/promo/google-store.png" alt="Chrome"/>
+      <!-- Download Links -->
+      <div class="flex flex-col sm:flex-row gap-4 items-center">
+        <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" 
+           class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
+          INSTALL FOR CHROME
         </a>
-        <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/">
-          <img src="/assets/promo/get-the-addon.png" alt="Firefox"/>
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" 
+           class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
+          INSTALL FOR FIREFOX
         </a>
       </div>
     </div>
     
-    <!-- Telegram Integration -->
-    <div class="bg-white p-8 rounded-xl border border-gray-300">
-      <div class="flex items-start gap-4 mb-6">
-        <div class="w-12 h-12 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-          <img src="/assets/icons/telegram.svg" alt="Telegram" class="w-6 h-6">
-        </div>
-        <div class="flex-1">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Telegram Bot</h2>
-          <p class="text-gray-600">Save links on the go by sending them to our Telegram bot. Perfect for capturing content from your mobile device.</p>
-        </div>
-      </div>
+    <!-- Telegram Bot -->
+    <div class="border-2 border-black p-8 bg-white">
+      <h2 class="text-2xl font-bold mb-6">TELEGRAM BOT</h2>
+      <p class="text-lg mb-8">Who installs apps anymore? Just use Telegram</p>
 
       <!-- Features -->
-      <div class="bg-gray-50 rounded-lg p-6 mb-6">
-        <h3 class="font-medium text-gray-900 mb-4">What you can do:</h3>
-        <div class="space-y-2 text-gray-600 text-sm">
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
-            <span>Send links directly to the bot and they're instantly saved</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
-            <span>Search through your entire bookmark collection from Telegram</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-sky-600 rounded-full"></span>
-            <span>Get instant access to your saved content wherever you are</span>
-          </div>
+      <div class="border-l-4 border-black pl-6 mb-8">
+        <h3 class="font-bold mb-4">WHAT IT DOES:</h3>
+        <div class="space-y-2">
+          <div>• Forward any link → instantly saved</div>
+          <div>• Search your entire library via chat</div>
         </div>
       </div>
 
-      <!-- CTA -->
-      <div class="flex items-center gap-4 justify-center w-full h-full">
-        <a href="/telegram/auth" class="inline-flex items-center bg-sky-600 hover:bg-sky-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-          </svg>
-          Connect Telegram
+      <!-- Connect Button -->
+      <div class="text-center">
+        <a href="/telegram/auth" class="bg-black text-white px-8 py-4 font-bold hover:bg-gray-800">
+          CONNECT TELEGRAM
         </a>
       </div>
     </div>
 
-    <!-- More Coming Soon -->
-    <div class="bg-gray-50 border border-gray-300 rounded-xl p-8 text-center">
-      <div class="mb-4">
-        <svg class="w-10 h-10 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-        </svg>
+    <!-- Pocket Import -->
+    <div class="border-2 border-black p-8 bg-white">
+      <h2 class="text-2xl font-bold mb-6">POCKET IMPORT</h2>
+      <p class="text-lg mb-8">Migrate your existing Pocket bookmarks. All articles, tags, and dates preserved.</p>
+
+      <div class="border-l-4 border-black pl-6 mb-8">
+        <h3 class="font-bold mb-4">HOW TO IMPORT:</h3>
+        <div class="space-y-3">
+          <div><strong>1.</strong> Export your data from Pocket</div>
+          <div><strong>2.</strong> Upload the zip file here</div>
+          <div><strong>3.</strong> We'll process everything in the background</div>
+          <div><strong>4.</strong> <a href="/contact" class="underline">Let me know</a> if you faced any problem</div>
+        </div>
       </div>
-      <h3 class="font-medium text-gray-900 mb-2">More integrations coming soon</h3>
-      <p class="text-gray-600 text-sm">We're working on additional integrations to make saving and organizing your knowledge even easier.</p>
+
+      <div class="text-center">
+        <a href="/pocket" class="bg-black text-white px-8 py-4 font-bold hover:bg-gray-800">
+          IMPORT FROM POCKET
+        </a>
+      </div>
     </div>
+
+    <!-- API Access -->
+    <div class="border-2 border-black p-8 bg-gray-100">
+      <h2 class="text-2xl font-bold mb-6">API ACCESS (COMING SOON)</h2>
+      <p class="text-lg mb-8">Build your own integrations. Save bookmarks programmatically.</p>
+
+      <div class="border-l-4 border-black pl-6 mb-8">
+        <h3 class="font-bold mb-4">FOR DEVELOPERS:</h3>
+        <div class="space-y-2">
+          <div>• REST API for saving and searching</div>
+          <div>• Webhook support for real-time updates</div>
+          <div>• Rate limiting: 1000 requests/hour</div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <a href="/users/me?tab=tokens" class="bg-gray-800 text-white px-8 py-4 font-bold hover:bg-black">
+          MANAGE API TOKENS
+        </a>
+      </div>
+    </div>
+
+    <!-- More Coming -->
+    <div class="border-2 border-black p-8 bg-yellow-100 text-center">
+      <h3 class="text-xl font-bold mb-4">MORE INTEGRATIONS COMING</h3>
+      <p>IFTTT, Zapier, RSS feeds, and more. <a href="/contact" class="underline">Suggest an integration</a>.</p>
+    </div>
+
   </div>
 </div>
 

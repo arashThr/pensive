@@ -1,34 +1,34 @@
 {{template "header" .}}
 
 <div class="max-w-4xl mx-auto px-6 py-12">
-  <div class="prose prose-gray max-w-none">
-    <h1 class="text-3xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
+  <div class="max-w-none">
+    <h1 class="text-3xl font-bold mb-8">PRIVACY POLICY</h1>
     
-    <p class="text-gray-600 mb-8">
+    <p class="mb-8">
       <strong>Last updated:</strong> July 2025
     </p>
 
     <div class="space-y-8">
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-        <p class="text-gray-700 leading-relaxed">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Overview</h2>
+        <p class="leading-relaxed">
           Pensive is a personal knowledge indexing service that helps you save, organize, and search content you've read online. 
           This privacy policy explains how we collect, use, and protect your information when you use our web application and browser extension.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Information We Collect</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Information We Collect</h2>
         
-        <h3 class="text-xl font-medium text-gray-900 mb-3">Account Information</h3>
-        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+        <h3 class="text-xl font-bold mb-3">Account Information</h3>
+        <ul class="list-disc list-inside space-y-2 mb-4">
           <li>Email address (for account creation and authentication)</li>
           <li>Password (encrypted and stored securely)</li>
           <li>Subscription status and billing information (processed through Stripe)</li>
         </ul>
 
-        <h3 class="text-xl font-medium text-gray-900 mb-3">Content You Save</h3>
-        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+        <h3 class="text-xl font-bold mb-3">Content You Save</h3>
+        <ul class="list-disc list-inside space-y-2 mb-4">
           <li>URLs of web pages you bookmark</li>
           <li>Page titles and metadata</li>
           <li>Extracted text content from saved pages (using Mozilla's Readability.js)</li>
@@ -36,8 +36,8 @@
           <li>Generated summaries and tags (premium feature using Google Gemini)</li>
         </ul>
 
-        <h3 class="text-xl font-medium text-gray-900 mb-3">Technical Information</h3>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <h3 class="text-xl font-bold mb-3">Technical Information</h3>
+        <ul class="list-disc list-inside space-y-2">
           <li>Authentication tokens for browser extension</li>
           <li>Session data for maintaining login state</li>
           <li>Basic analytics (page views, feature usage) via Umami Analytics</li>
@@ -45,8 +45,8 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">How We Use Your Information</h2>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">How We Use Your Information</h2>
+        <ul class="list-disc list-inside space-y-2">
           <li><strong>Core Service:</strong> Store and index your saved content for personal searchability</li>
           <li><strong>Content Enhancement:</strong> Generate summaries and tags using AI (premium feature)</li>
           <li><strong>Account Management:</strong> Authenticate users and manage subscriptions</li>
@@ -56,27 +56,27 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Browser Extension Privacy</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Browser Extension Privacy</h2>
+        <p class="leading-relaxed mb-4">
           Our browser extension only processes data when you explicitly save a page by clicking the extension icon. Before using the extension, you must provide consent for data collection and choose your preferred content extraction method.
         </p>
         
-        <h3 class="text-xl font-medium text-gray-900 mb-3">Consent and Data Collection</h3>
-        <p class="text-gray-700 leading-relaxed mb-4">
+        <h3 class="text-xl font-bold mb-3">Consent and Data Collection</h3>
+        <p class="leading-relaxed mb-4">
           When you first install the Pensive extension, you'll be presented with a consent page that explains what data we collect and asks for your permission. You must provide explicit consent before the extension can function.
         </p>
 
-        <h3 class="text-xl font-medium text-gray-900 mb-3">Content Extraction Methods</h3>
-        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+        <h3 class="text-xl font-bold mb-3">Content Extraction Methods</h3>
+        <ul class="list-disc list-inside space-y-2 mb-4">
           <li><strong>Enhanced Content Capture (Recommended):</strong> The extension uses Mozilla's Readability.js library locally to extract clean article content. If Readability fails, it captures the full HTML content of the page for better searchability and content preservation. This method works best on sites with complex layouts like forums, Reddit, and Stack Overflow.</li>
           <li><strong>Server-Side Capture Only:</strong> Extension sends only the page URL to Pensive servers, which fetch and process the content. This method may not work on sites with paywalls or complex layouts.</li>
         </ul>
 
-        <p class="text-gray-700 leading-relaxed mb-4">The extension:</p>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <p class="leading-relaxed mb-4">The extension:</p>
+        <ul class="list-disc list-inside space-y-2">
           <li>Requires explicit consent before collecting any data</li>
           <li>Only accesses the current tab when you click "save"</li>
-          <li>Extracts clean content using <a href="https://www.npmjs.com/package/@mozilla/readability">Mozilla's Readability.js library</a> (runs locally)</li>
+          <li>Extracts clean content using <a href="https://www.npmjs.com/package/@mozilla/readability" class="underline">Mozilla's Readability.js library</a> (runs locally)</li>
           <li>Falls back to HTML content capture when Readability extraction fails</li>
           <li>Sends extracted content directly to your Pensive account</li>
           <li>Stores only your authentication token and extraction method preference locally</li>
@@ -86,27 +86,27 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">User Responsibility for Shared Content</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">User Responsibility for Shared Content</h2>
+        <p class="leading-relaxed mb-4">
           When using Enhanced Content Capture, you are responsible for ensuring you do not share content you wish to keep private. While Pensive does not use, analyze, or share your content for any purpose other than providing the bookmarking service, you should exercise caution when saving pages containing:
         </p>
-        <ul class="list-disc list-inside space-y-2 text-gray-700 mb-4">
+        <ul class="list-disc list-inside space-y-2 mb-4">
           <li>Personal information, emails, or private messages</li>
           <li>Sensitive data from logged-in pages</li>
           <li>User-specific content you don't want stored</li>
           <li>Any content you wouldn't want saved to your account</li>
         </ul>
-        <p class="text-gray-700 leading-relaxed">
+        <p class="leading-relaxed">
           You have full control over what content gets saved through your choice of extraction method and which pages you choose to bookmark. You can switch between Enhanced Content Capture and Server-Side Capture Only at any time in the extension settings.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Data Sharing</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Sharing</h2>
+        <p class="leading-relaxed mb-4">
           We do not sell, rent, or share your personal information with third parties, except:
         </p>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <ul class="list-disc list-inside space-y-2">
           <li><strong>Service Providers:</strong> Google Gemini for AI features (premium users only)</li>
           <li><strong>Payment Processing:</strong> Stripe for subscription billing</li>
           <li><strong>Analytics:</strong> Umami Analytics for basic usage statistics (privacy-focused, no personal data)</li>
@@ -115,8 +115,8 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Data Security</h2>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Security</h2>
+        <ul class="list-disc list-inside space-y-2">
           <li>All data transmitted over HTTPS encryption</li>
           <li>Passwords are hashed using industry-standard algorithms</li>
           <li>Database hosted on secure, regularly updated infrastructure</li>
@@ -126,9 +126,9 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Your Rights</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">You have the right to:</p>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Your Rights</h2>
+        <p class="leading-relaxed mb-4">You have the right to:</p>
+        <ul class="list-disc list-inside space-y-2">
           <li><strong>Access:</strong> View all data we have about you</li>
           <li><strong>Export:</strong> Download your saved content in standard formats</li>
           <li><strong>Delete:</strong> Remove individual bookmarks or delete your entire account</li>
@@ -138,18 +138,15 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Beta Service Notice</h2>
-        <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg mb-6">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Beta Service Notice</h2>
+        <div class="p-4 bg-yellow-100 border-2 border-black mb-6">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-            </svg>
             <div>
-              <h3 class="text-amber-800 font-medium mb-2">Important: Beta Version</h3>
-              <p class="text-amber-700 text-sm leading-relaxed">
+              <h3 class="font-bold mb-2">Important: Beta Version</h3>
+              <p class="text-sm leading-relaxed">
                 Pensive is currently in beta testing. While we strive to protect your data, <strong>there is a possibility that data may be lost or wiped</strong> during updates, migrations, or unexpected issues. We strongly recommend:
               </p>
-              <ul class="list-disc list-inside mt-2 text-amber-700 text-sm space-y-1 ml-4">
+              <ul class="list-disc list-inside mt-2 text-sm space-y-1 ml-4">
                 <li>Regularly exporting your bookmarks as backup</li>
                 <li>Not relying on Pensive as your only storage method for critical information</li>
                 <li>Understanding that the service may experience downtime or data loss</li>
@@ -160,8 +157,8 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Data Retention</h2>
-        <ul class="list-disc list-inside space-y-2 text-gray-700">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Retention</h2>
+        <ul class="list-disc list-inside space-y-2">
           <li>Account data: Retained while your account is active</li>
           <li>Saved content: Retained until you delete it or close your account</li>
           <li>Session data: Automatically expires after inactivity</li>
@@ -171,25 +168,25 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Children's Privacy</h2>
-        <p class="text-gray-700 leading-relaxed">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Children's Privacy</h2>
+        <p class="leading-relaxed">
           Pensive is not intended for users under 13 years of age. We do not knowingly collect personal information from children under 13.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Changes to This Policy</h2>
-        <p class="text-gray-700 leading-relaxed">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Changes to This Policy</h2>
+        <p class="leading-relaxed">
           We may update this privacy policy from time to time. We will notify users of any material changes via email or through the service. 
           Your continued use of Pensive after changes constitutes acceptance of the updated policy.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Contact</h2>
-        <p class="text-gray-700 leading-relaxed">
+        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Contact</h2>
+        <p class="leading-relaxed">
           If you have questions about this privacy policy or how we handle your data, please contact us at:
-          <a href="mailto:arash.thr@live.com" class="text-sky-600 hover:text-sky-700 transition-colors">arash.thr@live.com</a>
+          <a href="mailto:arash.thr@live.com" class="underline">arash.thr@live.com</a>
         </p>
       </section>
     </div>

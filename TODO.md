@@ -62,6 +62,7 @@
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
 - [ ] Premium: Get YouTube
+- [ ] Create page for "Missing authorization code"
 - [ ] Observability
     - [ ] Add metrics
     - [ ] Send logs when extension crashes
@@ -69,12 +70,13 @@
     - [ ] Remove time from logs
     - [ ] Zap is possible?
 - [ ] Add like and dislike buttons
-- [ ] Tags
-    - [ ] Read tags from Pocket
-- [ ] Short key for calling the extension
 - [ ] Send verification email
     - [ ] Reminder to install Telegram and Extensions
-- [ ] Create page for "Missing authorization code"
+- [ ] Tags
+    - [ ] Read tags from Pocket
+- [ ] Full text search with part words
+- [x] Short key for calling the extension
+    - Let's do it when people ask for it
 - [x] Google and GitHub auth
 - [x] Add Firefox extenions
 - [x] Back up db

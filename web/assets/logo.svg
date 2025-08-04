@@ -2,13 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="96"
-   height="96"
-   viewBox="0 0 25.399999 25.399999"
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866666"
    version="1.1"
    id="svg1"
-   sodipodi:docname="minimal-small.svg"
+   sodipodi:docname="brutal2.svg"
    inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   inkscape:export-filename="brutal/icon48.png"
+   inkscape:export-xdpi="47.999992"
+   inkscape:export-ydpi="47.999992"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -23,70 +26,38 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="2.4651115"
-     inkscape:cx="25.353823"
-     inkscape:cy="62.066159"
+     inkscape:zoom="0.9008261"
+     inkscape:cx="141.53675"
+     inkscape:cy="31.082581"
      inkscape:window-width="1728"
      inkscape:window-height="1051"
-     inkscape:window-x="0"
-     inkscape:window-y="38"
+     inkscape:window-x="96"
+     inkscape:window-y="1478"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
-     id="defs1">
-    <inkscape:path-effect
-       effect="fillet_chamfer"
-       id="path-effect10"
-       is_visible="true"
-       lpeversion="1"
-       nodesatellites_param="F,0,0,1,0,2.99558,0,1 @ F,0,0,1,0,1.2582672,0,1 @ F,0,0,1,0,1.1437496,0,1 @ F,0,0,1,0,1.6557937,0,1 @ F,0,0,1,0,3.0165543,0,1"
-       radius="0"
-       unit="px"
-       method="auto"
-       mode="F"
-       chamfer_steps="1"
-       flexible="false"
-       use_knot_distance="true"
-       apply_no_radius="true"
-       apply_with_radius="true"
-       only_selected="false"
-       hide_knots="false" />
-    <inkscape:path-effect
-       effect="bspline"
-       id="path-effect9"
-       is_visible="true"
-       lpeversion="1.3"
-       weight="33.333333"
-       steps="2"
-       helper_size="0"
-       apply_no_weight="true"
-       apply_with_weight="true"
-       only_selected="false"
-       uniform="false" />
-    <inkscape:path-effect
-       effect="bspline"
-       id="path-effect9-7"
-       is_visible="true"
-       lpeversion="1.3"
-       weight="33.333333"
-       steps="2"
-       helper_size="0"
-       apply_no_weight="true"
-       apply_with_weight="true"
-       only_selected="false"
-       uniform="false" />
-  </defs>
+     id="defs1" />
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <path
-       id="rect9"
-       style="font-variation-settings:'wght' 600;fill:#4095bf;fill-opacity:1;stroke:#4095bf;stroke-width:1.05833;stroke-dasharray:none;stroke-opacity:1"
-       d="m 22.019579,8.9970569 c 0.199756,5.7241671 0.01946,11.6972121 -0.0058,17.4714811 -0.003,0.692161 -0.541511,1.080179 -1.167697,0.780091 -2.143921,-1.027433 -4.736714,-2.994152 -6.843356,-4.437156 -0.520732,-0.356691 -1.422181,-0.427702 -1.952326,-0.08672 -1.692772,1.088772 -4.7302888,3.44247 -6.5859377,4.511917 C 4.7011126,27.676584 3.944788,26.980492 3.944788,26.066022 V 9.156277 c 0,-1.6659969 1.3469685,-3.1225201 3.0117543,-3.1830339 3.8982997,-0.1417004 7.9614917,-0.037186 11.9245547,0.010951 1.65405,0.020091 3.080785,1.3595073 3.138482,3.0128628 z"
-       sodipodi:nodetypes="sscsss"
-       inkscape:path-effect="#path-effect10"
-       inkscape:original-d="m 21.876169,6.0050045 c 0.43669,7.0188075 0.134718,14.5479695 0.134718,21.7168115 -2.611923,-0.832822 -6.358829,-3.870995 -8.959018,-5.544425 -1.382521,0.437761 -8.3742457,6.277264 -9.107081,5.544425 V 6.1397227 C 9.6920174,5.6993777 15.976154,6.0050045 21.876169,6.0050045 Z"
-       transform="matrix(0.60493659,0,0,0.60040156,4.8184281,2.7148815)" />
+    <rect
+       style="fill:none;stroke:#000000;stroke-width:2.53107;stroke-linecap:butt;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       id="rect1"
+       width="22.868933"
+       height="22.868933"
+       x="5.4988666"
+       y="5.4988666" />
+    <text
+       xml:space="preserve"
+       style="font-weight:bold;font-size:18.8433px;line-height:1.25;font-family:'IBM Plex Sans';-inkscape-font-specification:'IBM Plex Sans Bold';text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;opacity:1;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:3.87436;stroke-linecap:butt;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       x="16.556458"
+       y="23.509644"
+       id="text1"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:3.87436;stroke-dasharray:none;stroke-opacity:1"
+         x="16.556458"
+         y="23.509644">P</tspan></text>
   </g>
 </svg>

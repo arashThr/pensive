@@ -1,151 +1,69 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-4xl mx-auto">
+<div class="px-8 py-16 max-w-4xl mx-auto">
   <!-- Header Section -->
-  <div class="text-center mb-10">
+  <div class="text-center mb-16">
     {{if .IsSubscribed}}
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Your Premium Plan</h1>
-      <p class="text-gray-600 leading-relaxed">
-        You're getting the most out of Pensive with full access to all premium features.
-      </p>
+      <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">YOUR PREMIUM PLAN</h1>
+      <p class="text-lg">You have full access to all premium features.</p>
     {{else}}
-      <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-3">Choose Your Plan</h1>
-      <p class="text-gray-600 leading-relaxed">
-        Build your searchable memory of the web. Everything you read should be indexed and findable.
-      </p>
+      <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">CHOOSE YOUR PLAN</h1>
+      <p class="text-lg">Build your searchable memory of the web. Everything you read should be indexed and findable.</p>
     {{end}}
   </div>
 
   <!-- Comparison Table -->
-  <div class="bg-white rounded-xl border border-gray-300 overflow-hidden mb-8">
+  <div class="border-2 border-black bg-white mb-16">
     <div class="grid grid-cols-1 md:grid-cols-2">
       <!-- Free Plan -->
-      <div class="p-8 border-r border-gray-200 {{if .IsSubscribed}}opacity-75{{end}}">
+      <div class="p-8 border-r-2 border-black {{if .IsSubscribed}}opacity-75{{end}}">
         <div class="text-center mb-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Free</h2>
-          <div class="text-3xl font-bold text-gray-900 mb-1">$0</div>
-          <p class="text-sm text-gray-600">Forever free</p>
+          <h2 class="text-2xl font-bold mb-2">FREE</h2>
+          <div class="text-3xl font-bold mb-1">$0</div>
+          <p class="text-sm">FOREVER FREE</p>
         </div>
-        
         <ul class="space-y-4">
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700">Save up to 100 bookmarks per day</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700">Full-text search across all saved content</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700">Browser extension for seamless saving</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700">Basic organization and tagging</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700">Import bookmarks from Pocket</span>
-          </li>
+          <li class="font-mono">• 100 bookmarks/day</li>
+          <li class="font-mono">• Full-text search</li>
+          <li class="font-mono">• Browser extension</li>
+          <li class="font-mono">• Basic tags</li>
+          <li class="font-mono">• Pocket import</li>
         </ul>
-        
         {{if not .IsSubscribed}}
         <div class="mt-8">
-          <a href="/signup" class="w-full inline-flex justify-center px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors">
-            Get Started Free
-          </a>
+          <a href="/signup" class="w-full inline-flex justify-center px-6 py-3 bg-black text-white font-bold">GET STARTED FREE</a>
         </div>
         {{end}}
       </div>
-      
       <!-- Premium Plan -->
-      <div class="p-8 bg-gradient-to-br from-sky-50 to-blue-50 relative {{if .IsSubscribed}}ring-2 ring-sky-600{{end}}">
-        {{if .IsSubscribed}}
-        <div class="absolute top-4 right-4">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-600 text-white">
-            Your Plan
-          </span>
-        </div>
-        {{end}}
-        
+      <div class="p-8 {{if .IsSubscribed}}bg-gray-100{{else}}bg-white{{end}}">
         <div class="text-center mb-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">Premium</h2>
-          <div class="text-3xl font-bold text-gray-900 mb-1">$5</div>
-          <p class="text-sm text-gray-600">per month</p>
+          <h2 class="text-2xl font-bold mb-2">PREMIUM</h2>
+          <div class="text-3xl font-bold mb-1">$5</div>
+          <p class="text-sm">PER MONTH</p>
         </div>
-        
-        <p class="text-sm text-sky-700 font-medium mb-4">Everything in Free, plus:</p>
-        
         <ul class="space-y-4">
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700"><strong>AI-powered summaries</strong> - Get instant insights without re-reading</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700"><strong>Telegram integration</strong> - Save bookmarks on the go from mobile</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700"><strong>Clean markdown extraction</strong> - Perfect reading experience</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700"><strong>Higher daily limits</strong> - Save more content without restrictions</span>
-          </li>
-          <li class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-sky-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span class="text-sm text-gray-700"><strong>Future features</strong> - YouTube video text search & weekly summaries</span>
-          </li>
+          <li class="font-mono">• AI summaries</li>
+          <li class="font-mono">• Telegram integration</li>
+          <li class="font-mono">• Clean markdown extraction</li>
+          <li class="font-mono">• Higher daily limits</li>
+          <li class="font-mono">• Future features</li>
         </ul>
-        
         {{if .IsSubscribed}}
         <div class="mt-8">
-          <a href="/payments/portal-session" class="w-full inline-flex justify-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors">
-            Manage Subscription
-          </a>
+          <a href="/payments/portal-session" class="w-full inline-flex justify-center px-6 py-3 bg-black text-white font-bold">MANAGE SUBSCRIPTION</a>
         </div>
         {{else}}
           {{if isSubscriptionEnabled}}
           <div class="mt-8">
             <form action="/payments/create-checkout-session" method="post">
               {{csrfField}}
-              <button 
-                type="submit" 
-                class="w-full inline-flex justify-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
-                Subscribe Now
-              </button>
+              <button type="submit" class="w-full inline-flex justify-center px-6 py-3 bg-black text-white font-bold cursor-pointer">SUBSCRIBE NOW</button>
             </form>
           </div>
           {{else}}
           <div class="mt-8">
-            <button 
-              type="button" 
-              class="w-full inline-flex justify-center px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
-              disabled>
-              Subscribe (Coming Soon)
-            </button>
+            <button type="button" class="w-full inline-flex justify-center px-6 py-3 bg-gray-300 text-black font-bold cursor-not-allowed opacity-75" disabled>SUBSCRIBE (COMING SOON)</button>
           </div>
           {{end}}
         {{end}}
@@ -153,83 +71,21 @@
     </div>
   </div>
 
-  {{if not .IsSubscribed}}
-    {{if isSubscriptionEnabled}}
-    <!-- Active Subscription Form -->
-    <div class="bg-white border border-gray-300 rounded-lg p-6 text-center">
-      <div class="mb-4">
-        <svg class="w-8 h-8 text-sky-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        </svg>
-      </div>
-      <p class="font-medium text-gray-900 mb-2">Ready to unlock premium features?</p>
-      <p class="text-sm text-gray-600 mb-6">
-        Get instant access to AI-powered insights, Telegram integration, and advanced tools 
-        to supercharge your knowledge management.
-      </p>
-      
-      <!-- Subscription Form -->
-      <form action="/payments/create-checkout-session" method="post">
-        {{csrfField}}
-        <button 
-          type="submit" 
-          class="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
-          Subscribe Now
-        </button>
-      </form>
-    </div>
-    {{else}}
-    <!-- Coming Soon Notice -->
-    <div class="bg-gray-50 border border-gray-300 rounded-lg p-6 text-center">
-      <div class="mb-4">
-        <svg class="w-8 h-8 text-gray-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <p class="font-medium text-gray-900 mb-2">Premium subscriptions launching soon</p>
-      <p class="text-sm text-gray-600 mb-6">
-        We're putting the finishing touches on these premium features. 
-        Stay tuned for the official launch announcement!
-      </p>
-      
-      <!-- Disabled CTA -->
-      <button 
-        type="button" 
-        class="px-6 py-3 bg-gray-300 text-gray-600 rounded-lg font-medium cursor-not-allowed opacity-75" 
-        disabled>
-        Subscribe (Coming Soon)
-      </button>
-    </div>
-    {{end}}
-  {{else}}
-    <!-- Already Subscribed Notice -->
-    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 text-center">
-      <div class="mb-4">
-        <svg class="w-8 h-8 text-emerald-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <p class="font-medium text-emerald-900 mb-2">You're all set with Premium!</p>
-      <p class="text-sm text-emerald-700 mb-6">
-        Enjoy unlimited bookmarks, AI summaries, Telegram integration, and all the premium features shown above.
-      </p>
-      
+  <!-- Already Subscribed Notice -->
+  {{if .IsSubscribed}}
+    <div class="border-2 border-black bg-gray-100 p-8 text-center mb-8">
+      <h3 class="font-bold mb-2">YOU'RE ALL SET WITH PREMIUM!</h3>
+      <p class="mb-6">Enjoy unlimited bookmarks, AI summaries, Telegram integration, and all the premium features above.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/payments/portal-session" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
-          Manage Billing
-        </a>
-        <a href="/home" class="px-6 py-3 border border-emerald-300 text-emerald-700 hover:bg-emerald-50 rounded-lg font-medium transition-colors">
-          Start Exploring
-        </a>
+        <a href="/payments/portal-session" class="px-6 py-3 bg-black text-white font-bold">MANAGE BILLING</a>
+        <a href="/home" class="px-6 py-3 border-2 border-black text-black font-bold">START EXPLORING</a>
       </div>
     </div>
   {{end}}
-  
+
   <!-- Navigation -->
   <div class="mt-8 text-center">
-    <a href="/home" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-      ← Back to Search
-    </a>
+    <a href="/home" class="text-sm underline font-bold">← BACK TO SEARCH</a>
   </div>
 </div>
 

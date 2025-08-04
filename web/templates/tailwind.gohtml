@@ -8,111 +8,94 @@
   <link rel="stylesheet" href="/assets/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   {{if and isProduction shouldUseAnalytics}}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{else}}
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              'mono': ['IBM Plex Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
   {{end}}
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col antialiased ibm-plex-sans">
+<body class="min-h-screen bg-white text-black font-mono flex flex-col">
+  
   <!-- Header -->
-  <header class="bg-gray-50 sticky top-0 z-50 border-b border-gray-300">
-    <div class="px-4 sm:px-6 max-w-7xl mx-auto">
-      
-      <!-- Main Navigation Bar -->
+  <header class="border-b-2 border-black bg-white sticky top-0 z-50">
+    <div class="px-6 max-w-6xl mx-auto">
       <div class="flex items-center justify-between h-16">
         
         <!-- Logo -->
-        <div class="text-xl font-semibold tracking-tight">
-          <a href="{{if currentUser}}/home{{else}}/{{end}}" class="flex items-center gap-2 hover:opacity-75 transition-opacity">
-            <img src="/assets/logo.svg" alt="Pensive Logo" class="h-10 w-10" />
-            <span class="font-bold text-gray-900">Pensive</span>
-            <span class="text-xs font-medium text-gray-600">Beta</span>
+        <div class="text-xl font-bold">
+          <a href="{{if currentUser}}/home{{else}}/{{end}}" class="hover:underline">
+            PENSIVE <span class="text-sm font-normal">[BETA]</span>
           </a>
         </div>
 
         {{if currentUser}}
-          <!-- Search Button (Desktop & Mobile) -->
-          <div class="flex items-center gap-2">
-            <!-- Search Button -->
-            <a href="/home" class="flex items-center gap-2 px-3 py-2 bg-white hover:bg-gray-50 border border-gray-300 rounded-lg transition-colors">
-              <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <span class="hidden sm:inline text-sm font-medium text-gray-600">Search</span>
-            </a>
-
-            <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center gap-1 text-sm font-medium">
-              <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                Library
-              </a>
-              <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                Extensions
-              </a>
+          <!-- Desktop Navigation -->
+          <div class="hidden md:flex items-center gap-6">
+            <a href="/home" class="hover:underline">SEARCH</a>
+            <a href="/bookmarks" class="hover:underline">LIBRARY</a>
+            <a href="/integrations" class="hover:underline">EXTENSIONS</a>
+            
+            <!-- Account Menu -->
+            <div class="relative">
+              <button id="account-menu" class="hover:underline">
+                ACCOUNT ▼
+              </button>
               
-              <!-- Account Dropdown -->
-              <div class="relative">
-                <button id="account-menu" class="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                  <span>Account</span>
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                
-                <!-- Dropdown Menu -->
-                <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-lg shadow-lg py-1">
-                  <a href="/users/me" class="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">Account Settings</a>
-                  <hr class="my-1 border-gray-300">
-                  <form action="/signout" method="post" class="block">
-                    {{csrfField}}
-                    <button type="submit" class="w-full text-left px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                      Sign Out
-                    </button>
-                  </form>
-                </div>
+              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black z-50">
+                <a href="/users/me" class="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                <hr class="border-black">
+                <form action="/signout" method="post" class="block">
+                  {{csrfField}}
+                  <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-100">
+                    Sign Out
+                  </button>
+                </form>
               </div>
-            </nav>
-
-            <!-- Mobile Menu Button -->
-            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+            </div>
           </div>
+
+          <!-- Mobile Menu Button -->
+          <button id="mobile-menu-button" class="md:hidden font-bold hover:underline">
+            MENU
+          </button>
 
         {{else}}
           <!-- Logged Out Navigation -->
-          <div class="flex items-center gap-3 text-sm font-medium">
-            <a href="/signin" class="text-gray-600 hover:text-sky-600 transition-colors">Sign In</a>
-            <a href="/signup" class="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors">Sign Up</a>
+          <div class="flex items-center gap-4">
+            <a href="/signin" class="hover:underline">SIGN IN</a>
+            <a href="/signup" class="bg-black text-white px-4 py-2 font-bold hover:bg-gray-800">SIGN UP</a>
           </div>
         {{end}}
       </div>
 
       {{if currentUser}}
         <!-- Mobile Navigation Menu -->
-        <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-gray-300">
-          <nav class="flex flex-col gap-1 pt-4">
-            <a href="/bookmarks" class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-              Library
-            </a>
-            <a href="/integrations" class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-              Extensions
-            </a>
-            <a href="/users/me" class="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-              Account Settings
-            </a>
-            <hr class="my-2 border-gray-300">
+        <div id="mobile-menu" class="hidden md:hidden border-t-2 border-black bg-white">
+          <div class="py-4 space-y-2">
+            <a href="/home" class="block py-2 hover:underline">SEARCH</a>
+            <a href="/bookmarks" class="block py-2 hover:underline">LIBRARY</a>
+            <a href="/integrations" class="block py-2 hover:underline">EXTENSIONS</a>
+            <a href="/users/me" class="block py-2 hover:underline">SETTINGS</a>
+            <hr class="border-black my-2">
             <form action="/signout" method="post">
               {{csrfField}}
-              <button type="submit" class="w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
-                Sign Out
+              <button type="submit" class="block py-2 hover:underline">
+                SIGN OUT
               </button>
             </form>
-          </nav>
+          </div>
         </div>
       {{end}}
     </div>
@@ -122,52 +105,32 @@
   {{if messages}}
     <div class="px-6 py-4 max-w-4xl mx-auto">
       {{range messages}}
-        <div class="flex items-center justify-between px-4 py-3 mb-2 bg-white border border-gray-300 rounded-lg shadow-sm {{if .IsError}}border-red-200 bg-red-50{{else}}border-sky-200 bg-sky-50{{end}}">
-          <div class="flex items-center gap-2">
-            {{if .IsError}}
-              <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <span class="text-red-600">{{.Message}}</span>
-            {{else}}
-              <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-sky-800">{{.Message}}</span>
-            {{end}}
-          </div>
-          <button onclick="closeAlert(event)" class="ml-2 text-gray-600 hover:text-gray-900 transition-colors">
-            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <div class="border-2 {{if .IsError}}border-red-600 bg-red-100{{else}}border-black bg-gray-100{{end}} p-4 mb-4">
+          <strong>{{if .IsError}}ERROR:{{else}}INFO:{{end}}</strong> {{.Message}}
+          <button onclick="closeAlert(event)" class="float-right font-bold">×</button>
         </div>
       {{end}}
     </div>
   {{end}}
 
-  <main class="flex-grow">
+  <main class="flex-1">
 {{end}}
 
 {{define "footer"}}
   </main>
-  <footer class="border-t border-gray-300 bg-white py-8">
-    <div class="max-w-7xl mx-auto px-6">
+  
+  <footer class="border-t-2 border-black bg-white py-8 mt-16">
+    <div class="max-w-4xl mx-auto px-6">
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="flex items-center gap-2 text-sm text-gray-600">
-          <svg class="h-4 w-4 text-sky-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-          </svg>
-          <span>© 2025 Pensive</span>
+        <div>
+          <strong>PENSIVE</strong> © 2025
         </div>
-        <div class="flex items-center gap-6 text-sm text-gray-600">
-          <a href="/contact" class="hover:text-gray-900 transition-colors">Contact</a>
-          <a href="/faq" class="hover:text-gray-900 transition-colors">FAQ</a>
-          <a href="/privacy" class="hover:text-gray-900 transition-colors">Privacy Policy</a>
-          <a href="https://github.com/arashThr" class="hover:text-gray-900 transition-colors" title="GitHub" target="_blank" rel="noopener">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
+        <div class="flex items-center gap-6">
+          <a href="/contact" class="hover:underline">CONTACT</a>
+          <a href="/faq" class="hover:underline">FAQ</a>
+          <a href="/privacy" class="hover:underline">PRIVACY</a>
+          <a href="https://github.com/arashThr" class="hover:underline" target="_blank" rel="noopener">
+            GITHUB
           </a>
         </div>
       </div>
@@ -196,7 +159,6 @@
         accountDropdown.classList.toggle('hidden');
       });
       
-      // Close dropdown when clicking outside
       document.addEventListener('click', () => {
         accountDropdown.classList.add('hidden');
       });
@@ -204,7 +166,7 @@
 
     // Alert close function
     function closeAlert(event) {
-      event.target.closest('.flex').remove();
+      event.target.closest('div').remove();
     }
   </script>
   <script src="/assets/htmx.min.js"></script>
@@ -218,18 +180,18 @@
   <div class="mt-8 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
       <a href="?page={{.Pages.Previous}}" 
-         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+         class="inline-flex items-center py-2 px-4 border-2 border-black text-sm font-bold hover:bg-gray-100">
         ← Previous
       </a>
     {{else}}
       <span class="invisible py-2 px-4"></span>
     {{end}}
 
-    <span class="text-sm text-gray-600">Page {{.Pages.Current}}</span>
+    <span class="text-sm font-bold">Page {{.Pages.Current}}</span>
 
     {{if .MorePages}}
       <a href="?page={{.Pages.Next}}" 
-         class="inline-flex items-center py-2 px-4 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors">
+         class="inline-flex items-center py-2 px-4 border-2 border-black text-sm font-bold hover:bg-gray-100">
         Next →
       </a>
     {{else}}

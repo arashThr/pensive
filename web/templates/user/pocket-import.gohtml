@@ -1,203 +1,32 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-4xl mx-auto">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2 tracking-tight">Import from Pocket</h1>
-    <p class="text-gray-600">Upload your Pocket export file to migrate your saved articles.</p>
+<div class="px-8 py-16 max-w-4xl mx-auto">
+  <div class="mb-16">
+    <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">IMPORT FROM POCKET</h1>
+    <p class="text-lg">Upload your Pocket export file to migrate your saved articles.</p>
   </div>
-
-    <!-- Import Form -->
-  <section class="bg-white rounded-xl border border-gray-300 p-6">
-      <div class="flex items-center mb-4">
-        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
-          <img src="/assets/icons/pocket.png" alt="Pocket" class="">
-        </div>
-        <div>
-          <h3 class="text-lg font-medium text-gray-900">Upload Export File</h3>
-          <p class="text-sm text-gray-600">Select your Pocket ZIP export file</p>
-        </div>
+  <section class="border-2 border-black bg-white p-8">
+    <h3 class="text-2xl font-bold mb-6">UPLOAD EXPORT FILE</h3>
+    <form action="/users/pocket-import" method="post" enctype="multipart/form-data" class="space-y-6">
+      {{csrfField}}
+      <input type="hidden" name="source" value="pocket">
+      <div>
+        <label for="import-file" class="block text-sm font-bold mb-2">CHOOSE ZIP FILE</label>
+        <input id="import-file" name="import-file" type="file" accept=".zip" required class="block w-full border-2 border-black px-4 py-3 font-mono">
+        <p class="text-xs mt-2">ZIP format required</p>
       </div>
-
-      <form action="/users/pocket-import" method="post" enctype="multipart/form-data" class="space-y-4">
-        {{csrfField}}
-        <input type="hidden" name="source" value="pocket">
-        
-        <!-- File Upload -->
-        <div>
-          <label for="import-file" class="block text-sm font-medium text-gray-600 mb-2">
-            Choose ZIP file
-          </label>
-          <div id="file-upload-area" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-gray-300 transition-all duration-200">
-            <div class="space-y-1 text-center">
-              <!-- Default upload icon -->
-              <svg id="upload-icon" class="mx-auto h-12 w-12 text-gray-600" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <!-- Success icon (hidden by default) -->
-              <svg id="success-icon" class="mx-auto h-12 w-12 text-green-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              
-              <div id="upload-text" class="flex text-sm text-gray-600">
-                <label for="import-file" class="relative cursor-pointer bg-white rounded-md font-medium text-sky-600 hover:text-sky-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-sky-500">
-                  <span>Upload a file</span>
-                  <input id="import-file" name="import-file" type="file" accept=".zip" required class="sr-only">
-                </label>
-                <p class="pl-1">or drag and drop</p>
-              </div>
-              
-              <!-- File info (hidden by default) -->
-              <div id="file-info" class="hidden">
-                <p id="file-name" class="text-sm font-medium text-gray-900"></p>
-                <p id="file-size" class="text-xs text-gray-600"></p>
-                <button type="button" id="remove-file" class="mt-2 text-xs text-red-600 hover:text-red-500 underline">Remove file</button>
-              </div>
-              
-              <p id="upload-hint" class="text-xs text-gray-600">ZIP format required</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="pt-4">
-          <button
-            type="submit"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-            </svg>
-            Begin Import
-          </button>
-        </div>
-      </form>
-
-      <!-- Help Text -->
-      <div class="mt-6 p-4 bg-sky-50 rounded-lg border border-sky-200">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <svg class="h-5 w-5 text-sky-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-            </svg>
-          </div>
-          <div class="ml-3">
-            <h3 class="text-sm font-medium text-sky-800">How to export from Pocket</h3>
-            <div class="mt-2 text-sm text-sky-700">
-              <ol class="list-decimal list-inside space-y-1">
-                <li>Go to <a href="https://getpocket.com/export" target="_blank" class="underline hover:no-underline">getpocket.com/export</a></li>
-                <li>Click "Export CSV file"</li>
-                <li>Download the ZIP file when ready</li>
-                <li>Upload that ZIP file here</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-      </div>
+      <button type="submit" class="w-full py-3 px-6 bg-black text-white font-bold">BEGIN IMPORT</button>
+    </form>
+    <div class="mt-8 border-t-2 border-black pt-8">
+      <h4 class="font-bold mb-2">HOW TO EXPORT FROM POCKET</h4>
+      <ol class="list-decimal list-inside space-y-1">
+        <li>Go to <a href="https://getpocket.com/export" target="_blank" class="underline">getpocket.com/export</a></li>
+        <li>Click "Export CSV file"</li>
+        <li>Download the ZIP file when ready</li>
+        <li>Upload that ZIP file here</li>
+      </ol>
+    </div>
   </section>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const fileInput = document.getElementById('import-file');
-  const uploadArea = document.getElementById('file-upload-area');
-  const uploadIcon = document.getElementById('upload-icon');
-  const successIcon = document.getElementById('success-icon');
-  const uploadText = document.getElementById('upload-text');
-  const fileInfo = document.getElementById('file-info');
-  const fileName = document.getElementById('file-name');
-  const fileSize = document.getElementById('file-size');
-  const uploadHint = document.getElementById('upload-hint');
-  const removeFileBtn = document.getElementById('remove-file');
-
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  function showFileSelected(file) {
-    // Update visual state
-    uploadArea.classList.remove('border-gray-300', 'border-dashed');
-    uploadArea.classList.add('border-green-500', 'border-solid', 'bg-green-50');
-    
-    // Hide upload elements
-    uploadIcon.classList.add('hidden');
-    uploadText.classList.add('hidden');
-    uploadHint.classList.add('hidden');
-    
-    // Show success elements
-    successIcon.classList.remove('hidden');
-    fileInfo.classList.remove('hidden');
-    
-    // Update file info
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
-  }
-
-  function resetUploadState() {
-    // Reset visual state
-    uploadArea.classList.remove('border-green-500', 'border-solid', 'bg-green-50');
-    uploadArea.classList.add('border-gray-300', 'border-dashed');
-    
-    // Show upload elements
-    uploadIcon.classList.remove('hidden');
-    uploadText.classList.remove('hidden');
-    uploadHint.classList.remove('hidden');
-    
-    // Hide success elements
-    successIcon.classList.add('hidden');
-    fileInfo.classList.add('hidden');
-    
-    // Clear file input
-    fileInput.value = '';
-  }
-
-  // Handle file selection
-  fileInput.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      showFileSelected(file);
-    }
-  });
-
-  // Handle remove file button
-  removeFileBtn.addEventListener('click', function() {
-    resetUploadState();
-  });
-
-  // Handle drag and drop
-  uploadArea.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uploadArea.classList.add('border-sky-500', 'bg-sky-50');
-  });
-
-  uploadArea.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
-  });
-
-  uploadArea.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const file = files[0];
-      if (file.name.toLowerCase().endsWith('.zip')) {
-        // Manually set the file to the input
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        fileInput.files = dt.files;
-        
-        showFileSelected(file);
-      } else {
-        alert('Please select a ZIP file.');
-      }
-    }
-  });
-});
-</script>
 
 {{template "footer" .}}

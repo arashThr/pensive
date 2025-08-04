@@ -1,74 +1,67 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-5xl mx-auto">
+<div class="px-8 py-16 max-w-5xl mx-auto">
+  
   <!-- Page Header -->
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-2">Account Settings</h1>
-    <p class="text-gray-600">Manage your profile, integrations, and data import/export options.</p>
+  <div class="mb-16">
+    <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">ACCOUNT SETTINGS</h1>
+    <p class="text-lg">Manage your profile, integrations, and data.</p>
   </div>
   
   <div class="flex flex-col lg:flex-row gap-8">
+    
     <!-- Mobile Tab Selector -->
     <div class="lg:hidden">
       <select 
         id="mobile-tab-select"
         name="tab"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 focus:border-sky-600 focus:ring-1 focus:ring-sky-600/20 outline-none transition-colors"
+        class="w-full px-4 py-3 border-2 border-black bg-white text-black font-bold"
         hx-get="/users/tab-content"
         hx-target="#tab-content"
         hx-swap="innerHTML"
         hx-trigger="change"
       >
-        <option value="profile">Profile</option>
-        <option value="tokens">Integrations</option>
-        <option value="import-export">Import & Export</option>
+        <option value="profile">PROFILE</option>
+        <option value="tokens">API TOKENS</option>
+        <option value="import-export">IMPORT / EXPORT</option>
       </select>
     </div>
 
-    <!-- Desktop Sidebar Navigation -->
+    <!-- Desktop Sidebar -->
     <div class="hidden lg:block lg:w-64 lg:flex-shrink-0">
-      <nav class="bg-white rounded-xl border border-gray-300 p-2">
-        <ul class="space-y-1">
+      <nav class="border-2 border-black bg-white">
+        <ul class="divide-y-2 divide-black">
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors active"
+              class="tab-button w-full text-left px-6 py-4 font-bold hover:bg-gray-100 active"
               data-tab="profile"
               hx-get="/users/tab-content?tab=profile"
               hx-target="#tab-content"
               hx-swap="innerHTML"
             >
-              <svg class="w-5 h-5 mr-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              Profile
+              PROFILE
             </button>
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors"
+              class="tab-button w-full text-left px-6 py-4 font-bold hover:bg-gray-100"
               data-tab="tokens"
               hx-get="/users/tab-content?tab=tokens"
               hx-target="#tab-content"
               hx-swap="innerHTML"
             >
-              <svg class="w-5 h-5 mr-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-              </svg>
-              Integrations
+              API TOKENS
             </button>
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 flex items-center transition-colors"
+              class="tab-button w-full text-left px-6 py-4 font-bold hover:bg-gray-100"
               data-tab="import-export"
               hx-get="/users/tab-content?tab=import-export"
               hx-target="#tab-content"
               hx-swap="innerHTML"
             >
-              <svg class="w-5 h-5 mr-3 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-              </svg>
-              Import & Export
+              IMPORT / EXPORT
             </button>
           </li>
         </ul>
@@ -77,33 +70,40 @@
 
     <!-- Tab Content Area -->
     <div class="flex-1">
-      <div id="tab-content" class="bg-white rounded-xl border border-gray-300 p-6"
+      <div id="tab-content" class="border-2 border-black bg-white p-8"
            hx-get="/users/tab-content?tab=profile"
            hx-trigger="load"
            hx-swap="innerHTML">
-        <!-- Loading placeholder -->
-        <div class="flex items-center justify-center py-12">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
-          <span class="ml-3 text-gray-600">Loading...</span>
+        
+        <!-- Loading State -->
+        <div class="text-center py-16">
+          <div class="inline-block border-2 border-black border-t-4 border-t-black w-8 h-8 animate-spin"></div>
+          <p class="mt-4 font-bold">LOADING...</p>
         </div>
+        
       </div>
     </div>
   </div>
 </div>
 
-<!-- Tab Navigation Script -->
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const mobileSelect = document.getElementById('mobile-tab-select');
   
+  // Desktop tab switching
   tabButtons.forEach(button => {
     button.addEventListener('click', function() {
       // Remove active styles from all buttons
-      tabButtons.forEach(btn => btn.classList.remove('active', 'bg-sky-50', 'text-sky-700'));
+      tabButtons.forEach(btn => {
+        btn.classList.remove('active', 'bg-black', 'text-white');
+        btn.classList.add('hover:bg-gray-100');
+      });
       
       // Add active styles to clicked button
-      this.classList.add('active', 'bg-sky-50', 'text-sky-700');
+      this.classList.add('active', 'bg-black', 'text-white');
+      this.classList.remove('hover:bg-gray-100');
       
       // Update mobile select to match
       const tab = this.getAttribute('data-tab');
@@ -111,15 +111,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // Handle mobile tab switching
+  // Mobile tab switching
   mobileSelect.addEventListener('change', function() {
     const selectedTab = this.value;
     
     // Update desktop active state
     tabButtons.forEach(btn => {
-      btn.classList.remove('active', 'bg-sky-50', 'text-sky-700');
+      btn.classList.remove('active', 'bg-black', 'text-white');
+      btn.classList.add('hover:bg-gray-100');
+      
       if (btn.getAttribute('data-tab') === selectedTab) {
-        btn.classList.add('active', 'bg-sky-50', 'text-sky-700');
+        btn.classList.add('active', 'bg-black', 'text-white');
+        btn.classList.remove('hover:bg-gray-100');
       }
     });
   });
@@ -127,46 +130,41 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set initial active state
   const profileButton = document.querySelector('[data-tab="profile"]');
   if (profileButton) {
-    profileButton.classList.add('active', 'bg-sky-50', 'text-sky-700');
+    profileButton.classList.add('active', 'bg-black', 'text-white');
+    profileButton.classList.remove('hover:bg-gray-100');
   }
   
-  // Import/Export file upload functionality using event delegation
+  // File upload utilities
   function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 BYTES';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['BYTES', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   function showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize) {
-    // Update visual state
-    uploadArea.classList.remove('border-sky-300', 'hover:border-sky-400');
-    uploadArea.classList.add('border-green-500', 'bg-green-50');
+    uploadArea.classList.remove('border-black', 'hover:bg-gray-100');
+    uploadArea.classList.add('border-black', 'bg-gray-100');
     
-    // Hide upload state, show file selected state
     uploadState.classList.add('hidden');
     fileSelected.classList.remove('hidden');
     
-    // Update file info
     fileName.textContent = file.name;
     fileSize.textContent = formatFileSize(file.size);
   }
 
   function resetUploadState(uploadArea, uploadState, fileSelected, fileInput) {
-    // Reset visual state
-    uploadArea.classList.remove('border-green-500', 'bg-green-50');
-    uploadArea.classList.add('border-sky-300', 'hover:border-sky-400');
+    uploadArea.classList.remove('bg-gray-100');
+    uploadArea.classList.add('border-black', 'hover:bg-gray-100');
     
-    // Show upload state, hide file selected state
     uploadState.classList.remove('hidden');
     fileSelected.classList.add('hidden');
     
-    // Clear file input
     fileInput.value = '';
   }
 
-  // Event delegation for file input changes
+  // File input change handler
   document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'import-file') {
       const file = e.target.files[0];
@@ -184,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Event delegation for remove file button
+  // Remove file button handler
   document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'remove-file') {
       const uploadArea = document.getElementById('file-upload-area');
@@ -198,13 +196,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Event delegation for drag and drop
+  // Drag and drop handlers
   document.addEventListener('dragover', function(e) {
     if (e.target && e.target.closest('#file-upload-area')) {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.add('border-sky-500', 'bg-sky-50');
+        uploadArea.classList.add('bg-gray-100');
       }
     }
   });
@@ -214,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
+        uploadArea.classList.remove('bg-gray-100');
       }
     }
   });
@@ -224,14 +222,13 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.remove('border-sky-500', 'bg-sky-50');
+        uploadArea.classList.remove('bg-gray-100');
       }
       
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         const file = files[0];
         if (file.name.toLowerCase().endsWith('.zip')) {
-          // Manually set the file to the input
           const fileInput = document.getElementById('import-file');
           if (fileInput) {
             const dt = new DataTransfer();
@@ -248,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           }
         } else {
-          alert('Please select a ZIP file.');
+          alert('ZIP FILES ONLY');
         }
       }
     }

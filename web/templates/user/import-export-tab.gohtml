@@ -1,116 +1,34 @@
-<div class="space-y-8">
+<div class="space-y-12">
   <!-- Header -->
   <div>
-    <h2 class="text-xl font-semibold text-gray-900 mb-2 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-      </svg>
-      Import & Export
-    </h2>
-    <p class="text-sm text-gray-600">
-      Manage your bookmark data by importing from other services or exporting your current collection.
-    </p>
-    
-    <!-- Beta Backup Reminder -->
-    <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-      <div class="flex items-start gap-2">
-        <svg class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-        </svg>
-        <div>
-          <p class="text-amber-800 text-xs font-medium mb-1">Beta Reminder</p>
-          <p class="text-amber-700 text-xs leading-tight">
-            During beta, we strongly recommend exporting your data regularly as backup. Data may be lost during updates.
-          </p>
-        </div>
-      </div>
+    <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">IMPORT / EXPORT</h2>
+    <p class="text-lg">Manage your bookmark data by importing from other services or exporting your current collection.</p>
+    <div class="mt-4 p-4 bg-yellow-100 border-2 border-black">
+      <p class="font-bold mb-1">BETA REMINDER</p>
+      <p class="text-xs">During beta, export your data regularly as backup. Data may be lost during updates.</p>
     </div>
   </div>
 
   <!-- Export Section -->
-  <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6">
-    <div class="flex items-start gap-4 mb-4">
-      <div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h3 class="font-medium text-emerald-900 mb-2">Export Your Data (Recommended)</h3>
-        <p class="text-sm text-emerald-800 mb-4">
-          Download all your bookmarks and metadata in a portable format. <strong>During beta, use this regularly as backup.</strong>
-        </p>
-        
-        <!-- What's Included -->
-        <div class="bg-white/80 rounded-lg p-4 mb-4">
-          <p class="text-sm font-medium text-emerald-900 mb-2">Export includes:</p>
-          <ul class="text-sm text-emerald-800 space-y-1">
-            <li class="flex items-center">
-              <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full mr-2"></span>
-              All bookmarks with metadata
-            </li>
-            <li class="flex items-center">
-              <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full mr-2"></span>
-              Tags and categories
-            </li>
-            <li class="flex items-center">
-              <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full mr-2"></span>
-              Creation dates and notes
-            </li>
-          </ul>
-        </div>
-        
-        <form action="/users/export" method="post">
-          {{csrfField}}
-          <button
-            type="submit"
-            class="flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
-          >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export Data
-          </button>
-        </form>
-      </div>
-    </div>
+  <div class="border-2 border-black bg-white p-8">
+    <h3 class="text-xl font-bold mb-4">EXPORT YOUR DATA</h3>
+    <p class="mb-4">Download all your bookmarks and metadata in a portable format. <strong>During beta, use this regularly as backup.</strong></p>
+    <ul class="mb-4 font-mono">
+      <li>• All bookmarks with metadata</li>
+      <li>• Tags and categories</li>
+      <li>• Creation dates and notes</li>
+    </ul>
+    <form action="/users/export" method="post">
+      {{csrfField}}
+      <button type="submit" class="px-4 py-2 bg-black text-white font-bold">EXPORT DATA</button>
+    </form>
   </div>
 
   <!-- Import Section -->
-  <div class="bg-sky-50 border border-sky-200 rounded-lg p-6">
-    <div class="flex items-start gap-4 mb-6">
-      <div class="w-10 h-10 rounded-lg bg-sky-100 flex items-center justify-center flex-shrink-0">
-        <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h3 class="font-medium text-sky-900 mb-2">Import from Pocket</h3>
-        <p class="text-sm text-sky-800">
-          Migrate all your saved articles from Pocket to your personal library.
-        </p>
-      </div>
-    </div>
-
-    <!-- Import Options -->
-    <div class="space-y-4">
-      <a href="/users/pocket-import" class="block w-full p-4 bg-white border border-sky-200 rounded-lg hover:border-sky-300 hover:bg-sky-25 transition-colors">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <img src="/assets/icons/pocket.png" alt="Pocket" class="w-8 h-8">
-            <div>
-              <h4 class="font-medium text-sky-900">Pocket Import</h4>
-              <p class="text-sm text-sky-700">Upload your Pocket export file</p>
-            </div>
-          </div>
-          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </a>
-    </div>
-
-
+  <div class="border-2 border-black bg-gray-100 p-8">
+    <h3 class="text-xl font-bold mb-4">IMPORT FROM POCKET</h3>
+    <p class="mb-4">Migrate all your saved articles from Pocket to your personal library.</p>
+    <a href="/users/pocket-import" class="block w-full p-4 bg-white border-2 border-black font-bold text-center hover:bg-gray-100">POCKET IMPORT</a>
   </div>
 </div>
 

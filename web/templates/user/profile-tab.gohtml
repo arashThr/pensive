@@ -1,75 +1,31 @@
-<div class="space-y-6">
+<div class="space-y-8">
   <div>
-    <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-      <svg class="w-5 h-5 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-      Profile Information
-    </h2>
-    
-    <!-- Email Display -->
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-300">
-      <p class="text-sm font-medium text-gray-900 mb-1">Email Address</p>
-      <p class="text-gray-600">{{.Email}}</p>
+    <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">PROFILE INFORMATION</h2>
+    <div class="border-2 border-black bg-white p-4">
+      <p class="text-sm font-bold mb-1">EMAIL ADDRESS</p>
+      <p class="font-mono">{{.Email}}</p>
     </div>
   </div>
 
   <!-- Subscription Status Section -->
-  <div class="border-t border-gray-300 pt-6">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">Subscription Status</h3>
-    
+  <div class="border-t-2 border-black pt-8">
+    <h3 class="text-xl font-bold mb-4">SUBSCRIPTION STATUS</h3>
     {{if .IsSubscribed}}
-      <!-- Active Subscription -->
-      <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-        <div class="flex items-center mb-3">
-          <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center mr-3">
-            <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <div>
-            <p class="font-medium text-emerald-900">Premium Subscriber</p>
-            <p class="text-sm text-emerald-700">Enjoy all premium features including AI summaries and integrations.</p>
-          </div>
-        </div>
-        <a href="/payments/portal-session"
-          class="inline-flex items-center px-4 py-2 border border-emerald-300 rounded-lg text-sm font-medium text-emerald-700 bg-white hover:bg-emerald-50 transition-colors">
-          Manage Subscription
-        </a>
+      <div class="border-2 border-black bg-white p-4 mb-4">
+        <p class="font-bold mb-2">PREMIUM SUBSCRIBER</p>
+        <p class="mb-4">Enjoy all premium features including AI summaries and integrations.</p>
+        <a href="/payments/portal-session" class="px-4 py-2 bg-black text-white font-bold">MANAGE SUBSCRIPTION</a>
       </div>
     {{else}}
-      <!-- No Subscription -->
-      <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
-        <div class="mb-4">
-          <p class="font-medium text-gray-900 mb-1">Free Account</p>
-          <p class="text-sm text-gray-600">Upgrade to premium to unlock AI-powered features and integrations.</p>
-        </div>
-        
-        <div class="space-y-3">
-          <div class="text-sm text-gray-600">
-            <p class="font-medium mb-2">Premium features include:</p>
-            <ul class="space-y-1 pl-4">
-              <li class="flex items-center">
-                <span class="w-1.5 h-1.5 bg-sky-600 rounded-full mr-2"></span>
-                AI-generated summaries and insights
-              </li>
-              <li class="flex items-center">
-                <span class="w-1.5 h-1.5 bg-sky-600 rounded-full mr-2"></span>
-                Telegram bot integration
-              </li>
-              <li class="flex items-center">
-                <span class="w-1.5 h-1.5 bg-sky-600 rounded-full mr-2"></span>
-                Advanced search and organization
-              </li>
-            </ul>
-          </div>
-          
-          <a href="/users/subscribe" 
-             class="inline-flex items-center px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-medium transition-colors">
-            Learn More About Premium
-          </a>
-        </div>
+      <div class="border-2 border-black bg-gray-100 p-4 mb-4">
+        <p class="font-bold mb-2">FREE ACCOUNT</p>
+        <p class="mb-4">Upgrade to premium to unlock AI-powered features and integrations.</p>
+        <ul class="mb-4">
+          <li class="font-mono">• AI-generated summaries and insights</li>
+          <li class="font-mono">• Telegram bot integration</li>
+          <li class="font-mono">• Advanced search and organization</li>
+        </ul>
+        <a href="/users/subscribe" class="px-4 py-2 bg-black text-white font-bold">LEARN MORE ABOUT PREMIUM</a>
       </div>
     {{end}}
   </div>

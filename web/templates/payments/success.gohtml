@@ -2,29 +2,17 @@
 
 <div class="px-6 py-8 max-w-2xl mx-auto">
   <!-- Success Card -->
-  <div class="bg-white rounded-xl border border-gray-300 p-8 text-center">
-    <!-- Success Icon -->
-    <div class="mb-6">
-      <div class="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-        <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-    </div>
-
-    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-4">Welcome to Premium!</h1>
-    <p class="text-gray-600 mb-2">Your subscription to the Starter plan has been successfully activated.</p>
-    <p class="text-sm text-gray-600 mb-8">You'll receive an email confirmation shortly with all the details.</p>
+  <div class="bg-white border-2 border-black p-8 text-center">
+    <h1 class="text-2xl font-bold mb-4">WELCOME TO PREMIUM!</h1>
+    <p class="mb-2">Your subscription to the Starter plan has been successfully activated.</p>
+    <p class="text-sm mb-8">You'll receive an email confirmation shortly with all the details.</p>
 
     <!-- Success Actions -->
-    <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
+    <div class="bg-gray-100 border-2 border-black p-6 mb-6">
       <div class="flex items-center gap-2 mb-3">
-        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-        <span class="font-medium text-emerald-900">Premium features now active</span>
+        <span class="font-bold">Premium features now active</span>
       </div>
-      <p class="text-sm text-emerald-800">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
+      <p class="text-sm">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
     </div>
 
     <!-- Billing Management -->
@@ -32,20 +20,20 @@
       <form action="/payments/create-portal-session" method="POST">
         {{csrfField}}
         <input type="hidden" name="session_id" value="{{.SessionId}}" />
-        <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-          Manage Billing & Subscription
+        <button type="submit" class="w-full bg-black text-white font-bold py-3 px-6 hover:bg-gray-800">
+          MANAGE BILLING & SUBSCRIPTION
         </button>
       </form>
       
-      <a href="/home" class="inline-block text-gray-600 hover:text-gray-900 text-sm transition-colors">
+      <a href="/home" class="inline-block text-sm underline">
         Start exploring premium features →
       </a>
     </div>
 
     <!-- Support -->
-    <div class="mt-8 pt-6 border-t border-gray-300">
-      <p class="text-sm text-gray-600">
-        Need help? <a href="/contact" class="text-sky-600 hover:text-sky-700 font-medium transition-colors">Contact our support team</a>
+    <div class="mt-8 pt-6 border-t-2 border-black">
+      <p class="text-sm">
+        Need help? <a href="/contact" class="underline">Contact our support team</a>
       </p>
     </div>
   </div>
