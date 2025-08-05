@@ -62,11 +62,11 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]types.ImportJobId, error) 
 	query := `
 		SELECT id
 		FROM import_jobs 
-		WHERE status != $1
+		WHERE status = $1
 		ORDER BY created_at ASC 
 		LIMIT $2`
 
-	rows, err := m.Pool.Query(context.Background(), query, ImportJobStatusCompleted, limit)
+	rows, err := m.Pool.Query(context.Background(), query, ImportJobStatusPending, limit)
 	if err != nil {
 		return nil, err
 	}

@@ -12,6 +12,9 @@
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
+- [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
+    - [x] Fix the error: Only pending
+    - [ ] Send logs for the error
 - [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket
 - [x] Adding bookmark from website brings the image, but the extension does not:
