@@ -595,7 +595,8 @@ type SearchResult struct {
 func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		WITH search_query AS (
-			SELECT plainto_tsquery(CASE WHEN $1 = '' THEN '' ELSE $1 END) AS query
+			SELECT to_tsquery(string_agg(lexeme || ':*', ' & ')) AS query
+			FROM unnest(string_to_array(CASE WHEN $1 = '' THEN '' ELSE $1 END, ' ')) AS lexeme
 		)
 		SELECT
 			ts_headline(lc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
