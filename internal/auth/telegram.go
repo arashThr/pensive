@@ -2,10 +2,10 @@ package auth
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 )
 
@@ -19,7 +19,7 @@ func (t *Telegram) RedirectWithAuthToken(w http.ResponseWriter, r *http.Request)
 
 	token, err := t.TelegramModel.CreateAuthToken(user.ID)
 	if err != nil {
-		slog.Error("failed to create auth token", "error", err, "user", user.ID)
+		logging.Logger.Errorw("failed to create auth token", "error", err, "user", user.ID)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

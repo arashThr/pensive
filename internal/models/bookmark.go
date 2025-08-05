@@ -7,7 +7,6 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
 	"github.com/go-shiori/go-readability"
@@ -125,11 +125,11 @@ func (model *BookmarkModel) CreateWithContent(
 	// Fallback to the original method of fetching the page
 	article, err := fetchLink(link)
 	if err != nil {
-		slog.Warn("Failed to fetch page on server", "error", err, "link", link)
+		logging.Logger.Warnw("Failed to fetch page on server", "error", err, "link", link)
 		// Neither Readability nor the extension provided content
 		// So we can't create a bookmark
 		if bookmarkRequest == nil {
-			slog.Warn("Page content inaccessible", "link", link, "userId", user.ID)
+			logging.Logger.Warnw("Page content inaccessible", "link", link, "userId", user.ID)
 			return nil, fmt.Errorf("page content inaccessible")
 		}
 	}
@@ -154,7 +154,7 @@ func (model *BookmarkModel) CreateWithContent(
 
 	// If HTML content is provided, use it instead of what Readability fetched
 	if htmlContent != "" {
-		slog.Info("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "readabilityHtmlSize", len(article.Content))
+		logging.Logger.Infow("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "readabilityHtmlSize", len(article.Content))
 		textContent := allTagsRemoved(htmlContent)
 		article.TextContent = textContent
 		if article.Excerpt == "" {
@@ -188,7 +188,7 @@ func (model *BookmarkModel) CreateWithContent(
 
 	if article.Image != "" {
 		if _, err := url.ParseRequestURI(article.Image); err != nil {
-			slog.Warn("Failed to parse image URL", "error", err)
+			logging.Logger.Warnw("Failed to parse image URL", "error", err)
 			inputBookmark.ImageUrl = ""
 		}
 	}
@@ -231,10 +231,10 @@ func (model *BookmarkModel) CreateWithContent(
 }
 
 func fetchLink(link string) (readability.Article, error) {
-	slog.Info("Fetching page content", "link", link)
+	logging.Logger.Infow("Fetching page content", "link", link)
 	resp, err := getPage(link)
 	if err != nil {
-		slog.Warn("Failed to fetch page", "error", err, "link", link)
+		logging.Logger.Warnw("Failed to fetch page", "error", err, "link", link)
 		return readability.Article{}, fmt.Errorf("fetch page on server: %w", err)
 	}
 	defer resp.Body.Close()
@@ -247,7 +247,7 @@ func fetchLink(link string) (readability.Article, error) {
 	article, err := readability.FromReader(resp.Body, finalURL)
 	// TODO: Check for the language
 	if err != nil {
-		slog.Warn("Failed to parse page", "error", err, "link", link)
+		logging.Logger.Warnw("Failed to parse page", "error", err, "link", link)
 		return readability.Article{}, fmt.Errorf("parse page on server: %w", err)
 	}
 	return article, nil
@@ -416,19 +416,19 @@ func (model *BookmarkModel) generateAIData(content string, link string, bookmark
 	htmlContent := cleanHTMLForLLM(content)
 	// Log the duration of the function and size of the content
 	start := time.Now()
-	slog.Info("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
+	logging.Logger.Infow("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
 	aiDataResponse, err := model.promptToGetAIData(htmlContent)
 	if err != nil {
-		slog.Warn("Failed to convert HTML to markdown, using text content", "error", err)
+		logging.Logger.Warnw("Failed to convert HTML to markdown, using text content", "error", err)
 		return
 	}
-	slog.Info("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
+	logging.Logger.Infow("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
 	// Update the bookmark with all AI-generated content in library_items table
 	_, err = model.Pool.Exec(context.Background(), `
 		UPDATE library_items SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE id = $4`,
 		aiDataResponse.Summary, aiDataResponse.Excerpt, aiDataResponse.Tags, bookmarkId)
 	if err != nil {
-		slog.Warn("Failed to update bookmark AI content", "error", err)
+		logging.Logger.Warnw("Failed to update bookmark AI content", "error", err)
 	}
 
 	// Also update the markdown content in library_contents table
@@ -436,7 +436,7 @@ func (model *BookmarkModel) generateAIData(content string, link string, bookmark
 		UPDATE library_contents SET ai_markdown = $1 WHERE id = $2`,
 		aiDataResponse.Markdown, bookmarkId)
 	if err != nil {
-		slog.Warn("Failed to update bookmark markdown content", "error", err)
+		logging.Logger.Warnw("Failed to update bookmark markdown content", "error", err)
 	}
 }
 

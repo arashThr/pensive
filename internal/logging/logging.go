@@ -1,54 +1,83 @@
 package logging
 
 import (
-	"log/slog"
-	"net/http"
-	"os"
-	"sync"
+	"fmt"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/config"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type loggerKey string
+var Logger *zap.SugaredLogger
 
-const LoggerKey = loggerKey("loggerKey")
+var logger, _ = zap.NewProduction()
+var DefaultLogger = logger.Sugar()
 
-var (
-	instance *slog.Logger
-	once     sync.Once
-)
-
-func GetLogger(isProduction bool) *slog.Logger {
-	once.Do(func() {
-		var handler slog.Handler
-		if isProduction {
-			handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-				Level:     slog.LevelInfo,
-				AddSource: true,
-			})
-		} else {
-			handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-				Level: slog.LevelDebug,
-			})
-		}
-		instance = slog.New(handler)
-	})
-	return instance
+func getLevel(level string) zapcore.Level {
+	switch level {
+	case "debug":
+		return zapcore.DebugLevel
+	case "error":
+		return zapcore.ErrorLevel
+	default:
+		return zapcore.InfoLevel
+	}
 }
 
-func LoggerMiddleware(isProduction bool) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			baseLogger := GetLogger(isProduction)
-			ctx := r.Context()
-			user := context.User(ctx)
-			if user == nil {
-				ctx = context.WithLogger(ctx, baseLogger)
-			} else {
-				reqLogger := baseLogger.With("user", user.ID)
-				ctx = context.WithLogger(ctx, reqLogger)
-			}
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
+func Init(cfg *config.AppConfig) {
+	initLogger(cfg)
+	initTelegram(cfg)
+}
+
+func initLogger(cfg *config.AppConfig) error {
+	var zapCfg zap.Config
+	var encoderCfg zapcore.EncoderConfig
+
+	if cfg.Environment == "development" {
+		// Development: Human-readable console output, debug level
+		zapCfg = zap.NewDevelopmentConfig()
+		encoderCfg = zap.NewDevelopmentEncoderConfig()
+		encoderCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder // Colored logs for readability
+		zapCfg.EncoderConfig = encoderCfg
+	} else {
+		// Production: JSON output, info level, file rotation
+		zapCfg = zap.NewProductionConfig()
+		encoderCfg = zap.NewProductionEncoderConfig()
+		encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+		encoderCfg.EncodeLevel = zapcore.LowercaseLevelEncoder
+		zapCfg.EncoderConfig = encoderCfg
+		zapCfg.OutputPaths = []string{"stdout", cfg.Logging.LogFile}
+		zapCfg.ErrorOutputPaths = []string{"stderr"}
+	}
+
+	// Set log level from config
+	zapCfg.Level = zap.NewAtomicLevelAt(getLevel(cfg.Logging.LogLevel))
+
+	// Add caller information (file and line number)
+	zapCfg.EncoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
+
+	// Add stack traces for errors in development
+	opts := []zap.Option{
+		zap.AddCaller(),
+		zap.AddStacktrace(zapcore.ErrorLevel),
+	}
+
+	// Build logger
+	logger, err := zapCfg.Build(opts...)
+
+	if err != nil {
+		return fmt.Errorf("creating logger: %w", err)
+	}
+
+	// Use SugaredLogger for simpler API
+	Logger = logger.Sugar()
+
+	return nil
+}
+
+// Sync flushes the logger
+func Sync() {
+	if Logger != nil {
+		Logger.Sync()
 	}
 }

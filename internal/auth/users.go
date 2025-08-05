@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service"
 	"github.com/arashthr/go-course/web"
@@ -99,7 +99,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
-	logger.Info("create user success")
+	logger.Infow("create user success")
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
@@ -138,7 +138,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.UserService.Authenticate(email, password)
 	if err != nil {
-		logger.Info("sign in failed", "error", err)
+		logger.Infow("sign in failed", "error", err)
 		u.Templates.SignIn.Execute(w, r, data, web.NavbarMessage{
 			Message: "Email address or password is incorrect",
 			IsError: true,
@@ -164,7 +164,7 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	err = u.SessionService.Delete(token)
 	if err != nil {
-		logger.Info("sign out failed", "error", err)
+		logger.Infow("sign out failed", "error", err)
 		http.Error(w, "Sign out failed", http.StatusInternalServerError)
 		return
 	}
@@ -197,9 +197,9 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	validTokens, err := u.TokenModel.Get(user.ID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			logger.Info("api token not found for current user")
+			logger.Infow("api token not found for current user")
 		} else {
-			logger.Info("get api token for current user", "error", err)
+			logger.Infow("get api token for current user", "error", err)
 			http.Error(w, "Failed to get API token", http.StatusInternalServerError)
 			return
 		}
@@ -328,9 +328,9 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		validTokens, err := u.TokenModel.Get(user.ID)
 		if err != nil {
 			if errors.Is(err, pgx.ErrNoRows) {
-				logger.Info("api token not found for current user")
+				logger.Infow("api token not found for current user")
 			} else {
-				logger.Info("get api token for current user", "error", err)
+				logger.Infow("get api token for current user", "error", err)
 				http.Error(w, "Failed to get API token", http.StatusInternalServerError)
 				return
 			}
@@ -426,7 +426,7 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := context.User(r.Context())
 		if user == nil {
-			slog.Info("unauthorized request", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
+			logging.Logger.Infow("unauthorized request", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}

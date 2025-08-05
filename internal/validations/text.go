@@ -2,10 +2,10 @@ package validations
 
 import (
 	"html"
-	"log/slog"
 	"regexp"
 	"strconv"
 
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -26,7 +26,7 @@ func GetPageOffset(pageStr string) int {
 	}
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		slog.Error("converting page to int", "page", pageStr, "error", err)
+		logging.Logger.Errorw("converting page to int", "page", pageStr, "error", err)
 		return 1
 	}
 	if page <= 0 || page >= 100 {

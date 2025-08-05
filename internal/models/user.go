@@ -3,10 +3,10 @@ package models
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
@@ -182,7 +182,7 @@ func (us *UserModel) GetByOAuth(provider, oauthID string) (*User, error) {
 func (us *UserModel) CreateOAuthUser(provider, oauthID, email, oauthEmail string) (*User, error) {
 	email = normalizeEmail(email)
 
-	slog.Info("creating oauth user", "provider", provider, "oauth_id", oauthID)
+	logging.Logger.Infow("creating oauth user", "provider", provider, "oauth_id", oauthID)
 
 	row := us.Pool.QueryRow(context.Background(), `
 		INSERT INTO users (email, oauth_provider, oauth_id, oauth_email) 

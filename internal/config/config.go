@@ -5,12 +5,15 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/arashthr/go-course/internal/db"
-	"github.com/arashthr/go-course/internal/service"
-	"github.com/arashthr/go-course/internal/validations"
 	"github.com/joho/godotenv"
-	"github.com/stripe/stripe-go/v81"
 )
+
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+}
 
 type StripeConfig struct {
 	Key                 string
@@ -38,11 +41,22 @@ type GoogleOAuthConfig struct {
 	ClientSecret string
 }
 
+type TelegramLoggerConfig struct {
+	Token  string
+	ChatID string
+}
+
+type LoggerConfig struct {
+	LogLevel string
+	LogFile  string
+	Telegram TelegramLoggerConfig
+}
+
 type AppConfig struct {
 	Environment string
 	Domain      string
-	PSQL        db.PostgresConfig
-	SMTP        service.SMTPConfig
+	PSQL        PostgresConfig
+	SMTP        SMTPConfig
 	CSRF        struct {
 		Key    string
 		Secure bool
@@ -50,6 +64,7 @@ type AppConfig struct {
 	Server struct {
 		Address string
 	}
+	Logging   LoggerConfig
 	Stripe    StripeConfig
 	Telegram  TelegramConfig
 	Turnstile TurnstileConfig
@@ -64,58 +79,81 @@ func LoadEnvConfig() (*AppConfig, error) {
 		return nil, fmt.Errorf("loading .env file: %w", err)
 	}
 
-	cfg.Domain = os.Getenv("DOMAIN")
+	cfg.Domain = GetEnvOrDie("DOMAIN")
+	cfg.Environment = GetEnvOrDie("ENVIRONMENT")
 
 	// DB
-	cfg.PSQL = db.DefaultPostgresConfig()
+	cfg.PSQL = DefaultPostgresConfig()
 
 	// SMTP
-	port, err := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	port, err := strconv.Atoi(GetEnvOrDie("SMTP_PORT"))
 	if err != nil {
 		return nil, err
 	}
-	cfg.SMTP = service.SMTPConfig{
-		Host:     os.Getenv("SMTP_HOST"),
+	cfg.SMTP = SMTPConfig{
+		Host:     GetEnvOrDie("SMTP_HOST"),
 		Port:     port,
-		Username: os.Getenv("SMTP_USER"),
-		Password: os.Getenv("SMTP_PASS"),
+		Username: GetEnvOrDie("SMTP_USER"),
+		Password: GetEnvOrDie("SMTP_PASS"),
 	}
 
 	// CSRF
-	cfg.CSRF.Key = os.Getenv("CSRF_TOKEN")
-	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
+	cfg.CSRF.Key = GetEnvOrDie("CSRF_TOKEN")
+	cfg.CSRF.Secure = GetEnvOrDie("CSRF_SECURE") == "true"
 
 	// Server
-	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
+	cfg.Server.Address = GetEnvOrDie("SERVER_ADDRESS")
+
+	cfg.Logging = LoggerConfig{
+		LogLevel: GetEnvWithDefault("LOG_LEVEL", "info"),
+		LogFile:  GetEnvWithDefault("LOG_FILE", "./data/logs.log"),
+		Telegram: TelegramLoggerConfig{
+			Token:  os.Getenv("TELEGRAM_LOGGING_TOKEN"),
+			ChatID: os.Getenv("TELEGRAM_LOGGING_CHAT_ID"),
+		},
+	}
 
 	// Stripe
 	cfg.Stripe = StripeConfig{
-		Key:                 os.Getenv("STRIPE_KEY"),
-		PriceId:             os.Getenv("STRIPE_PRICE_ID"),
-		StripeWebhookSecret: os.Getenv("STRIPE_WEBHOOK_SECRET"),
+		Key:                 GetEnvOrDie("STRIPE_KEY"),
+		PriceId:             GetEnvOrDie("STRIPE_PRICE_ID"),
+		StripeWebhookSecret: GetEnvOrDie("STRIPE_WEBHOOK_SECRET"),
 	}
-	// Or set stripe.Key
-	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	cfg.Telegram = TelegramConfig{
-		BotName: validations.GetEnvOrDie("TELEGRAM_BOT_NAME"),
-		Token:   validations.GetEnvOrDie("TELEGRAM_BOT_TOKEN"),
+		BotName: GetEnvOrDie("TELEGRAM_BOT_NAME"),
+		Token:   GetEnvOrDie("TELEGRAM_BOT_TOKEN"),
 	}
 
 	cfg.Turnstile = TurnstileConfig{
-		SiteKey:   validations.GetEnvOrDie("TURNSTILE_SITE_KEY"),
-		SecretKey: validations.GetEnvOrDie("TURNSTILE_SECRET_KEY"),
+		SiteKey:   GetEnvOrDie("TURNSTILE_SITE_KEY"),
+		SecretKey: GetEnvOrDie("TURNSTILE_SECRET_KEY"),
 	}
 
 	cfg.GitHub = GitHubOAuthConfig{
-		ClientID:     validations.GetEnvOrDie("GITHUB_CLIENT_ID"),
-		ClientSecret: validations.GetEnvOrDie("GITHUB_CLIENT_SECRET"),
+		ClientID:     GetEnvOrDie("GITHUB_CLIENT_ID"),
+		ClientSecret: GetEnvOrDie("GITHUB_CLIENT_SECRET"),
 	}
 
 	cfg.Google = GoogleOAuthConfig{
-		ClientID:     validations.GetEnvOrDie("GOOGLE_CLIENT_ID"),
-		ClientSecret: validations.GetEnvOrDie("GOOGLE_CLIENT_SECRET"),
+		ClientID:     GetEnvOrDie("GOOGLE_CLIENT_ID"),
+		ClientSecret: GetEnvOrDie("GOOGLE_CLIENT_SECRET"),
 	}
 
 	return &cfg, nil
+}
+
+func GetEnvWithDefault(envName, defaultValue string) string {
+	if value := os.Getenv(envName); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+func GetEnvOrDie(envName string) string {
+	value := os.Getenv(envName)
+	if value == "" {
+		panic("Environment variable " + envName + " is not set")
+	}
+	return value
 }

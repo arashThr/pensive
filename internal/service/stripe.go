@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/web"
 	stripeclient "github.com/stripe/stripe-go/v81"
@@ -118,11 +118,11 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 	// Typically this is stored alongside the authenticated user in your database.
 	// TODO: Read session ID from db
 	sessionId := r.FormValue("session_id")
-	slog.Info("create portal session", "sessionId", sessionId)
+	logging.Logger.Infow("create portal session", "sessionId", sessionId)
 	sess, err := session.Get(sessionId, nil)
 
 	if err != nil {
-		slog.Error("session.Get", "error", err)
+		logging.Logger.Errorw("session.Get", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -135,7 +135,7 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		slog.Error("create portal session", "error", err)
+		logging.Logger.Errorw("create portal session", "error", err)
 		return
 	}
 
@@ -146,14 +146,14 @@ func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	customerId, err := s.StripeModel.GetCustomerIdByUserId(user.ID)
 	if err != nil {
-		slog.Error("get stripe customer id", "error", err)
+		logging.Logger.Errorw("get stripe customer id", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	returnPath, err := url.JoinPath(s.Domain, "/users/me")
 	if err != nil {
-		slog.Error("url.JoinPath", "error", err)
+		logging.Logger.Errorw("url.JoinPath", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 	params := &stripeclient.BillingPortalSessionParams{
@@ -164,7 +164,7 @@ func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 	ps, err := portalsession.New(params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		slog.Error("Go to billing portal", "error", err)
+		logging.Logger.Errorw("Go to billing portal", "error", err)
 		return
 	}
 
@@ -216,7 +216,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Unmarshal the event data into an appropriate struct depending on its Type
-	slog.Info("Received webhook", "event_type", event.Type)
+	logging.Logger.Infow("Received webhook", "event_type", event.Type)
 	switch event.Type {
 	case "customer.subscription.deleted":
 		subscription, err := getSubscriptionDeleted(&event)
@@ -245,7 +245,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 	case "customer.subscription.trial_will_end":
 		// handleSubscriptionTrialWillEnd(subscription)
 	case "entitlements.active_entitlement_summary.updated":
-		slog.Info("Active entitlement summary updated", "event_id", event.ID)
+		logging.Logger.Infow("Active entitlement summary updated", "event_id", event.ID)
 		// Then define and call a func to handle active entitlement summary updated.
 		// handleEntitlementUpdated(subscription)
 	case "checkout.session.completed":
@@ -278,7 +278,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 		}
 		go s.StripeModel.HandleInvoiceFailed(invoice)
 	default:
-		slog.Warn("Unhandled event type", "event_type", event.Type)
+		logging.Logger.Warnw("Unhandled event type", "event_type", event.Type)
 	}
 	w.WriteHeader(http.StatusOK)
 }
@@ -309,10 +309,10 @@ func handleSubscriptionUpdated(event *stripeclient.Event) (*stripeclient.Subscri
 	if err != nil {
 		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
 	}
-	slog.Info("Subscription updated", "subscriptionID", subscription.ID)
-	slog.Info("Subscription updated with previous attributes", "prevAtt", event.Data.PreviousAttributes)
+	logging.Logger.Infow("Subscription updated", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Subscription updated with previous attributes", "prevAtt", event.Data.PreviousAttributes)
 	if event.Data.PreviousAttributes["status"] != nil {
-		slog.Info("Subscription status changed", "prevStatus", event.Data.PreviousAttributes["status"], "newStatus", subscription.Status)
+		logging.Logger.Infow("Subscription status changed", "prevStatus", event.Data.PreviousAttributes["status"], "newStatus", subscription.Status)
 	}
 	return &subscription, nil
 }
@@ -321,12 +321,12 @@ func handleCheckoutSessionCompleted(event *stripeclient.Event) error {
 	var session stripeclient.CheckoutSession
 	err := json.Unmarshal(event.Data.Raw, &session)
 	if err != nil {
-		slog.Error("Error parsing webhook JSON", "error", err)
+		logging.Logger.Errorw("Error parsing webhook JSON", "error", err)
 		return fmt.Errorf("parsing webhook JSON: %w", err)
 	}
 	// Get the customer ID from the session
 	customerId := session.Customer.ID
-	slog.Info("Session completed", "sessionID", session.ID, "customerID", customerId)
+	logging.Logger.Infow("Session completed", "sessionID", session.ID, "customerID", customerId)
 	return nil
 }
 
@@ -336,7 +336,7 @@ func getSubscriptionCreated(event *stripeclient.Event) (*stripeclient.Subscripti
 	if err != nil {
 		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
 	}
-	slog.Info("Subscription created", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Subscription created", "subscriptionID", subscription.ID)
 	return &subscription, nil
 }
 
@@ -346,7 +346,7 @@ func getSubscriptionDeleted(event *stripeclient.Event) (*stripeclient.Subscripti
 	if err != nil {
 		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)
 	}
-	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Subscription deleted", "subscriptionID", subscription.ID)
 	return &subscription, nil
 }
 
@@ -356,7 +356,7 @@ func getInvoicePaid(event *stripeclient.Event) (*stripeclient.Invoice, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.paid webhook JSON: %w", err)
 	}
-	slog.Info("Invoice paid", "invoiceID", invoice.ID)
+	logging.Logger.Infow("Invoice paid", "invoiceID", invoice.ID)
 	return &invoice, nil
 }
 
@@ -366,6 +366,6 @@ func getInvoiceFailed(event *stripeclient.Event) (*stripeclient.Invoice, error) 
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.failed webhook JSON: %w", err)
 	}
-	slog.Info("Invoice failed", "invoiceID", invoice.ID)
+	logging.Logger.Infow("Invoice failed", "invoiceID", invoice.ID)
 	return &invoice, nil
 }

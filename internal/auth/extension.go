@@ -2,10 +2,10 @@ package auth
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 )
 
@@ -41,7 +41,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 
 	token, err := e.TokenModel.Create(user.ID, "extension")
 	if err != nil {
-		slog.Error("failed to create extension token", "error", err, "user", user.ID)
+		logging.Logger.Errorw("failed to create extension token", "error", err, "user", user.ID)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusInternalServerError)
 		html := `

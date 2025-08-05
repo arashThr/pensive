@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
@@ -49,10 +49,10 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	data.Title = "New Bookmark"
 	data.UserId = user.ID
 	data.Link = r.FormValue("link")
-	slog.Debug("creating bookmark", "link", data.Link, "userId", data.UserId)
+	logging.Logger.Debugw("creating bookmark", "link", data.Link, "userId", data.UserId)
 
 	if !validations.IsURLValid(data.Link) {
-		slog.Error("Invalid URL", "url", data.Link)
+		logging.Logger.Errorw("Invalid URL", "url", data.Link)
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
@@ -102,7 +102,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		IsPremium bool
 	}
 	host := validations.ExtractHostname(bookmark.Link)
-	logger.Info("editing bookmark", "url", host)
+	logger.Infow("editing bookmark", "url", host)
 	data.Link = bookmark.Link
 	data.Host = host
 	data.Title = bookmark.Title
@@ -115,7 +115,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Thumbnail = bookmark.ImageUrl
 	data.IsPremium = user.IsSubscriptionPremium()
 
-	logger.Info("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
+	logger.Infow("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
 
 	// For premium users, fetch AI-generated content
 	if data.IsPremium {

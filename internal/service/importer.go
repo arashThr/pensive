@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service/importer"
 	"github.com/arashthr/go-course/internal/types"
@@ -124,7 +125,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info("import job created",
+	logger.Infow("import job created",
 		"job_id", createdJob.ID,
 		"user_id", user.ID,
 		"source", source,
@@ -150,7 +151,11 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	user := context.User(r.Context())
 
-	logger.Info("export requested", "user_id", user.ID)
+	logger.Infow("export requested", "user_id", user.ID)
+	err := logging.Telegram.SendMessage(fmt.Sprintf("Export request by %d", user.ID))
+	if err != nil {
+		fmt.Printf("Telegram failed: %v", err)
+	}
 
 	// Get all bookmarks for the user
 	bookmarks, err := p.getAllBookmarksForUser(user.ID)
@@ -225,7 +230,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info("export completed successfully", "user_id", user.ID, "bookmark_count", len(bookmarks), "file_size", fileInfo.Size())
+	logger.Infow("export completed successfully", "user_id", user.ID, "bookmark_count", len(bookmarks), "file_size", fileInfo.Size())
 }
 
 // getAllBookmarksForUser retrieves all bookmarks for a user by paginating through all pages
@@ -357,7 +362,7 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info("import status check", "user_id", user.ID, "job_id", jobID, "status", job.Status)
+	logger.Infow("import status check", "user_id", user.ID, "job_id", jobID, "status", job.Status)
 
 	data := struct {
 		Title          string

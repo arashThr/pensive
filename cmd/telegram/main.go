@@ -2,15 +2,15 @@ package main
 
 import (
 	"log"
-	"log/slog"
 
 	"github.com/arashthr/go-course/integrations/telegram"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
+	"github.com/arashthr/go-course/internal/logging"
 )
 
 func main() {
-	slog.Info("Starting Telegram bot")
+	logging.Logger.Infow("Starting Telegram bot")
 
 	configs, err := config.LoadEnvConfig()
 
@@ -20,7 +20,7 @@ func main() {
 
 	telegramToken := configs.Telegram.Token
 	apiEndpoint := configs.Domain
-	slog.Info("API endpoint", "endpoint", apiEndpoint)
+	logging.Logger.Infow("API endpoint", "endpoint", apiEndpoint)
 
 	pool, err := db.Open(configs.PSQL)
 	if err != nil {

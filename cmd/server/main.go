@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,7 +23,7 @@ import (
 	"google.golang.org/genai"
 )
 
-func setupDb(cfg db.PostgresConfig) (*pgxpool.Pool, error) {
+func setupDb(cfg config.PostgresConfig) (*pgxpool.Pool, error) {
 	err := db.Migrate(cfg.PgConnectionString())
 	if err != nil {
 		panic(err)
@@ -42,8 +41,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	log := logging.GetLogger(cfg.Environment == "production")
-	slog.SetDefault(log)
+
+	logging.Init(cfg)
+	defer logging.Sync()
+
 	err = run(cfg)
 	if err != nil {
 		panic(err)
@@ -63,7 +64,7 @@ func run(cfg *config.AppConfig) error {
 
 	genAIClient, err := genai.NewClient(ctx, nil)
 	if err != nil {
-		slog.Error("failed to create Gemini client", "error", err)
+		logging.Logger.Errorw("failed to create Gemini client", "error", err)
 	}
 
 	// Services
@@ -189,7 +190,6 @@ func run(cfg *config.AppConfig) error {
 		ImportJobModel: importJobModel,
 		BookmarkModel:  bookmarksModel,
 		UserModel:      userService,
-		Logger:         slog.Default(),
 	}
 	go importProcessor.Start(ctx)
 
@@ -198,11 +198,11 @@ func run(cfg *config.AppConfig) error {
 	// TODO: Use slog for logging requests
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(logging.LoggerMiddleware(cfg.Environment == "production"))
 
-	// Routes
+	// API Routes
 	r.Route("/api", func(r chi.Router) {
 		r.Use(amw.SetUser)
+		r.Use(LoggerMiddleware(cfg.Environment == "production"))
 
 		r.Get("/ping", healthCheck)
 		r.Post("/stripe-webhooks", stripController.Webhook)
@@ -228,18 +228,11 @@ func run(cfg *config.AppConfig) error {
 		})
 	})
 
-	// OAuth routes (no CSRF protection needed for OAuth)
-	r.Route("/oauth", func(r chi.Router) {
-		r.Get("/github", githubController.RedirectToGitHub)
-		r.Get("/github/callback", githubController.HandleCallback)
-
-		r.Get("/google", googleController.RedirectToGoogle)
-		r.Get("/google/callback", googleController.HandleCallback)
-	})
-
+	// Web routes
 	r.Group(func(r chi.Router) {
 		r.Use(csrfMw)
 		r.Use(umw.SetUser)
+		r.Use(LoggerMiddleware(cfg.Environment == "production"))
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			user := authcontext.User(r.Context())
@@ -347,6 +340,14 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/{id}/markdown-content", bookmarksController.GetBookmarkMarkdownHTMX)
 			})
 		})
+
+		r.Route("/oauth", func(r chi.Router) {
+			r.Get("/github", githubController.RedirectToGitHub)
+			r.Get("/github/callback", githubController.HandleCallback)
+
+			r.Get("/google", googleController.RedirectToGoogle)
+			r.Get("/google/callback", googleController.HandleCallback)
+		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
@@ -358,4 +359,22 @@ func run(cfg *config.AppConfig) error {
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
+}
+
+func LoggerMiddleware(isProduction bool) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			reqLogger := logging.Logger.With(
+				"reqPath", r.URL.Path,
+				"reqMethod", r.Method,
+			)
+
+			if user := authcontext.User(ctx); user != nil {
+				reqLogger = reqLogger.With("user", user.ID)
+			}
+			ctx = authcontext.WithLogger(ctx, reqLogger)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }

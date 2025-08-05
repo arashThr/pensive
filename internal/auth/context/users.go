@@ -3,10 +3,11 @@ package context
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
+	"go.uber.org/zap"
 )
 
 type key int
@@ -20,7 +21,7 @@ func WithUser(ctx context.Context, user *models.User) context.Context {
 	return context.WithValue(ctx, userKey, user)
 }
 
-func WithLogger(ctx context.Context, logger *slog.Logger) context.Context {
+func WithLogger(ctx context.Context, logger *zap.SugaredLogger) context.Context {
 	return context.WithValue(ctx, loggerKey, logger)
 }
 
@@ -34,12 +35,12 @@ func User(ctx context.Context) *models.User {
 	return user
 }
 
-func Logger(ctx context.Context) *slog.Logger {
+func Logger(ctx context.Context) *zap.SugaredLogger {
 	value := ctx.Value(loggerKey)
-	logger, ok := value.(*slog.Logger)
+	logger, ok := value.(*zap.SugaredLogger)
 	if !ok {
 		fmt.Fprintln(os.Stderr, "logger was not found in the context")
-		return slog.Default()
+		return logging.DefaultLogger
 	}
 	return logger
 }

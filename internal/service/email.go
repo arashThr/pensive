@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/arashthr/go-course/internal/config"
 	"gopkg.in/mail.v2"
 )
 
@@ -23,14 +24,7 @@ type Email struct {
 	HTML      string
 }
 
-type SMTPConfig struct {
-	Host     string
-	Port     int
-	Username string
-	Password string
-}
-
-func NewEmailService(config SMTPConfig) *EmailService {
+func NewEmailService(config config.SMTPConfig) *EmailService {
 	return &EmailService{
 		dialer: mail.NewDialer(
 			config.Host, config.Port, config.Username, config.Password,

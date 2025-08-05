@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/arashthr/go-course/internal/config"
+	"github.com/arashthr/go-course/internal/logging"
 	internalModels "github.com/arashthr/go-course/internal/models"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -97,7 +97,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	userId, err := telegramService.GetUserFromAuthToken(authToken)
 	if err != nil {
-		slog.Error("failed to find auth token", "error", err)
+		logging.Logger.Errorw("failed to find auth token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
 			Text:      "❌ <b>Authentication failed</b>\n\nYour link is invalid or expired. Please generate a new link from the Pensive integrations page.",
@@ -108,7 +108,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	token, err := TokenModel.Create(userId, "telegram")
 	if err != nil {
-		slog.Error("failed to create API token", "error", err)
+		logging.Logger.Errorw("failed to create API token", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
 			Text:      "⚠️ <b>Setup error</b>\n\nFailed to create API token. Please try connecting again.",
@@ -119,7 +119,7 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	err = telegramService.SetTokenForChatId(userId, update.Message.Chat.ID, token)
 	if err != nil {
-		slog.Error("failed to store chat ID", "error", err)
+		logging.Logger.Errorw("failed to store chat ID", "error", err)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
 			Text:      "⚠️ <b>Connection error</b>\n\nFailed to complete the connection. Please try again.",
@@ -142,7 +142,7 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	if !isUserAuthenticated(userId) {
 		integrationsPath, err := url.JoinPath(apiEndpoint, "integrations")
 		if err != nil {
-			slog.Error("failed to create integrations path", "error", err)
+			logging.Logger.Errorw("failed to create integrations path", "error", err)
 			return
 		}
 		fmt.Println(integrationsPath)
@@ -197,7 +197,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	reqBody, _ := json.Marshal(map[string]string{"link": link})
 	req, err := http.NewRequest("POST", apiEndpoint+"/api/v1/bookmarks", bytes.NewBuffer(reqBody))
 	if err != nil {
-		slog.Error("failed to create save request", "error", err, "link", link, "chatID", chatID)
+		logging.Logger.Errorw("failed to create save request", "error", err, "link", link, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
@@ -205,7 +205,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		slog.Error("failed to send request", "error", err, "link", link, "chatID", chatID)
+		logging.Logger.Errorw("failed to send request", "error", err, "link", link, "chatID", chatID)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    chatID,
 			Text:      "❌ <b>Save failed</b>\n\nNetwork error: " + err.Error(),
@@ -216,7 +216,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
+		logging.Logger.Errorw("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
 
 		var errorMessage string
 		if resp.StatusCode == http.StatusTooManyRequests {
@@ -235,10 +235,10 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 
 	var bookmark BookmarkResponse
 	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
-		slog.Error("failed to decode response", "error", err, "link", link, "chatID", chatID)
+		logging.Logger.Errorw("failed to decode response", "error", err, "link", link, "chatID", chatID)
 		return
 	}
-	slog.Info("Saved bookmark", "id", bookmark.Id, "title", bookmark.Title)
+	logging.Logger.Infow("Saved bookmark", "id", bookmark.Id, "title", bookmark.Title)
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:    chatID,
@@ -261,14 +261,14 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string) {
 	req, err := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/search?query="+urlQueryEscape(query), nil)
 	if err != nil {
-		slog.Error("failed to create search request", "error", err, "query", query, "chatID", chatID)
+		logging.Logger.Errorw("failed to create search request", "error", err, "query", query, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		slog.Error("failed to send request", "error", err, "query", query, "chatID", chatID)
+		logging.Logger.Errorw("failed to send request", "error", err, "query", query, "chatID", chatID)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    chatID,
 			Text:      "❌ <b>Search failed</b>\n\nNetwork error: " + err.Error(),
@@ -279,7 +279,7 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		slog.Error("failed to search bookmarks", "status", resp.Status, "query", query, "chatID", chatID)
+		logging.Logger.Errorw("failed to search bookmarks", "status", resp.Status, "query", query, "chatID", chatID)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    chatID,
 			Text:      "❌ <b>Search failed</b>\n\nServer error: " + resp.Status,
@@ -290,7 +290,7 @@ func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string
 
 	var result SearchResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		slog.Error("failed to decode response", "error", err, "query", query, "chatID", chatID)
+		logging.Logger.Errorw("failed to decode response", "error", err, "query", query, "chatID", chatID)
 		return
 	}
 
@@ -350,7 +350,7 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 	data := update.CallbackQuery.Data
 	parts := strings.Split(data, "|")
 	if len(parts) != 2 {
-		slog.Error("invalid callback data", "data", data)
+		logging.Logger.Errorw("invalid callback data", "data", data)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Invalid action",
@@ -370,13 +370,13 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 
 func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
-	slog.Debug("Deleting bookmark", "id", bookmarkID, "userId", userId)
+	logging.Logger.Debugw("Deleting bookmark", "id", bookmarkID, "userId", userId)
 	req, _ := http.NewRequest("DELETE", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		slog.Error("failed to delete bookmark", "error", err, "status", resp.StatusCode)
+		logging.Logger.Errorw("failed to delete bookmark", "error", err, "status", resp.StatusCode)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Failed to delete bookmark",
@@ -400,13 +400,13 @@ func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, book
 
 func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
-	slog.Debug("Getting bookmark summary", "id", bookmarkID, "userId", userId)
+	logging.Logger.Debugw("Getting bookmark summary", "id", bookmarkID, "userId", userId)
 	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		slog.Error("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "ID", bookmarkID)
+		logging.Logger.Errorw("failed to get bookmark summary", "error", err, "status", resp.StatusCode, "ID", bookmarkID)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Failed to get summary",
@@ -418,7 +418,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 
 	var bookmark BookmarkResponse
 	if err := json.NewDecoder(resp.Body).Decode(&bookmark); err != nil {
-		slog.Error("failed to decode bookmark", "error", err, "ID", bookmarkID)
+		logging.Logger.Errorw("failed to decode bookmark", "error", err, "ID", bookmarkID)
 		b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
 			CallbackQueryID: update.CallbackQuery.ID,
 			Text:            "Failed to get summary",
@@ -427,7 +427,7 @@ func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmark
 		return
 	}
 
-	slog.Debug("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
+	logging.Logger.Debugw("Got bookmark summary", "id", bookmarkID, "title", bookmark.Title)
 
 	var summaryText strings.Builder
 	summaryText.WriteString("📄 <b>Summary</b>\n\n")

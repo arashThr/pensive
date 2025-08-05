@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
 
 	authcontext "github.com/arashthr/go-course/internal/auth/context"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/rand"
 	"golang.org/x/oauth2"
@@ -40,7 +40,7 @@ func NewGitHubOAuth(
 ) *GitHub {
 	redirectURL, err := url.JoinPath(domain, "/oauth/github/callback")
 	if err != nil {
-		slog.Error("failed to join path", "error", err)
+		logging.Logger.Errorw("failed to join path", "error", err)
 		redirectURL = fmt.Sprintf("%s/oauth/github/callback", domain)
 	}
 
@@ -65,7 +65,7 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
-		slog.Error("failed to generate state parameter", "error", err)
+		logging.Logger.Errorw("failed to generate state parameter", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -139,7 +139,7 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
 		return
 	}
-	logger.Info("GitHub user", "user", githubUser)
+	logger.Infow("GitHub user", "user", githubUser)
 
 	// Handle user authentication/creation
 	user, err := g.authenticateOrCreateUser(githubUser)
@@ -159,7 +159,7 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	// Set session cookie
 	setCookie(w, CookieSession, session.Token)
-	logger.Info("GitHub OAuth login successful", "user_id", user.ID, "github_id", githubUser.ID)
+	logger.Infow("GitHub OAuth login successful", "user_id", user.ID, "github_id", githubUser.ID)
 
 	// Redirect to home page
 	http.Redirect(w, r, "/home", http.StatusFound)
@@ -256,13 +256,13 @@ func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User,
 	user, err := g.UserService.GetByOAuth("github", fmt.Sprintf("%d", githubUser.ID))
 	if err == nil {
 		// User exists, return them
-		slog.Info("user exists", "user", user)
+		logging.Logger.Infow("user exists", "user", user)
 		return user, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
 		// Unexpected error
-		slog.Error("error for get by oauth", "error", err)
+		logging.Logger.Errorw("error for get by oauth", "error", err)
 		return nil, err
 	}
 

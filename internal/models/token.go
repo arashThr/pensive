@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"log/slog"
 	"time"
 
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/rand"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5"
@@ -50,7 +50,7 @@ func (as *TokenModel) Create(userId types.UserId, source string) (*GeneratedApiT
 		return nil, fmt.Errorf("api token count: %w", err)
 	}
 	if count >= MaxTokens {
-		slog.Warn("api token limit reached. deleting old ones", "count", count, "userId", userId)
+		logging.Logger.Warnw("api token limit reached. deleting old ones", "count", count, "userId", userId)
 		// Delete the oldest token if the limit is reached
 		_, err = as.Pool.Exec(context.Background(), `
 			DELETE FROM api_tokens
@@ -63,7 +63,7 @@ func (as *TokenModel) Create(userId types.UserId, source string) (*GeneratedApiT
 		if err != nil {
 			return nil, fmt.Errorf("api token delete old: %w", err)
 		}
-		slog.Info("old api token deleted", "userId", userId)
+		logging.Logger.Infow("old api token deleted", "userId", userId)
 	}
 
 	apiToken := GeneratedApiToken{

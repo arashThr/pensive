@@ -143,8 +143,9 @@
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
-- [ ] Add verified to user table
-    - [ ] Verify email
+- [ ] Add passwordless login for production
+- [x] ~~Add verified to user table~~: Use passwordless login
+    - ~~[ ] Verify email~~
 - [x] Extension
     - Check auth endpoint
     - Delete token when siging out    

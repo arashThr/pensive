@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"log/slog"
 	"time"
 
 	"github.com/arashthr/go-course/internal/errors"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -65,24 +65,24 @@ func (s *StripeModel) SaveSession(userId types.UserId, sessionId string) error {
 
 func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 	if invoice.Subscription == nil {
-		slog.Error("No subscription found in invoice paid event. We do not expect to receive this", "invoiceID", invoice.ID)
+		logging.Logger.Errorw("No subscription found in invoice paid event. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
 	}
 	if invoice.Status != stripeclient.InvoiceStatusPaid {
-		slog.Error("Invoice not paid", "status", invoice.Status, "invoiceID", invoice.ID)
+		logging.Logger.Errorw("Invoice not paid", "status", invoice.Status, "invoiceID", invoice.ID)
 		return
 	}
 	customerId := invoice.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
 	if err != nil {
-		slog.Error("Error getting user id", "customerId", customerId, "error", err)
+		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	slog.Info("Processing invoice", "userId", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("Processing invoice", "userId", userId, "invoiceID", invoice.ID)
 
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
-		slog.Error("Error starting transaction", "error", err)
+		logging.Logger.Errorw("Error starting transaction", "error", err)
 		return
 	}
 	defer tx.Rollback(context.Background())
@@ -93,7 +93,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		SELECT * FROM invoices
 		WHERE stripe_invoice_id = $1;`, invoice.ID).Scan(&prevInvoice)
 	if prevInvoice != "" {
-		slog.Info("Invoice already processed", "invoiceID", invoice.ID)
+		logging.Logger.Infow("Invoice already processed", "invoiceID", invoice.ID)
 		return
 	}
 
@@ -111,7 +111,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		newInvoice.StripeInvoiceId, newInvoice.SubscriptionID, newInvoice.Status,
 		newInvoice.Amount, newInvoice.PaidAt)
 	if err != nil {
-		slog.Error("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
+		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
 		return
 	}
 
@@ -122,32 +122,32 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		stripe_invoice_id = $2
 		WHERE id = $3;`, "premium", invoice.ID, userId)
 	if err != nil {
-		slog.Error("Error updating user subscription status", "error", err)
+		logging.Logger.Errorw("Error updating user subscription status", "error", err)
 		return
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		slog.Error("Error committing transaction", "error", err)
+		logging.Logger.Errorw("Error committing transaction", "error", err)
 		return
 	}
 
-	slog.Info("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
+	logging.Logger.Infow("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
 func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 	if invoice.Subscription == nil {
-		slog.Error("No subscription found in invoice failed event. We do not expect to receive this", "invoiceID", invoice.ID)
+		logging.Logger.Errorw("No subscription found in invoice failed event. We do not expect to receive this", "invoiceID", invoice.ID)
 		return
 	}
 
 	customerId := invoice.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
 	if err != nil {
-		slog.Error("Error getting user id", "customerId", customerId, "error", err)
+		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	slog.Info("Processing invoice failed", "userId", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("Processing invoice failed", "userId", userId, "invoiceID", invoice.ID)
 
 	newInvoice := &StripeInvoice{
 		StripeInvoiceId: invoice.ID,
@@ -161,7 +161,7 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 	// Start tx
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
-		slog.Error("Error starting transaction", "error", err)
+		logging.Logger.Errorw("Error starting transaction", "error", err)
 		return
 	}
 	defer tx.Rollback(context.Background())
@@ -174,7 +174,7 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		VALUES ($1, $2, $3, $4, $5, $6);`, newInvoice.StripeInvoiceId, newInvoice.SubscriptionID,
 		newInvoice.Status, newInvoice.Amount, newInvoice.PaidAt, newInvoice.CreatedAt)
 	if err != nil {
-		slog.Error("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
+		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
 		return
 	}
 
@@ -183,17 +183,17 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		SET stripe_invoice_id = $1
 		WHERE id = $2;`, invoice.ID, userId)
 	if err != nil {
-		slog.Error("Error updating user for failed invoice", "error", err)
+		logging.Logger.Errorw("Error updating user for failed invoice", "error", err)
 		return
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		slog.Error("Error committing transaction", "error", err)
+		logging.Logger.Errorw("Error committing transaction", "error", err)
 		return
 	}
 
-	slog.Info("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
+	logging.Logger.Infow("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
 }
 
 func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
@@ -201,10 +201,10 @@ func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription
 	customerId := subscription.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
 	if err != nil {
-		slog.Error("Error getting user id for record subscription", "customerId", customerId, "error", err)
+		logging.Logger.Errorw("Error getting user id for record subscription", "customerId", customerId, "error", err)
 		return
 	}
-	slog.Info("Processing subscription", "userId", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Processing subscription", "userId", userId, "subscriptionID", subscription.ID)
 
 	// Insert subscription into subscriptions table
 	sub := Subscription{
@@ -221,11 +221,11 @@ func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription
 		VALUES ($1, $2, $3, $4, $5, $6, $7);`, sub.StripeSubscriptionID, sub.UserID, sub.Status,
 		sub.CurrentPeriodStart, sub.CurrentPeriodEnd, sub.CanceledAt, sub.PreviousAttributes)
 	if err != nil {
-		slog.Error("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
+		logging.Logger.Errorw("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
 		return
 	}
 
-	slog.Info("Subscription inserted", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Subscription inserted", "subscriptionID", subscription.ID)
 }
 
 func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
@@ -233,15 +233,15 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 	customerId := subscription.Customer.ID
 	userId, err := s.getUserIdByStripeCustomerId(customerId)
 	if err != nil {
-		slog.Error("Error getting user id", "customerId", customerId, "error", err)
+		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	slog.Info("Processing subscription deletion", "userId", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Processing subscription deletion", "userId", userId, "subscriptionID", subscription.ID)
 
 	// Start tx
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
-		slog.Error("Error starting transaction", "error", err)
+		logging.Logger.Errorw("Error starting transaction", "error", err)
 		return
 	}
 	defer tx.Rollback(context.Background())
@@ -252,7 +252,7 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 		SET subscription_status = $1
 		WHERE id = $2;`, "canceled", userId)
 	if err != nil {
-		slog.Error("Error updating subscription", "error", err)
+		logging.Logger.Errorw("Error updating subscription", "error", err)
 		return
 	}
 
@@ -270,17 +270,17 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 		VALUES ($1, $2, $3, $4, $5, $6);`, sub.StripeSubscriptionID, sub.UserID, sub.Status,
 		sub.CurrentPeriodStart, sub.CurrentPeriodEnd, sub.CanceledAt)
 	if err != nil {
-		slog.Error("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
+		logging.Logger.Errorw("Error saving subscription", "error", err, "subscriptionID", subscription.ID)
 		return
 	}
 
 	err = tx.Commit(context.Background())
 	if err != nil {
-		slog.Error("Error committing transaction", "error", err)
+		logging.Logger.Errorw("Error committing transaction", "error", err)
 		return
 	}
 
-	slog.Info("Subscription deleted", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Subscription deleted", "subscriptionID", subscription.ID)
 }
 
 func (s *StripeModel) GetCustomerIdByUserId(userId types.UserId) (customerId string, err error) {
