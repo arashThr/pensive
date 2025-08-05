@@ -46,8 +46,6 @@ func initLogger(cfg *config.AppConfig) error {
 		encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 		encoderCfg.EncodeLevel = zapcore.LowercaseLevelEncoder
 		zapCfg.EncoderConfig = encoderCfg
-		zapCfg.OutputPaths = []string{"stdout", cfg.Logging.LogFile}
-		zapCfg.ErrorOutputPaths = []string{"stderr"}
 	}
 
 	// Set log level from config
