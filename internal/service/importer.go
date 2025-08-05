@@ -44,6 +44,9 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	user := context.User(r.Context())
 
+	logger.Infow("pocket import requested", "user_id", user.ID)
+	logging.Telegram.SendMessage(fmt.Sprintf("pocket import requested by user %d", user.ID))
+
 	// Parse multipart form (2MB max size)
 	err := r.ParseMultipartForm(2 << 20)
 	if err != nil {
@@ -151,11 +154,8 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	user := context.User(r.Context())
 
-	logger.Infow("export requested", "user_id", user.ID)
-	err := logging.Telegram.SendMessage(fmt.Sprintf("Export request by %d", user.ID))
-	if err != nil {
-		fmt.Printf("Telegram failed: %v", err)
-	}
+	logger.Infow("export requested by user", "user_id", user.ID)
+	logging.Telegram.SendMessage(fmt.Sprintf("Export request by user %d", user.ID))
 
 	// Get all bookmarks for the user
 	bookmarks, err := p.getAllBookmarksForUser(user.ID)

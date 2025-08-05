@@ -37,7 +37,6 @@ func (tg *telegramLogging) SendMessage(message string) error {
 		"text": "%s",
 		"chat_id": "%s"
 	}`, message, tg.chatId)
-	fmt.Printf("Body: %v", string(body))
 	req, err := http.Post(tg.endpoint, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return fmt.Errorf("telegram message: %w", err)
