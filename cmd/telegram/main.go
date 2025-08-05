@@ -10,13 +10,13 @@ import (
 )
 
 func main() {
-	logging.Logger.Infow("Starting Telegram bot")
-
 	configs, err := config.LoadEnvConfig()
-
 	if err != nil {
 		log.Fatalf("failed to load config: %v", err)
 	}
+
+	logging.Init(configs)
+	logging.Logger.Infow("Starting Telegram bot")
 
 	telegramToken := configs.Telegram.Token
 	apiEndpoint := configs.Domain

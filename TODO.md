@@ -14,7 +14,8 @@
     - When entering old link
 - [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
     - [x] Fix the error: Only pending
-    - [ ] Send logs for the error
+    - [x] Send logs for the error
+    - [ ] Better user response
 - [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket
 - [x] Adding bookmark from website brings the image, but the extension does not:
@@ -71,7 +72,7 @@
     - [ ] Send logs when extension crashes
     - [ ] Telegram logging
     - [ ] Remove time from logs
-    - [ ] Zap is possible?
+    - [x] Zap is possible?
 - [ ] Add like and dislike buttons
 - [ ] Send verification email
     - [ ] Reminder to install Telegram and Extensions

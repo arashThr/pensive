@@ -99,6 +99,7 @@ func (p *ImportProcessor) processJob(jobID types.ImportJobId) {
 	// Update final status
 	if err != nil {
 		logging.Logger.Errorw("job processing failed", "error", err)
+		logging.Telegram.SendMessage(fmt.Sprintf("job id %v processing failed for user %v", jobID, job.UserID))
 		errorMsg := err.Error()
 		if updateErr := models.UpdateStatus(tx, job.ID, models.ImportJobStatusFailed, &errorMsg); updateErr != nil {
 			logging.Logger.Errorw("update job status to failed", "error", updateErr)
