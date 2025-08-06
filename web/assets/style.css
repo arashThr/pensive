@@ -521,6 +521,9 @@
   }
 }
 @layer utilities {
+  .pointer-events-none {
+    pointer-events: none;
+  }
   .collapse {
     visibility: collapse;
   }
@@ -1330,6 +1333,11 @@
       @media (hover: hover) {
         text-decoration-line: underline;
       }
+    }
+  }
+  .placeholder\:text-black {
+    &::placeholder {
+      color: var(--color-black);
     }
   }
   .placeholder\:text-gray-600 {

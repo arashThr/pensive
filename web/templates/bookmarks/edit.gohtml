@@ -7,9 +7,9 @@
 
 <div class="px-6 py-8 max-w-4xl mx-auto">
   <!-- Main Content Card -->
-  <div class="bg-white rounded-xl border border-gray-300">
+  <div class="bg-white border-2 border-black">
     <!-- Header Section -->
-    <div class="p-6 border-b border-gray-300">
+    <div class="p-6 border-b-2 border-black">
       <div class="flex items-start justify-between">
         <!-- Content Info -->
         <div class="flex-1 min-w-0">
@@ -18,54 +18,54 @@
             {{if .Thumbnail}}
               <div class="w-16 h-16 flex-shrink-0">
                 <a href="{{.Link}}" target="_blank">
-                  <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded-lg border border-gray-300" />
+                  <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover border-2 border-black" />
                 </a>
               </div>
             {{end}}
             
             <!-- Title and URL -->
             <div class="flex-1 min-w-0">
-              <h1 class="text-xl font-semibold text-gray-900 mb-2 line-clamp-2">{{.Title}}</h1>
+              <h1 class="text-xl font-bold mb-2 line-clamp-2">{{.Title}}</h1>
               <a href="{{.Link}}" target="_blank" 
-                 class="text-sm text-sky-600 hover:text-sky-700 transition-colors break-all">
+                 class="text-sm underline break-all">
                 {{.Link}}
               </a>
             </div>
           </div>
           
           <!-- Metadata -->
-          <div class="text-xs text-gray-600">
-            Added {{.CreatedAt.Format "Jan 2, 2006"}}
+          <div class="text-xs font-bold">
+            ADDED {{.CreatedAt.Format "JAN 2, 2006"}}
           </div>
         </div>
 
         <!-- Actions Menu -->
         <div class="relative ml-4">
-          <button id="propertiesMenuButton" class="p-2 rounded-lg hover:bg-gray-50 transition-colors">
-            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+          <button id="propertiesMenuButton" class="p-2 border-2 border-black hover:bg-gray-100">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
             </svg>
           </button>
           
-          <div id="propertiesMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-300 py-1 z-10">
-            <a href="/bookmarks/{{.Id}}/full" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-              View Full Text
+          <div id="propertiesMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black py-1 z-10">
+            <a href="/bookmarks/{{.Id}}/full" class="block px-4 py-2 text-sm font-bold hover:bg-gray-100">
+              VIEW FULL TEXT
             </a>
             {{if .IsPremium}}
-              <button id="toggleMarkdownBtn" class="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <span id="markdownBtnText">View Markdown</span>
+              <button id="toggleMarkdownBtn" class="w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100">
+                <span id="markdownBtnText">VIEW MARKDOWN</span>
               </button>
             {{else}}
-              <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                View Markdown
+              <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-bold hover:bg-gray-100">
+                VIEW MARKDOWN
               </a>
             {{end}}
-            <hr class="my-1 border-gray-300">
+            <hr class="my-1 border-black">
             <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"
                   onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
               {{csrfField}}
-              <button class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors" type="submit">
-                Delete Bookmark
+              <button class="w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100" type="submit">
+                DELETE BOOKMARK
               </button>
             </form>
           </div>
@@ -78,10 +78,10 @@
       <!-- Primary Excerpt -->
       <div>
         <div class="flex items-center mb-2">
-          <svg class="w-4 h-4 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
           </svg>
-          <span class="text-sm font-medium text-gray-900">Openning paragraph</span>
+          <span class="text-sm font-bold">OPENING PARAGRAPH</span>
         </div>
         {{if and .IsPremium .AIExcerpt}}
           <p class="text-gray-600 leading-relaxed">{{.AIExcerpt}}</p>
@@ -93,28 +93,28 @@
       <!-- Premium AI Content -->
       {{if .IsPremium}}
         {{if .AISummary}}
-          <div class="bg-sky-50 border border-sky-200 rounded-lg p-4">
+          <div class="bg-gray-100 border-2 border-black p-4">
             <div class="flex items-center mb-2">
-              <svg class="w-4 h-4 mr-2 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span class="text-sm font-medium text-sky-900">Key Insights</span>
+              <span class="text-sm font-bold">KEY INSIGHTS</span>
             </div>
-            <p class="text-sky-800 leading-relaxed">{{.AISummary}}</p>
+            <p class="leading-relaxed">{{.AISummary}}</p>
           </div>
         {{end}}
         
         {{if .AITags}}
           <div>
             <div class="flex items-center mb-3">
-              <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
-              <span class="text-sm font-medium text-gray-900">Topics</span>
+              <span class="text-sm font-bold">TOPICS</span>
             </div>
             <div class="flex flex-wrap gap-2">
               {{range split .AITags ","}}
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                <span class="inline-flex items-center px-3 py-1 text-xs font-bold bg-gray-100 border-2 border-black">
                   {{trim .}}
                 </span>
               {{end}}
@@ -126,16 +126,16 @@
         <div id="markdownContainer" class="hidden">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center">
-              <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span class="text-sm font-medium text-gray-900">AI-Generated Markdown</span>
+              <span class="text-sm font-bold">AI-GENERATED MARKDOWN</span>
             </div>
-            <button id="hideMarkdownBtn" class="text-xs text-gray-500 hover:text-gray-700 transition-colors">
-              Hide
+            <button id="hideMarkdownBtn" class="text-xs font-bold hover:bg-gray-100 px-2 py-1 border border-black">
+              HIDE
             </button>
           </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <div class="bg-gray-100 border-2 border-black p-4">
             <div id="markdownContent" 
                  class="markdown-content prose max-w-none"
                  hx-get="/bookmarks/{{.Id}}/markdown-content" 
@@ -157,12 +157,12 @@
 
   <!-- Navigation -->
   <div class="mt-6 flex items-center gap-4">
-    <a href="/home" class="text-sky-600 hover:text-sky-700 text-sm font-medium transition-colors">
-      ← Back to Search
+    <a href="/home" class="text-sm font-bold underline">
+      ← BACK TO SEARCH
     </a>
-    <span class="text-gray-300">|</span>
-    <a href="/bookmarks" class="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
-      All Bookmarks
+    <span>|</span>
+    <a href="/bookmarks" class="text-sm font-bold underline">
+      ALL BOOKMARKS
     </a>
   </div>
 </div>

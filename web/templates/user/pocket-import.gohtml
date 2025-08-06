@@ -12,8 +12,15 @@
       <input type="hidden" name="source" value="pocket">
       <div>
         <label for="import-file" class="block text-sm font-bold mb-2">CHOOSE ZIP FILE</label>
-        <input id="import-file" name="import-file" type="file" accept=".zip" required class="block w-full border-2 border-black px-4 py-3 font-mono">
-        <p class="text-xs mt-2">ZIP format required</p>
+        <div class="relative">
+          <input id="import-file" name="import-file" type="file" accept=".zip" required class="block w-full border-2 border-black px-4 py-3 font-mono hover:bg-gray-100 cursor-pointer">
+          <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs mt-2 font-bold">CLICK ABOVE TO SELECT YOUR ZIP FILE</p>
       </div>
       <button type="submit" class="w-full py-3 px-6 bg-black text-white font-bold">BEGIN IMPORT</button>
     </form>

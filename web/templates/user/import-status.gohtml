@@ -5,56 +5,56 @@
     {{if .ImportComplete}}
       <!-- Success State -->
       <div class="mb-8">
-        <div class="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-          <svg class="w-8 h-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mx-auto w-16 h-16 bg-white border-2 border-black flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
       </div>
 
-      <h1 class="text-2xl font-bold text-gray-900 mb-4">Import Complete!</h1>
-      <p class="text-gray-600 mb-8">
+      <h1 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">IMPORT COMPLETE!</h1>
+      <p class="mb-8">
         Successfully imported <strong>{{.ImportedCount}} bookmarks</strong> from {{.Source}} into your library.
       </p>
 
       <!-- Success Actions -->
-      <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-6 mb-6">
-        <p class="text-emerald-800 mb-4">Your bookmarks are now searchable and ready to explore.</p>
+      <div class="bg-white border-2 border-black p-6 mb-6">
+        <p class="mb-4 font-bold">YOUR BOOKMARKS ARE NOW SEARCHABLE AND READY TO EXPLORE.</p>
         <a
           href="/bookmarks"
-          class="inline-flex items-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-black text-white font-bold hover:bg-gray-800"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          Browse Your Library
+          BROWSE YOUR LIBRARY
         </a>
       </div>
 
     {{else if .ImportFailed}}
       <!-- Error State -->
       <div class="mb-8">
-        <div class="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-          <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="mx-auto w-16 h-16 bg-white border-2 border-black flex items-center justify-center">
+          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </div>
       </div>
 
-      <h1 class="text-2xl font-bold text-gray-900 mb-4">Import Failed</h1>
-      <p class="text-gray-600 mb-8">
+      <h1 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">IMPORT FAILED</h1>
+      <p class="mb-8">
         We encountered an issue while importing your {{.Source}} data.
       </p>
 
       {{if .ErrorMessage}}
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-left">
+        <div class="bg-white border-2 border-black p-4 mb-6 text-left">
           <div class="flex items-start gap-3">
-            <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
             <div>
-              <h3 class="font-medium text-red-900 mb-1">Error Details</h3>
-              <p class="text-sm text-red-800">{{.ErrorMessage}}</p>
+              <h3 class="font-bold mb-1">ERROR DETAILS</h3>
+              <p class="text-sm">{{.ErrorMessage}}</p>
             </div>
           </div>
         </div>
@@ -64,39 +64,39 @@
       <div class="space-y-4">
         <a
           href="/users/me?tab=import-export"
-          class="inline-flex items-center px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-black text-white font-bold hover:bg-gray-800"
         >
           <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Try Again
+          TRY AGAIN
         </a>
       </div>
 
     {{else}}
       <!-- Still Processing State -->
       <div class="mb-8">
-        <div class="mx-auto w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center">
-          <svg class="animate-spin w-8 h-8 text-sky-600" fill="none" viewBox="0 0 24 24">
+        <div class="mx-auto w-16 h-16 bg-white border-2 border-black flex items-center justify-center">
+          <svg class="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
       </div>
 
-      <h1 class="text-2xl font-bold text-gray-900 mb-4">Import In Progress</h1>
-      <p class="text-gray-600 mb-8">
+      <h1 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">IMPORT IN PROGRESS</h1>
+      <p class="mb-8">
         Your {{.Source}} import is still being processed. Please wait a moment while we add your bookmarks to the library.
       </p>
 
-      <div class="bg-sky-50 border border-sky-200 rounded-lg p-6 mb-6">
+      <div class="bg-white border-2 border-black p-6 mb-6">
         <div class="flex items-center justify-center mb-3">
-          <svg class="w-5 h-5 text-sky-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span class="text-sky-800 font-medium">This page will refresh automatically</span>
+          <span class="font-bold">THIS PAGE WILL REFRESH AUTOMATICALLY</span>
         </div>
-        <p class="text-sm text-sky-700">
+        <p class="text-sm">
           Large imports may take several minutes to complete.
         </p>
       </div>
@@ -106,14 +106,14 @@
     {{end}}
 
     <!-- Navigation -->
-    <div class="mt-8 pt-6 border-t border-gray-300">
+    <div class="mt-8 pt-6 border-t-2 border-black">
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/home" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-          ← Back to Search
+        <a href="/home" class="text-sm font-bold underline">
+          ← BACK TO SEARCH
         </a>
-        <span class="hidden sm:inline text-gray-400">|</span>
-        <a href="/users/me" class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-          Account Settings
+        <span class="hidden sm:inline">|</span>
+        <a href="/users/me" class="text-sm font-bold underline">
+          ACCOUNT SETTINGS
         </a>
       </div>
     </div>

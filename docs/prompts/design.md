@@ -27,8 +27,9 @@
 
 ### Buttons
 - **Primary**: `bg-black text-white px-6 py-3 font-bold hover:bg-gray-800`
-- **Secondary**: `bg-gray-200 text-black px-4 py-2 font-bold hover:bg-gray-300`
+- **Secondary**: `border-2 border-black text-black px-4 py-2 font-bold hover:bg-gray-100`
 - **All caps text** for button labels
+- **No rounded corners** - sharp rectangular buttons only
 
 ### Containers
 - **Main sections**: `border-2 border-black p-6`
@@ -52,7 +53,10 @@
 - **No smooth transitions** - instant state changes
 - **Underlines** for links, not color changes
 - **Bold text** for emphasis instead of colors
-- **Hover states**: Simple background color changes only
+- **Hover states**: Simple background color changes
+
+### Loading States & Animations
+- **Spinning wheel**: Use `animate-spin` for loading indicators
 
 ## Content Principles
 - **Direct language** - no marketing fluff
