@@ -195,8 +195,6 @@ func run(cfg *config.AppConfig) error {
 
 	// Middlewares
 	r := chi.NewRouter()
-	// TODO: Use slog for logging requests
-	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	// API Routes
@@ -364,17 +362,24 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 func LoggerMiddleware(isProduction bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			t1 := time.Now()
 			ctx := r.Context()
 			reqLogger := logging.Logger.With(
-				"reqPath", r.URL.Path,
-				"reqMethod", r.Method,
+				"req_path", r.URL.Path,
+				"req_method", r.Method,
 			)
 
 			if user := authcontext.User(ctx); user != nil {
 				reqLogger = reqLogger.With("user", user.ID)
 			}
 			ctx = authcontext.WithLogger(ctx, reqLogger)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+
+			defer func() {
+				reqLogger.Debugw("http request", "from", r.RemoteAddr, "status", ww.Status(), "size", ww.BytesWritten(), "duration", time.Since(t1))
+			}()
+
+			next.ServeHTTP(ww, r.WithContext(ctx))
 		})
 	}
 }
