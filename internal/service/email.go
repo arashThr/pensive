@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DefaultSender = "me@noreply.com"
+	DefaultSender = "notifications@getpensive.com"
 )
 
 type EmailService struct {
