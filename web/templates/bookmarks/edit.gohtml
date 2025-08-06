@@ -41,16 +41,13 @@
 
         <!-- Actions Menu -->
         <div class="relative ml-4">
-          <button id="propertiesMenuButton" class="p-2 border-2 border-black hover:bg-gray-100">
+          <button id="propertiesMenuButton" class="p-2 hover:bg-gray-100">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
             </svg>
           </button>
           
           <div id="propertiesMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black py-1 z-10">
-            <a href="/bookmarks/{{.Id}}/full" class="block px-4 py-2 text-sm font-bold hover:bg-gray-100">
-              VIEW FULL TEXT
-            </a>
             {{if .IsPremium}}
               <button id="toggleMarkdownBtn" class="w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100">
                 <span id="markdownBtnText">VIEW MARKDOWN</span>
