@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pageUrlElement = document.getElementById('pageUrl');
   const saveBtn = document.getElementById('saveBtn');
   const removeBtn = document.getElementById('removeBtn');
+  const actionsSaved = document.getElementById('actions-saved');
+  const viewSavedBtn = document.getElementById('viewSavedBtn');
+  const removeSavedBtn = document.getElementById('removeSavedBtn');
   const settingsLink = document.getElementById('settingsLink');
   const searchLink = document.getElementById('searchLink');
   const createAccountBtn = document.getElementById('createAccountBtn');
@@ -15,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let currentTab = null;
   let isBookmarked = false;
+  let bookmarkId = null;
   let htmlContentCleanupEnabled = false;
 
   // Get current tab information
@@ -37,6 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Event listeners
   saveBtn.addEventListener('click', saveBookmark);
   removeBtn.addEventListener('click', removeBookmark);
+  viewSavedBtn.addEventListener('click', viewSavedPage);
+  removeSavedBtn.addEventListener('click', removeBookmark);
   settingsLink.addEventListener('click', openSettings);
   searchLink.addEventListener('click', openSearch);
   createAccountBtn.addEventListener('click', (e) => {
@@ -76,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        actionsSaved.style.display = 'none';
         // Show auto-save notice
         const autoSaveNotice = document.getElementById('autoSaveNotice');
         if (autoSaveNotice) {
@@ -98,10 +105,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (response.ok) {
         const data = await response.json();
         isBookmarked = data.exists;
+        if (data.exists && data.bookmark && data.bookmark.Id) {
+          bookmarkId = data.bookmark.Id;
+        } else {
+          bookmarkId = null;
+        }
         updateBookmarkStatus();
       } else {
         // Default to not bookmarked on error
         isBookmarked = false;
+        bookmarkId = null;
         updateBookmarkStatus();
       }
 
@@ -109,14 +122,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Error checking bookmark status:', error);
       // Default to not bookmarked on error
       isBookmarked = false;
+      bookmarkId = null;
       updateBookmarkStatus();
     }
   }
 
   function updateBookmarkStatus() {
-    // Show action buttons when user is configured
-    document.getElementById('actions').style.display = 'flex';
-    
     // Hide auto-save notice
     const autoSaveNotice = document.getElementById('autoSaveNotice');
     if (autoSaveNotice) {
@@ -124,11 +135,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     if (isBookmarked) {
-      updateStatus('saved', 'Page is saved');
-      saveBtn.disabled = true;
-      removeBtn.disabled = false;
+      updateStatus('saved', 'Saved to your library');
+      // Show saved actions, hide regular actions
+      document.getElementById('actions').style.display = 'none';
+      actionsSaved.style.display = 'flex';
     } else {
       updateStatus('not-saved', 'Click Save button to bookmark');
+      // Show regular actions, hide saved actions
+      document.getElementById('actions').style.display = 'flex';
+      actionsSaved.style.display = 'none';
       saveBtn.disabled = false;
       removeBtn.disabled = true;
     }
@@ -146,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateStatus('not-configured', 'Account not connected');
       // Hide action buttons when not configured
       document.getElementById('actions').style.display = 'none';
+      actionsSaved.style.display = 'none';
       // Show auto-save notice
       const autoSaveNotice = document.getElementById('autoSaveNotice');
       if (autoSaveNotice) {
@@ -239,15 +255,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       if (response.ok) {
         isBookmarked = true;
+        const responseData = await response.json();
+        if (responseData.Id) {
+          bookmarkId = responseData.Id;
+        }
         const successMessage = pageContent.htmlContent ? 'Page saved with content!' : 'Page saved successfully!';
         updateStatus('saved', successMessage);
-        saveBtn.disabled = true;
-        removeBtn.disabled = false;
+        // Switch to saved state UI
+        document.getElementById('actions').style.display = 'none';
+        actionsSaved.style.display = 'flex';
 
         // Auto-hide success message after 2 seconds
         setTimeout(() => {
           if (isBookmarked) {
-            updateStatus('saved', 'Page is saved');
+            updateStatus('saved', 'Saved to your library');
           }
         }, 2000);
       } else {
@@ -259,9 +280,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           // If it's already bookmarked, treat it as success
           if (errorData.errorCode === 'DUPLICATE_BOOKMARK' || response.status === 409) {
             isBookmarked = true;
+            // The bookmark ID should have been retrieved during the initial status check
+            // so we don't need to extract it from the error response
             updateStatus('saved', 'Page already saved');
-            saveBtn.disabled = true;
-            removeBtn.disabled = false;
+            // Switch to saved state UI
+            document.getElementById('actions').style.display = 'none';
+            actionsSaved.style.display = 'flex';
             return;
           }
           errorMessage = errorData.errorMessage || errorMessage;
@@ -296,6 +320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateStatus('not-configured', 'Account not connected');
         // Hide action buttons when not configured
         document.getElementById('actions').style.display = 'none';
+        actionsSaved.style.display = 'none';
         // Show auto-save notice
         const autoSaveNotice = document.getElementById('autoSaveNotice');
         if (autoSaveNotice) {
@@ -315,7 +340,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (response.ok) {
         isBookmarked = false;
+        bookmarkId = null;
         updateStatus('not-saved', 'Page removed successfully!');
+        // Switch to not-saved state UI
+        document.getElementById('actions').style.display = 'flex';
+        actionsSaved.style.display = 'none';
         saveBtn.disabled = false;
         removeBtn.disabled = true;
 
@@ -328,7 +357,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (response.status === 404) {
         // Bookmark doesn't exist, which is fine for removal
         isBookmarked = false;
+        bookmarkId = null;
         updateStatus('not-saved', 'Click Save button to bookmark');
+        // Switch to not-saved state UI
+        document.getElementById('actions').style.display = 'flex';
+        actionsSaved.style.display = 'none';
         saveBtn.disabled = false;
         removeBtn.disabled = true;
       } else {
@@ -388,6 +421,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function openSettings() {
     browserAPI.runtime.openOptionsPage();
+  }
+
+  async function viewSavedPage() {
+    if (!currentTab || !bookmarkId) return;
+
+    try {
+      const { endpoint } = await browserAPI.storage.local.get(['endpoint']);
+
+      if (!endpoint) {
+        // If no endpoint is configured, show an error or open options
+        browserAPI.runtime.openOptionsPage();
+        return;
+      }
+
+      // Open the specific bookmark page using the bookmark ID
+      const bookmarkUrl = new URL(`/bookmarks/${bookmarkId}/edit`, endpoint);
+      await browserAPI.tabs.create({ url: bookmarkUrl.href });
+
+      // Close the popup
+      window.close();
+    } catch (error) {
+      console.error('Error opening saved page:', error);
+      // Fallback to opening options page
+      browserAPI.runtime.openOptionsPage();
+    }
   }
 
   async function openSearch() {
