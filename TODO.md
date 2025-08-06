@@ -145,6 +145,8 @@
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
 - [ ] Add passwordless login for production
+- [ ] Make the logo red - Add red buttons for actions
+- [ ] Write down about tech stack in FAQ
 - [x] ~~Add verified to user table~~: Use passwordless login
     - ~~[ ] Verify email~~
 - [x] Extension
