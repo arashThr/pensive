@@ -95,6 +95,7 @@ func run(cfg *config.AppConfig) error {
 	importJobModel := &models.ImportJobModel{
 		Pool: pool,
 	}
+	authTokenService := models.NewAuthTokenService(pool)
 
 	// Middlewares
 	umw := auth.UserMiddleware{
@@ -116,9 +117,13 @@ func run(cfg *config.AppConfig) error {
 		UserService:          userService,
 		SessionService:       sessionService,
 		PasswordResetService: passwordResetService,
+		AuthTokenService:     authTokenService,
 		EmailService:         emailService,
 		TokenModel:           tokenModel,
 	}
+	usersController.AuthConfig.AllowPasswordAuth = cfg.Auth.AllowPasswordAuth
+	usersController.AuthConfig.AllowPasswordlessAuth = cfg.Auth.AllowPasswordlessAuth
+
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
 	usersController.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
@@ -130,6 +135,9 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
 	usersController.Templates.ImportExportTab = views.Must(views.ParseTemplate("user/import-export-tab.gohtml"))
 	usersController.Templates.Subscribe = views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml"))
+	usersController.Templates.PasswordlessNew = views.Must(views.ParseTemplate("passwordless-signup.gohtml", "tailwind.gohtml"))
+	usersController.Templates.PasswordlessSignIn = views.Must(views.ParseTemplate("passwordless-signin.gohtml", "tailwind.gohtml"))
+	usersController.Templates.PasswordlessCheckEmail = views.Must(views.ParseTemplate("passwordless-check-email.gohtml", "tailwind.gohtml"))
 
 	bookmarksController := service.Bookmarks{
 		BookmarkModel: bookmarksModel,
@@ -272,6 +280,15 @@ func run(cfg *config.AppConfig) error {
 		r.Post("/forgot-pw", usersController.ProcessForgotPassword)
 		r.Get("/reset-password", usersController.ResetPassword)
 		r.Post("/reset-password", usersController.ProcessResetPassword)
+
+		// Passwordless authentication routes
+		r.Route("/auth/passwordless", func(r chi.Router) {
+			r.Get("/signup", usersController.PasswordlessNew)
+			r.Post("/signup", usersController.ProcessPasswordlessSignup)
+			r.Get("/signin", usersController.PasswordlessSignIn)
+			r.Post("/signin", usersController.ProcessPasswordlessSignIn)
+			r.Get("/verify", usersController.VerifyPasswordlessAuth)
+		})
 		r.Route("/home", func(r chi.Router) {
 			r.Use(umw.RequireUser)
 			r.Get("/", homeController.Index)

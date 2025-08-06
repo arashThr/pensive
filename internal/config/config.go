@@ -64,6 +64,10 @@ type AppConfig struct {
 	Server struct {
 		Address string
 	}
+	Auth struct {
+		AllowPasswordAuth    bool
+		AllowPasswordlessAuth bool
+	}
 	Logging   LoggerConfig
 	Stripe    StripeConfig
 	Telegram  TelegramConfig
@@ -103,6 +107,17 @@ func LoadEnvConfig() (*AppConfig, error) {
 
 	// Server
 	cfg.Server.Address = GetEnvOrDie("SERVER_ADDRESS")
+
+	// Auth - Default based on environment
+	if cfg.Environment == "production" {
+		// Production: only passwordless by default
+		cfg.Auth.AllowPasswordAuth = GetEnvWithDefault("ALLOW_PASSWORD_AUTH", "false") == "true"
+		cfg.Auth.AllowPasswordlessAuth = GetEnvWithDefault("ALLOW_PASSWORDLESS_AUTH", "true") == "true"
+	} else {
+		// Local development: both methods by default
+		cfg.Auth.AllowPasswordAuth = GetEnvWithDefault("ALLOW_PASSWORD_AUTH", "true") == "true"
+		cfg.Auth.AllowPasswordlessAuth = GetEnvWithDefault("ALLOW_PASSWORDLESS_AUTH", "true") == "true"
+	}
 
 	cfg.Logging = LoggerConfig{
 		LogLevel: GetEnvWithDefault("LOG_LEVEL", "info"),
