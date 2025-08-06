@@ -34,21 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Check if current page is bookmarked
   await checkBookmarkStatus();
 
-  // Auto-save if page is not bookmarked and user is configured
-  if (!isBookmarked) {
-    const { endpoint, apiToken } = await browserAPI.storage.local.get(['endpoint', 'apiToken']);
-    if (endpoint && apiToken && currentTab.url.startsWith('http') && !currentTab.url.includes('getpensive.com')) {
-      // Auto-save the page
-      await saveBookmark();
-    } else {
-      // Show auto-save notice if user is not configured
-      const autoSaveNotice = document.getElementById('autoSaveNotice');
-      if (autoSaveNotice) {
-        autoSaveNotice.style.display = 'block';
-      }
-    }
-  }
-
   // Event listeners
   saveBtn.addEventListener('click', saveBookmark);
   removeBtn.addEventListener('click', removeBookmark);
@@ -143,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       saveBtn.disabled = true;
       removeBtn.disabled = false;
     } else {
-      updateStatus('not-saved', 'Click extension icon to save');
+      updateStatus('not-saved', 'Click Save button to bookmark');
       saveBtn.disabled = false;
       removeBtn.disabled = true;
     }
@@ -337,13 +322,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Auto-hide success message after 2 seconds
         setTimeout(() => {
           if (!isBookmarked) {
-            updateStatus('not-saved', 'Click extension icon to save');
+            updateStatus('not-saved', 'Click Save button to bookmark');
           }
         }, 2000);
       } else if (response.status === 404) {
         // Bookmark doesn't exist, which is fine for removal
         isBookmarked = false;
-        updateStatus('not-saved', 'Click extension icon to save');
+        updateStatus('not-saved', 'Click Save button to bookmark');
         saveBtn.disabled = false;
         removeBtn.disabled = true;
       } else {

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Pensive Extension Settings</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       * {
         margin: 0;
@@ -12,9 +12,9 @@
       }
 
       body {
-        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #f9fafb;
-        color: #111827;
+        font-family: 'IBM Plex Mono', monospace;
+        background-color: #ffffff;
+        color: #000000;
         line-height: 1.5;
         min-height: 100vh;
       }
@@ -27,8 +27,7 @@
 
       .card {
         background: white;
-        border: 1px solid #d1d5db;
-        border-radius: 12px;
+        border: 2px solid #000000;
         padding: 32px;
       }
 
@@ -37,29 +36,24 @@
         display: flex;
         align-items: center;
         margin-bottom: 32px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #000000;
       }
 
       .header-icon {
         width: 40px;
         height: 40px;
-        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-right: 16px;
       }
 
-      .header-icon svg {
-        width: 20px;
-        height: 20px;
-        color: #2563eb;
-      }
-
       .header h1 {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #111827;
-        tracking: -0.025em;
+        color: #000000;
+        text-transform: uppercase;
       }
 
       /* Status */
@@ -67,10 +61,10 @@
         display: flex;
         align-items: center;
         padding: 16px;
-        border-radius: 8px;
         margin-bottom: 24px;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.875rem;
+        border: 2px solid #000000;
       }
 
       .status-icon {
@@ -80,23 +74,13 @@
       }
 
       .status.connected {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-      }
-
-      .status.connected .status-icon {
-        color: #059669;
+        background: #ffffff;
+        color: #000000;
       }
 
       .status.disconnected {
-        background: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
-      }
-
-      .status.disconnected .status-icon {
-        color: #dc2626;
+        background: #f3f4f6;
+        color: #000000;
       }
 
       /* Buttons */
@@ -104,46 +88,46 @@
         display: inline-flex;
         align-items: center;
         padding: 12px 24px;
-        border-radius: 8px;
-        font-weight: 500;
+        font-weight: 700;
         text-decoration: none;
-        border: none;
+        border: 2px solid #000000;
         cursor: pointer;
-        transition: all 0.2s;
         font-size: 0.875rem;
+        text-transform: uppercase;
+        font-family: 'IBM Plex Mono', monospace;
       }
 
       .btn-primary {
-        background: #2563eb;
+        background: #000000;
         color: white;
       }
 
       .btn-primary:hover {
-        background: #1d4ed8;
+        background: #333333;
       }
 
       .btn-secondary {
-        background: #f9fafb;
-        color: #374151;
-        border: 1px solid #d1d5db;
+        background: #f3f4f6;
+        color: #000000;
       }
 
       .btn-secondary:hover {
-        background: #f3f4f6;
+        background: #e5e7eb;
       }
 
       .btn-danger {
-        background: #dc2626;
+        background: #000000;
         color: white;
       }
 
       .btn-danger:hover {
-        background: #b91c1c;
+        background: #333333;
       }
 
       .btn:disabled {
         background: #9ca3af;
         cursor: not-allowed;
+        color: #6b7280;
       }
 
       /* Auth Actions */
@@ -155,23 +139,23 @@
 
       /* Info Sections */
       .info-section {
-        background: #f9fafb;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
+        background: #f3f4f6;
+        border: 2px solid #000000;
         padding: 24px;
         margin-bottom: 24px;
       }
 
       .info-section h3 {
         font-size: 0.875rem;
-        font-weight: 600;
-        color: #111827;
+        font-weight: 700;
+        color: #000000;
         margin-bottom: 16px;
+        text-transform: uppercase;
       }
 
       .info-section p {
         font-size: 0.875rem;
-        color: #4b5563;
+        color: #000000;
         margin-bottom: 8px;
       }
 
@@ -181,28 +165,28 @@
 
       /* User Info */
       #user-info h3::before {
-        content: '👤';
-        margin-right: 8px;
+        content: '';
+        margin-right: 0px;
       }
 
       #user-info p {
         background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
+        border: 2px solid #000000;
         padding: 12px;
-        color: #374151;
+        color: #000000;
+        font-weight: 600;
       }
 
       .subscription-premium {
-        color: #2563eb !important;
-        background: #f8fafc !important;
-        border-color: #dbeafe !important;
+        color: #000000 !important;
+        background: #ffffff !important;
+        border-color: #000000 !important;
       }
 
       .subscription-free {
-        color: #059669 !important;
-        background: #ecfdf5 !important;
-        border-color: #a7f3d0 !important;
+        color: #000000 !important;
+        background: #f3f4f6 !important;
+        border-color: #000000 !important;
       }
 
       /* Website Link */
@@ -213,24 +197,25 @@
 
       .website-link h3 {
         font-size: 1rem;
-        font-weight: 600;
-        color: #111827;
+        font-weight: 700;
+        color: #000000;
         margin-bottom: 8px;
+        text-transform: uppercase;
       }
 
       .website-link p {
-        color: #4b5563;
+        color: #000000;
         margin-bottom: 16px;
       }
 
       .website-link a {
-        color: #2563eb;
-        text-decoration: none;
-        font-weight: 500;
+        color: #000000;
+        text-decoration: underline;
+        font-weight: 700;
       }
 
       .website-link a:hover {
-        color: #1d4ed8;
+        color: #000000;
         text-decoration: underline;
       }
 
@@ -238,14 +223,15 @@
       .advanced-settings {
         margin-top: 32px;
         padding-top: 24px;
-        border-top: 1px solid #e5e7eb;
+        border-top: 2px solid #000000;
       }
 
       .advanced-settings h2 {
         font-size: 1.125rem;
-        font-weight: 600;
-        color: #111827;
+        font-weight: 700;
+        color: #000000;
         margin-bottom: 20px;
+        text-transform: uppercase;
       }
 
       /* Radio Options */
@@ -258,15 +244,14 @@
         align-items: flex-start;
         gap: 12px;
         padding: 16px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        border: 2px solid #000000;
         margin-bottom: 12px;
         cursor: pointer;
-        transition: all 0.2s;
+        background: #ffffff;
       }
 
       .radio-option:hover {
-        background: #f9fafb;
+        background: #f3f4f6;
       }
 
       .radio-option:last-child {
@@ -293,26 +278,24 @@
         width: 18px;
         height: 18px;
         background: white;
-        border: 2px solid #d1d5db;
-        border-radius: 50%;
+        border: 2px solid #000000;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s;
         flex-shrink: 0;
         margin-top: 2px;
       }
 
       .radio-input:checked ~ .radio-checkmark {
-        border-color: #2563eb;
+        border-color: #000000;
+        background: #000000;
       }
 
       .radio-checkmark::after {
         content: "";
         width: 8px;
         height: 8px;
-        border-radius: 50%;
-        background: #2563eb;
+        background: #ffffff;
         display: none;
       }
 
@@ -325,8 +308,8 @@
       }
 
       .radio-title {
-        font-weight: 500;
-        color: #374151;
+        font-weight: 700;
+        color: #000000;
         margin-bottom: 4px;
         display: flex;
         align-items: center;
@@ -335,17 +318,18 @@
 
       .radio-desc {
         font-size: 0.875rem;
-        color: #6b7280;
+        color: #000000;
         line-height: 1.4;
       }
 
       .recommended-tag {
-        background: #dbeafe;
-        color: #1d4ed8;
+        background: #f3f4f6;
+        color: #000000;
         padding: 2px 8px;
-        border-radius: 4px;
+        border: 1px solid #000000;
         font-size: 0.75rem;
-        font-weight: 600;
+        font-weight: 700;
+        text-transform: uppercase;
       }
 
       /* Utility Classes */
