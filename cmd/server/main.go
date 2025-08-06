@@ -82,9 +82,7 @@ func run(cfg *config.AppConfig) error {
 	tokenModel := &models.TokenModel{
 		Pool: pool,
 	}
-	stripeModel := &models.StripeModel{
-		Pool: pool,
-	}
+	stripeModel := models.NewStripeModel(cfg.Stripe.Key, pool)
 	bookmarksModel := &models.BookmarkModel{
 		Pool:        pool,
 		GenAIClient: genAIClient,

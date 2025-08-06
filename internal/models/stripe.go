@@ -11,11 +11,20 @@ import (
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stripe/stripe-go/v81"
 	stripeclient "github.com/stripe/stripe-go/v81"
 )
 
 type StripeModel struct {
 	Pool *pgxpool.Pool
+}
+
+func NewStripeModel(stripKey string, pool *pgxpool.Pool) *StripeModel {
+	// Initialize stripe key
+	stripe.Key = stripKey
+	return &StripeModel{
+		Pool: pool,
+	}
 }
 
 type Subscription struct {
