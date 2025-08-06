@@ -29,20 +29,20 @@ type Users struct {
 		AllowPasswordlessAuth bool
 	}
 	Templates struct {
-		New                       web.Template
-		SignIn                    web.Template
-		ForgotPassword            web.Template
-		CheckYourEmail            web.Template
-		ResetPassword             web.Template
-		UserPage                  web.Template
-		Subscribe                 web.Template
-		Token                     web.Template
-		ProfileTab                web.Template
-		TokensTab                 web.Template
-		ImportExportTab           web.Template
-		PasswordlessNew           web.Template
-		PasswordlessSignIn        web.Template
-		PasswordlessCheckEmail    web.Template
+		New                    web.Template
+		SignIn                 web.Template
+		ForgotPassword         web.Template
+		CheckYourEmail         web.Template
+		ResetPassword          web.Template
+		UserPage               web.Template
+		Subscribe              web.Template
+		Token                  web.Template
+		ProfileTab             web.Template
+		TokensTab              web.Template
+		ImportExportTab        web.Template
+		PasswordlessNew        web.Template
+		PasswordlessSignIn     web.Template
+		PasswordlessCheckEmail web.Template
 	}
 	UserService          *models.UserModel
 	SessionService       *models.SessionService
@@ -399,7 +399,6 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, err := readCookie(r, CookieSession)
 		if err != nil {
-			log.Printf("read cookie: %v", err)
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -547,7 +546,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 		"token": {authToken.Token},
 	}
 	magicURL := fmt.Sprintf("%s/auth/passwordless/verify?", u.Domain) + values.Encode()
-	
+
 	// Send email in background to avoid blocking the response
 	go func() {
 		err := u.EmailService.PasswordlessSignup(email, magicURL)
