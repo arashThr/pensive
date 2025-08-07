@@ -50,7 +50,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	// Parse multipart form (2MB max size)
 	err := r.ParseMultipartForm(2 << 20)
 	if err != nil {
-		logger.Error("parse multipart form", "error", err)
+		logger.Errorw("parse multipart form", "error", err)
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
 	}
@@ -58,7 +58,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	// Get the uploaded file
 	file, header, err := r.FormFile("import-file")
 	if err != nil {
-		logger.Error("get form file", "error", err)
+		logger.Errorw("get form file", "error", err)
 		http.Error(w, "Failed to get uploaded file", http.StatusBadRequest)
 		return
 	}
@@ -82,14 +82,14 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	// Create permanent file with unique name
 	filePath, err := importer.GetImportFilePath(user.ID, source)
 	if err != nil {
-		logger.Error("create upload directory", "error", err)
+		logger.Errorw("create upload directory", "error", err)
 		http.Error(w, "Failed to process upload", http.StatusInternalServerError)
 		return
 	}
 
 	permanentFile, err := os.Create(filePath)
 	if err != nil {
-		logger.Error("create permanent file", "error", err)
+		logger.Errorw("create permanent file", "error", err)
 		http.Error(w, "Failed to process upload", http.StatusInternalServerError)
 		return
 	}
@@ -98,7 +98,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	// Copy uploaded file to permanent location
 	_, err = io.Copy(permanentFile, file)
 	if err != nil {
-		logger.Error("copy file to permanent location", "error", err)
+		logger.Errorw("copy file to permanent location", "error", err)
 		os.Remove(filePath) // Clean up on error
 		http.Error(w, "Failed to process upload", http.StatusInternalServerError)
 		return
@@ -107,7 +107,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 	// Basic ZIP validation - try to open it
 	_, err = zip.OpenReader(filePath)
 	if err != nil {
-		logger.Error("validate zip file", "error", err)
+		logger.Errorw("validate zip file", "error", err)
 		os.Remove(filePath) // Clean up invalid file
 		http.Error(w, "Invalid ZIP file", http.StatusBadRequest)
 		return
@@ -122,7 +122,7 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 
 	createdJob, err := p.ImportJobModel.Create(job)
 	if err != nil {
-		logger.Error("create import job", "error", err)
+		logger.Errorw("create import job", "error", err)
 		os.Remove(filePath) // Clean up on error
 		http.Error(w, "Failed to create import job", http.StatusInternalServerError)
 		return
@@ -160,7 +160,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	// Get all bookmarks for the user
 	bookmarks, err := p.getAllBookmarksForUser(user.ID)
 	if err != nil {
-		logger.Error("get all bookmarks for export", "error", err)
+		logger.Errorw("get all bookmarks for export", "error", err)
 		http.Error(w, "Failed to retrieve bookmarks", http.StatusInternalServerError)
 		return
 	}
@@ -173,7 +173,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	// Create temporary directory for export files
 	tempDir, err := os.MkdirTemp("", "export_*")
 	if err != nil {
-		logger.Error("create temp directory", "error", err)
+		logger.Errorw("create temp directory", "error", err)
 		http.Error(w, "Failed to create export", http.StatusInternalServerError)
 		return
 	}
@@ -183,7 +183,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	csvPath := filepath.Join(tempDir, "part_000000.csv")
 	err = p.createCSV(csvPath, bookmarks)
 	if err != nil {
-		logger.Error("create CSV file", "error", err)
+		logger.Errorw("create CSV file", "error", err)
 		http.Error(w, "Failed to create export file", http.StatusInternalServerError)
 		return
 	}
@@ -192,7 +192,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	zipPath := filepath.Join(tempDir, "bookmarks_export.zip")
 	err = p.createZip(zipPath, csvPath)
 	if err != nil {
-		logger.Error("create ZIP file", "error", err)
+		logger.Errorw("create ZIP file", "error", err)
 		http.Error(w, "Failed to create export archive", http.StatusInternalServerError)
 		return
 	}
@@ -200,7 +200,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	// Serve the ZIP file
 	file, err := os.Open(zipPath)
 	if err != nil {
-		logger.Error("open export file", "error", err)
+		logger.Errorw("open export file", "error", err)
 		http.Error(w, "Failed to open export file", http.StatusInternalServerError)
 		return
 	}
@@ -209,7 +209,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	// Get file info for Content-Length
 	fileInfo, err := file.Stat()
 	if err != nil {
-		logger.Error("get file info", "error", err)
+		logger.Errorw("get file info", "error", err)
 		http.Error(w, "Failed to get export file info", http.StatusInternalServerError)
 		return
 	}
@@ -226,7 +226,7 @@ func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
 	// Copy file to response
 	_, err = io.Copy(w, file)
 	if err != nil {
-		logger.Error("copy export file to response", "error", err)
+		logger.Errorw("copy export file to response", "error", err)
 		return
 	}
 
@@ -350,14 +350,14 @@ func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
 	// Get job from database
 	job, err := p.ImportJobModel.GetByID(jobID)
 	if err != nil {
-		logger.Error("get import job", "error", err, "job_id", jobID)
+		logger.Errorw("get import job", "error", err, "job_id", jobID)
 		http.Error(w, "Job not found", http.StatusNotFound)
 		return
 	}
 
 	// Verify job belongs to the current user
 	if job.UserID != user.ID {
-		logger.Warn("unauthorized job access", "job_id", jobID, "job_user_id", job.UserID, "current_user_id", user.ID)
+		logger.Warnw("unauthorized job access", "job_id", jobID, "job_user_id", job.UserID, "current_user_id", user.ID)
 		http.Error(w, "Job not found", http.StatusNotFound)
 		return
 	}

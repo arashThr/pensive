@@ -30,14 +30,14 @@ func (t *Token) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(r.Context())
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
-		logger.Error("no authorization header", "authHeader", authHeader)
+		logger.Errorw("no authorization header", "authHeader", authHeader)
 		http.Error(w, "No authorization header", http.StatusBadRequest)
 		return
 	}
 
 	tokenParts := strings.Split(authHeader, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		logger.Error("invalid authorization header format", "authHeader", authHeader)
+		logger.Errorw("invalid authorization header format", "authHeader", authHeader)
 		http.Error(w, "Invalid authorization header format", http.StatusBadRequest)
 		return
 	}
@@ -45,7 +45,7 @@ func (t *Token) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	token := tokenParts[1]
 	err := t.TokenModel.DeleteByToken(token)
 	if err != nil {
-		logger.Error("failed to delete current token", "error", err)
+		logger.Errorw("failed to delete current token", "error", err)
 		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
 		return
 	}

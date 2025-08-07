@@ -121,7 +121,8 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/api/bookmarks [post]
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data types.CreateBookmarkRequest
-	logger := context.Logger(r.Context())
+	ctx := r.Context()
+	logger := context.Logger(ctx)
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		logger.Errorw("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
@@ -130,7 +131,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	user := context.User(r.Context())
+	user := context.User(ctx)
 
 	if !validations.IsURLValid(data.Link) {
 		logger.Errorw("[api] invalid URL", "link", data.Link)
@@ -147,7 +148,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infow("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
-	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, user, models.Api, &data)
+	bookmark, err := a.BookmarkModel.CreateWithContent(ctx, data.Link, user, models.Api, &data)
 	if err != nil {
 		// Handle rate limit error specifically
 		if errors.Is(err, errors.ErrDailyLimitExceeded) {
@@ -319,7 +320,7 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 			})
 			return nil
 		}
-		logger.Error("[api] get bookmark by ID", "error", err, "id", id)
+		logger.Errorw("[api] get bookmark by ID", "error", err, "id", id)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "api: Something went wrong",

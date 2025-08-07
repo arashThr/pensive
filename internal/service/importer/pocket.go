@@ -164,7 +164,7 @@ func (p *ImportProcessor) processPocketImport(tx pgx.Tx, job *models.ImportJob) 
 			logging.Logger.Debugw("skipping invalid URL", "url", item.URL)
 		} else if item.Status == "archive" {
 			// Do not apply the premium status to the import
-			_, err := p.BookmarkModel.Create(item.URL, user, models.Pocket)
+			_, err := p.BookmarkModel.Create(context.Background(), item.URL, user, models.Pocket)
 			if err != nil {
 				logging.Logger.Errorw("create bookmark failed", "error", err, "url", item.URL)
 			}
