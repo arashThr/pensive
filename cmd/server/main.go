@@ -132,6 +132,7 @@ func run(cfg *config.AppConfig) error {
 	usersController.Templates.ProfileTab = views.Must(views.ParseTemplate("user/profile-tab.gohtml"))
 	usersController.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
 	usersController.Templates.ImportExportTab = views.Must(views.ParseTemplate("user/import-export-tab.gohtml"))
+	usersController.Templates.DataManagementTab = views.Must(views.ParseTemplate("user/data-management-tab.gohtml"))
 	usersController.Templates.Subscribe = views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml"))
 	usersController.Templates.PasswordlessNew = views.Must(views.ParseTemplate("passwordless-signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.PasswordlessSignIn = views.Must(views.ParseTemplate("passwordless-signin.gohtml", "tailwind.gohtml"))
@@ -234,9 +235,9 @@ func run(cfg *config.AppConfig) error {
 
 	// Web routes
 	r.Group(func(r chi.Router) {
-		r.Use(csrfMw)
 		r.Use(umw.SetUser)
 		r.Use(LoggerMiddleware(cfg.Environment == "production"))
+		r.Use(csrfMw)
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			user := authcontext.User(r.Context())
@@ -302,6 +303,8 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/me", usersController.CurrentUser)
 				r.Get("/tab-content", usersController.TabContent)
 				r.Post("/delete-token", usersController.DeleteToken)
+				r.Post("/delete-content", usersController.DeleteAllContent)
+				r.Post("/delete-account", usersController.DeleteAccount)
 			})
 			// Import/export
 			r.Group(func(r chi.Router) {

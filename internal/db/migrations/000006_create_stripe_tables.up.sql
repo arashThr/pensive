@@ -10,7 +10,7 @@ CREATE TABLE stripe_customers (
 CREATE TABLE subscriptions (
     id SERIAL PRIMARY KEY,
     stripe_subscription_id TEXT,
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status TEXT NOT NULL,
     current_period_start TIMESTAMPTZ NOT NULL,
     current_period_end TIMESTAMPTZ NOT NULL,
