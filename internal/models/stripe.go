@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/arashthr/go-course/internal/errors"
@@ -62,7 +61,6 @@ type SubscriptionHistory struct {
 }
 
 func (s *StripeModel) SaveSession(userId types.UserId, sessionId string) error {
-	log.Printf("save session: userId: %d, sessionId: %s\n", userId, sessionId)
 	_, err := s.Pool.Exec(context.Background(), `
 		INSERT INTO stripe_sessions (user_id, stripe_session_id)
 		VALUES ($1, $2);`, userId, sessionId)

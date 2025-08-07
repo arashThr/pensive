@@ -3,11 +3,11 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
@@ -46,7 +46,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		Link   string
 	}
 	ctx := r.Context()
-	user := context.User(ctx)
+	user := usercontext.User(ctx)
 	data.Title = "New Bookmark"
 	data.UserId = user.ID
 	data.Link = r.FormValue("link")
@@ -80,13 +80,13 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
 	}
 
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 
 	var data struct {
 		Link      string
@@ -158,11 +158,12 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
 	bookmarks, morePages, err := b.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
-		log.Printf("bookmark by user id: %v", err)
+		logger.Errorw("ubdex bookmark by user id", "error", err, "user_id", user.ID, "page", page)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -218,7 +219,7 @@ func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
 
 // GetFullBookmark handles GET /v1/bookmarks/{id}/full and returns the full content of a bookmark.
 func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
@@ -268,7 +269,7 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 
 // GetBookmarkMarkdown handles GET /bookmarks/{id}/markdown and returns the AI-generated markdown content
 func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
@@ -309,7 +310,7 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 
 // GetBookmarkMarkdownHTMX handles HTMX requests for GET /bookmarks/{id}/markdown-content and returns just the markdown content
 func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
@@ -335,6 +336,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 }
 
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
+	logger := loggercontext.Logger(r.Context())
 	id := chi.URLParam(r, "id")
 	bookmark, err := b.BookmarkModel.GetById(types.BookmarkId(id))
 	if err != nil {
@@ -342,7 +344,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 			http.Error(w, "Bookmark not found", http.StatusNotFound)
 			return nil, err
 		}
-		log.Print(err)
+		logger.Errorw("get bookmark", "error", err, "boomark_id", id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return nil, err
 	}
@@ -359,7 +361,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 type bookmarkOpts func(http.ResponseWriter, *http.Request, *models.Bookmark) error
 
 func userMustOwnBookmark(w http.ResponseWriter, r *http.Request, bookmark *models.Bookmark) error {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 	if user.ID != bookmark.UserId {
 		http.Error(w, "User does not have access to the bookmark", http.StatusForbidden)
 		return fmt.Errorf("user does not have access to the bookmark")

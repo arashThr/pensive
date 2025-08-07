@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path"
 	"regexp"
 	"strings"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/web"
 	"github.com/arashthr/go-course/web/templates"
@@ -71,9 +71,10 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 }
 
 func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navMsgs ...web.NavbarMessage) {
+	logger := loggercontext.Logger(r.Context())
 	tpl, err := t.htmlTemplate.Clone()
 	if err != nil {
-		log.Printf("cloning template failed: %v", err)
+		logger.Errorw("cloning template failed", "error", err)
 		http.Error(w, "There was an error serving your request", http.StatusInternalServerError)
 		return
 	}
@@ -90,7 +91,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 				return csrf.TemplateField(r)
 			},
 			"currentUser": func() *models.User {
-				return context.User(r.Context())
+				return usercontext.User(r.Context())
 			},
 			"messages": func() []web.NavbarMessage {
 				return navMsgs
@@ -111,7 +112,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 	var buf bytes.Buffer
 	err = tpl.Execute(&buf, data)
 	if err != nil {
-		log.Printf("executing template: %v", err)
+		logger.Errorw("executing template", "error", err)
 		http.Error(w, "There was an error executing the template", http.StatusInternalServerError)
 		return
 	}

@@ -12,7 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/service/importer"
@@ -41,8 +42,8 @@ func (p Importer) PocketImport(w http.ResponseWriter, r *http.Request) {
 
 // ProcessImport handles the file upload and creates an import job
 func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	user := context.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 
 	logger.Infow("pocket import requested", "user_id", user.ID)
 	logging.Telegram.SendMessage(fmt.Sprintf("pocket import requested by user %d", user.ID))
@@ -151,8 +152,8 @@ func (p Importer) ProcessImport(w http.ResponseWriter, r *http.Request) {
 
 // ProcessExport handles exporting user data
 func (p Importer) ProcessExport(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	user := context.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 
 	logger.Infow("export requested by user", "user_id", user.ID)
 	logging.Telegram.SendMessage(fmt.Sprintf("Export request by user %d", user.ID))
@@ -338,8 +339,8 @@ func (p Importer) createZip(zipPath, csvPath string) error {
 
 // ImportStatus checks the status of an import job
 func (p Importer) ImportStatus(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	user := context.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 	jobID := types.ImportJobId(r.URL.Query().Get("job_id"))
 
 	if jobID == "" {

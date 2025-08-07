@@ -3,7 +3,8 @@ package service
 import (
 	"net/http"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
@@ -20,8 +21,8 @@ type Home struct {
 }
 
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	logger := context.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	recent, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {
@@ -44,8 +45,8 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Home) Search(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	logger := context.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	query := r.FormValue("query")
 	if query == "" {
@@ -86,8 +87,8 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	logger := context.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	data, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {

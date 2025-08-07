@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db/migrations"
+	"github.com/arashthr/go-course/internal/logging"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
@@ -50,12 +50,12 @@ func Migrate(connString string) error {
 	err = m.Up()
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			log.Println("no migrations")
+			logging.Logger.Info("no migrations")
 			return nil
 		}
 		return fmt.Errorf("applying migrations: %w", err)
 	} else {
-		log.Println("migrations applied")
+		logging.Logger.Info("migrations applied")
 	}
 	return nil
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 )
@@ -15,7 +15,7 @@ type Telegram struct {
 }
 
 func (t *Telegram) RedirectWithAuthToken(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 
 	token, err := t.TelegramModel.CreateAuthToken(user.ID)
 	if err != nil {
