@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
 	"github.com/arashthr/go-course/internal/models"
 )
 
@@ -27,7 +27,7 @@ func (t *Token) AuthenticatedPing(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string "Failed to delete token"
 // @Router /api/v1/tokens/current [delete]
 func (t *Token) DeleteToken(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		logger.Errorw("no authorization header", "authHeader", authHeader)

@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	authcontext "github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
@@ -94,7 +94,7 @@ func (model *BookmarkModel) CreateWithContent(
 	source BookmarkSource,
 	bookmarkRequest *types.CreateBookmarkRequest,
 ) (*Bookmark, error) {
-	logger := authcontext.Logger(ctx)
+	logger := loggercontext.Logger(ctx)
 	parsedURL, err := url.Parse(link)
 	if err != nil {
 		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
@@ -239,7 +239,7 @@ func (model *BookmarkModel) CreateWithContent(
 }
 
 func fetchLink(ctx context.Context, link string) (readability.Article, error) {
-	logger := authcontext.Logger(ctx)
+	logger := loggercontext.Logger(ctx)
 	logger.Infow("Fetching page content", "link", link)
 	resp, err := getPage(link)
 	if err != nil {
@@ -421,7 +421,7 @@ func cleanHTMLForLLM(htmlContent string) string {
 }
 
 func (model *BookmarkModel) generateAIData(ctx context.Context, content string, link string, bookmarkId string) {
-	logger := authcontext.Logger(ctx)
+	logger := loggercontext.Logger(ctx)
 	// Clean up HTML content to reduce LLM costs
 	htmlContent := cleanHTMLForLLM(content)
 	// Log the duration of the function and size of the content

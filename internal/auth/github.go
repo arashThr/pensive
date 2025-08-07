@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	authcontext "github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/logging"
@@ -62,7 +62,7 @@ func NewGitHubOAuth(
 
 // RedirectToGitHub initiates the OAuth flow by redirecting to GitHub
 func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
-	logger := authcontext.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
@@ -90,7 +90,7 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 
 // HandleCallback processes the OAuth callback from GitHub
 func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	logger := authcontext.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")

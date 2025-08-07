@@ -7,7 +7,8 @@ import (
 	"time"
 
 	"github.com/arashthr/go-course/internal/auth"
-	authcontext "github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
@@ -207,7 +208,7 @@ func run(cfg *config.AppConfig) error {
 	// API Routes
 	r.Route("/api", func(r chi.Router) {
 		r.Use(amw.SetUser)
-		r.Use(LoggerMiddleware(cfg.Environment == "production"))
+		r.Use(LoggerMiddleware(cfg.Environment == "production", "api"))
 
 		r.Get("/ping", healthCheck)
 		r.Post("/stripe-webhooks", stripController.Webhook)
@@ -236,11 +237,11 @@ func run(cfg *config.AppConfig) error {
 	// Web routes
 	r.Group(func(r chi.Router) {
 		r.Use(umw.SetUser)
-		r.Use(LoggerMiddleware(cfg.Environment == "production"))
+		r.Use(LoggerMiddleware(cfg.Environment == "production", "web"))
 		r.Use(csrfMw)
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			user := authcontext.User(r.Context())
+			user := usercontext.User(r.Context())
 			if user != nil {
 				// User is authenticated, redirect to /home
 				http.Redirect(w, r, "/home", http.StatusFound)
@@ -377,7 +378,7 @@ func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
 }
 
-func LoggerMiddleware(isProduction bool) func(next http.Handler) http.Handler {
+func LoggerMiddleware(isProduction bool, flow string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			t1 := time.Now()
@@ -385,12 +386,13 @@ func LoggerMiddleware(isProduction bool) func(next http.Handler) http.Handler {
 			reqLogger := logging.Logger.With(
 				"req_path", r.URL.Path,
 				"req_method", r.Method,
+				"flow", flow,
 			)
 
-			if user := authcontext.User(ctx); user != nil {
+			if user := usercontext.User(ctx); user != nil {
 				reqLogger = reqLogger.With("user", user.ID)
 			}
-			ctx = authcontext.WithLogger(ctx, reqLogger)
+			ctx = loggercontext.WithLogger(ctx, reqLogger)
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
 			defer func() {

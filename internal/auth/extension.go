@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/models"
 )
 
@@ -18,8 +19,8 @@ type ExtensionAuthResponse struct {
 }
 
 func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
-	user := context.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 	if user == nil {
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusUnauthorized)

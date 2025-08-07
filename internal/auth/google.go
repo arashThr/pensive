@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	authcontext "github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/logging"
@@ -66,7 +66,7 @@ func NewGoogleOAuth(
 }
 
 func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
-	logger := authcontext.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
@@ -92,7 +92,7 @@ func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	logger := authcontext.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")

@@ -3,14 +3,13 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/errors"
-	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
 	"github.com/arashthr/go-course/internal/validations"
@@ -43,23 +42,30 @@ type Bookmark struct {
 // @Failure 400 {object} ErrorResponse "Invalid URL"
 // @Router /v1/api/bookmarks/check [get]
 func (a *Api) CheckBookmarkByLinkAPI(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	link := r.URL.Query().Get("url")
 
 	if link == "" {
-		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+		err := writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: "URL parameter is required",
 		})
+		if err != nil {
+			logger.Errorw("write response", "error", err)
+		}
 		return
 	}
 
 	if !validations.IsURLValid(link) {
-		logging.Logger.Errorw("[api] invalid URL", "link", link)
-		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
+		logger.Errorw("[api] invalid URL", "link", link)
+		err := writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_URL",
 			Message: fmt.Sprintf("Invalid URL: %v", link),
 		})
+		if err != nil {
+			logger.Errorw("write response", "error", err)
+		}
 		return
 	}
 
@@ -70,10 +76,13 @@ func (a *Api) CheckBookmarkByLinkAPI(w http.ResponseWriter, r *http.Request) {
 				Exists bool `json:"exists"`
 			}
 			data.Exists = false
-			writeResponse(w, data)
+			err := writeResponse(w, data)
+			if err != nil {
+				logger.Errorw("write response", "error", err)
+			}
 			return
 		}
-		logging.Logger.Errorw("[api] failed to check bookmark", "error", err, "link", link)
+		logger.Errorw("[api] failed to check bookmark", "error", err, "link", link)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "api: Something went wrong",
@@ -87,15 +96,19 @@ func (a *Api) CheckBookmarkByLinkAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Exists = true
 	data.Bookmark = mapModelToBookmark(bookmark)
-	writeResponse(w, data)
+	err = writeResponse(w, data)
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
 	bookmarks, _, err := a.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
-		log.Printf("fetching bookmarks: %v", err)
+		logger.Errorw("fetching bookmarks", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -107,7 +120,10 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	for _, b := range bookmarks {
 		data.Bookmarks = append(data.Bookmarks, mapModelToBookmark(&b))
 	}
-	writeResponse(w, data)
+	err = writeResponse(w, data)
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 // CreateAPI handles the creation of a new bookmark.
@@ -122,7 +138,7 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data types.CreateBookmarkRequest
 	ctx := r.Context()
-	logger := context.Logger(ctx)
+	logger := loggercontext.Logger(ctx)
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		logger.Errorw("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
@@ -131,7 +147,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	user := context.User(ctx)
+	user := usercontext.User(ctx)
 
 	if !validations.IsURLValid(data.Link) {
 		logger.Errorw("[api] invalid URL", "link", data.Link)
@@ -168,10 +184,14 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Infow("[api] created bookmark", "bookmarkId", bookmark.Id)
-	writeResponse(w, mapModelToBookmark(bookmark))
+	err = writeResponse(w, mapModelToBookmark(bookmark))
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 func (a *Api) GetAPI(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
 		writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
@@ -180,10 +200,14 @@ func (a *Api) GetAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	writeResponse(w, mapModelToBookmark(bookmark))
+	err := writeResponse(w, mapModelToBookmark(bookmark))
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
 		return
@@ -205,10 +229,14 @@ func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	writeResponse(w, mapModelToBookmark(bookmark))
+	err = writeResponse(w, mapModelToBookmark(bookmark))
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmarkByLink(w, r)
 	if bookmark == nil {
 		return
@@ -222,11 +250,15 @@ func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	writeResponse(w, mapModelToBookmark(bookmark))
-	logging.Logger.Infow("[api] deleted bookmark", "bookmarkId", bookmark.Id)
+	err = writeResponse(w, mapModelToBookmark(bookmark))
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
+	logger.Infow("[api] deleted bookmark", "bookmarkId", bookmark.Id)
 }
 
 func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
 		return
@@ -243,7 +275,10 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 		Id types.BookmarkId `json:"id"`
 	}
 	data.Id = bookmark.Id
-	writeResponse(w, &data)
+	err = writeResponse(w, &data)
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 // SearchAPI handles the search for bookmarks based on a query.
@@ -254,16 +289,17 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} ErrorResponse "Something went wrong"
 // @Router /v1/api/bookmarks/search [get]
 func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	query := r.FormValue("query")
 	if query == "" {
 		http.Error(w, "Query is required", http.StatusBadRequest)
 		return
 	}
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 
 	results, err := a.BookmarkModel.Search(user, query)
 	if err != nil {
-		logging.Logger.Errorw("searching bookmarks", "error", err)
+		logger.Errorw("searching bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -281,7 +317,10 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 			Thumbnail: r.ImageUrl,
 		})
 	}
-	writeResponse(w, data)
+	err = writeResponse(w, data)
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 // CurrentUserAPI handles the current user's information.
@@ -291,19 +330,23 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} ErrorResponse "Something went wrong"
 // @Router /v1/api/user/me [get]
 func (a *Api) CurrentUserAPI(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	var data struct {
 		Email        string
 		IsSubscribed bool
 	}
 	data.Email = user.Email
 	data.IsSubscribed = user.IsSubscriptionPremium()
-	writeResponse(w, data)
+	err := writeResponse(w, data)
+	if err != nil {
+		logger.Errorw("write response", "error", err)
+	}
 }
 
 func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) *models.Bookmark {
 	id := chi.URLParam(r, "id")
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	if strings.TrimSpace(id) == "" {
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
@@ -330,7 +373,7 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 
 	for _, opt := range opts {
 		if err := opt(w, r, bookmark); err != nil {
-			log.Printf("Error in running opts on getBookmark: %v", err)
+			logger.Errorw("running opts on getBookmark", "error", err)
 			writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 				Code:    "INTERNAL_ERROR",
 				Message: "api: Something went wrong",
@@ -342,12 +385,13 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 }
 
 func (a *Api) getBookmarkByLink(w http.ResponseWriter, r *http.Request) *models.Bookmark {
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	var data struct {
 		Link string
 	}
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		logging.Logger.Errorw("[api] decoding request body", "error", err)
+		logger.Errorw("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: fmt.Sprintf("Invalid request body: %v", err),
@@ -356,7 +400,7 @@ func (a *Api) getBookmarkByLink(w http.ResponseWriter, r *http.Request) *models.
 	}
 
 	if !validations.IsURLValid(data.Link) {
-		logging.Logger.Errorw("[api] invalid URL", "link", data.Link)
+		logger.Errorw("[api] invalid URL", "link", data.Link)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_URL",
 			Message: fmt.Sprintf("Invalid URL: %v", data.Link),
@@ -372,7 +416,7 @@ func (a *Api) getBookmarkByLink(w http.ResponseWriter, r *http.Request) *models.
 			})
 			return nil
 		}
-		logging.Logger.Errorw("[api] failed to create bookmark", "error", err, "link", data.Link)
+		logger.Errorw("[api] failed to create bookmark", "error", err, "link", data.Link)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "INTERNAL_ERROR",
 			Message: "api: Something went wrong",
@@ -382,23 +426,25 @@ func (a *Api) getBookmarkByLink(w http.ResponseWriter, r *http.Request) *models.
 	return bookmark
 }
 
-func writeResponse(w http.ResponseWriter, data interface{}) {
+func writeResponse(w http.ResponseWriter, data interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("encoding response: %v", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return err
 	}
+	return nil
 }
 
-func writeErrorResponse(w http.ResponseWriter, statusCode int, errResp ErrorResponse) {
+func writeErrorResponse(w http.ResponseWriter, statusCode int, errResp ErrorResponse) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
 
 	if err := json.NewEncoder(w).Encode(errResp); err != nil {
-		log.Printf("encoding error response: %v", err)
 		http.Error(w, "Failed to encode error response", http.StatusInternalServerError)
+		return err
 	}
+	return nil
 }
 
 func mapModelToBookmark(b *models.Bookmark) Bookmark {

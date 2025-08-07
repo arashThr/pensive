@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/arashthr/go-course/internal/auth/context"
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
+	"github.com/arashthr/go-course/internal/auth/context/usercontext"
 	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/logging"
@@ -79,7 +79,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
@@ -153,7 +153,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
@@ -197,7 +197,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
@@ -219,14 +219,14 @@ func (u Users) Subscribe(w http.ResponseWriter, r *http.Request) {
 		IsSubscribed bool
 	}
 	data.Title = "Subscription"
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 	data.IsSubscribed = user.IsSubscriptionPremium()
 	u.Templates.Subscribe.Execute(w, r, data)
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	logger := context.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	var data struct {
 		Title        string
 		Email        string
@@ -262,6 +262,7 @@ func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	var data struct {
 		Title string
 		Email string
@@ -271,7 +272,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	pwReset, err := u.PasswordResetService.Create(data.Email)
 	if err != nil {
 		// TODO: Handle other cases, like when the user does not exist
-		log.Println(err)
+		logger.Errorw("process forgot password", "error", err)
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
@@ -281,7 +282,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	resetUrl := fmt.Sprintf("%s/reset-password?", u.Domain) + values.Encode()
 	err = u.EmailService.ForgotPassword(data.Email, resetUrl)
 	if err != nil {
-		log.Println(err)
+		logger.Errorw("reset in forgot password", "error", err)
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
@@ -299,6 +300,7 @@ func (u Users) ResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
 	var data struct {
 		Token    string
 		Password string
@@ -309,21 +311,21 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	user, err := u.PasswordResetService.Consume(data.Token)
 	if err != nil {
 		// TODO: Better message if failed duo to bad token
-		log.Println("consume token:", err)
+		logger.Infow("consume token for reset password", "error", err)
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
 
 	err = u.UserService.UpdatePassword(user.ID, data.Password)
 	if err != nil {
-		log.Printf("update password failed: %v", err)
+		logger.Errorw("update password failed", "error", err)
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
 
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		log.Println("create session for password reset", err)
+		logger.Infow("create session for password reset", "error", err)
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
@@ -332,9 +334,9 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	tokenId := r.FormValue("token_id")
-	user := context.User(r.Context())
+	user := usercontext.User(r.Context())
 	err := u.TokenModel.Delete(user.ID, tokenId)
 	if err != nil {
 		logger.Errorw("delete token", "error", err)
@@ -345,8 +347,8 @@ func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
-	user := context.User(r.Context())
-	logger := context.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
 
 	tab := r.URL.Query().Get("tab")
 	if tab == "" {
@@ -417,7 +419,7 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 			return
 		}
 		ctx := r.Context()
-		ctx = context.WithUser(ctx, user)
+		ctx = usercontext.WithUser(ctx, user)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -425,7 +427,7 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 
 func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := context.User(r.Context())
+		user := usercontext.User(r.Context())
 		if user == nil {
 			http.Redirect(w, r, "/signin", http.StatusFound)
 			return
@@ -453,12 +455,12 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 		token := tokenParts[1]
 		user, err := amw.TokenModel.User(token)
 		if err != nil {
-			log.Printf("set user: %v", err)
+			logging.Logger.Errorw("setting user for api", "error", err)
 			next.ServeHTTP(w, r)
 			return
 		}
 		ctx := r.Context()
-		ctx = context.WithUser(ctx, user)
+		ctx = usercontext.WithUser(ctx, user)
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 	})
@@ -466,7 +468,7 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 
 func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := context.User(r.Context())
+		user := usercontext.User(r.Context())
 		if user == nil {
 			logging.Logger.Infow("unauthorized request", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -479,8 +481,8 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 // DeleteAllContent deletes all user content but keeps the account active
 func (u Users) DeleteAllContent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	logger := context.Logger(ctx)
-	user := context.User(ctx)
+	logger := loggercontext.Logger(ctx)
+	user := usercontext.User(ctx)
 
 	logger.Infow("Content delete requested", "user_id", user.ID)
 
@@ -502,8 +504,8 @@ func (u Users) DeleteAllContent(w http.ResponseWriter, r *http.Request) {
 // DeleteAccount deletes the entire user account and all associated data
 func (u Users) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	logger := context.Logger(ctx)
-	user := context.User(ctx)
+	logger := loggercontext.Logger(ctx)
+	user := usercontext.User(ctx)
 
 	logger.Infow("User delete requested", "user_id", user.ID)
 
@@ -546,7 +548,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
 
@@ -640,7 +642,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	logger := context.Logger(r.Context())
+	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
 
@@ -695,7 +697,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 
 func (u Users) VerifyPasswordlessAuth(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	logger := context.Logger(ctx)
+	logger := loggercontext.Logger(ctx)
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		logger.Errorw("missing token in passwordless auth verification")
