@@ -38,7 +38,11 @@ func FAQ(tpl Template) http.HandlerFunc {
 		},
 		{
 			Question: "Is there a free version?",
-			Answer:   "You can start using Pensive for free. With premium, you will have higher limits, specially on AI features.",
+			Answer:   "You can start using Pensive for free with AI features included. With premium, you get higher daily limits (100 vs 10 bookmarks/day)",
+		},
+		{
+			Question: "Do you have a mobile app?",
+			Answer:   "No, but you don't need to install a new app to work with Pensive. Just connect you account to Pensive Telegram bot to save articles and search in your library.",
 		},
 		{
 			Question: "What language is Pensive available in?",
