@@ -220,7 +220,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 
 		var errorMessage string
 		if resp.StatusCode == http.StatusTooManyRequests {
-			errorMessage = "❌ <b>Daily limit exceeded</b>\n\nYou've reached your daily bookmark limit. Please upgrade to premium for higher limits."
+			errorMessage = "❌ <b>Daily limit exceeded</b>\n\nYou've reached your daily bookmark limit. Upgrade to premium for 100 bookmarks/day."
 		} else {
 			errorMessage = "❌ <b>Save failed</b>\n\nServer error: " + resp.Status
 		}

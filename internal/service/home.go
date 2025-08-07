@@ -116,7 +116,7 @@ func (h Home) getRecentBookmarksData(user *models.User, limit int) (types.Recent
 
 	for _, b := range bookmarks {
 		excerpt := b.Excerpt
-		if user.IsSubscriptionPremium() && b.AIExcerpt != nil {
+		if b.AIExcerpt != nil {
 			excerpt = *b.AIExcerpt
 		}
 		data.Bookmarks = append(data.Bookmarks, types.RecentBookmark{

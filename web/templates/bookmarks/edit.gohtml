@@ -1,9 +1,7 @@
 {{template "header" .}}
 
-<!-- Load marked.js for markdown rendering (only for premium users) -->
-{{if .IsPremium}}
+<!-- Load marked.js for markdown rendering (available for all users) -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-{{end}}
 
 <div class="px-6 py-8 max-w-4xl mx-auto">
   <!-- Main Content Card -->
@@ -48,15 +46,9 @@
           </button>
           
           <div id="propertiesMenu" class="hidden absolute right-0 mt-2 w-48 bg-white border-2 border-black py-1 z-10">
-            {{if .IsPremium}}
-              <button id="toggleMarkdownBtn" class="w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100">
-                <span id="markdownBtnText">VIEW MARKDOWN</span>
-              </button>
-            {{else}}
-              <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-bold hover:bg-gray-100">
-                VIEW MARKDOWN
-              </a>
-            {{end}}
+            <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-bold hover:bg-gray-100">
+              VIEW MARKDOWN
+            </a>
             <hr class="my-1 border-black">
             <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"
                   onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
@@ -80,15 +72,14 @@
           </svg>
           <span class="text-sm font-bold">OPENING PARAGRAPH</span>
         </div>
-        {{if and .IsPremium .AIExcerpt}}
+        {{if .AIExcerpt}}
           <p class="text-gray-600 leading-relaxed">{{.AIExcerpt}}</p>
         {{else}}
           <p class="text-gray-600 leading-relaxed">{{.Excerpt}}</p>
         {{end}}
       </div>
 
-      <!-- Premium AI Content -->
-      {{if .IsPremium}}
+      <!-- AI Content (available for all users) -->
         {{if .AISummary}}
           <div class="bg-gray-100 border-2 border-black p-4">
             <div class="flex items-center mb-2">
@@ -148,7 +139,6 @@
             </div>
           </div>
         </div>
-      {{end}}
     </div>
   </div>
 
@@ -164,8 +154,7 @@
   </div>
 </div>
 
-<!-- Markdown Styling -->
-{{if .IsPremium}}
+<!-- Markdown Styling (available for all users) -->
 <style>
   .markdown-content {
     line-height: 1.7;
@@ -276,8 +265,6 @@
     margin: 2rem 0;
   }
 </style>
-{{end}}
-
 <!-- Menu Toggle Script -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -297,7 +284,6 @@
       e.stopPropagation();
     });
 
-    {{if .IsPremium}}
     // Markdown toggle functionality
     const toggleMarkdownBtn = document.getElementById('toggleMarkdownBtn');
     const hideMarkdownBtn = document.getElementById('hideMarkdownBtn');
@@ -324,7 +310,6 @@
       markdownContainer.classList.add('hidden');
       markdownBtnText.textContent = 'View Markdown';
     });
-    {{end}}
   });
 </script>
 

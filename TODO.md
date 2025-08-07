@@ -147,6 +147,7 @@
 - [ ] Add passwordless login for production
 - [ ] Make the logo red - Add red buttons for actions
 - [ ] Write down about tech stack in FAQ
+- [ ] Update logging in API to use context logger
 - [x] ~~Add verified to user table~~: Use passwordless login
     - ~~[ ] Verify email~~
 - [x] Extension

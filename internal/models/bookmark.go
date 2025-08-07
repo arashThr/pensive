@@ -25,7 +25,12 @@ import (
 
 type BookmarkSource = int
 
-const PageSize = 5
+const PageSize = 10
+
+const (
+	FreeUserDailyLimit    = 10
+	PremiumUserDailyLimit = 100
+)
 
 const (
 	WebSource BookmarkSource = iota
@@ -217,8 +222,8 @@ func (model *BookmarkModel) CreateWithContent(
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 
-	// Only generate AI content for premium users and not for imports (like Pocket)
-	if user.IsSubscriptionPremium() && source != Pocket {
+	// Generate AI content for all users except for imports (like Pocket)
+	if source != Pocket {
 		contentForMarkdown := content
 		if htmlContent != "" {
 			contentForMarkdown = htmlContent
@@ -626,13 +631,7 @@ func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, er
 	if err != nil {
 		return nil, fmt.Errorf("collect bookmark search rows: %w", err)
 	}
-	if !user.IsSubscriptionPremium() {
-		for i := range results {
-			results[i].AISummary = nil
-			results[i].AIExcerpt = nil
-			results[i].AITags = nil
-		}
-	}
+	// AI features are now available for all users
 	return results, nil
 }
 
@@ -775,11 +774,6 @@ func getPage(link string) (*http.Response, error) {
 	resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	return resp, nil
 }
-
-const (
-	FreeUserDailyLimit    = 100
-	PremiumUserDailyLimit = 300
-)
 
 // checkRateLimit checks if a user has exceeded their daily bookmark limit
 func (model *BookmarkModel) checkRateLimit(user *User) error {

@@ -5,7 +5,7 @@
     <h1 class="text-3xl font-bold mb-8">PRIVACY POLICY</h1>
     
     <p class="mb-8">
-      <strong>Last updated:</strong> July 2025
+      <strong>Last updated:</strong> August 2025
     </p>
 
     <div class="space-y-8">
@@ -48,7 +48,7 @@
         <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">How We Use Your Information</h2>
         <ul class="list-disc list-inside space-y-2">
           <li><strong>Core Service:</strong> Store and index your saved content for personal searchability</li>
-          <li><strong>Content Enhancement:</strong> Generate summaries and tags using AI (premium feature)</li>
+          <li><strong>Content Enhancement:</strong> Generate summaries and tags using AI (available for all users)</li>
           <li><strong>Account Management:</strong> Authenticate users and manage subscriptions</li>
           <li><strong>Service Improvement:</strong> Analyze usage patterns to improve features</li>
           <li><strong>Communication:</strong> Send important service updates (rare, no marketing)</li>
@@ -68,7 +68,7 @@
 
         <h3 class="text-xl font-bold mb-3">Content Extraction Methods</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
-          <li><strong>Enhanced Content Capture (Recommended):</strong> The extension uses Mozilla's Readability.js library locally to extract clean article content. If Readability fails, it captures the full HTML content of the page for better searchability and content preservation. This method works best on sites with complex layouts like forums, Reddit, and Stack Overflow.</li>
+          <li><strong>Enhanced Content Capture (Recommended):</strong> The extension uses Mozilla's Readability.js library locally to extract clean article content. We also capture the trimmed down version of the page HTML for better searchability and making markdown version of the page. This method is needed for sites with complex layouts like forums, Reddit, and Stack Overflow.</li>
           <li><strong>Server-Side Capture Only:</strong> Extension sends only the page URL to Pensive servers, which fetch and process the content. This method may not work on sites with paywalls or complex layouts.</li>
         </ul>
 
@@ -77,7 +77,7 @@
           <li>Requires explicit consent before collecting any data</li>
           <li>Only accesses the current tab when you click "save"</li>
           <li>Extracts clean content using <a href="https://www.npmjs.com/package/@mozilla/readability" class="underline">Mozilla's Readability.js library</a> (runs locally)</li>
-          <li>Falls back to HTML content capture when Readability extraction fails</li>
+          <li>Captures the trimmed downs version of the HTML content</li>
           <li>Sends extracted content directly to your Pensive account</li>
           <li>Stores only your authentication token and extraction method preference locally</li>
           <li>Never tracks your browsing or collects data from pages you don't save</li>
@@ -107,7 +107,7 @@
           We do not sell, rent, or share your personal information with third parties, except:
         </p>
         <ul class="list-disc list-inside space-y-2">
-          <li><strong>Service Providers:</strong> Google Gemini for AI features (premium users only)</li>
+          <li><strong>Service Providers:</strong> Google Gemini for AI features (all users)</li>
           <li><strong>Payment Processing:</strong> Stripe for subscription billing</li>
           <li><strong>Analytics:</strong> Umami Analytics for basic usage statistics (privacy-focused, no personal data)</li>
           <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>

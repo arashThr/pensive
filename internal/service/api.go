@@ -121,8 +121,9 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 // @Router /v1/api/bookmarks [post]
 func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	var data types.CreateBookmarkRequest
+	logger := context.Logger(r.Context())
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-		logging.Logger.Errorw("[api] decoding request body", "error", err)
+		logger.Errorw("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: fmt.Sprintf("Invalid request body: %v", err),
@@ -132,7 +133,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 
 	if !validations.IsURLValid(data.Link) {
-		logging.Logger.Errorw("[api] invalid URL", "link", data.Link)
+		logger.Errorw("[api] invalid URL", "link", data.Link)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_URL",
 			Message: fmt.Sprintf("Invalid URL: %v", data.Link),
@@ -145,19 +146,19 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		data.PublishedTime = &publishedTime
 	}
 
-	logging.Logger.Infow("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
+	logger.Infow("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
 	bookmark, err := a.BookmarkModel.CreateWithContent(data.Link, user, models.Api, &data)
 	if err != nil {
-		logging.Logger.Errorw("[api] failed to create bookmark", "error", err)
-
 		// Handle rate limit error specifically
 		if errors.Is(err, errors.ErrDailyLimitExceeded) {
+			logger.Infow("user hit daily limit", "user_id", user.ID)
 			writeErrorResponse(w, http.StatusTooManyRequests, ErrorResponse{
 				Code:    "DAILY_LIMIT_EXCEEDED",
-				Message: "Daily bookmark limit exceeded. Please upgrade to premium for higher limits.",
+				Message: "Daily bookmark limit exceeded. Upgrade to premium for 100 bookmarks/day.",
 			})
 			return
 		}
+		logger.Errorw("[api] failed to create bookmark", "error", err)
 
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "CREATE_BOOKMARK",
@@ -165,7 +166,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	logging.Logger.Infow("[api] created bookmark", "bookmarkId", bookmark.Id)
+	logger.Infow("[api] created bookmark", "bookmarkId", bookmark.Id)
 	writeResponse(w, mapModelToBookmark(bookmark))
 }
 

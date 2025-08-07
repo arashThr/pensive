@@ -61,7 +61,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var message string
 		if errors.Is(err, errors.ErrDailyLimitExceeded) {
-			message = "Daily bookmark limit exceeded. Please upgrade to premium for higher limits."
+			message = "Daily bookmark limit exceeded. Upgrade to premium for 100 bookmarks/day."
 		} else {
 			message = err.Error()
 		}
@@ -117,12 +117,10 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 
 	logger.Infow("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
 
-	// For premium users, fetch AI-generated content
-	if data.IsPremium {
-		data.AISummary = bookmark.AISummary
-		data.AIExcerpt = bookmark.AIExcerpt
-		data.AITags = bookmark.AITags
-	}
+	// AI-generated content is now available for all users
+	data.AISummary = bookmark.AISummary
+	data.AIExcerpt = bookmark.AIExcerpt
+	data.AITags = bookmark.AITags
 
 	b.Templates.Edit.Execute(w, r, data)
 }
@@ -316,13 +314,6 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Check if user is premium
-	user := context.User(r.Context())
-	if !user.IsSubscriptionPremium() {
-		http.Error(w, "Premium subscription required", http.StatusForbidden)
-		return
-	}
-
 	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.Id)
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
@@ -332,7 +323,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 			</div>`))
 			return
 		}
-		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
+		logger.Errorw("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
