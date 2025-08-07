@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/arashthr/go-course/internal/auth/context"
-	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 )
 
@@ -19,6 +18,7 @@ type ExtensionAuthResponse struct {
 }
 
 func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
+	logger := context.Logger(r.Context())
 	user := context.User(r.Context())
 	if user == nil {
 		w.Header().Set("Content-Type", "text/html")
@@ -41,7 +41,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 
 	token, err := e.TokenModel.Create(user.ID, "extension")
 	if err != nil {
-		logging.Logger.Errorw("failed to create extension token", "error", err, "user", user.ID)
+		logger.Errorw("failed to create extension token", "error", err, "user", user.ID)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusInternalServerError)
 		html := `

@@ -66,10 +66,11 @@ func NewGoogleOAuth(
 }
 
 func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
+	logger := authcontext.Logger(r.Context())
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
-		logging.Logger.Errorw("failed to generate state parameter", "error", err)
+		logger.Errorw("failed to generate state parameter", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -96,7 +97,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")
 	if err != nil {
-		logger.Error("missing oauth state cookie", "error", err)
+		logger.Errorw("missing oauth state cookie", "error", err)
 		http.Error(w, "Invalid OAuth state", http.StatusBadRequest)
 		return
 	}
@@ -114,7 +115,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	state := r.URL.Query().Get("state")
 	if state != stateCookie.Value {
-		logger.Error("oauth state mismatch")
+		logger.Errorw("oauth state mismatch")
 		http.Error(w, "Invalid OAuth state", http.StatusBadRequest)
 		return
 	}
@@ -122,14 +123,14 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Exchange authorization code for access token
 	code := r.URL.Query().Get("code")
 	if code == "" {
-		logger.Error("missing authorization code")
+		logger.Errorw("missing authorization code")
 		http.Error(w, "Missing authorization code", http.StatusBadRequest)
 		return
 	}
 
 	token, err := g.OAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		logger.Error("failed to exchange code for token", "error", err)
+		logger.Errorw("failed to exchange code for token", "error", err)
 		http.Error(w, "Failed to authenticate with Google", http.StatusInternalServerError)
 		return
 	}
@@ -137,7 +138,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Get user information from Google
 	googleUser, err := g.getGoogleUser(token.AccessToken)
 	if err != nil {
-		logger.Error("failed to get Google user", "error", err)
+		logger.Errorw("failed to get Google user", "error", err)
 		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
 		return
 	}
@@ -145,7 +146,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Handle user authentication/creation
 	user, err := g.authenticateOrCreateUser(googleUser)
 	if err != nil {
-		logger.Error("failed to authenticate or create user", "error", err)
+		logger.Errorw("failed to authenticate or create user", "error", err)
 		http.Error(w, "Failed to authenticate user", http.StatusInternalServerError)
 		return
 	}
@@ -153,7 +154,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Create session
 	session, err := g.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Error("failed to create session", "error", err)
+		logger.Errorw("failed to create session", "error", err)
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
@@ -200,14 +201,12 @@ func (g *GoogleAuth) authenticateOrCreateUser(googleUser *GoogleUser) (*models.U
 	user, err := g.UserService.GetByOAuth("google", googleUser.ID)
 	if err == nil {
 		// User exists, return them
-		logging.Logger.Infow("user exists", "user", user)
 		return user, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
 		// Unexpected error
-		logging.Logger.Errorw("error for get by oauth", "error", err)
-		return nil, err
+		return nil, fmt.Errorf("error for get by oauth: %w", err)
 	}
 
 	// User doesn't exist, try to find by email

@@ -45,7 +45,8 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		UserId types.UserId
 		Link   string
 	}
-	user := context.User(r.Context())
+	ctx := r.Context()
+	user := context.User(ctx)
 	data.Title = "New Bookmark"
 	data.UserId = user.ID
 	data.Link = r.FormValue("link")
@@ -57,7 +58,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmark, err := b.BookmarkModel.Create(data.Link, user, models.WebSource)
+	bookmark, err := b.BookmarkModel.Create(ctx, data.Link, user, models.WebSource)
 	if err != nil {
 		var message string
 		if errors.Is(err, errors.ErrDailyLimitExceeded) {
@@ -228,7 +229,7 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.Id), http.StatusNotFound)
 			return
 		}
-		logger.Error("[bookmarks] get bookmark content by ID", "error", err, "id", bookmark.Id)
+		logger.Errorw("[bookmarks] get bookmark content by ID", "error", err, "id", bookmark.Id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -260,7 +261,7 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
-		logger.Error("encoding response", "error", err)
+		logger.Errorw("encoding response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
@@ -286,7 +287,7 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 			b.Templates.MarkdownNotAvailable.Execute(w, r, data)
 			return
 		}
-		logger.Error("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
+		logger.Errorw("[bookmarks] get bookmark markdown by ID", "error", err, "id", bookmark.Id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}

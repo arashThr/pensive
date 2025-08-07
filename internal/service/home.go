@@ -25,7 +25,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 
 	recent, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {
-		logger.Error("failed to get recent bookmarks data", "error", err)
+		logger.Errorw("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -56,7 +56,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 
 	results, err := h.BookmarkModel.Search(user, query)
 	if err != nil {
-		logger.Error("failed to search bookmarks", "error", err)
+		logger.Errorw("failed to search bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -91,7 +91,7 @@ func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
 
 	data, err := h.getRecentBookmarksData(user, 5)
 	if err != nil {
-		logger.Error("failed to get recent bookmarks data", "error", err)
+		logger.Errorw("failed to get recent bookmarks data", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
