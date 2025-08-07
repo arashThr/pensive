@@ -533,6 +533,9 @@
   .absolute {
     position: absolute;
   }
+  .fixed {
+    position: fixed;
+  }
   .relative {
     position: relative;
   }
@@ -562,6 +565,9 @@
   }
   .float-right {
     float: right;
+  }
+  .mx-4 {
+    margin-inline: calc(var(--spacing) * 4);
   }
   .mx-auto {
     margin-inline: auto;
@@ -664,6 +670,9 @@
   }
   .hidden {
     display: none;
+  }
+  .inline {
+    display: inline;
   }
   .inline-block {
     display: inline-block;
@@ -948,6 +957,10 @@
     border-style: var(--tw-border-style);
     border-width: 2px;
   }
+  .border-4 {
+    border-style: var(--tw-border-style);
+    border-width: 4px;
+  }
   .border-t {
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
@@ -981,6 +994,9 @@
   .border-red-600 {
     border-color: var(--color-red-600);
   }
+  .border-red-800 {
+    border-color: var(--color-red-800);
+  }
   .border-t-black {
     border-top-color: var(--color-black);
   }
@@ -990,14 +1006,26 @@
   .bg-gray-100 {
     background-color: var(--color-gray-100);
   }
+  .bg-gray-200 {
+    background-color: var(--color-gray-200);
+  }
   .bg-gray-300 {
     background-color: var(--color-gray-300);
   }
   .bg-gray-800 {
     background-color: var(--color-gray-800);
   }
+  .bg-red-50 {
+    background-color: var(--color-red-50);
+  }
   .bg-red-100 {
     background-color: var(--color-red-100);
+  }
+  .bg-red-600 {
+    background-color: var(--color-red-600);
+  }
+  .bg-red-800 {
+    background-color: var(--color-red-800);
   }
   .bg-sky-600 {
     background-color: var(--color-sky-600);
@@ -1163,6 +1191,18 @@
   .text-gray-600 {
     color: var(--color-gray-600);
   }
+  .text-red-600 {
+    color: var(--color-red-600);
+  }
+  .text-red-700 {
+    color: var(--color-red-700);
+  }
+  .text-red-800 {
+    color: var(--color-red-800);
+  }
+  .text-red-900 {
+    color: var(--color-red-900);
+  }
   .text-white {
     color: var(--color-white);
   }
@@ -1231,6 +1271,20 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-gray-800);
+      }
+    }
+  }
+  .hover\:bg-red-700 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-red-700);
+      }
+    }
+  }
+  .hover\:bg-red-900 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-red-900);
       }
     }
   }

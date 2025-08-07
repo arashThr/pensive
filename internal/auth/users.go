@@ -40,6 +40,7 @@ type Users struct {
 		ProfileTab             web.Template
 		TokensTab              web.Template
 		ImportExportTab        web.Template
+		DataManagementTab      web.Template
 		PasswordlessNew        web.Template
 		PasswordlessSignIn     web.Template
 		PasswordlessCheckEmail web.Template
@@ -93,7 +94,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
-		logger.Error("turnstile siteverify on sign up", "error", err)
+		logger.Errorw("turnstile siteverify on sign up", "error", err)
 		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Verification failed",
 			IsError: true,
@@ -115,7 +116,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Error("create user failed", "error", err)
+		logger.Errorw("create user failed", "error", err)
 		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Creating session failed",
 			IsError: true,
@@ -158,15 +159,17 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("cf-turnstile-response")
 
 	var data struct {
-		Title            string
-		TurnstileSiteKey string
+		Title                 string
+		TurnstileSiteKey      string
+		AllowPasswordlessAuth bool
 	}
 	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
+	data.AllowPasswordlessAuth = u.AuthConfig.AllowPasswordlessAuth
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
-		logger.Error("turnstile siteverify on sign in", "error", err)
+		logger.Errorw("turnstile siteverify on sign in", "error", err)
 		u.Templates.SignIn.Execute(w, r, data, web.NavbarMessage{
 			Message: "Verification failed",
 			IsError: true,
@@ -185,7 +188,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Error("sign in process failed", "error", err)
+		logger.Errorw("sign in process failed", "error", err)
 		http.Error(w, "Sign in process failed", http.StatusInternalServerError)
 		return
 	}
@@ -334,7 +337,7 @@ func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	err := u.TokenModel.Delete(user.ID, tokenId)
 	if err != nil {
-		logger.Error("delete token", "error", err)
+		logger.Errorw("delete token", "error", err)
 		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
 		return
 	}
@@ -386,6 +389,8 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		u.Templates.TokensTab.Execute(w, r, data)
 	case "import-export":
 		u.Templates.ImportExportTab.Execute(w, r, data)
+	case "data-management":
+		u.Templates.DataManagementTab.Execute(w, r, data)
 	default:
 		u.Templates.ProfileTab.Execute(w, r, data)
 	}
@@ -471,8 +476,54 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	})
 }
 
-// Passwordless Authentication Methods
+// DeleteAllContent deletes all user content but keeps the account active
+func (u Users) DeleteAllContent(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	logger := context.Logger(ctx)
+	user := context.User(ctx)
 
+	logger.Infow("Content delete requested", "user_id", user.ID)
+
+	// Deleting from library_items will be cascaded to library_content
+	_, err := u.UserService.Pool.Exec(ctx, `DELETE FROM library_items WHERE user_id = $1`, user.ID)
+	// err = deleteUserContent(ctx, tx)
+	if err != nil {
+		logger.Errorw("delete user content", "error", err, "user_id", user.ID)
+		http.Error(w, "Failed to delete content", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Infow("user content deleted", "user_id", user.ID, "email", user.Email)
+
+	// Redirect back to user settings page
+	http.Redirect(w, r, "/users/me", http.StatusFound)
+}
+
+// DeleteAccount deletes the entire user account and all associated data
+func (u Users) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	logger := context.Logger(ctx)
+	user := context.User(ctx)
+
+	logger.Infow("User delete requested", "user_id", user.ID)
+
+	// Deleting from library_items will be cascaded to library_content
+	_, err := u.UserService.Pool.Exec(ctx, `DELETE FROM users WHERE id = $1`, user.ID)
+	// err = deleteUserContent(ctx, tx)
+	if err != nil {
+		logger.Errorw("delete user", "error", err, "user_id", user.ID)
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Infow("user account deleted", "user_id", user.ID, "email", user.Email)
+
+	// Clear session cookie and redirect to home
+	setCookie(w, CookieSession, "")
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+// Passwordless Authentication Methods
 func (u Users) PasswordlessNew(w http.ResponseWriter, r *http.Request) {
 	if !u.AuthConfig.AllowPasswordlessAuth {
 		http.Redirect(w, r, "/signup", http.StatusFound)
@@ -509,7 +560,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
-		logger.Error("turnstile siteverify on passwordless sign up", "error", err)
+		logger.Errorw("turnstile siteverify on passwordless sign up", "error", err)
 		u.Templates.PasswordlessNew.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Verification failed",
 			IsError: true,
@@ -533,7 +584,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 	// Create auth token for signup
 	authToken, err := u.AuthTokenService.Create(email, models.AuthTokenTypeSignup)
 	if err != nil {
-		logger.Error("create auth token for signup", "error", err)
+		logger.Errorw("create auth token for signup", "error", err)
 		u.Templates.PasswordlessNew.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Failed to send sign up email",
 			IsError: true,
@@ -551,7 +602,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 	go func() {
 		err := u.EmailService.PasswordlessSignup(email, magicURL)
 		if err != nil {
-			logger.Error("send passwordless signup email", "error", err)
+			logger.Errorw("send passwordless signup email", "error", err)
 		}
 	}()
 
@@ -603,7 +654,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
-		logger.Error("turnstile siteverify on passwordless sign in", "error", err)
+		logger.Errorw("turnstile siteverify on passwordless sign in", "error", err)
 		u.Templates.PasswordlessSignIn.Execute(w, r, signinTemplateData, web.NavbarMessage{
 			Message: "Verification failed",
 			IsError: true,
@@ -626,7 +677,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 	go func() {
 		err := u.sendPasswordlessSigninEmail(email, logger)
 		if err != nil {
-			logger.Error("failed to send passwordless signin email", "error", err)
+			logger.Errorw("failed to send passwordless signin email", "error", err)
 		}
 	}()
 
@@ -647,14 +698,14 @@ func (u Users) VerifyPasswordlessAuth(w http.ResponseWriter, r *http.Request) {
 	logger := context.Logger(ctx)
 	token := r.URL.Query().Get("token")
 	if token == "" {
-		logger.Error("missing token in passwordless auth verification")
+		logger.Errorw("missing token in passwordless auth verification")
 		http.Error(w, "Invalid verification link", http.StatusBadRequest)
 		return
 	}
 
 	authToken, err := u.AuthTokenService.Consume(token)
 	if err != nil {
-		logger.Error("consume auth token", "error", err)
+		logger.Errorw("consume auth token", "error", err)
 		http.Error(w, "Invalid or expired verification link", http.StatusBadRequest)
 		return
 	}
@@ -665,7 +716,7 @@ func (u Users) VerifyPasswordlessAuth(w http.ResponseWriter, r *http.Request) {
 		// Create new user
 		user, err = u.createPasswordlessUser(ctx, authToken.Email)
 		if err != nil {
-			logger.Error("create passwordless user", "error", err)
+			logger.Errorw("create passwordless user", "error", err)
 			http.Error(w, "Failed to create account", http.StatusInternalServerError)
 			return
 		}
@@ -673,7 +724,7 @@ func (u Users) VerifyPasswordlessAuth(w http.ResponseWriter, r *http.Request) {
 		// Get existing user for signin
 		user, err = u.UserService.GetByEmail(authToken.Email)
 		if err != nil {
-			logger.Error("get user for passwordless signin", "error", err)
+			logger.Errorw("get user for passwordless signin", "error", err)
 			http.Error(w, "Account not found", http.StatusNotFound)
 			return
 		}
@@ -682,7 +733,7 @@ func (u Users) VerifyPasswordlessAuth(w http.ResponseWriter, r *http.Request) {
 	// Create session
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Error("create session for passwordless auth", "error", err)
+		logger.Errorw("create session for passwordless auth", "error", err)
 		http.Error(w, "Failed to create session", http.StatusInternalServerError)
 		return
 	}
@@ -696,7 +747,7 @@ func (u Users) sendPasswordlessSigninEmail(email string, logger *zap.SugaredLogg
 	// Create auth token for signin
 	authToken, err := u.AuthTokenService.Create(email, models.AuthTokenTypeSignin)
 	if err != nil {
-		logger.Error("create auth token for signin", "error", err)
+		logger.Errorw("create auth token for signin", "error", err)
 		return err
 	}
 
@@ -707,7 +758,7 @@ func (u Users) sendPasswordlessSigninEmail(email string, logger *zap.SugaredLogg
 	magicURL := fmt.Sprintf("%s/auth/passwordless/verify?", u.Domain) + values.Encode()
 	err = u.EmailService.PasswordlessSignin(email, magicURL)
 	if err != nil {
-		logger.Error("send passwordless signin email", "error", err)
+		logger.Errorw("send passwordless signin email", "error", err)
 		return err
 	}
 

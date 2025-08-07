@@ -24,6 +24,7 @@
         <option value="profile">PROFILE</option>
         <option value="tokens">API TOKENS</option>
         <option value="import-export">IMPORT / EXPORT</option>
+        <option value="data-management">DATA MANAGEMENT</option>
       </select>
     </div>
 
@@ -62,6 +63,17 @@
               hx-swap="innerHTML"
             >
               IMPORT / EXPORT
+            </button>
+          </li>
+          <li>
+            <button 
+              class="tab-button w-full text-left px-6 py-4 font-bold hover:bg-gray-100"
+              data-tab="data-management"
+              hx-get="/users/tab-content?tab=data-management"
+              hx-target="#tab-content"
+              hx-swap="innerHTML"
+            >
+              DATA MANAGEMENT
             </button>
           </li>
         </ul>
