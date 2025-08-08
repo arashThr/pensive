@@ -723,6 +723,12 @@
   .h-full {
     height: 100%;
   }
+  .max-h-4 {
+    max-height: calc(var(--spacing) * 4);
+  }
+  .max-h-5 {
+    max-height: calc(var(--spacing) * 5);
+  }
   .min-h-screen {
     min-height: 100vh;
   }
@@ -761,6 +767,9 @@
   }
   .w-32 {
     width: calc(var(--spacing) * 32);
+  }
+  .w-40 {
+    width: calc(var(--spacing) * 40);
   }
   .w-48 {
     width: calc(var(--spacing) * 48);
@@ -1129,6 +1138,9 @@
   }
   .text-right {
     text-align: right;
+  }
+  .align-middle {
+    vertical-align: middle;
   }
   .font-mono {
     font-family: var(--font-mono);

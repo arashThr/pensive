@@ -313,11 +313,11 @@ func run(cfg *config.AppConfig) error {
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", usersController.Create)
-			// Subscriptions
-			r.Get("/subscribe", usersController.Subscribe)
 			// Auth
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
+				// Subscriptions
+				r.Get("/subscribe", usersController.Subscribe)
 				r.Get("/me", usersController.CurrentUser)
 				r.Get("/tab-content", usersController.TabContent)
 				r.Post("/delete-token", usersController.DeleteToken)

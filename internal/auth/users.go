@@ -50,6 +50,13 @@ type Users struct {
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	if user != nil {
+		// User is already logged in, redirect to home
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
 	data := struct {
 		Title            string
 		TurnstileSiteKey string
@@ -121,6 +128,13 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	if user != nil {
+		// User is already logged in, redirect to home
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
 	var data struct {
 		Title            string
 		TurnstileSiteKey string
@@ -503,6 +517,13 @@ func (u Users) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 // Passwordless Authentication Methods
 func (u Users) PasswordlessNew(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	if user != nil {
+		// User is already logged in, redirect to home
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
 	data := struct {
 		Title            string
 		TurnstileSiteKey string
@@ -587,6 +608,13 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 }
 
 func (u Users) PasswordlessSignIn(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	if user != nil {
+		// User is already logged in, redirect to home
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
 	data := struct {
 		Title            string
 		TurnstileSiteKey string
