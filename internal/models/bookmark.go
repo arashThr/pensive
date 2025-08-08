@@ -114,7 +114,7 @@ func (model *BookmarkModel) CreateWithContent(
 	}
 
 	// Check rate limit before creating new bookmark
-	if err := model.checkRateLimit(user); err != nil {
+	if err := model.checkRateLimit(user); err != nil && source != Pocket {
 		return nil, err
 	}
 

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -90,7 +89,8 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 
 // HandleCallback processes the OAuth callback from GitHub
 func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	logger := loggercontext.Logger(r.Context())
+	ctx := r.Context()
+	logger := loggercontext.Logger(ctx)
 
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")
@@ -126,7 +126,7 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := g.OAuthConfig.Exchange(context.Background(), code)
+	token, err := g.OAuthConfig.Exchange(ctx, code)
 	if err != nil {
 		logger.Errorw("failed to exchange code for token", "error", err)
 		http.Error(w, "Failed to authenticate with GitHub", http.StatusInternalServerError)

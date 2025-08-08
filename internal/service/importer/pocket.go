@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
 	"github.com/arashthr/go-course/internal/types"
@@ -36,88 +37,92 @@ type PocketItem struct {
 
 // Start begins processing import jobs in a loop
 func (p *ImportProcessor) Start(ctx context.Context) {
+	logger := logging.Logger.With("flow", "importer")
+	ctx = loggercontext.WithLogger(ctx, logger)
 	ticker := time.NewTicker(5 * time.Second) // Poll every 5 seconds
 	defer ticker.Stop()
 
-	logging.Logger.Infow("import processor started")
+	logger.Infow("import processor started")
 
 	for {
 		select {
 		case <-ctx.Done():
-			logging.Logger.Infow("import processor stopping")
+			logger.Infow("import processor stopping")
 			return
 		case <-ticker.C:
 			jobs, err := p.ImportJobModel.GetPendingJobs(3) // Process up to 3 jobs concurrently
 			if err != nil {
-				logging.Logger.Errorw("get pending jobs", "error", err)
+				logger.Errorw("get pending jobs", "error", err)
 				continue
 			}
 
 			for _, job := range jobs {
-				go p.processJob(job) // Process concurrently
+				go p.processJob(ctx, job) // Process concurrently
 			}
 		}
 	}
 }
 
 // processJob processes a single import job
-func (p *ImportProcessor) processJob(jobID types.ImportJobId) {
+func (p *ImportProcessor) processJob(ctx context.Context, jobID types.ImportJobId) {
+	logger := loggercontext.Logger(ctx)
 	tx, err := p.ImportJobModel.Pool.Begin(context.Background())
 	if err != nil {
-		logging.Logger.Errorw("begin transaction", "error", err)
+		logger.Errorw("begin transaction", "error", err)
 		return
 	}
 	defer tx.Rollback(context.Background())
 
 	job, err := models.PickupJob(tx, jobID)
 	if err != nil {
-		logging.Logger.Errorw("get job by id", "error", err, "job_id", jobID)
+		logger.Errorw("get job by id", "error", err, "job_id", jobID)
 		return
 	}
 
 	if job == nil {
-		logging.Logger.Infow("no job to process", "job_id", jobID)
+		logger.Infow("no job to process", "job_id", jobID)
 		return
 	}
 
-	logging.Logger.Infow("processing import job", "source", job.Source, "file", job.FilePath, "job_id", job.ID)
+	logger.Infow("processing import job", "source", job.Source, "file", job.FilePath, "job_id", job.ID)
 
 	// Update status to processing
 	if err := models.UpdateStatus(tx, job.ID, models.ImportJobStatusProcessing, nil); err != nil {
-		logging.Logger.Errorw("update job status to processing", "error", err)
+		logger.Errorw("update job status to processing", "error", err)
 		return
 	}
 
 	// Process based on source
 	switch job.Source {
 	case "pocket":
-		err = p.processPocketImport(tx, job)
+		err = p.processPocketImport(ctx, tx, job)
 	default:
 		err = fmt.Errorf("unsupported import source: %s", job.Source)
 	}
 
 	// Update final status
 	if err != nil {
-		logging.Logger.Errorw("job processing failed", "error", err)
+		logger.Errorw("job processing failed", "error", err)
 		logging.Telegram.SendMessage(fmt.Sprintf("job id %v processing failed for user %v", jobID, job.UserID))
 		errorMsg := err.Error()
 		if updateErr := models.UpdateStatus(tx, job.ID, models.ImportJobStatusFailed, &errorMsg); updateErr != nil {
-			logging.Logger.Errorw("update job status to failed", "error", updateErr)
+			logger.Errorw("update job status to failed", "error", updateErr)
 		}
 	} else {
-		logging.Logger.Infow("job processing completed", "job_id", job.ID)
+		logger.Infow("job processing completed", "job_id", job.ID)
 		if updateErr := models.UpdateStatus(tx, job.ID, models.ImportJobStatusCompleted, nil); updateErr != nil {
-			logging.Logger.Errorw("update job status to completed", "error", updateErr)
+			logger.Errorw("update job status to completed", "error", updateErr)
 		}
 	}
 
 	if err := tx.Commit(context.Background()); err != nil {
-		logging.Logger.Errorw("commit transaction", "error", err)
+		logger.Errorw("commit transaction", "error", err)
 	}
 }
 
 // processPocketImport processes a Pocket ZIP export
-func (p *ImportProcessor) processPocketImport(tx pgx.Tx, job *models.ImportJob) error {
+func (p *ImportProcessor) processPocketImport(ctx context.Context, tx pgx.Tx, job *models.ImportJob) error {
+	logger := loggercontext.Logger(ctx)
 	// Open ZIP file
 	reader, err := zip.OpenReader(job.FilePath)
 	if err != nil {
@@ -139,20 +144,20 @@ func (p *ImportProcessor) processPocketImport(tx pgx.Tx, job *models.ImportJob) 
 	}
 
 	// Parse CSV file
-	items, err := p.parsePocketCSV(csvFile)
+	items, err := p.parsePocketCSV(ctx, csvFile)
 	if err != nil {
 		return fmt.Errorf("parse pocket CSV: %w", err)
 	}
-	logging.Logger.Infow("parsed pocket CSV", "items", len(items), "user_id", job.UserID)
+	logger.Infow("parsed pocket CSV", "items", len(items), "user_id", job.UserID)
 
 	// Update total items count
 	if err := models.UpdateProgress(tx, job.ID, len(items), 0); err != nil {
-		logging.Logger.Errorw("update total items count", "error", err)
+		logger.Errorw("update total items count", "error", err)
 	}
 
 	user, err := p.UserModel.Get(job.UserID)
 	if err != nil {
-		logging.Logger.Errorw("get user for import", "error", err, "user_id", job.UserID)
+		logger.Errorw("get user for import", "error", err, "user_id", job.UserID)
 		return fmt.Errorf("get user for import: %w", err)
 	}
 
@@ -161,26 +166,27 @@ func (p *ImportProcessor) processPocketImport(tx pgx.Tx, job *models.ImportJob) 
 	for _, item := range items {
 		// Validate URL
 		if !validations.IsURLValid(item.URL) {
-			logging.Logger.Debugw("skipping invalid URL", "url", item.URL)
+			logger.Debugw("skipping invalid URL", "url", item.URL)
 		} else if item.Status == "archive" {
 			// Do not apply the premium status to the import
-			_, err := p.BookmarkModel.Create(context.Background(), item.URL, user, models.Pocket)
+			_, err := p.BookmarkModel.Create(ctx, item.URL, user, models.Pocket)
 			if err != nil {
-				logging.Logger.Errorw("create bookmark failed", "error", err, "url", item.URL)
+				logger.Errorw("create bookmark failed", "error", err, "url", item.URL)
 			}
 		}
 		importedCount++
 		if err := models.UpdateProgress(tx, job.ID, len(items), importedCount); err != nil {
-			logging.Logger.Errorw("update progress", "error", err)
+			logger.Errorw("update progress", "error", err)
 		}
 	}
 
-	logging.Logger.Infow("import completed", "imported_count", importedCount, "total_items", len(items))
+	logger.Infow("import completed", "imported_count", importedCount, "total_items", len(items))
 	return nil
 }
 
 // parsePocketCSV parses the Pocket CSV file and returns items
-func (p *ImportProcessor) parsePocketCSV(csvFile *zip.File) ([]PocketItem, error) {
+func (p *ImportProcessor) parsePocketCSV(ctx context.Context, csvFile *zip.File) ([]PocketItem, error) {
+	logger := loggercontext.Logger(ctx)
 	rc, err := csvFile.Open()
 	if err != nil {
 		return nil, fmt.Errorf("open CSV file: %w", err)
@@ -230,7 +236,7 @@ func (p *ImportProcessor) parsePocketCSV(csvFile *zip.File) ([]PocketItem, error
 		timeAddedStr := strings.TrimSpace(record[timeAddedIndex])
 		timeAddedUnix, err := strconv.ParseInt(timeAddedStr, 10, 64)
 		if err != nil {
-			logging.Logger.Debugw("invalid time_added, using current time", "time_added", timeAddedStr)
+			logger.Debugw("invalid time_added, using current time", "time_added", timeAddedStr)
 			timeAddedUnix = time.Now().Unix()
 		}
 

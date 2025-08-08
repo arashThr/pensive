@@ -117,7 +117,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Send verification email asynchronously
 	go func() {
-		err := u.sendEmailVerification(email, logger)
+		err := u.sendEmailVerification(email)
 		if err != nil {
 			logger.Errorw("send email verification for new user", "error", err)
 		}
@@ -835,7 +835,7 @@ func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := u.sendEmailVerification(user.Email, logger)
+	err := u.sendEmailVerification(user.Email)
 	if err != nil {
 		logger.Errorw("resend verification email", "error", err)
 		// Return HTML for HTMX
@@ -858,7 +858,7 @@ func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	</div>`))
 }
 
-func (u Users) sendEmailVerification(email string, logger *zap.SugaredLogger) error {
+func (u Users) sendEmailVerification(email string) error {
 	authToken, err := u.AuthTokenService.Create(email, models.AuthTokenTypeEmailVerification)
 	if err != nil {
 		return fmt.Errorf("create auth token for email verification: %w", err)

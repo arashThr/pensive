@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -92,7 +91,8 @@ func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
-	logger := loggercontext.Logger(r.Context())
+	ctx := r.Context()
+	logger := loggercontext.Logger(ctx)
 
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")
@@ -128,7 +128,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := g.OAuthConfig.Exchange(context.Background(), code)
+	token, err := g.OAuthConfig.Exchange(ctx, code)
 	if err != nil {
 		logger.Errorw("failed to exchange code for token", "error", err)
 		http.Error(w, "Failed to authenticate with Google", http.StatusInternalServerError)

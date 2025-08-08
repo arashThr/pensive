@@ -116,7 +116,7 @@ func PickupJob(tx pgx.Tx, jobID types.ImportJobId) (*ImportJob, error) {
 	}
 
 	job, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[ImportJob])
-	if err != nil {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("collect rows for pickup job: %w", err)
 	}
 

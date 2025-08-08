@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/config"
 	"github.com/arashthr/go-course/internal/logging"
 	internalModels "github.com/arashthr/go-course/internal/models"
 	"github.com/go-telegram/bot"
@@ -25,7 +24,6 @@ var (
 	userAPITokens   = map[int64]string{}
 	telegramService *internalModels.TelegramService
 	TokenModel      *internalModels.TokenModel
-	configs         *config.AppConfig
 )
 
 type BookmarkResponse struct {

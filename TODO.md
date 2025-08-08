@@ -9,6 +9,7 @@
 - [ ] Getting non-existant bookmark: Something went wrong
 - [ ] Faster build
 - [ ] Add context for imports with import id
+- [ ] Remove context.Background
 - [ ] Send email for reset password takes time. Do we wait for sending email?
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
