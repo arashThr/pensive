@@ -36,6 +36,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"csrfField": func() (template.HTML, error) {
 			return "", fmt.Errorf("csrfField not implemented")
 		},
+		"csrfToken": func() (string, error) {
+			return "", fmt.Errorf("csrfToken not implemented")
+		},
 		"currentUser": func() (template.HTML, error) {
 			return "", fmt.Errorf("current user not implemented")
 		},
@@ -89,6 +92,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 		template.FuncMap{
 			"csrfField": func() template.HTML {
 				return csrf.TemplateField(r)
+			},
+			"csrfToken": func() string {
+				return csrf.Token(r)
 			},
 			"currentUser": func() *models.User {
 				return usercontext.User(r.Context())

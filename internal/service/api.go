@@ -166,8 +166,15 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 	logger.Infow("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
 	bookmark, err := a.BookmarkModel.CreateWithContent(ctx, data.Link, user, models.Api, &data)
 	if err != nil {
-		// Handle rate limit error specifically
-		if errors.Is(err, errors.ErrDailyLimitExceeded) {
+		// Handle rate limit errors specifically
+		if errors.Is(err, errors.ErrUnverifiedUserLimitExceeded) {
+			logger.Infow("unverified user hit bookmark limit", "user_id", user.ID)
+			writeErrorResponse(w, http.StatusForbidden, ErrorResponse{
+				Code:    "UNVERIFIED_USER_LIMIT_EXCEEDED",
+				Message: "Unverified account limit reached (10 bookmarks). Please verify your email to unlock unlimited bookmarks.",
+			})
+			return
+		} else if errors.Is(err, errors.ErrDailyLimitExceeded) {
 			logger.Infow("user hit daily limit", "user_id", user.ID)
 			writeErrorResponse(w, http.StatusTooManyRequests, ErrorResponse{
 				Code:    "DAILY_LIMIT_EXCEEDED",
@@ -318,27 +325,6 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	err = writeResponse(w, data)
-	if err != nil {
-		logger.Errorw("write response", "error", err)
-	}
-}
-
-// CurrentUserAPI handles the current user's information.
-// @Produce json
-// @Success 200 {object} struct{Email string; IsSubscribed bool; Tokens []models.ApiToken}
-// @Failure 401 {object} ErrorResponse "Unauthorized"
-// @Failure 500 {object} ErrorResponse "Something went wrong"
-// @Router /v1/api/user/me [get]
-func (a *Api) CurrentUserAPI(w http.ResponseWriter, r *http.Request) {
-	user := usercontext.User(r.Context())
-	logger := loggercontext.Logger(r.Context())
-	var data struct {
-		Email        string
-		IsSubscribed bool
-	}
-	data.Email = user.Email
-	data.IsSubscribed = user.IsSubscriptionPremium()
-	err := writeResponse(w, data)
 	if err != nil {
 		logger.Errorw("write response", "error", err)
 	}

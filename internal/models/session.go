@@ -69,11 +69,11 @@ func (ss *SessionService) User(token string) (*User, error) {
 	var user User
 
 	row := ss.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash, subscription_status
+		SELECT users.id, email, password_hash, subscription_status, email_verified, oauth_email
 		FROM users
 		JOIN sessions ON users.id = sessions.user_id
 		WHERE sessions.token_hash = $1 AND sessions.expires_at > NOW()`, tokenHash)
-	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.SubscriptionStatus)
+	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.SubscriptionStatus, &user.EmailVerified, &user.OAuthEmail)
 	if err != nil {
 		return nil, fmt.Errorf("session user: %w", err)
 	}

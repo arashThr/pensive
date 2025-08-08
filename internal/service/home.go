@@ -32,13 +32,25 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Title          string
-		IsUserPremium  bool
-		RecentBookmark types.RecentBookmarksType
+		Title            string
+		IsUserPremium    bool
+		EmailVerified    bool
+		RecentBookmark   types.RecentBookmarksType
+		RemainingBookmarks int
 	}{
 		Title:          "Home",
 		IsUserPremium:  user.IsSubscriptionPremium(),
+		EmailVerified:  user.EmailVerified,
 		RecentBookmark: recent,
+	}
+
+	// Get remaining bookmarks for unverified users
+	remaining, err := h.BookmarkModel.GetRemainingBookmarks(user)
+	if err != nil {
+		logger.Warnw("failed to get remaining bookmarks", "error", err)
+		data.RemainingBookmarks = 0
+	} else {
+		data.RemainingBookmarks = remaining
 	}
 
 	h.Templates.Home.Execute(w, r, data)

@@ -36,6 +36,7 @@ func (es *EmailService) Send(email Email) error {
 	msg := mail.NewMessage()
 	es.setFrom(msg, email)
 	msg.SetHeader("To", email.To)
+	msg.SetHeader("From", email.From)
 	msg.SetHeader("Subject", email.Subject)
 	switch {
 	case email.Plaintext != "" && email.HTML != "":
@@ -58,6 +59,7 @@ func (es *EmailService) Send(email Email) error {
 func (es *EmailService) ForgotPassword(to, resetURL string) error {
 	email := Email{
 		Subject:   "Reset your password",
+		From:      "notification@getpensive.com",
 		To:        to,
 		Plaintext: "To reset your password, please visit the following link: " + resetURL,
 		HTML:      `<p>To reset your password, please visit the following link: <a href="` + resetURL + `">` + resetURL + `</a></p>`,
@@ -115,6 +117,7 @@ The Pensive Team`, magicURL)
 
 	email := Email{
 		Subject:   "Complete your sign up",
+		From:      "notification@getpensive.com",
 		To:        to,
 		Plaintext: plaintext,
 		HTML:      html,
@@ -172,6 +175,7 @@ The Pensive Team`, magicURL)
 
 	email := Email{
 		Subject:   "Sign in to your account",
+		From:      "notification@getpensive.com",
 		To:        to,
 		Plaintext: plaintext,
 		HTML:      html,
@@ -179,6 +183,71 @@ The Pensive Team`, magicURL)
 	err := es.Send(email)
 	if err != nil {
 		return fmt.Errorf("passwordless signin email: %w", err)
+	}
+	return nil
+}
+
+func (es *EmailService) EmailVerification(to, verificationURL string) error {
+	plaintext := fmt.Sprintf(`Verify your email address
+
+Click the link below to verify your email address and unlock full access to your Pensive account:
+%s
+
+This link will expire in 15 minutes for security reasons.
+
+Until your email is verified, your account is limited to saving 10 bookmarks.
+
+If you didn't create this account, please ignore this email.
+
+---
+The Pensive Team`, verificationURL)
+
+	html := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify your email address</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #000; margin-bottom: 10px;">Verify your email address</h1>
+        <p style="color: #666; font-size: 16px;">Click the button below to verify your email and unlock full access</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="%s" style="background-color: #000; color: #fff; padding: 12px 30px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Verify Email</a>
+    </div>
+    
+    <div style="background-color: #f8f9fa; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
+        <p style="color: #856404; font-weight: bold; margin: 0 0 10px 0;">Account Limitations</p>
+        <p style="color: #856404; margin: 0; font-size: 14px;">Until your email is verified, your account is limited to saving 10 bookmarks.</p>
+    </div>
+    
+    <div style="border-top: 2px solid #eee; padding-top: 20px; margin-top: 30px;">
+        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+            <strong>This link will expire in 15 minutes</strong> for security reasons.
+        </p>
+        <p style="color: #666; font-size: 14px;">
+            If you didn't create this account, please ignore this email.
+        </p>
+        <p style="color: #666; font-size: 14px; margin-top: 20px;">
+            —<br>The Pensive Team
+        </p>
+    </div>
+</body>
+</html>`, verificationURL)
+
+	email := Email{
+		Subject:   "Verify your email address",
+		From:      "notification@getpensive.com",
+		To:        to,
+		Plaintext: plaintext,
+		HTML:      html,
+	}
+	err := es.Send(email)
+	if err != nil {
+		return fmt.Errorf("email verification email: %w", err)
 	}
 	return nil
 }

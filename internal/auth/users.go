@@ -24,11 +24,7 @@ import (
 type Users struct {
 	Domain          string
 	TurnstileConfig config.TurnstileConfig
-	AuthConfig      struct {
-		AllowPasswordAuth     bool
-		AllowPasswordlessAuth bool
-	}
-	Templates struct {
+	Templates       struct {
 		New                    web.Template
 		SignIn                 web.Template
 		ForgotPassword         web.Template
@@ -54,31 +50,17 @@ type Users struct {
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
-	// In production, redirect to passwordless signup if password auth is disabled
-	if !u.AuthConfig.AllowPasswordAuth && u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/auth/passwordless/signup", http.StatusFound)
-		return
-	}
-
 	data := struct {
-		Title                 string
-		TurnstileSiteKey      string
-		AllowPasswordlessAuth bool
+		Title            string
+		TurnstileSiteKey string
 	}{
-		Title:                 "Sign Up",
-		TurnstileSiteKey:      u.TurnstileConfig.SiteKey,
-		AllowPasswordlessAuth: u.AuthConfig.AllowPasswordlessAuth,
+		Title:            "Sign Up",
+		TurnstileSiteKey: u.TurnstileConfig.SiteKey,
 	}
 	u.Templates.New.Execute(w, r, data)
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	// Redirect if password auth is disabled
-	if !u.AuthConfig.AllowPasswordAuth {
-		http.Redirect(w, r, "/auth/passwordless/signup", http.StatusFound)
-		return
-	}
-
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -114,9 +96,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// For password users, create a session but also send verification email
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Errorw("create user failed", "error", err)
+		logger.Errorw("create user session failed", "error", err)
 		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: "Creating session failed",
 			IsError: true,
@@ -124,48 +107,41 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
-	logger.Infow("create user success")
+
+	// Send verification email asynchronously
+	go func() {
+		err := u.sendEmailVerification(email, logger)
+		if err != nil {
+			logger.Errorw("send email verification for new user", "error", err)
+		}
+	}()
+
+	logger.Infow("create user success, verification email sent", "user_id", user.ID)
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
 func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
-	// In production, redirect to passwordless signin if password auth is disabled
-	if !u.AuthConfig.AllowPasswordAuth && u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/auth/passwordless/signin", http.StatusFound)
-		return
-	}
-
 	var data struct {
-		Title                 string
-		TurnstileSiteKey      string
-		AllowPasswordlessAuth bool
+		Title            string
+		TurnstileSiteKey string
 	}
 	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
-	data.AllowPasswordlessAuth = u.AuthConfig.AllowPasswordlessAuth
 	u.Templates.SignIn.Execute(w, r, data)
 }
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
-	// Redirect if password auth is disabled
-	if !u.AuthConfig.AllowPasswordAuth {
-		http.Redirect(w, r, "/auth/passwordless/signin", http.StatusFound)
-		return
-	}
-
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
 
 	var data struct {
-		Title                 string
-		TurnstileSiteKey      string
-		AllowPasswordlessAuth bool
+		Title            string
+		TurnstileSiteKey string
 	}
 	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
-	data.AllowPasswordlessAuth = u.AuthConfig.AllowPasswordlessAuth
 
 	err := validateTurnstileToken(token, u.TurnstileConfig.SecretKey, r.RemoteAddr)
 	if err != nil {
@@ -527,11 +503,6 @@ func (u Users) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 
 // Passwordless Authentication Methods
 func (u Users) PasswordlessNew(w http.ResponseWriter, r *http.Request) {
-	if !u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/signup", http.StatusFound)
-		return
-	}
-
 	data := struct {
 		Title            string
 		TurnstileSiteKey string
@@ -543,11 +514,6 @@ func (u Users) PasswordlessNew(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request) {
-	if !u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/signup", http.StatusFound)
-		return
-	}
-
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
@@ -621,11 +587,6 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 }
 
 func (u Users) PasswordlessSignIn(w http.ResponseWriter, r *http.Request) {
-	if !u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
-
 	data := struct {
 		Title            string
 		TurnstileSiteKey string
@@ -637,11 +598,6 @@ func (u Users) PasswordlessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request) {
-	if !u.AuthConfig.AllowPasswordlessAuth {
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
-
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
@@ -768,13 +724,16 @@ func (u Users) sendPasswordlessSigninEmail(email string, logger *zap.SugaredLogg
 }
 
 func (u Users) createPasswordlessUser(ctx gocontext.Context, email string) (*models.User, error) {
-	// Create user without password (OAuth-style)
+	// Create user without password, marking email as verified since they used magic link
 	row := u.UserService.Pool.QueryRow(ctx, `
-		INSERT INTO users (email) VALUES ($1) RETURNING id, subscription_status, stripe_invoice_id
+		INSERT INTO users (email, email_verified, email_verified_at) 
+		VALUES ($1, true, NOW()) 
+		RETURNING id, subscription_status, stripe_invoice_id
 	`, email)
 
 	user := models.User{
-		Email: email,
+		Email:         email,
+		EmailVerified: true,
 	}
 
 	err := row.Scan(&user.ID, &user.SubscriptionStatus, &user.StripeInvoiceId)
@@ -783,6 +742,111 @@ func (u Users) createPasswordlessUser(ctx gocontext.Context, email string) (*mod
 	}
 
 	return &user, nil
+}
+
+func (u Users) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	logger := loggercontext.Logger(ctx)
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		logger.Errorw("missing token in email verification")
+		http.Error(w, "Invalid verification link", http.StatusBadRequest)
+		return
+	}
+
+	authToken, err := u.AuthTokenService.Consume(token)
+	if err != nil {
+		logger.Errorw("consume auth token for email verification", "error", err)
+		http.Error(w, "Invalid or expired verification link", http.StatusBadRequest)
+		return
+	}
+
+	if authToken.TokenType != models.AuthTokenTypeEmailVerification {
+		logger.Errorw("invalid token type for email verification", "type", authToken.TokenType)
+		http.Error(w, "Invalid verification link", http.StatusBadRequest)
+		return
+	}
+
+	user, err := u.UserService.GetByEmail(authToken.Email)
+	if err != nil {
+		logger.Errorw("get user for email verification", "error", err)
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	if user.EmailVerified {
+		logger.Infow("email already verified", "user_id", user.ID, "email", user.Email)
+		http.Redirect(w, r, "/home", http.StatusFound)
+		return
+	}
+
+	err = u.UserService.MarkEmailVerified(user.ID)
+	if err != nil {
+		logger.Errorw("mark email verified", "error", err)
+		http.Error(w, "Failed to verify email", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Infow("email verification success", "user_id", user.ID, "email", user.Email)
+	http.Redirect(w, r, "/home", http.StatusFound)
+}
+
+func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	logger := loggercontext.Logger(ctx)
+	user := usercontext.User(ctx)
+
+	if user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if user.EmailVerified {
+		logger.Infow("email already verified", "user_id", user.ID)
+		http.Error(w, "Email already verified", http.StatusBadRequest)
+		return
+	}
+
+	err := u.sendEmailVerification(user.Email, logger)
+	if err != nil {
+		logger.Errorw("resend verification email", "error", err)
+		// Return HTML for HTMX
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`<div class="p-6 bg-white border-2 border-black">
+			<p class="font-bold">FAILED TO SEND EMAIL</p>
+			<p class="text-sm">Please try again or contact support.</p>
+		</div>`))
+		return
+	}
+
+	logger.Infow("verification email resent", "user_id", user.ID)
+	// Return success HTML for HTMX
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`<div class="p-6 bg-white border-2 border-black">
+		<p class="font-bold">VERIFICATION EMAIL SENT</p>
+		<p class="text-sm">Check your inbox and click the verification link.</p>
+	</div>`))
+}
+
+func (u Users) sendEmailVerification(email string, logger *zap.SugaredLogger) error {
+	authToken, err := u.AuthTokenService.Create(email, models.AuthTokenTypeEmailVerification)
+	if err != nil {
+		return fmt.Errorf("create auth token for email verification: %w", err)
+	}
+
+	values := url.Values{
+		"token": {authToken.Token},
+	}
+	verificationURL := fmt.Sprintf("%s/auth/verify-email?", u.Domain) + values.Encode()
+
+	err = u.EmailService.EmailVerification(email, verificationURL)
+	if err != nil {
+		return fmt.Errorf("send email verification: %w", err)
+	}
+
+	return nil
 }
 
 func validateTurnstileToken(token string, secretKey string, remoteIP string) error {

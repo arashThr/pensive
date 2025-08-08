@@ -69,11 +69,7 @@
       </div>
       <div class="text-sm flex justify-between">
         <a class="underline" href="/signup">Need an account?</a>
-        {{if .AllowPasswordlessAuth}}
         <a class="underline" href="/auth/passwordless/signin">Use magic link instead?</a>
-        {{else}}
-        <a class="underline" href="/forgot-pw">Forgot password?</a>
-        {{end}}
       </div>
     </form>
   </div>

@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Go web application for bookmarking and content management, featuring:
 - Web scraping and content extraction using Mozilla Readability
 - AI-powered content summarization with Google Gemini
-- Multiple authentication methods (GitHub, Google, Telegram OAuth)
+- Multiple authentication methods (GitHub, Google, Telegram OAuth, password-based)
+- Email verification system for password signups with usage limitations
 - Browser extensions (Chrome/Firefox) for easy bookmark saving
 - Telegram bot integration
 - Stripe payment processing for premium features
@@ -59,7 +60,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Framework**: Chi router for HTTP routing
 - **Database**: PostgreSQL with pgx driver
 - **Templating**: Go templates with HTMX for dynamic content
-- **Auth**: Multiple OAuth providers + session-based auth
+- **Auth**: Multiple OAuth providers + session-based auth + password-based auth with email verification
 - **AI**: Google Gemini for content summarization
 - **Payments**: Stripe for subscription management
 - **Logging**: Zap for structured logging
@@ -73,11 +74,18 @@ This is a Go web application for bookmarking and content management, featuring:
 
 ### Database Schema
 - Users, sessions, and password reset tables
+- Email verification system with auth tokens
 - API tokens for extension/bot authentication
 - Library/bookmarks with full-text search (tsvector)
 - Stripe subscription management tables
 - Import job tracking for Pocket imports
 - Telegram authentication tables
+
+### User Account System
+- **OAuth users** (GitHub, Google, Telegram): Automatically verified, full access
+- **Passwordless users**: Magic link authentication, automatically verified, full access  
+- **Password users**: Email verification required, limited to 100 total bookmarks until verified
+- **Verified users**: Daily limits (10 free, 100 premium)
 
 ### Deployment
 - Docker multi-stage build (Tailwind → Go build → Alpine runtime)

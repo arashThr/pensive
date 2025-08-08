@@ -61,7 +61,9 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	bookmark, err := b.BookmarkModel.Create(ctx, data.Link, user, models.WebSource)
 	if err != nil {
 		var message string
-		if errors.Is(err, errors.ErrDailyLimitExceeded) {
+		if errors.Is(err, errors.ErrUnverifiedUserLimitExceeded) {
+			message = "Unverified account limit reached (10 bookmarks). Please verify your email to unlock unlimited bookmarks."
+		} else if errors.Is(err, errors.ErrDailyLimitExceeded) {
 			message = "Daily bookmark limit exceeded. Upgrade to premium for 100 bookmarks/day."
 		} else {
 			message = err.Error()

@@ -24,13 +24,19 @@ Premium features will be extended in the future, including the option to support
 
 ## Authentication
 The application supports multiple authentication methods:
-- **OAuth**: GitHub and Google OAuth for quick signup/signin
-- **Passwordless Authentication**: Magic link authentication via email (production default)
-- **Traditional**: Email/password authentication (local development default)
-- **Environment-based**: Production uses passwordless by default, local development allows both methods
+- **OAuth**: GitHub and Google OAuth for quick signup/signin (automatically verified)
+- **Passwordless Authentication**: Magic link authentication via email (automatically verified)
+- **Traditional**: Email/password authentication with email verification required
 - **API Token Authentication**: For browser extensions and telegram bot integration
 
 Authentication is handled with secure session management, CSRF protection, and Cloudflare Turnstile for bot protection.
+
+### User Account Types & Limitations
+- **OAuth users**: Automatically verified, full access to daily limits
+- **Passwordless users**: Automatically verified, full access to daily limits  
+- **Password users**: Email verification required, limited to 100 total bookmarks until verified
+- **Verified users**: Daily bookmark limits (10 free, 100 premium)
+- **Unverified users**: Total lifetime limit of 100 bookmarks to encourage verification
 
 For UI/UX, I'm going with a clean, simple, and intuitive design. The aesthetics should feel calm, cozy, and personal, with minimal interactions needed. The UI uses a black and white theme with modern flat design. While I don't have a specific inspiration yet, services like Pocket or Instapaper are somewhat similar, but I want something that feels more personal, and does not feel dead (Google products are a good example of dead feeling design).
 Since the focus of the app is on text, I want black and white to be the main essence of the pages.

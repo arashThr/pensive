@@ -120,8 +120,6 @@ func run(cfg *config.AppConfig) error {
 		EmailService:         emailService,
 		TokenModel:           tokenModel,
 	}
-	usersController.AuthConfig.AllowPasswordAuth = cfg.Auth.AllowPasswordAuth
-	usersController.AuthConfig.AllowPasswordlessAuth = cfg.Auth.AllowPasswordlessAuth
 
 	usersController.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersController.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
@@ -162,6 +160,13 @@ func run(cfg *config.AppConfig) error {
 	importerController.Templates.PocketImport = views.Must(views.ParseTemplate("user/pocket-import.gohtml", "tailwind.gohtml"))
 	importerController.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
 	importerController.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
+
+	userController := service.User{
+		BookmarkModel:    bookmarksModel,
+		AuthTokenService: authTokenService,
+		EmailService:     emailService,
+		Domain:           cfg.Domain,
+	}
 
 	apiController := service.Api{
 		BookmarkModel: bookmarksModel,
@@ -220,7 +225,10 @@ func run(cfg *config.AppConfig) error {
 			r.Route("/tokens", func(r chi.Router) {
 				r.Delete("/current", tokenController.DeleteToken)
 			})
-			r.Get("/user", apiController.CurrentUserAPI)
+			r.Route("/user", func(r chi.Router) {
+				r.Get("/", userController.CurrentUserAPI)
+				r.Post("/request-verification", userController.RequestVerificationEmailAPI)
+			})
 			r.Route("/bookmarks", func(r chi.Router) {
 				r.Get("/", apiController.IndexAPI)
 				r.Post("/", apiController.CreateAPI)
@@ -281,13 +289,22 @@ func run(cfg *config.AppConfig) error {
 		r.Get("/reset-password", usersController.ResetPassword)
 		r.Post("/reset-password", usersController.ProcessResetPassword)
 
-		// Passwordless authentication routes
-		r.Route("/auth/passwordless", func(r chi.Router) {
-			r.Get("/signup", usersController.PasswordlessNew)
-			r.Post("/signup", usersController.ProcessPasswordlessSignup)
-			r.Get("/signin", usersController.PasswordlessSignIn)
-			r.Post("/signin", usersController.ProcessPasswordlessSignIn)
-			r.Get("/verify", usersController.VerifyPasswordlessAuth)
+		// Email verification routes
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/verify-email", usersController.VerifyEmail)
+
+			r.Route("/resend-verification", func(r chi.Router) {
+				r.Use(umw.RequireUser)
+				r.Post("/", usersController.ResendVerificationEmail)
+			})
+
+			r.Route("/passwordless", func(r chi.Router) {
+				r.Get("/signup", usersController.PasswordlessNew)
+				r.Post("/signup", usersController.ProcessPasswordlessSignup)
+				r.Get("/signin", usersController.PasswordlessSignIn)
+				r.Post("/signin", usersController.ProcessPasswordlessSignIn)
+				r.Get("/verify", usersController.VerifyPasswordlessAuth)
+			})
 		})
 		r.Route("/home", func(r chi.Router) {
 			r.Use(umw.RequireUser)

@@ -28,8 +28,9 @@ type BookmarkSource = int
 const PageSize = 10
 
 const (
-	FreeUserDailyLimit    = 10
-	PremiumUserDailyLimit = 100
+	FreeUserDailyLimit       = 10
+	PremiumUserDailyLimit    = 100
+	UnverifiedUserTotalLimit = 100
 )
 
 const (
@@ -780,8 +781,27 @@ func getPage(link string) (*http.Response, error) {
 	return resp, nil
 }
 
-// checkRateLimit checks if a user has exceeded their daily bookmark limit
+// checkRateLimit checks if a user has exceeded their bookmark limits
 func (model *BookmarkModel) checkRateLimit(user *User) error {
+	// For unverified users, check total bookmark count (not daily)
+	if !user.EmailVerified {
+		row := model.Pool.QueryRow(context.Background(), `
+			SELECT COUNT(*) FROM library_items WHERE user_id = $1
+		`, user.ID)
+
+		var totalCount int
+		if err := row.Scan(&totalCount); err != nil {
+			return fmt.Errorf("check total bookmark count for unverified user: %w", err)
+		}
+
+		if totalCount >= UnverifiedUserTotalLimit {
+			return errors.ErrUnverifiedUserLimitExceeded
+		}
+
+		return nil
+	}
+
+	// For verified users, check daily limit
 	today := time.Now().Truncate(24 * time.Hour)
 	tomorrow := today.Add(24 * time.Hour)
 
@@ -792,7 +812,7 @@ func (model *BookmarkModel) checkRateLimit(user *User) error {
 
 	var count int
 	if err := row.Scan(&count); err != nil {
-		return fmt.Errorf("check rate limit: %w", err)
+		return fmt.Errorf("check daily rate limit: %w", err)
 	}
 
 	var limit int
@@ -809,8 +829,24 @@ func (model *BookmarkModel) checkRateLimit(user *User) error {
 	return nil
 }
 
-// GetRemainingBookmarks returns the number of bookmarks a user can still create today
+// GetRemainingBookmarks returns the number of bookmarks a user can still create
 func (model *BookmarkModel) GetRemainingBookmarks(user *User) (int, error) {
+	// For unverified users, return total remaining bookmarks (lifetime limit)
+	if !user.EmailVerified {
+		row := model.Pool.QueryRow(context.Background(), `
+			SELECT COUNT(*) FROM library_items WHERE user_id = $1
+		`, user.ID)
+
+		var totalCount int
+		if err := row.Scan(&totalCount); err != nil {
+			return 0, fmt.Errorf("get total bookmarks for unverified user: %w", err)
+		}
+
+		remaining := max(UnverifiedUserTotalLimit-totalCount, 0)
+		return remaining, nil
+	}
+
+	// For verified users, return daily remaining bookmarks
 	today := time.Now().Truncate(24 * time.Hour)
 	tomorrow := today.Add(24 * time.Hour)
 

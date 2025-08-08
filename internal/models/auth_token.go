@@ -19,13 +19,14 @@ const (
 type AuthTokenType string
 
 const (
-	AuthTokenTypeSignup AuthTokenType = "signup"
-	AuthTokenTypeSignin AuthTokenType = "signin"
+	AuthTokenTypeSignup            AuthTokenType = "signup"
+	AuthTokenTypeSignin            AuthTokenType = "signin"
+	AuthTokenTypeEmailVerification AuthTokenType = "email_verification"
 )
 
 type AuthToken struct {
-	ID        int
-	Email     string
+	ID    int
+	Email string
 	// Token is only set when an AuthToken is being created.
 	Token     string
 	TokenHash string
@@ -68,7 +69,7 @@ func (service *AuthTokenService) Create(email string, tokenType AuthTokenType) (
 		`INSERT INTO auth_tokens (email, token_hash, token_type, expires_at)
 		VALUES($1, $2, $3, $4)
 		RETURNING id, created_at;`, authToken.Email, authToken.TokenHash, authToken.TokenType, authToken.ExpiresAt)
-	
+
 	err = row.Scan(&authToken.ID, &authToken.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("inserting auth token in db: %w", err)
@@ -85,7 +86,7 @@ func (service *AuthTokenService) Consume(token string) (*AuthToken, error) {
 		`SELECT id, email, token_type, expires_at, created_at
 		FROM auth_tokens
 		WHERE token_hash = $1;`, tokenHash)
-	
+
 	err := row.Scan(&authToken.ID, &authToken.Email, &authToken.TokenType, &authToken.ExpiresAt, &authToken.CreatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("fetch auth token: %w", err)

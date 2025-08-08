@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/arashthr/go-course/internal/errors"
 	"github.com/arashthr/go-course/internal/logging"
@@ -31,6 +32,8 @@ type User struct {
 	OAuthProvider      *string
 	OAuthID            *string
 	OAuthEmail         *string
+	EmailVerified      bool
+	EmailVerifiedAt    *time.Time
 }
 
 type UserModel struct {
@@ -185,16 +188,18 @@ func (us *UserModel) CreateOAuthUser(provider, oauthID, email, oauthEmail string
 	logging.Logger.Infow("creating oauth user", "provider", provider, "oauth_id", oauthID)
 
 	row := us.Pool.QueryRow(context.Background(), `
-		INSERT INTO users (email, oauth_provider, oauth_id, oauth_email) 
-		VALUES ($1, $2, $3, $4) 
+		INSERT INTO users (email, oauth_provider, oauth_id, oauth_email, email_verified, email_verified_at) 
+		VALUES ($1, $2, $3, $4, true, NOW()) 
 		RETURNING id, subscription_status, stripe_invoice_id
 	`, email, provider, oauthID, oauthEmail)
 
 	user := User{
-		Email:         email,
-		OAuthProvider: &provider,
-		OAuthID:       &oauthID,
-		OAuthEmail:    &oauthEmail,
+		Email:           email,
+		OAuthProvider:   &provider,
+		OAuthID:         &oauthID,
+		OAuthEmail:      &oauthEmail,
+		EmailVerified:   true,
+		EmailVerifiedAt: &time.Time{},
 	}
 
 	err := row.Scan(&user.ID, &user.SubscriptionStatus, &user.StripeInvoiceId)
@@ -242,4 +247,14 @@ func (us *UserModel) GetByEmail(email string) (*User, error) {
 		return nil, fmt.Errorf("get user by email: %w", err)
 	}
 	return &user, nil
+}
+
+func (us *UserModel) MarkEmailVerified(userID types.UserId) error {
+	_, err := us.Pool.Exec(context.Background(), `
+		UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE id = $1
+	`, userID)
+	if err != nil {
+		return fmt.Errorf("mark email verified: %w", err)
+	}
+	return nil
 }
