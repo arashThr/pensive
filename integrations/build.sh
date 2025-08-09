@@ -29,3 +29,5 @@ if [ "$1" == "firefox" ]; then
     cd ../..
     rm -rf dist/firefox
 fi
+
+echo "Version $version for $1 is built"

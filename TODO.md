@@ -81,6 +81,7 @@
 - [ ] Tags
     - [ ] Read tags from Pocket
 - [ ] Full text search with part words
+- [ ] Telegram first message should help you sign up
 - [x] Short key for calling the extension
     - Let's do it when people ask for it
 - [x] Google and GitHub auth
