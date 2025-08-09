@@ -50,6 +50,10 @@
               VIEW MARKDOWN
             </a>
             <hr class="my-1 border-black">
+            <button id="reportBtn" class="w-full text-left px-4 py-2 text-sm font-bold hover:bg-gray-100">
+              REPORT ISSUE
+            </button>
+            <hr class="my-1 border-black">
             <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"
                   onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
               {{csrfField}}
@@ -151,6 +155,33 @@
     <a href="/bookmarks" class="text-sm font-bold underline">
       ALL BOOKMARKS
     </a>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div id="reportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white border-2 border-black p-6 max-w-md mx-4">
+    <h3 class="text-lg font-bold mb-4">REPORT CONTENT ISSUE</h3>
+    <p class="mb-4 text-sm leading-relaxed">
+      If the content wasn't captured properly for this page, you can report it to help us improve our service. 
+      We'll investigate why this link wasn't processed correctly and work to make it better.
+    </p>
+    <div id="reportStatus" class="mb-4 hidden">
+      <!-- Status messages will appear here -->
+    </div>
+    <div class="flex gap-3 justify-end">
+      <button id="cancelReportBtn" class="px-4 py-2 text-sm font-bold border border-black hover:bg-gray-100">
+        CANCEL
+      </button>
+      <button id="submitReportBtn" 
+              class="px-4 py-2 text-sm font-bold bg-black text-white hover:bg-gray-800"
+              hx-post="/bookmarks/{{.Id}}/report"
+              hx-target="#reportStatus"
+              hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
+              hx-on:htmx:after-request="handleReportResponse(event)">
+        SEND REPORT
+      </button>
+    </div>
   </div>
 </div>
 
@@ -282,6 +313,47 @@
 
     menu.addEventListener('click', function (e) {
       e.stopPropagation();
+    });
+
+    // Report functionality
+    const reportBtn = document.getElementById('reportBtn');
+    const reportModal = document.getElementById('reportModal');
+    const cancelReportBtn = document.getElementById('cancelReportBtn');
+    const submitReportBtn = document.getElementById('submitReportBtn');
+    const reportStatus = document.getElementById('reportStatus');
+
+    reportBtn.addEventListener('click', function() {
+      menu.classList.add('hidden');
+      reportModal.classList.remove('hidden');
+    });
+
+    cancelReportBtn.addEventListener('click', function() {
+      reportModal.classList.add('hidden');
+      reportStatus.classList.add('hidden');
+      reportStatus.innerHTML = '';
+    });
+
+    window.handleReportResponse = function(event) {
+      reportStatus.classList.remove('hidden');
+      if (event.detail.xhr.status === 200) {
+        reportStatus.innerHTML = '<p class="text-green-600 text-sm font-bold">✓ Report sent successfully! Thank you for helping us improve.</p>';
+        setTimeout(function() {
+          reportModal.classList.add('hidden');
+          reportStatus.classList.add('hidden');
+          reportStatus.innerHTML = '';
+        }, 2000);
+      } else {
+        reportStatus.innerHTML = '<p class="text-red-600 text-sm font-bold">⚠ Failed to send report. Please try again.</p>';
+      }
+    };
+
+    // Close modal when clicking outside
+    reportModal.addEventListener('click', function(e) {
+      if (e.target === reportModal) {
+        reportModal.classList.add('hidden');
+        reportStatus.classList.add('hidden');
+        reportStatus.innerHTML = '';
+      }
     });
 
     // Markdown toggle functionality

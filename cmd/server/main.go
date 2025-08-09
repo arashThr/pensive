@@ -372,6 +372,7 @@ func run(cfg *config.AppConfig) error {
 				r.Get("/{id}/full", bookmarksController.GetFullBookmark)
 				r.Get("/{id}/markdown", bookmarksController.GetBookmarkMarkdown)
 				r.Get("/{id}/markdown-content", bookmarksController.GetBookmarkMarkdownHTMX)
+				r.Post("/{id}/report", bookmarksController.ReportBookmark)
 			})
 		})
 

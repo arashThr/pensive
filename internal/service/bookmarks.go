@@ -337,6 +337,31 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 	w.Write([]byte(markdownContent))
 }
 
+// ReportBookmark handles POST /bookmarks/{id}/report and sends a report about content capture issues
+func (b Bookmarks) ReportBookmark(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
+	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
+	if err != nil {
+		return
+	}
+
+	user := usercontext.User(r.Context())
+	
+	// Send report via Telegram
+	message := fmt.Sprintf("🚨 Content Capture Issue Report\n\nURL: %s\nTitle: %s\nUser: %s\nBookmark ID: %s", 
+		bookmark.Link, bookmark.Title, user.Email, bookmark.Id)
+	
+	err = logging.Telegram.SendMessage(message)
+	if err != nil {
+		logger.Errorw("failed to send report via telegram", "error", err, "bookmark_id", bookmark.Id)
+		http.Error(w, "Failed to send report", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Infow("bookmark reported", "bookmark_id", bookmark.Id, "user_id", user.ID)
+	w.WriteHeader(http.StatusOK)
+}
+
 func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookmarkOpts) (*models.Bookmark, error) {
 	logger := loggercontext.Logger(r.Context())
 	id := chi.URLParam(r, "id")
