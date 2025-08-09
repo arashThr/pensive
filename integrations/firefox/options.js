@@ -10,18 +10,11 @@ const devMode = permissions.some(permission =>
 );
 
 document.addEventListener('DOMContentLoaded', async function () {
-  // Check for consent first
-  const consentResult = await browserAPI.storage.local.get(['consentGiven']);
-  if (!consentResult.consentGiven) {
-    window.location.href = 'consent.html';
-    return;
-  }
 
   const connectButton = document.getElementById('connect-button');
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
-  const enhancedCaptureRadio = document.getElementById('enhancedCapture');
-  const serverSideOnlyRadio = document.getElementById('serverSideOnly');
+  const fullPageCaptureToggle = document.getElementById('fullPageCaptureToggle');
 
   let grantOrigins = ['https://getpensive.com/*'];
   if (devMode) {
@@ -41,29 +34,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     validateToken(result.apiToken);
   }
 
-  // Set default values for content capture settings
-  const fullPageCapture = result.fullPageCapture ? result.fullPageCapture : false;
+  // Set default values for content capture settings (default to true for full page capture)
+  const fullPageCapture = result.fullPageCapture !== undefined ? result.fullPageCapture : true;
 
-  // Set radio button states based on stored preferences
-  if (fullPageCapture) {
-    enhancedCaptureRadio.checked = true;
-    serverSideOnlyRadio.checked = false;
-  } else {
-    serverSideOnlyRadio.checked = true;
-    enhancedCaptureRadio.checked = false;
-  }
+  // Set toggle state based on stored preferences
+  fullPageCaptureToggle.checked = fullPageCapture;
 
-  // Auto-save content processing settings when radio buttons change
-  enhancedCaptureRadio.addEventListener('change', async () => {
-    if (enhancedCaptureRadio.checked) {
-      await browserAPI.storage.local.set({ fullPageCapture: true });
-    }
-  });
-
-  serverSideOnlyRadio.addEventListener('change', async () => {
-    if (serverSideOnlyRadio.checked) {
-      await browserAPI.storage.local.set({ fullPageCapture: false });
-    }
+  // Auto-save content processing settings when toggle changes
+  fullPageCaptureToggle.addEventListener('change', async () => {
+    await browserAPI.storage.local.set({ fullPageCapture: fullPageCaptureToggle.checked });
   });
 
   // Add sign out button functionality

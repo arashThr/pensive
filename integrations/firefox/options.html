@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>Pensive Extension Settings</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       * {
         margin: 0;
@@ -12,7 +12,7 @@
       }
 
       body {
-        font-family: 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Sans', sans-serif;
         background-color: #ffffff;
         color: #000000;
         line-height: 1.5;
@@ -94,7 +94,7 @@
         cursor: pointer;
         font-size: 0.875rem;
         text-transform: uppercase;
-        font-family: 'IBM Plex Mono', monospace;
+        font-family: 'IBM Plex Sans', sans-serif;
       }
 
       .btn-primary {
@@ -234,80 +234,38 @@
         text-transform: uppercase;
       }
 
-      /* Radio Options */
-      .radio-group {
+      /* Toggle Options */
+      .toggle-section {
         margin-bottom: 24px;
       }
 
-      .radio-option {
+      .toggle-option {
         display: flex;
         align-items: flex-start;
         gap: 12px;
         padding: 16px;
         border: 2px solid #000000;
-        margin-bottom: 12px;
-        cursor: pointer;
         background: #ffffff;
       }
 
-      .radio-option:hover {
+      .toggle-option:hover {
         background: #f3f4f6;
       }
 
-      .radio-option:last-child {
-        margin-bottom: 0;
-      }
-
-      .radio-label {
+      .toggle-label {
         display: flex;
         align-items: flex-start;
-        gap: 12px;
+        justify-content: space-between;
         cursor: pointer;
         width: 100%;
+        gap: 20px;
       }
 
-      .radio-input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-        height: 0;
-        width: 0;
-      }
-
-      .radio-checkmark {
-        width: 18px;
-        height: 18px;
-        background: white;
-        border: 2px solid #000000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-top: 2px;
-      }
-
-      .radio-input:checked ~ .radio-checkmark {
-        border-color: #000000;
-        background: #000000;
-      }
-
-      .radio-checkmark::after {
-        content: "";
-        width: 8px;
-        height: 8px;
-        background: #ffffff;
-        display: none;
-      }
-
-      .radio-input:checked ~ .radio-checkmark::after {
-        display: block;
-      }
-
-      .radio-content {
+      .toggle-content {
         flex: 1;
       }
 
-      .radio-title {
+      .toggle-title {
         font-weight: 700;
         color: #000000;
         margin-bottom: 4px;
@@ -316,10 +274,62 @@
         gap: 8px;
       }
 
-      .radio-desc {
+      .toggle-desc {
         font-size: 0.875rem;
         color: #000000;
         line-height: 1.4;
+      }
+
+      .toggle-switch {
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+
+      .toggle-input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+
+      .toggle-slider {
+        position: relative;
+        display: inline-block;
+        width: 54px;
+        height: 28px;
+        background: #f3f4f6;
+        border: 2px solid #000000;
+        cursor: pointer;
+        transition: background 0.2s ease;
+      }
+
+      .toggle-slider::before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        top: 2px;
+        background: #000000;
+        transition: transform 0.2s ease;
+      }
+
+      .toggle-input:checked + .toggle-slider {
+        background: #000000;
+      }
+
+      .toggle-input:checked + .toggle-slider::before {
+        background: #ffffff;
+        transform: translateX(24px);
+      }
+
+      .toggle-slider:hover {
+        background: #e5e7eb;
+      }
+
+      .toggle-input:checked + .toggle-slider:hover {
+        background: #333333;
       }
 
       .recommended-tag {
@@ -396,28 +406,19 @@
         <!-- Content Capture Settings -->
         <div class="advanced-settings">
           <h2>Content Capture Settings</h2>
-          <div class="radio-group">
-            <div class="radio-option">
-              <label class="radio-label">
-                <input type="radio" id="enhancedCapture" name="captureMethod" value="enhanced" class="radio-input" checked>
-                <span class="radio-checkmark"></span>
-                <div class="radio-content">
-                  <div class="radio-title">
-                    Enhanced content capture
+          <div class="toggle-section">
+            <div class="toggle-option">
+              <label class="toggle-label">
+                <div class="toggle-content">
+                  <div class="toggle-title">
+                    Full page content capture
                     <span class="recommended-tag">Recommended</span>
                   </div>
-                  <p class="radio-desc">Captures HTML content for better searchability and content preservation. Works best on sites with a complex layout, like forums.</p>
+                  <p class="toggle-desc">When enabled, captures HTML content for better searchability and content preservation. Works best on sites with complex layouts, like forums. When disabled, only sends the URL to our servers (may not work on sites with paywalls).</p>
                 </div>
-              </label>
-            </div>
-
-            <div class="radio-option">
-              <label class="radio-label">
-                <input type="radio" id="serverSideOnly" name="captureMethod" value="server-only" class="radio-input">
-                <span class="radio-checkmark"></span>
-                <div class="radio-content">
-                  <div class="radio-title">Server-side capture only</div>
-                  <p class="radio-desc">Only sends the URL to our servers. May not work on sites with paywalls or complex layouts.</p>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="fullPageCaptureToggle" class="toggle-input">
+                  <span class="toggle-slider"></span>
                 </div>
               </label>
             </div>
