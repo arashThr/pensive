@@ -375,7 +375,7 @@ func allTagsRemoved(htmlContent string) string {
 
 	// Remove all HTML tags
 	tagRe := regexp.MustCompile(`<[^>]*>`)
-	textOnly := tagRe.ReplaceAllString(htmlContent, "")
+	textOnly := tagRe.ReplaceAllString(htmlContent, " ")
 
 	// Decode HTML entities
 	textOnly = strings.ReplaceAll(textOnly, "&nbsp;", " ")
@@ -411,11 +411,11 @@ func cleanHTMLForLLM(htmlContent string) string {
 	whitespaceRe := regexp.MustCompile(`\s+`)
 
 	cleaned := htmlContent
-	cleaned = scriptRe.ReplaceAllString(cleaned, "")
-	cleaned = styleRe.ReplaceAllString(cleaned, "")
-	cleaned = commentRe.ReplaceAllString(cleaned, "")
-	cleaned = trackingRe.ReplaceAllString(cleaned, "")
-	cleaned = attrRe.ReplaceAllString(cleaned, "")
+	cleaned = scriptRe.ReplaceAllString(cleaned, " ")
+	cleaned = styleRe.ReplaceAllString(cleaned, " ")
+	cleaned = commentRe.ReplaceAllString(cleaned, " ")
+	cleaned = trackingRe.ReplaceAllString(cleaned, " ")
+	cleaned = attrRe.ReplaceAllString(cleaned, " ")
 	cleaned = whitespaceRe.ReplaceAllString(cleaned, " ")
 
 	return strings.TrimSpace(cleaned)
@@ -604,20 +604,98 @@ type SearchResult struct {
 }
 
 func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, error) {
+	// Sanitize and validate the search query
+	sanitizedQuery := sanitizeSearchQuery(query)
+	if sanitizedQuery == "" {
+		// Return empty results for empty queries instead of erroring
+		return []SearchResult{}, nil
+	}
+
+	// Try full-text search first
+	results, err := model.performFullTextSearch(user, sanitizedQuery)
+	if err != nil {
+		// If full-text search fails, fall back to simple pattern matching
+		return model.performFallbackSearch(user, sanitizedQuery)
+	}
+
+	// If full-text search returns no results, try fallback search
+	if len(results) == 0 {
+		return model.performFallbackSearch(user, sanitizedQuery)
+	}
+
+	return results, nil
+}
+
+// sanitizeSearchQuery cleans and validates search input
+func sanitizeSearchQuery(query string) string {
+	if query == "" {
+		return ""
+	}
+
+	// Trim whitespace and normalize
+	query = strings.TrimSpace(query)
+	if query == "" {
+		return ""
+	}
+
+	// Remove potentially problematic tsquery operators and characters
+	// Keep alphanumeric, spaces, hyphens, and quotes for phrase searching
+	reg := regexp.MustCompile(`[^a-zA-Z0-9\s\-"']`)
+	query = reg.ReplaceAllString(query, " ")
+
+	// Normalize multiple spaces to single spaces
+	spaceReg := regexp.MustCompile(`\s+`)
+	query = spaceReg.ReplaceAllString(query, " ")
+
+	// Trim again after cleanup
+	query = strings.TrimSpace(query)
+
+	// Ensure we don't return empty string after sanitization
+	if query == "" {
+		return ""
+	}
+
+	return query
+}
+
+// performFullTextSearch executes the full-text search using PostgreSQL's search capabilities
+func (model *BookmarkModel) performFullTextSearch(user *User, query string) ([]SearchResult, error) {
 	rows, err := model.Pool.Query(context.Background(), `
-		WITH search_query AS (
-			SELECT to_tsquery(string_agg(lexeme || ':*', ' & ')) AS query
-			FROM unnest(string_to_array(CASE WHEN $1 = '' THEN '' ELSE $1 END, ' ')) AS lexeme
+		WITH search_terms AS (
+			SELECT string_agg(
+				CASE 
+					WHEN trim(lexeme) = '' THEN NULL
+					ELSE trim(lexeme) || ':*'
+				END, 
+				' & '
+			) AS tsquery_string
+			FROM unnest(string_to_array($1, ' ')) AS lexeme
+			WHERE trim(lexeme) != ''
+		),
+		search_query AS (
+			SELECT 
+				CASE 
+					WHEN st.tsquery_string IS NULL OR st.tsquery_string = '' THEN NULL
+					ELSE to_tsquery('english', st.tsquery_string)
+				END AS query
+			FROM search_terms st
 		)
 		SELECT
-			ts_headline(lc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>') AS headline,
+			CASE 
+				WHEN sq.query IS NOT NULL THEN 
+					ts_headline('english', lc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>')
+				ELSE lc.excerpt
+			END AS headline,
 			li.id AS id,
 			li.title AS title,
 			li.link AS link,
 			li.excerpt AS excerpt,
 			li.image_url AS image_url,
 			li.created_at AS created_at,
-			ts_rank(lc.search_vector, sq.query) AS rank,
+			CASE 
+				WHEN sq.query IS NOT NULL THEN ts_rank(lc.search_vector, sq.query)
+				ELSE 0.0
+			END AS rank,
 			li.ai_summary AS ai_summary,
 			li.ai_excerpt AS ai_excerpt,
 			li.ai_tags AS ai_tags
@@ -625,19 +703,71 @@ func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, er
 		JOIN library_contents lc ON li.id = lc.id
 		CROSS JOIN search_query sq
 		WHERE li.user_id = $2
-    		AND lc.search_vector @@ sq.query
-		ORDER BY rank DESC
+			AND sq.query IS NOT NULL
+			AND lc.search_vector IS NOT NULL
+			AND lc.search_vector @@ sq.query
+		ORDER BY rank DESC, li.created_at DESC
 		LIMIT 10`, query, user.ID)
 
 	if err != nil {
-		return nil, fmt.Errorf("search bookmarks: %w", err)
+		return nil, fmt.Errorf("full-text search failed: %w", err)
 	}
 
 	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
 	if err != nil {
-		return nil, fmt.Errorf("collect bookmark search rows: %w", err)
+		return nil, fmt.Errorf("collect full-text search rows: %w", err)
 	}
-	// AI features are now available for all users
+
+	return results, nil
+}
+
+// performFallbackSearch performs a simpler pattern-based search when full-text search fails
+func (model *BookmarkModel) performFallbackSearch(user *User, query string) ([]SearchResult, error) {
+	// Create a pattern for ILIKE search
+	pattern := "%" + strings.ReplaceAll(query, " ", "%") + "%"
+
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT
+			COALESCE(li.excerpt, '(No excerpt available)') AS headline,
+			li.id AS id,
+			li.title AS title,
+			li.link AS link,
+			li.excerpt AS excerpt,
+			li.image_url AS image_url,
+			li.created_at AS created_at,
+			CASE 
+				WHEN LOWER(li.title) ILIKE LOWER($1) THEN 1.0
+				WHEN LOWER(li.excerpt) ILIKE LOWER($1) THEN 0.8
+				WHEN LOWER(lc.content) ILIKE LOWER($1) THEN 0.6
+				WHEN LOWER(li.ai_summary) ILIKE LOWER($1) THEN 0.5
+				WHEN LOWER(li.ai_tags) ILIKE LOWER($1) THEN 0.3
+				ELSE 0.1
+			END AS rank,
+			li.ai_summary AS ai_summary,
+			li.ai_excerpt AS ai_excerpt,
+			li.ai_tags AS ai_tags
+		FROM library_items li
+		JOIN library_contents lc ON li.id = lc.id
+		WHERE li.user_id = $2
+			AND (
+				LOWER(li.title) ILIKE LOWER($1) OR
+				LOWER(li.excerpt) ILIKE LOWER($1) OR
+				LOWER(lc.content) ILIKE LOWER($1) OR
+				LOWER(COALESCE(li.ai_summary, '')) ILIKE LOWER($1) OR
+				LOWER(COALESCE(li.ai_tags, '')) ILIKE LOWER($1)
+			)
+		ORDER BY rank DESC, li.created_at DESC
+		LIMIT 10`, pattern, user.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("fallback search failed: %w", err)
+	}
+
+	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
+	if err != nil {
+		return nil, fmt.Errorf("collect fallback search rows: %w", err)
+	}
+
 	return results, nil
 }
 

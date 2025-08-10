@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentTab = null;
   let isBookmarked = false;
   let bookmarkId = null;
-  let htmlContentCleanupEnabled = false;
 
   // Get current tab information
   try {
@@ -30,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     pageTitleElement.textContent = currentTab.title;
     pageUrlElement.textContent = currentTab.url;
   } catch (error) {
-    console.error('Error getting current tab:', error);
+    console.error('[Pensive] Error getting current tab:', error);
     updateStatus('error', 'Error loading page information');
     return;
   }
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
     } catch (error) {
-      console.error('Error checking bookmark status:', error);
       // Default to not bookmarked on error
       isBookmarked = false;
       bookmarkId = null;
@@ -200,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             publishedDate = Date.now()
           }
           pageContent.title = result.content.title || currentTab.title;
-          pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || "";
+          pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || '';
           pageContent.lang = result.content.lang || document.documentElement.lang;
           pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
           pageContent.publishedTime = new Date(publishedDate).toISOString()
@@ -223,7 +221,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             : 'client-html';
         }
       } catch (contentError) {
-        console.error('Failed to extract page content:', contentError);
         updateStatus('error', 'Failed to extract page content. Continuing with server-side extraction...');
       }
     }
@@ -380,7 +377,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
     } catch (error) {
-      console.error('Error removing bookmark:', error);
+      console.error('[Pensive] Error removing bookmark:', error);
       updateStatus('error', 'Network error occurred');
       removeBtn.disabled = false;
     }
@@ -442,7 +439,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Close the popup
       window.close();
     } catch (error) {
-      console.error('Error opening saved page:', error);
       // Fallback to opening options page
       browserAPI.runtime.openOptionsPage();
     }
@@ -465,7 +461,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Close the popup
       window.close();
     } catch (error) {
-      console.error('Error opening search page:', error);
       // Fallback to opening options page
       browserAPI.runtime.openOptionsPage();
     }
@@ -628,11 +623,11 @@ function extractContent() {
 
     // Apply cleaning steps
     let cleaned = htmlContent;
-    cleaned = cleaned.replace(scriptRe, '');
-    cleaned = cleaned.replace(styleRe, '');
-    cleaned = cleaned.replace(commentRe, '');
-    cleaned = cleaned.replace(trackingRe, '');
-    cleaned = cleaned.replace(attrRe, '');
+    cleaned = cleaned.replace(scriptRe, ' ');
+    cleaned = cleaned.replace(styleRe, ' ');
+    cleaned = cleaned.replace(commentRe, ' ');
+    cleaned = cleaned.replace(trackingRe, ' ');
+    cleaned = cleaned.replace(attrRe, ' ');
     cleaned = cleaned.replace(whitespaceRe, ' ');
 
     // Trim leading/trailing whitespace
@@ -665,6 +660,7 @@ function extractContent() {
         while (el.firstChild) {
           parent.insertBefore(el.firstChild, el);
         }
+        parent.insertBefore(document.createTextNode(' '), el);
         el.remove();
       }
     });
@@ -691,29 +687,28 @@ function extractContent() {
 
   try {
     // Extract clean HTML content
-    // TODO: Remove the logs
     const originalHtml = document.documentElement.outerHTML;
     const originalSize = originalHtml.length;
-    console.log(`Original HTML size: ${originalSize} characters`);
+    // console.log(`Original HTML size: ${originalSize} characters`);
 
     const htmlContent = cleanHtmlContentString(originalHtml);
-    const afterLLMCleanSize = htmlContent.length;
-    const llmReduction = ((originalSize - afterLLMCleanSize) / originalSize * 100).toFixed(1);
-    console.log(`After LLM clean: ${afterLLMCleanSize} characters (${llmReduction}% reduction)`);
+    // const afterLLMCleanSize = htmlContent.length;
+    // const llmReduction = ((originalSize - afterLLMCleanSize) / originalSize * 100).toFixed(1);
+    // console.log(`After LLM clean: ${afterLLMCleanSize} characters (${llmReduction}% reduction)`);
 
     // turn htmlContent to document
-    const cleanedHtml = extractMainHtmlContent(htmlContent);
-    const afterGeneralCleanSize = cleanedHtml.length;
-    const generalReduction = ((afterLLMCleanSize - afterGeneralCleanSize) / afterLLMCleanSize * 100).toFixed(1);
-    console.log(`After general clean: ${afterGeneralCleanSize} characters (${generalReduction}% reduction from previous step)`);
+    const cleanedHtml = extractMainHtmlContent(htmlContent, { maxChars: 100_000 });
+    // const afterGeneralCleanSize = cleanedHtml.length;
+    // const generalReduction = ((afterLLMCleanSize - afterGeneralCleanSize) / afterLLMCleanSize * 100).toFixed(1);
+    // console.log(`After general clean: ${afterGeneralCleanSize} characters (${generalReduction}% reduction from previous step)`);
 
     const doc = new DOMParser().parseFromString(cleanedHtml, 'text/html');
     const htmlContentWhitelist = extractCleanHtmlWhitelist(doc);
-    const finalSize = htmlContentWhitelist.length;
-    const whitelistReduction = ((afterGeneralCleanSize - finalSize) / afterGeneralCleanSize * 100).toFixed(1);
-    const totalReduction = ((originalSize - finalSize) / originalSize * 100).toFixed(1);
-    console.log(`After whitelist clean: ${finalSize} characters (${whitelistReduction}% reduction from previous step)`);
-    console.log(`Total reduction: ${totalReduction}% (${originalSize} → ${finalSize} characters)`);
+    // const finalSize = htmlContentWhitelist.length;
+    // const whitelistReduction = ((afterGeneralCleanSize - finalSize) / afterGeneralCleanSize * 100).toFixed(1);
+    // const totalReduction = ((originalSize - finalSize) / originalSize * 100).toFixed(1);
+    // console.log(`After whitelist clean: ${finalSize} characters (${whitelistReduction}% reduction from previous step)`);
+    // console.log(`Total reduction: ${totalReduction}% (${originalSize} → ${finalSize} characters)`);
 
     // Get page title
 
@@ -722,6 +717,7 @@ function extractContent() {
       htmlContent: htmlContentWhitelist,
     };
   } catch (error) {
+    console.error("[Pensive] Capturing content failed: ", error)
     return {
       success: false,
       error: error.message
@@ -735,7 +731,6 @@ function parseWithReadability() {
     // Check if the page is probably readable
     const isReadable = isProbablyReaderable(document);
     if (!isReadable) {
-      console.log('Page is not readable');
       return {
         success: false,
         error: 'Page is not readable'
@@ -748,7 +743,6 @@ function parseWithReadability() {
     const reader = new Readability(documentClone);
     article = reader.parse();
   } catch (error) {
-    console.error('Error extracting page content:', error);
     return {
       success: false,
       error: error.message
