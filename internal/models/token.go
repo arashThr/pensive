@@ -127,7 +127,7 @@ func (as *TokenModel) User(token string) (*User, error) {
 	tokenHash := as.hash(token)
 
 	rows, err := as.Pool.Query(context.Background(), `
-		SELECT *
+		SELECT users.*
 		FROM users
 		JOIN api_tokens ON users.id = api_tokens.user_id
 		WHERE api_tokens.token_hash = $1`, tokenHash)
