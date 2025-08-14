@@ -6,7 +6,8 @@
       "Bash(grep:*)",
       "Bash(mv:*)",
       "Bash(ls:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(go build:*)"
     ],
     "deny": []
   }

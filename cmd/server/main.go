@@ -13,6 +13,7 @@ import (
 	"github.com/arashthr/go-course/internal/db"
 	"github.com/arashthr/go-course/internal/logging"
 	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/go-course/internal/ratelimit"
 	"github.com/arashthr/go-course/internal/service"
 	"github.com/arashthr/go-course/internal/service/importer"
 	"github.com/arashthr/go-course/web"
@@ -95,6 +96,11 @@ func run(cfg *config.AppConfig) error {
 		Pool: pool,
 	}
 	authTokenService := models.NewAuthTokenService(pool)
+	demoService := &service.DemoService{
+		GenAIClient:   genAIClient,
+		RateLimiter:   ratelimit.NewRateLimiter(3, 10*time.Minute), // 3 requests per 10 minutes
+		BookmarkModel: bookmarksModel,
+	}
 
 	// Middlewares
 	umw := auth.UserMiddleware{
@@ -217,6 +223,11 @@ func run(cfg *config.AppConfig) error {
 
 		r.Get("/ping", healthCheck)
 		r.Post("/stripe-webhooks", stripController.Webhook)
+
+		// Demo endpoints (public)
+		r.Route("/demo", func(r chi.Router) {
+			r.Post("/extract", demoService.ExtractContent)
+		})
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)

@@ -346,11 +346,11 @@ func (b Bookmarks) ReportBookmark(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := usercontext.User(r.Context())
-	
+
 	// Send report via Telegram
-	message := fmt.Sprintf("🚨 Content Capture Issue Report\n\nURL: %s\nTitle: %s\nUser: %s\nBookmark ID: %s", 
+	message := fmt.Sprintf("🚨 Content Capture Issue Report\n\nURL: %s\nTitle: %s\nUser: %s\nBookmark ID: %s",
 		bookmark.Link, bookmark.Title, user.Email, bookmark.Id)
-	
+
 	err = logging.Telegram.SendMessage(message)
 	if err != nil {
 		logger.Errorw("failed to send report via telegram", "error", err, "bookmark_id", bookmark.Id)

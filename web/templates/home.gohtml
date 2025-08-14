@@ -2,45 +2,82 @@
 
 <div class="px-8 py-16 max-w-4xl mx-auto">
   
-  <!-- The Problem -->
-  <div class="border-l-4 border-black pl-6 mb-16">
-    <p class="text-lg mb-4">
-      I once found this <a href="https://ciechanow.ski/mechanical-watch/" class="underline">incredible article about mechanical watches</a> with amazing interactive animations. It was most amazing article I'd ever seen.
-    </p>
-    <p class="text-lg mb-4">
-      Three weeks later when I wanted to show it to a friend... gone. Lost somewhere in my 2,847 Chrome bookmarks.
-    </p>
-    <p class="text-lg font-bold">
-      That's why I built Pensive.
-    </p>
-  </div>
-
-  <!-- What It Does -->
+  <!-- Main Demo Section -->
   <div class="mb-16">
     <h1 class="text-4xl font-bold mb-8 leading-tight">
-      Stop losing the good stuff you find online
+      Bookmarking service that was built for search
     </h1>
     
     <p class="text-xl mb-8">
-      Pensive captures the full content of articles you save. 
-      When you search for "that thing about compound interest" you'll actually find it, 
-      even if the article was titled "Money Tips #47".
+      Pensive captures the full content of articles and makes them <strong>searchable</strong>. 
+      Here's what it extracts from any article:
     </p>
-
-    <div class="border border-black p-4 mb-8 bg-gray-100">
-      <strong>Search example:</strong><br>
-      Query: "mechanical watch"<br>
-      → Found in 3 saved articles<br>
-      → Not lost in Google's 2.4 billion results
-    </div>
-
-    <div class="flex flex-col sm:flex-row">
-      <p class="mb-8">
-        <a href="/signup" class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">START SAVING STUFF</a>
-      </p>
-      <p class="sm:ml-4 text-sm">10 saves/day free (with AI features)</p>
-    </div>
   </div>
+
+  <!-- Try It Yourself Section -->
+  <div class="mb-16">
+    <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">Try it yourself</h2>
+    
+    <div class="bg-gray-50 border-2 border-black p-6">
+      <p class="mb-4 font-bold">Test with any article URL:</p>
+      
+      <div class="space-y-4">
+        <div class="flex gap-2">
+          <input 
+            type="url" 
+            id="demo-url" 
+            placeholder="https://example.com/article" 
+            class="flex-1 p-3 border-2 border-black"
+            value="https://www.catherinejue.com/fast"
+          />
+          <button 
+            id="demo-extract" 
+            class="px-6 py-3 bg-black text-white font-bold hover:bg-gray-800"
+          >
+            TRY IT
+          </button>
+        </div>
+        
+        <div id="demo-result" class="hidden">
+          <div class="bg-white border-2 border-black p-4">
+            <div class="space-y-4">
+              <div>
+                <h4 class="font-bold mb-2">Extracted Title:</h4>
+                <p id="demo-title" class="text-sm"></p>
+              </div>
+              <div>
+                <h4 class="font-bold mb-2">Content Preview:</h4>
+                <p id="demo-content" class="text-sm text-gray-600"></p>
+              </div>
+              <div id="demo-summary-section" class="hidden">
+                <h4 class="font-bold mb-2">AI Summary:</h4>
+                <p id="demo-summary" class="text-sm bg-gray-100 p-3 border border-gray-300"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="demo-loading" class="hidden text-center py-4">
+          <span class="text-sm">Processing... ⌛</span>
+        </div>
+        
+        <div id="demo-error" class="hidden pb-3">
+          <p class="text-sm"></p>
+          <div id="demo-signup-section" class="hidden mt-4 text-center">
+            <p class="text-sm mb-3">Want to try more:</p>
+            <a href="/signup" class="bg-black text-white px-4 py-2 text-sm font-bold hover:bg-gray-800">CREATE YOUR ACCOUNT</a>
+          </div>
+        </div>
+      </div>
+    </div> 
+  </div>
+
+    <div class="text-center">
+      <p class="mb-4">
+        <a href="/signup" class="bg-black text-white px-8 py-4 text-lg font-bold hover:bg-gray-800">CREATE YOUR ACCOUNT</a>
+      </p>
+      <p class="text-sm text-gray-600 pt-2">10 AI-enhanced bookmarks per day</p>
+    </div>
 
   <!-- How It Works -->
   <div class="mb-16">
@@ -84,7 +121,7 @@
     <div class="space-y-8">
       <div>
         <h3 class="font-bold text-lg mb-2">Full-text search</h3>
-        <p>Search through everything you've saved, not just titles and tags.</p>
+        <p>Pensive is build for search: Search through everything you've saved, not just titles and tags.</p>
       </div>
 
       <div>
@@ -168,113 +205,78 @@
 
   <!-- Final CTA -->
   <div class="text-center border-2 border-black p-8 bg-gray-100">
-    <h2 class="text-2xl font-bold mb-8">Ready to stop losing good content?</h2>
+    <h2 class="text-2xl font-bold mb-8">Ready make your own searchable memory of the web?</h2>
     <a href="/signup" class="bg-black text-white px-8 py-4 text-lg font-bold hover:bg-gray-800">START SAVING</a>
-    <p class="text-sm mt-8">No credit card required</p>
   </div>
 
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const sliderTrack = document.getElementById('slider-track');
-  const prevBtn = document.getElementById('prev-btn');
-  const nextBtn = document.getElementById('next-btn');
-  const dots = document.querySelectorAll('.slider-dot');
-  const captions = document.querySelectorAll('#slide-caption span');
-  
-  let currentSlide = 0;
-  const totalSlides = 5;
-  
-  function updateSlider() {
-    // Move the slider
-    const translateX = -(currentSlide * 100);
-    sliderTrack.style.transform = `translateX(${translateX}%)`;
+  document.getElementById('demo-extract').addEventListener('click', async function() {
+    const url = document.getElementById('demo-url').value;
+    if (!url) return;
     
-    // Update dots
-    dots.forEach((dot, index) => {
-      if (index === currentSlide) {
-        dot.classList.remove('bg-gray-300', 'hover:bg-gray-400');
-        dot.classList.add('bg-sky-600');
-      } else {
-        dot.classList.remove('bg-sky-600');
-        dot.classList.add('bg-gray-300', 'hover:bg-gray-400');
-      }
-    });
+    // Show loading, hide results
+    document.getElementById('demo-loading').classList.remove('hidden');
+    document.getElementById('demo-result').classList.add('hidden');
+    document.getElementById('demo-error').classList.add('hidden');
+    document.getElementById('demo-signup-section').classList.add('hidden');
     
-    // Update captions
-    captions.forEach((caption, index) => {
-      if (index === currentSlide) {
-        caption.classList.remove('hidden');
-      } else {
-        caption.classList.add('hidden');
+    try {
+      const response = await fetch('/api/demo/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url })
+      });
+      
+      if (!response.ok) {
+        if (response.status === 429) {
+          // Parse rate limit response to check for signup flag
+          const errorData = await response.json();
+          if (errorData.show_signup) {
+            throw new Error('SHOW_SIGNUP:' + errorData.error);
+          }
+          throw new Error('Rate limit exceeded');
+        }
+        throw new Error('Failed to process URL');
       }
-    });
-  }
-  
-  function nextSlide() {
-    currentSlide = (currentSlide + 1) % totalSlides;
-    updateSlider();
-  }
-  
-  function prevSlide() {
-    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-    updateSlider();
-  }
-  
-  function goToSlide(slideIndex) {
-    currentSlide = slideIndex;
-    updateSlider();
-  }
-  
-  // Event listeners
-  nextBtn.addEventListener('click', nextSlide);
-  prevBtn.addEventListener('click', prevSlide);
-  
-  dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => goToSlide(index));
-  });
-  
-  // Auto-play functionality (optional - pauses on hover)
-  let autoPlayInterval = setInterval(nextSlide, 5000);
-  
-  const sliderContainer = document.querySelector('.relative.max-w-4xl');
-  sliderContainer.addEventListener('mouseenter', () => {
-    clearInterval(autoPlayInterval);
-  });
-  
-  sliderContainer.addEventListener('mouseleave', () => {
-    autoPlayInterval = setInterval(nextSlide, 5000);
-  });
-  
-  // Keyboard navigation
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') {
-      prevSlide();
-    } else if (e.key === 'ArrowRight') {
-      nextSlide();
+      
+      const data = await response.json();
+      
+      // Show results
+      document.getElementById('demo-title').textContent = data.title;
+      document.getElementById('demo-content').textContent = data.content.substring(0, 300) + '...';
+      
+      if (data.summary) {
+        document.getElementById('demo-summary').textContent = data.summary;
+        document.getElementById('demo-summary-section').classList.remove('hidden');
+      }
+      
+      document.getElementById('demo-result').classList.remove('hidden');
+      
+    } catch (error) {
+      let errorMessage = 'Error processing URL: ' + error.message;
+      let showSignupSection = false;
+      
+      if (error.message.startsWith('SHOW_SIGNUP:')) {
+        errorMessage = error.message.replace('SHOW_SIGNUP:', '');
+        showSignupSection = true;
+      } else if (error.message.includes('429') || error.message.includes('Rate limit')) {
+        errorMessage = 'Rate limit exceeded. You can try 3 URLs per 10 minutes. Please wait before trying again.';
+      }
+      
+      document.getElementById('demo-error').classList.remove('hidden');
+      
+      // Show or hide signup section based on flag
+      if (showSignupSection) {
+        document.getElementById('demo-signup-section').classList.remove('hidden');
+      } else {
+        document.getElementById('demo-signup-section').classList.add('hidden');
+      }
+    } finally {
+      document.getElementById('demo-loading').classList.add('hidden');
     }
   });
-  
-  // Touch/swipe support for mobile
-  let startX = 0;
-  let endX = 0;
-  
-  sliderTrack.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-  });
-  
-  sliderTrack.addEventListener('touchend', (e) => {
-    endX = e.changedTouches[0].clientX;
-    const threshold = 50; // minimum swipe distance
-    
-    if (startX - endX > threshold) {
-      nextSlide(); // swipe left - go to next
-    } else if (endX - startX > threshold) {
-      prevSlide(); // swipe right - go to previous
-    }
-  });
-});
 </script>
 
 {{template "footer" .}}

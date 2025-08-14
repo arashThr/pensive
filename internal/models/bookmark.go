@@ -28,9 +28,9 @@ type BookmarkSource = int
 const PageSize = 10
 
 const (
-	FreeUserDailyLimit       = 10
-	PremiumUserDailyLimit    = 100
-	UnverifiedUserTotalLimit = 100
+	FreeUserDailyLimit       = 10  // Free users: 10 bookmarks with AI per day
+	PremiumUserDailyLimit    = 100 // Premium users: 100 bookmarks with AI per day
+	UnverifiedUserTotalLimit = 10  // Unverified users: 10 total bookmarks until verified
 )
 
 const (
@@ -428,7 +428,7 @@ func (model *BookmarkModel) generateAIData(ctx context.Context, content string, 
 	// Log the duration of the function and size of the content
 	start := time.Now()
 	logger.Infow("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
-	aiDataResponse, err := model.promptToGetAIData(htmlContent)
+	aiDataResponse, err := model.PromptToGetAIData(htmlContent)
 	if err != nil {
 		logger.Warnw("Failed to convert HTML to markdown, using text content", "error", err)
 		return
@@ -458,8 +458,8 @@ type aiDataResponseType struct {
 	Tags     string `json:"tags"`
 }
 
-// promptToGetAIData uses Gemini to convert HTML content to markdown format and generate additional AI content
-func (model *BookmarkModel) promptToGetAIData(htmlContent string) (*aiDataResponseType, error) {
+// PromptToGetAIData uses Gemini to convert HTML content to markdown format and generate additional AI content
+func (model *BookmarkModel) PromptToGetAIData(htmlContent string) (*aiDataResponseType, error) {
 	if model.GenAIClient == nil {
 		return nil, fmt.Errorf("GenAI client not initialized")
 	}
@@ -957,6 +957,40 @@ func (model *BookmarkModel) checkRateLimit(user *User) error {
 	}
 
 	return nil
+}
+
+// ExtractContentOnly extracts content from a URL without saving to database (for demo purposes)
+func (model *BookmarkModel) ExtractContentOnly(ctx context.Context, link string) (*Bookmark, string, error) {
+	// Fetch and extract using existing logic
+	article, err := fetchLink(ctx, link)
+	if err != nil {
+		return nil, "", fmt.Errorf("fetch content: %w", err)
+	}
+
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return nil, "", fmt.Errorf("parse URL: %w", err)
+	}
+
+	// Create bookmark structure without saving to database
+	bookmark := &Bookmark{
+		Title:    article.Title,
+		Link:     link,
+		Excerpt:  article.Excerpt,
+		ImageUrl: article.Image,
+		SiteName: article.SiteName,
+	}
+
+	if bookmark.Title == "" {
+		bookmark.Title = parsedURL.String()
+	}
+	if bookmark.Excerpt == "" {
+		bookmark.Excerpt = "(No excerpt available)"
+	}
+
+	content := validations.CleanUpText(article.TextContent)
+
+	return bookmark, content, nil
 }
 
 // GetRemainingBookmarks returns the number of bookmarks a user can still create

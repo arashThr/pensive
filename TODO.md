@@ -14,6 +14,7 @@
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
+- [ ] Why this fails: `https://danielmiessler.com/blog/im-worried-it-might-get-bad`
 - [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
     - [x] Fix the error: Only pending
     - [x] Send logs for the error
