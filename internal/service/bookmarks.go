@@ -242,7 +242,7 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 		Title       string           `json:"title"`
 		Link        string           `json:"link"`
 		Excerpt     string           `json:"excerpt"`
-		CreatedAt   time.Time        `json:"created_at,omitempty"`
+		CreatedAt   time.Time        `json:"created_at"`
 		SiteName    string           `json:"site_name,omitempty"`
 		Source      string           `json:"source,omitempty"`
 		ImageUrl    string           `json:"image_url,omitempty"`

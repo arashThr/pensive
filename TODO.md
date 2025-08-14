@@ -63,8 +63,6 @@
 	• Non-200
 	• Login redirects
 	• Cloudflare pages (__cf_bm cookies, JS challenges)
-- [ ] Landing page: Here's how it works demo:
-    - Save the link, show the summary
 - Youtube
     - Option: Use [RapiAPI](https://rapidapi.com/solid-api-solid-api-default/api/youtube-transcript3/pricing)
     - `youtube-transcript-api`
@@ -83,6 +81,9 @@
     - [ ] Read tags from Pocket
 - [ ] Full text search with part words
 - [ ] Telegram first message should help you sign up
+- [x] Landing page: Here's how it works demo:
+    - Save the link, show the summary
+    - Result: Slider looks better and less complicated
 - [x] Short key for calling the extension
     - Let's do it when people ask for it
 - [x] Google and GitHub auth

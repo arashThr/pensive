@@ -1,115 +1,126 @@
 {{template "header" .}}
 
 <div class="px-8 py-16 max-w-4xl mx-auto">
-  
-  <!-- Main Demo Section -->
+
   <div class="mb-16">
     <h1 class="text-4xl font-bold mb-8 leading-tight">
       Bookmarking service that was built for search
     </h1>
-    
+
     <p class="text-xl mb-8">
-      Pensive captures the full content of articles and makes them <strong>searchable</strong>. 
-      Here's what it extracts from any article:
+      Pensive captures the full content of articles and makes them <strong>searchable</strong>.
     </p>
   </div>
 
-  <!-- Try It Yourself Section -->
-  <div class="mb-16">
-    <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">Try it yourself</h2>
-    
-    <div class="bg-gray-50 border-2 border-black p-6">
-      <p class="mb-4 font-bold">Test with any article URL:</p>
-      
-      <div class="space-y-4">
-        <div class="flex gap-2">
-          <input 
-            type="url" 
-            id="demo-url" 
-            placeholder="https://example.com/article" 
-            class="flex-1 p-3 border-2 border-black"
-            value="https://www.catherinejue.com/fast"
-          />
-          <button 
-            id="demo-extract" 
-            class="px-6 py-3 bg-black text-white font-bold hover:bg-gray-800"
-          >
-            TRY IT
-          </button>
+  <div class="relative max-w-4xl mx-auto mb-16">
+    <!-- Slider Container -->
+    <div class="overflow-hidden rounded-lg border border-gray-300">
+      <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
+        <!-- Slide 1: Library View -->
+        <div class="w-full flex-shrink-0">
+          <img src="/assets/promo/screenshots/library.png"
+            alt="Pensive Library - Your personal collection of saved content" class="w-full h-auto">
         </div>
-        
-        <div id="demo-result" class="hidden">
-          <div class="bg-white border-2 border-black p-4">
-            <div class="space-y-4">
-              <div>
-                <h4 class="font-bold mb-2">Extracted Title:</h4>
-                <p id="demo-title" class="text-sm"></p>
-              </div>
-              <div>
-                <h4 class="font-bold mb-2">Content Preview:</h4>
-                <p id="demo-content" class="text-sm text-gray-600"></p>
-              </div>
-              <div id="demo-summary-section" class="hidden">
-                <h4 class="font-bold mb-2">AI Summary:</h4>
-                <p id="demo-summary" class="text-sm bg-gray-100 p-3 border border-gray-300"></p>
-              </div>
-            </div>
-          </div>
+        <!-- Slide 2: Search Interface -->
+        <div class="w-full flex-shrink-0">
+          <img src="/assets/promo/screenshots/search.png" alt="Powerful search through your saved content"
+            class="w-full h-auto">
         </div>
-        
-        <div id="demo-loading" class="hidden text-center py-4">
-          <span class="text-sm">Processing... ⌛</span>
+        <!-- Slide 3: Search Results -->
+        <div class="w-full flex-shrink-0">
+          <img src="/assets/promo/screenshots/search-recent.png" alt="Recent search results showing relevant content"
+            class="w-full h-auto">
         </div>
-        
-        <div id="demo-error" class="hidden pb-3">
-          <p class="text-sm"></p>
-          <div id="demo-signup-section" class="hidden mt-4 text-center">
-            <p class="text-sm mb-3">Want to try more:</p>
-            <a href="/signup" class="bg-black text-white px-4 py-2 text-sm font-bold hover:bg-gray-800">CREATE YOUR ACCOUNT</a>
-          </div>
+        <!-- Slide 4: Individual Link Page -->
+        <div class="w-full flex-shrink-0">
+          <img src="/assets/promo/screenshots/link-page.png" alt="Detailed view of saved content with full text search"
+            class="w-full h-auto">
+        </div>
+        <!-- Slide 5: Extension Saving -->
+        <div class="w-full flex-shrink-0">
+          <img src="/assets/promo/screenshots/extension-saved.jpg" alt="Browser extension seamlessly saving content"
+            class="w-full h-auto">
         </div>
       </div>
-    </div> 
+    </div>
+    <!-- Navigation Arrows -->
+    <button id="prev-btn"
+      class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-gray-50 border border-gray-300 rounded-full p-2 shadow-lg transition-colors">
+      <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+    <button id="next-btn"
+      class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white hover:bg-gray-50 border border-gray-300 rounded-full p-2 shadow-lg transition-colors">
+      <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+
+    <!-- Dot Indicators -->
+    <div class="flex justify-center mt-6 gap-2">
+      <button class="slider-dot w-3 h-3 rounded-full bg-sky-600 transition-colors" data-slide="0"></button>
+      <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+        data-slide="1"></button>
+      <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+        data-slide="2"></button>
+      <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+        data-slide="3"></button>
+      <button class="slider-dot w-3 h-3 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors"
+        data-slide="4"></button>
+    </div>
+
+    <!-- Slide Captions -->
+    <div class="text-center mt-4">
+      <div id="slide-caption" class="text-gray-600">
+        <span data-slide="0">Your personal library of saved content, beautifully organized and searchable</span>
+        <span data-slide="1" class="hidden">Powerful search that finds exactly what you're looking for</span>
+        <span data-slide="2" class="hidden">Recent searches help you quickly access frequently needed content</span>
+        <span data-slide="3" class="hidden">Full content capture means every word is searchable and accessible</span>
+        <span data-slide="4" class="hidden">Browser extension makes saving content effortless and automatic</span>
+      </div>
+    </div>
   </div>
 
-    <div class="text-center">
-      <p class="mb-4">
-        <a href="/signup" class="bg-black text-white px-8 py-4 text-lg font-bold hover:bg-gray-800">CREATE YOUR ACCOUNT</a>
-      </p>
-      <p class="text-sm text-gray-600 pt-2">10 AI-enhanced bookmarks per day</p>
-    </div>
+  <div class="text-center">
+    <p class="mb-4">
+      <a href="/signup" class="bg-black text-white px-8 py-4 text-lg font-bold hover:bg-gray-800">CREATE YOUR
+        ACCOUNT</a>
+    </p>
+    <p class="text-sm text-gray-600 pt-2">10 AI-enhanced bookmarks per day</p>
+  </div>
 
   <!-- How It Works -->
   <div class="mb-16">
     <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">How it works</h2>
-    
+
     <div class="flex sm:flex-row flex-col justify-between">
       <div class="space-y-6">
         <div>
           <strong>I: Save articles</strong><br>
           Browser extension or Telegram bot
         </div>
-        
+
         <div>
           <strong>II: We grab the main content</strong><br>
           Main section of the article will be saved
         </div>
-        
+
         <div>
           <strong>III: Search your library</strong><br>
           Find anything by content, not just title
         </div>
       </div>
-        <div class="flex flex-col gap-4 items-center sm:mt-0 mt-4">
-          <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" 
-            class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
-            INSTALL FOR CHROME
-          </a>
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" 
-            class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
-            INSTALL FOR FIREFOX
-          </a>
-        </div>
+      <div class="flex flex-col gap-4 items-center sm:mt-0 mt-4">
+        <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd"
+          class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
+          INSTALL FOR CHROME
+        </a>
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/"
+          class="bg-black text-white px-6 py-3 font-bold hover:bg-gray-800">
+          INSTALL FOR FIREFOX
+        </a>
+      </div>
     </div>
 
   </div>
@@ -117,7 +128,7 @@
   <!-- Features -->
   <div class="mb-16">
     <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">What you get</h2>
-    
+
     <div class="space-y-8">
       <div>
         <h3 class="font-bold text-lg mb-2">Full-text search</h3>
@@ -126,7 +137,8 @@
 
       <div>
         <h3 class="font-bold text-lg mb-2">Save from anywhere</h3>
-        <p>Browser extension for desktop. Telegram bot for mobile. Forward any link to <a href="https://t.me/GetPensiveBot" class="underline">@GetPensiveBot</a>.</p>
+        <p>Browser extension for desktop. Telegram bot for mobile. Forward any link to <a
+            href="https://t.me/GetPensiveBot" class="underline">@GetPensiveBot</a>.</p>
       </div>
 
       <div>
@@ -146,8 +158,8 @@
   <div class="border-2 border-black p-6 mb-16 bg-yellow-100">
     <h3 class="font-bold mb-2">⚠️ This is beta software</h3>
     <p>
-      I'm actively developing Pensive. While I work to keep your data safe, 
-      there's a possibility of data loss during updates. 
+      I'm actively developing Pensive. While I work to keep your data safe,
+      there's a possibility of data loss during updates.
       Back up your important bookmarks regularly.
     </p>
   </div>
@@ -157,26 +169,36 @@
     <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">Why I built this</h2>
 
     <p class="mb-4">
-      Years ago, I discovered Gordon Bell and <a href="https://en.wikipedia.org/wiki/MyLifeBits" class="underline">MyLifeBits</a> research project. It was an experiment to document and make searchable everything in a person's life. The idea stuck with me: is it possible to preserve everything I see and hear, and make it searchable?
+      Years ago, I discovered Gordon Bell and <a href="https://en.wikipedia.org/wiki/MyLifeBits"
+        class="underline">MyLifeBits</a> research project. It was an experiment to document and make searchable
+      everything in a person's life. The idea stuck with me: is it possible to preserve everything I see and hear, and
+      make it searchable?
     </p>
-    
+
     <p class="mb-4">
-      As someone who loves reading articles (especially on Hacker News) and enjoys sharing links, I kept losing the good stuff. That <a href="https://ciechanow.ski/mechanical-watch/" class="underline">mechanical watch article</a>? Buried under SEO spam. The personal web is drowning in corporate content farms.
+      As someone who loves reading articles (especially on Hacker News) and enjoys sharing links, I kept losing the good
+      stuff. That <a href="https://ciechanow.ski/mechanical-watch/" class="underline">mechanical watch article</a>?
+      Buried under SEO spam. The personal web is drowning in corporate content farms.
     </p>
-    
+
     <p class="mb-4">
-      I tried everything. Pocket was one of them and I really liked it, at least until Mozilla turned it into another ad platform and finally <a href="https://support.mozilla.org/en-US/kb/future-of-pocket" class="underline">shut it down</a>. There are other options, but I at this point I wanted my own solution. So I built Pensive.
+      I tried everything. Pocket was one of them and I really liked it, at least until Mozilla turned it into another ad
+      platform and finally <a href="https://support.mozilla.org/en-US/kb/future-of-pocket" class="underline">shut it
+        down</a>. There are other options, but I at this point I wanted my own solution. So I built Pensive.
     </p>
-    
+
     <p>
-      No growth hacking. No daily recommendations you'll never read. Just a quiet tool that remembers what you found valuable. You can read more about the creation of Pensive in <a href="https://arashtaher.com/blog/introducing-pensive/" class="underline">this</a> blog post</a>. <a href="/contact" class="underline">Let me know</a> what you think.
+      No growth hacking. No daily recommendations you'll never read. Just a quiet tool that remembers what you found
+      valuable. You can read more about the creation of Pensive in <a
+        href="https://arashtaher.com/blog/introducing-pensive/" class="underline">this</a> blog post</a>. <a
+        href="/contact" class="underline">Let me know</a> what you think.
     </p>
   </div>
 
   <!-- Pricing -->
   <div class="mb-16">
     <h2 class="text-2xl font-bold mb-8 border-b-2 border-black pb-2">Pricing</h2>
-    
+
     <div class="grid md:grid-cols-2 gap-8">
       <div class="border border-black p-6">
         <h3 class="font-bold text-xl mb-4">Free</h3>
@@ -189,7 +211,7 @@
         </ul>
         <a href="/signup" class="bg-gray-100 text-black px-4 py-2 font-bold hover:bg-gray-300">START FREE</a>
       </div>
-      
+
       <div class="border-2 border-black p-6 bg-black text-white">
         <h3 class="font-bold text-xl mb-4">Premium - $5/month</h3>
         <ul class="space-y-2 mb-6">
@@ -212,71 +234,106 @@
 </div>
 
 <script>
-  document.getElementById('demo-extract').addEventListener('click', async function() {
-    const url = document.getElementById('demo-url').value;
-    if (!url) return;
-    
-    // Show loading, hide results
-    document.getElementById('demo-loading').classList.remove('hidden');
-    document.getElementById('demo-result').classList.add('hidden');
-    document.getElementById('demo-error').classList.add('hidden');
-    document.getElementById('demo-signup-section').classList.add('hidden');
-    
-    try {
-      const response = await fetch('/api/demo/extract', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url })
-      });
-      
-      if (!response.ok) {
-        if (response.status === 429) {
-          // Parse rate limit response to check for signup flag
-          const errorData = await response.json();
-          if (errorData.show_signup) {
-            throw new Error('SHOW_SIGNUP:' + errorData.error);
-          }
-          throw new Error('Rate limit exceeded');
+  document.addEventListener('DOMContentLoaded', function () {
+    const sliderTrack = document.getElementById('slider-track');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const dots = document.querySelectorAll('.slider-dot');
+    const captions = document.querySelectorAll('#slide-caption span');
+
+    let currentSlide = 0;
+    const totalSlides = 5;
+
+    function updateSlider() {
+      // Move the slider
+      const translateX = -(currentSlide * 100);
+      sliderTrack.style.transform = `translateX(${translateX}%)`;
+
+      // Update dots
+      dots.forEach((dot, index) => {
+        if (index === currentSlide) {
+          dot.classList.remove('bg-gray-300', 'hover:bg-gray-400');
+          dot.classList.add('bg-sky-600');
+        } else {
+          dot.classList.remove('bg-sky-600');
+          dot.classList.add('bg-gray-300', 'hover:bg-gray-400');
         }
-        throw new Error('Failed to process URL');
-      }
-      
-      const data = await response.json();
-      
-      // Show results
-      document.getElementById('demo-title').textContent = data.title;
-      document.getElementById('demo-content').textContent = data.content.substring(0, 300) + '...';
-      
-      if (data.summary) {
-        document.getElementById('demo-summary').textContent = data.summary;
-        document.getElementById('demo-summary-section').classList.remove('hidden');
-      }
-      
-      document.getElementById('demo-result').classList.remove('hidden');
-      
-    } catch (error) {
-      let errorMessage = 'Error processing URL: ' + error.message;
-      let showSignupSection = false;
-      
-      if (error.message.startsWith('SHOW_SIGNUP:')) {
-        errorMessage = error.message.replace('SHOW_SIGNUP:', '');
-        showSignupSection = true;
-      } else if (error.message.includes('429') || error.message.includes('Rate limit')) {
-        errorMessage = 'Rate limit exceeded. You can try 3 URLs per 10 minutes. Please wait before trying again.';
-      }
-      
-      document.getElementById('demo-error').classList.remove('hidden');
-      
-      // Show or hide signup section based on flag
-      if (showSignupSection) {
-        document.getElementById('demo-signup-section').classList.remove('hidden');
-      } else {
-        document.getElementById('demo-signup-section').classList.add('hidden');
-      }
-    } finally {
-      document.getElementById('demo-loading').classList.add('hidden');
+      });
+
+      // Update captions
+      captions.forEach((caption, index) => {
+        if (index === currentSlide) {
+          caption.classList.remove('hidden');
+        } else {
+          caption.classList.add('hidden');
+        }
+      });
     }
+
+    function nextSlide() {
+      currentSlide = (currentSlide + 1) % totalSlides;
+      updateSlider();
+    }
+
+    function prevSlide() {
+      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+      updateSlider();
+    }
+
+    function goToSlide(slideIndex) {
+      currentSlide = slideIndex;
+      updateSlider();
+    }
+
+    // Event listeners
+    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', prevSlide);
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => goToSlide(index));
+    });
+
+    // Auto-play functionality (optional - pauses on hover)
+    let autoPlayInterval = setInterval(nextSlide, 5000);
+
+    const sliderContainer = document.querySelector('.relative.max-w-4xl');
+    sliderContainer.addEventListener('mouseenter', () => {
+      clearInterval(autoPlayInterval);
+    });
+
+    sliderContainer.addEventListener('mouseleave', () => {
+      autoPlayInterval = setInterval(nextSlide, 5000);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+      }
+    });
+
+    // Touch/swipe support for mobile
+    let startX = 0;
+    let endX = 0;
+
+    sliderTrack.addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    sliderTrack.addEventListener('touchend', (e) => {
+      endX = e.changedTouches[0].clientX;
+      const threshold = 50; // minimum swipe distance
+
+      if (startX - endX > threshold) {
+        nextSlide(); // swipe left - go to next
+      } else if (endX - startX > threshold) {
+        prevSlide(); // swipe right - go to previous
+      }
+    });
   });
 </script>
+
 
 {{template "footer" .}}
