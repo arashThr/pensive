@@ -125,18 +125,23 @@ func (as *TokenModel) Get(userId types.UserId) ([]ApiToken, error) {
 
 func (as *TokenModel) User(token string) (*User, error) {
 	tokenHash := as.hash(token)
-	var user User
 
-	row := as.Pool.QueryRow(context.Background(), `
-		SELECT users.id, email, password_hash, subscription_status
+	rows, err := as.Pool.Query(context.Background(), `
+		SELECT *
 		FROM users
 		JOIN api_tokens ON users.id = api_tokens.user_id
 		WHERE api_tokens.token_hash = $1`, tokenHash)
 
-	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash, &user.SubscriptionStatus)
 	if err != nil {
 		return nil, fmt.Errorf("api user: %w", err)
 	}
+
+	user, err := pgx.CollectExactlyOneRow(rows, pgx.RowToAddrOfStructByName[User])
+
+	if err != nil {
+		return nil, fmt.Errorf("api collect one user: %w", err)
+	}
+
 	// Update token access time
 	_, err = as.Pool.Exec(context.Background(), `
 		UPDATE api_tokens
@@ -145,7 +150,7 @@ func (as *TokenModel) User(token string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("api token update last used: %w", err)
 	}
-	return &user, nil
+	return user, nil
 }
 
 func (as *TokenModel) hash(token string) string {
