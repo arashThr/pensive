@@ -1,62 +1,67 @@
-# Brutalist Design System for Pensive
+# Linear-Inspired Design System for Pensive
 
 ## Typography
-- **Font**: IBM Plex Mono (monospace for everything)
-- **Headings**: Bold, no fancy sizing - just font-bold
-- **Body**: Regular weight
-- **Links**: Underlined, no color change
-- **Emphasis**: Bold text, not color
+- **Font**: IBM Plex Sans (clean sans-serif for everything)
+- **Headings**: Semibold (600) to Bold (700) weight
+- **Body**: Regular (400) to Medium (500) weight
+- **Links**: Medium weight with color change and underlines
+- **Emphasis**: Medium/semibold weight with violet accent color
 
 ## Colors
-- **Primary**: Black (#000000)
-- **Background**: White (#FFFFFF) 
-- **Secondary Background**: Gray-100 (#F3F4F6)
-- **Accent**: None - use bold text instead
-- **Borders**: Black, 2px thick for important elements, 1px for minor
-- **Warning**: Yellow-100 background with black border
-- **Error**: Red-100 background with red-600 border
+- **Primary**: Violet (#8b5cf6)
+- **Background**: White (#ffffff) and Light Gray (#f9fafb)
+- **Text**: Gray-900 (#111827) for headings, Gray-600 (#4b5563) for body
+- **Secondary**: Gray-200 (#e5e7eb) for borders
+- **Success**: Green-600 (#059669) with Green-50 background (#ecfdf5)
+- **Warning**: Amber-600 (#d97706) with Amber-50 background (#fef3c7)
+- **Error**: Red-600 (#dc2626) with Red-50 background (#fef2f2)
 
 ## Layout
-- **No rounded corners** - everything is square
-- **No shadows** - flat design only
-- **Thick borders** (2px) for major sections
-- **Sharp contrast** - black on white, no grays for text
-- **Wide spacing** - plenty of breathing room
+- **Rounded corners** - 8px (lg) for cards, 6px for buttons, 12px (xl) for major containers
+- **Subtle shadows** - soft box shadows for cards and elevated elements
+- **Thin borders** (1px) for most elements
+- **Sophisticated contrast** - gray scale hierarchy with violet accents
+- **Generous spacing** - balanced breathing room with modern proportions
 
 ## Components
 
 ### Buttons
-- **Primary**: `bg-black text-white px-6 py-3 font-bold hover:bg-gray-800`
-- **Secondary**: `border-2 border-black text-black px-4 py-2 font-bold hover:bg-gray-100`
-- **All caps text** for button labels
-- **No rounded corners** - sharp rectangular buttons only
+- **Primary**: `bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors`
+- **Secondary**: `border border-gray-300 text-gray-700 px-6 py-3 font-semibold rounded-lg hover:bg-gray-50 transition-colors`
+- **Danger**: `bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors`
+- **Sentence case** for button labels
+- **Smooth transitions** for hover states
 
 ### Containers
-- **Main sections**: `border-2 border-black p-6`
-- **Emphasis boxes**: `border-l-4 border-black pl-6`
-- **Warnings**: `border-2 border-black p-6 bg-yellow-100`
-- **No rounded corners anywhere**
+- **Cards**: `bg-white border border-gray-200 rounded-xl shadow-sm p-6`
+- **Info boxes**: `bg-gray-50 border border-gray-200 rounded-lg p-6`
+- **Success**: `bg-green-50 border border-green-200 rounded-lg p-6 text-green-800`
+- **Warning**: `bg-amber-50 border border-amber-200 rounded-lg p-6 text-amber-800`
+- **Error**: `bg-red-50 border border-red-200 rounded-lg p-6 text-red-800`
 
 ### Navigation
-- **Header**: `border-b-2 border-black`
-- **Footer**: `border-t-2 border-black`
-- **All caps** for navigation items
-- **Underline on hover** instead of color changes
+- **Header**: `bg-white/80 backdrop-blur-sm border-b border-gray-200`
+- **Footer**: `border-t border-gray-200`
+- **Sentence case** for navigation items
+- **Color and background changes** on hover with smooth transitions
 
 ### Content Hierarchy
-- **H1**: `text-4xl font-bold` (no color, just size)
-- **H2**: `text-2xl font-bold border-b-2 border-black pb-2`
-- **H3**: `font-bold text-lg`
-- **Lists**: Simple bullets (•) or numbers, no fancy styling
+- **H1**: `text-4xl font-bold text-gray-900 mb-4`
+- **H2**: `text-3xl font-bold text-gray-900 mb-6`
+- **H3**: `text-xl font-semibold text-gray-900 mb-4`
+- **Body**: `text-gray-600 leading-relaxed`
+- **Links**: `text-violet-600 hover:text-violet-700 font-medium transition-colors`
 
 ### Interactive Elements
-- **No smooth transitions** - instant state changes
-- **Underlines** for links, not color changes
-- **Bold text** for emphasis instead of colors
-- **Hover states**: Simple background color changes
+- **Smooth transitions** - `transition-colors` and `transition-all` for polished feel
+- **Color changes** for links with optional underlines
+- **Violet accents** for interactive elements
+- **Hover states**: Background, border, and color changes with smooth transitions
 
 ### Loading States & Animations
-- **Spinning wheel**: Use `animate-spin` for loading indicators
+- **Spinning indicators**: `animate-spin` with violet border-top for modern spinners
+- **Smooth transitions**: 200ms ease for most hover states
+- **Gradient backgrounds**: Subtle gradients for hero sections and special areas
 
 ## Content Principles
 - **Direct language** - no marketing fluff
@@ -66,24 +71,25 @@
 - **No corporate speak** - avoid "seamlessly," "powerful," etc.
 
 ## Visual Hierarchy
-1. **Bold typography** creates hierarchy, not colors
-2. **Border thickness** indicates importance
-3. **Spacing** separates sections
-4. **ALL CAPS** for UI elements (buttons, nav)
-5. **Regular case** for content
+1. **Typography weights** and **colors** create hierarchy
+2. **Spacing and borders** indicate importance and grouping
+3. **Violet accents** draw attention to key interactive elements
+4. **Sentence case** for most UI elements
+5. **Gray scale** for content hierarchy (900 for headings, 600 for body)
 
-## Anti-Patterns (Things to Avoid)
-- ❌ Rounded corners
-- ❌ Drop shadows
-- ❌ Gradients
-- ❌ Multiple colors for decoration
-- ❌ Smooth animations
-- ❌ Icon fonts or SVG icons
-- ❌ Fancy hover effects
-- ❌ Corporate marketing language
+## Design Principles (Things to Embrace)
+- ✅ Rounded corners for modern feel
+- ✅ Subtle shadows for depth
+- ✅ Careful use of gradients
+- ✅ Violet accent color for interactivity
+- ✅ Smooth transitions for polish
+- ✅ SVG icons when they add clarity
+- ✅ Sophisticated hover effects
+- ✅ Direct, honest language (avoid corporate speak)
 
 ## Grid & Spacing
-- **Fixed max-width**: `max-w-4xl mx-auto`
-- **Consistent padding**: `px-6` or `px-8`
-- **Vertical rhythm**: `mb-8` or `mb-16` for sections
-- **Simple grid**: Only basic 2-column layouts when needed
+- **Responsive max-width**: `max-w-5xl mx-auto` for main content, `max-w-6xl` for library
+- **Consistent padding**: `px-6` to `px-8` horizontally, `py-8` to `py-16` vertically
+- **Vertical rhythm**: `mb-6` to `mb-16` for sections based on importance
+- **Modern layouts**: Card grids, flexbox, and responsive design patterns
+- **Generous whitespace**: Balanced spacing that feels modern and breathable

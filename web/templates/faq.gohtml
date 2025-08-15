@@ -1,50 +1,40 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-4xl mx-auto">
-  <!-- Page Header -->
+<div class="px-6 py-12 max-w-4xl mx-auto">
   <div class="text-center mb-10">
-    <h1 class="text-2xl font-bold mb-3">FREQUENTLY ASKED QUESTIONS</h1>
-    <p>Everything you need to know about using Pensive to manage your knowledge collection.</p>
+    <h1 class="text-4xl font-bold text-gray-900 mb-4">Frequently asked questions</h1>
+    <p class="text-gray-600 leading-relaxed">Everything you need to know about using Pensive to manage your knowledge collection.</p>
   </div>
-
   {{if .Questions}}
-    <!-- FAQ Grid -->
     <div class="grid md:grid-cols-2 gap-6">
       {{range .Questions}}
         {{template "qa" .}}
       {{end}}
     </div>
   {{else}}
-    <!-- Empty State -->
-    <div class="bg-white border-2 border-black p-8 text-center">
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
       <div class="mb-4">
-        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h3 class="text-lg font-bold mb-2">No FAQs available yet</h3>
-      <p class="mb-6">We're working on adding helpful answers to common questions.</p>
-      <a href="/contact" class="underline">
-        Contact us with your questions →
-      </a>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">No FAQs available yet</h3>
+      <p class="text-gray-600 mb-6">We're working on adding helpful answers to common questions.</p>
+      <a href="/contact" class="text-violet-600 hover:text-violet-700 font-medium underline transition-colors">Contact us with your questions →</a>
     </div>
   {{end}}
-
-  <!-- Contact CTA -->
-  <div class="mt-12 bg-gray-100 border-2 border-black p-8 text-center">
-    <h3 class="font-bold mb-2">Didn't find what you're looking for?</h3>
-    <p class="mb-4">I'm here to help with any questions about Pensive.</p>
-    <a href="/contact" class="bg-black text-white px-4 py-2 font-bold hover:bg-gray-800">
-      GET IN TOUCH
-    </a>
+  <div class="mt-12 bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Didn't find what you're looking for?</h3>
+    <p class="text-gray-600 mb-4">I'm here to help with any questions about Pensive.</p>
+    <a href="/contact" class="bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors">Get in touch</a>
   </div>
 </div>
 
 {{template "footer" .}}
 
 {{define "qa"}}
-<div class="bg-white border-2 border-black p-6">
-  <h3 class="font-bold mb-3">{{.Question}}</h3>
-  <p class="leading-relaxed">{{.Answer}}</p>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+  <h3 class="text-xl font-semibold text-gray-900 mb-3">{{.Question}}</h3>
+  <p class="text-gray-600 leading-relaxed">{{.Answer}}</p>
 </div>
 {{end}}

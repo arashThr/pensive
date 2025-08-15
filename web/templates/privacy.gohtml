@@ -1,43 +1,43 @@
 {{template "header" .}}
 
 <div class="max-w-4xl mx-auto px-6 py-12">
-  <div class="max-w-none">
-    <h1 class="text-3xl font-bold mb-8">PRIVACY POLICY</h1>
+  <div class="prose max-w-none">
+    <h1 class="text-4xl font-bold text-gray-900 mb-8">Privacy Policy</h1>
     
-    <p class="mb-8">
+    <p class="text-gray-600 mb-8">
       <strong>Last updated:</strong> August 2025
     </p>
 
     <div class="space-y-8">
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Overview</h2>
-        <p class="leading-relaxed">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Overview</h2>
+        <p class="text-gray-600 leading-relaxed">
           Pensive is a personal knowledge indexing service that helps you save, organize, and search content you've read online. 
           This privacy policy explains how we collect, use, and protect your information when you use our web application and browser extension.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Information We Collect</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Information We Collect</h2>
         
-        <h3 class="text-xl font-bold mb-3">Account Information</h3>
-        <ul class="list-disc list-inside space-y-2 mb-4">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Account Information</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-600 mb-4">
           <li>Email address (for account creation and authentication)</li>
           <li>Password (encrypted and stored securely)</li>
           <li>Subscription status and billing information (processed through Stripe)</li>
         </ul>
 
-        <h3 class="text-xl font-bold mb-3">Content You Save</h3>
-        <ul class="list-disc list-inside space-y-2 mb-4">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Content You Save</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-600 mb-4">
           <li>URLs of web pages you bookmark</li>
           <li>Page titles and metadata</li>
           <li>Extracted text content from saved pages</li>
-          <li>Clean HTML content (with ads and tracking removed) which will be used for creating the mardown version</li>
+          <li>Clean HTML content (with ads and tracking removed) which will be used for creating the markdown version</li>
           <li>Generated summaries and tags (premium feature using Google Gemini)</li>
         </ul>
 
-        <h3 class="text-xl font-bold mb-3">Technical Information</h3>
-        <ul class="list-disc list-inside space-y-2">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Technical Information</h3>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
           <li>Authentication tokens for browser extension</li>
           <li>Session data for maintaining login state</li>
           <li>Basic analytics (page views, feature usage) via Umami Analytics</li>
@@ -45,8 +45,8 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">How We Use Your Information</h2>
-        <ul class="list-disc list-inside space-y-2">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">How We Use Your Information</h2>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
           <li><strong>Core Service:</strong> Store and index your saved content for personal searchability</li>
           <li><strong>Content Enhancement:</strong> Generate summaries and tags using AI (available for all users)</li>
           <li><strong>Account Management:</strong> Authenticate users and manage subscriptions</li>
@@ -56,22 +56,22 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Browser Extension Privacy</h2>
-        <p class="leading-relaxed mb-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Browser Extension Privacy</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
           Our browser extension only processes data when you explicitly save a page by clicking the extension icon. You have control over how content is captured through your extension settings.
         </p>
 
-        <h3 class="text-xl font-bold mb-3">Content Extraction Methods</h3>
-        <p class="leading-relaxed mb-4">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Content Extraction Methods</h3>
+        <p class="text-gray-600 leading-relaxed mb-4">
           You can choose between two content capture methods in the extension settings:
         </p>
-        <ul class="list-disc list-inside space-y-2 mb-4">
+        <ul class="list-disc list-inside space-y-2 text-gray-600 mb-4">
           <li><strong>Full Page Content Capture (Default, Recommended):</strong> The extension tries to find and extract the main article of the page. We also capture the cleaned HTML content for better searchability and content preservation. This method is needed for sites with complex layouts like forums, Reddit, and Stack Overflow.</li>
           <li><strong>Server-Side Capture Only:</strong> Extension sends only the page URL to Pensive servers, which fetch and process the content. This method will not work on sites with paywalls or complex layouts.</li>
         </ul>
 
-        <p class="leading-relaxed mb-4">The extension:</p>
-        <ul class="list-disc list-inside space-y-2">
+        <p class="text-gray-600 leading-relaxed mb-4">The extension:</p>
+        <ul class="list-disc list-inside space-y-2 text-gray-600">
           <li>Only accesses the current tab when you click "save"</li>
           <li>Captures the cleaned HTML content when full page capture is enabled</li>
           <li>Sends extracted content directly to your Pensive account</li>
@@ -82,8 +82,8 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">User Responsibility for Shared Content</h2>
-        <p class="leading-relaxed mb-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">User Responsibility for Shared Content</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
           When using Enhanced Content Capture, you are responsible for ensuring you do not share content you wish to keep private. While Pensive does not use, analyze, or share your content for any purpose other than providing the bookmarking service, you should exercise caution when saving pages containing:
         </p>
         <ul class="list-disc list-inside space-y-2 mb-4">
@@ -92,14 +92,14 @@
           <li>User-specific content you don't want stored</li>
           <li>Any content you wouldn't want saved to your account</li>
         </ul>
-        <p class="leading-relaxed">
+        <p class="text-gray-600 leading-relaxed">
           You have full control over what content gets saved through your choice of extraction method and which pages you choose to bookmark. You can switch between Enhanced Content Capture and Server-Side Capture Only at any time in the extension settings.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Sharing</h2>
-        <p class="leading-relaxed mb-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Data Sharing</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
           We do not sell, rent, or share your personal information with third parties, except:
         </p>
         <ul class="list-disc list-inside space-y-2">
@@ -111,7 +111,7 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Security</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Data Security</h2>
         <ul class="list-disc list-inside space-y-2">
           <li>All data transmitted over HTTPS encryption</li>
           <li>Passwords are hashed using industry-standard algorithms</li>
@@ -122,10 +122,10 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Management and Your Rights</h2>
-        <p class="leading-relaxed mb-4">You have full control over your data and can manage it through your account settings:</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Data Management and Your Rights</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">You have full control over your data and can manage it through your account settings:</p>
         
-        <h3 class="text-xl font-bold mb-3">Data Access and Portability</h3>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Data Access and Portability</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
           <li><strong>Access:</strong> View all data we have about you through your account dashboard</li>
           <li><strong>Export:</strong> Download your saved content in standard formats (available in Import/Export settings)</li>
@@ -133,17 +133,17 @@
           <li><strong>Correction:</strong> Update or correct any inaccurate information</li>
         </ul>
 
-        <h3 class="text-xl font-bold mb-3">Data Deletion Options</h3>
-        <p class="leading-relaxed mb-2">We provide two levels of data deletion through your account settings:</p>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Data Deletion Options</h3>
+        <p class="text-gray-600 leading-relaxed mb-2">We provide two levels of data deletion through your account settings:</p>
         <ul class="list-disc list-inside space-y-2 mb-4">
           <li><strong>Delete All Content:</strong> Permanently removes all your saved bookmarks, content, and API tokens while keeping your account active. This action cannot be undone.</li>
           <li><strong>Delete Account:</strong> Permanently deletes your entire account including all content, settings, session data, and subscription information. This action cannot be undone.</li>
         </ul>
-        <p class="leading-relaxed mb-4">
+        <p class="text-gray-600 leading-relaxed mb-4">
           <strong>Important:</strong> Before using either deletion option, we strongly recommend exporting your data first as these actions are irreversible. You can find export options in the Import/Export tab of your account settings.
         </p>
 
-        <h3 class="text-xl font-bold mb-3">Individual Content Management</h3>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Individual Content Management</h3>
         <ul class="list-disc list-inside space-y-2">
           <li><strong>Individual Bookmarks:</strong> Delete specific bookmarks from your library at any time</li>
           <li><strong>Bulk Actions:</strong> Select and manage multiple bookmarks simultaneously</li>
@@ -152,7 +152,7 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Beta Service Notice</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Beta Service Notice</h2>
         <div class="p-4 bg-yellow-100 border-2 border-black mb-6">
           <div class="flex items-start gap-3">
             <div>
@@ -171,7 +171,7 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Data Retention</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Data Retention</h2>
         <ul class="list-disc list-inside space-y-2">
           <li>Account data: Retained while your account is active</li>
           <li>Saved content: Retained until you delete it or close your account</li>
@@ -182,21 +182,21 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Changes to This Policy</h2>
-        <p class="leading-relaxed">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Changes to This Policy</h2>
+        <p class="text-gray-600 leading-relaxed">
           We may update this privacy policy from time to time. We will notify users of any material changes via email or through the service. 
           Your continued use of Pensive after changes constitutes acceptance of the updated policy.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Legal Jurisdiction and GDPR Compliance</h2>
-        <p class="leading-relaxed mb-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Legal Jurisdiction and GDPR Compliance</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
           Pensive is operated from Stockholm, Sweden, and our data processing activities are governed by Swedish data protection laws and the European Union's General Data Protection Regulation (GDPR).
         </p>
         
-        <h3 class="text-xl font-bold mb-3">GDPR Rights for EU/EEA Users</h3>
-        <p class="leading-relaxed mb-2">Under GDPR, you have additional rights including:</p>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">GDPR Rights for EU/EEA Users</h3>
+        <p class="text-gray-600 leading-relaxed mb-2">Under GDPR, you have additional rights including:</p>
         <ul class="list-disc list-inside space-y-2 mb-4">
           <li><strong>Right to be forgotten:</strong> Request complete deletion of your personal data</li>
           <li><strong>Data protection authority complaints:</strong> File complaints with your local supervisory authority</li>
@@ -204,7 +204,7 @@
           <li><strong>Data minimization:</strong> We only collect and process data necessary for our services</li>
         </ul>
 
-        <h3 class="text-xl font-bold mb-3">Data Processing Legal Basis</h3>
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">Data Processing Legal Basis</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
           <li><strong>Account creation and management:</strong> Contract performance</li>
           <li><strong>Content saving and search:</strong> Contract performance and legitimate interest</li>
@@ -213,19 +213,19 @@
           <li><strong>Service improvement:</strong> Legitimate interest</li>
         </ul>
 
-        <h3 class="text-xl font-bold mb-3">International Data Transfers</h3>
-        <p class="leading-relaxed">
+        <h3 class="text-2xl font-semibold text-gray-900 mb-3">International Data Transfers</h3>
+        <p class="text-gray-600 leading-relaxed">
           Some of our service providers (Google Gemini for AI features, Stripe for payments) may process data outside the EU/EEA. These transfers are protected by adequacy decisions, standard contractual clauses, or other appropriate safeguards as required by GDPR.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">Contact</h2>
-        <p class="leading-relaxed mb-4">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Contact</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
           If you have questions about this privacy policy or how we handle your data, please contact us at:
           <a href="mailto:arash.thr@live.com" class="underline">arash.thr@live.com</a>
         </p>
-        <p class="leading-relaxed">
+        <p class="text-gray-600 leading-relaxed">
           <strong>Data Protection Officer contact:</strong> For GDPR-related inquiries, EU/EEA users can reach our data protection contact at the same email address.
         </p>
       </section>
@@ -233,4 +233,4 @@
   </div>
 </div>
 
-{{template "footer" .}} 
+{{template "footer" .}}

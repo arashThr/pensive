@@ -1,59 +1,59 @@
 <div class="space-y-8">
   <div>
-    <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">DATA MANAGEMENT</h2>
-    <p class="text-lg mb-6">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
+    <h2 class="text-3xl font-bold text-gray-900 mb-6">Data management</h2>
+    <p class="text-gray-600 leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
   </div>
 
   <!-- Delete All Content -->
-  <div class="border-2 border-red-600 bg-red-50 p-6">
-    <h3 class="text-xl font-bold mb-2 text-red-800">DELETE ALL CONTENT</h3>
-    <p class="mb-4">This will permanently delete all your saved bookmarks and their content. Your account will remain active and you can continue using Pensive.</p>
-    <p class="text-sm font-mono mb-4 text-red-700">⚠️ This action cannot be undone. Consider exporting your data first from the IMPORT/EXPORT tab.</p>
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
+    <h3 class="text-xl font-semibold mb-2 text-red-900">Delete all content</h3>
+    <p class="mb-4 text-red-700">This will permanently delete all your saved bookmarks and their content. Your account will remain active and you can continue using Pensive.</p>
+    <p class="text-sm mb-4 text-red-600">⚠️ This action cannot be undone. Consider exporting your data first from the Import/Export tab.</p>
     <button 
       id="delete-content-btn"
-      class="px-4 py-2 bg-red-600 text-white font-bold hover:bg-red-700 border-2 border-red-600"
+      class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
       onclick="showDeleteContentModal()"
     >
-      DELETE ALL CONTENT
+      Delete all content
     </button>
   </div>
 
   <!-- Delete Account -->
-  <div class="border-2 border-red-800 bg-red-100 p-6">
-    <h3 class="text-xl font-bold mb-2 text-red-900">DELETE ACCOUNT</h3>
-    <p class="mb-4">This will permanently delete your entire account, including all content, settings, subscription information, and API tokens.</p>
-    <p class="text-sm font-mono mb-4 text-red-800">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-red-800">
+    <h3 class="text-xl font-semibold mb-2 text-red-900">Delete account</h3>
+    <p class="mb-4 text-red-700">This will permanently delete your entire account, including all content, settings, subscription information, and API tokens.</p>
+    <p class="text-sm mb-4 text-red-600">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
     <button 
       id="delete-account-btn"
-      class="px-4 py-2 bg-red-800 text-white font-bold hover:bg-red-900 border-2 border-red-800"
+      class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
       onclick="showDeleteAccountModal()"
     >
-      DELETE ACCOUNT
+      Delete account
     </button>
   </div>
 </div>
 
 <!-- Delete Content Modal -->
 <div id="delete-content-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-  <div class="bg-white border-4 border-black p-8 max-w-md mx-4">
-    <h3 class="text-xl font-bold mb-4">CONFIRM CONTENT DELETION</h3>
-    <p class="mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
-    <p class="text-sm mb-6 text-red-600 font-bold">This action cannot be undone. Have you backed up your data?</p>
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 max-w-md mx-4">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Confirm content deletion</h3>
+    <p class="text-gray-600 leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
+    <p class="text-sm mb-6 text-red-600 font-semibold">This action cannot be undone. Have you backed up your data?</p>
     
     <div class="flex gap-4">
       <button 
-        class="px-4 py-2 bg-gray-200 text-black font-bold border-2 border-black"
+        class="border border-gray-300 text-gray-700 px-6 py-3 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
         onclick="hideDeleteContentModal()"
       >
-        CANCEL
+        Cancel
       </button>
       <form action="/users/delete-content" method="POST" style="display: inline;">
         {{csrfField}}
         <button 
           type="submit"
-          class="px-4 py-2 bg-red-600 text-white font-bold border-2 border-red-600"
+          class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
         >
-          YES, DELETE ALL CONTENT
+          Yes, delete all content
         </button>
       </form>
     </div>
@@ -62,25 +62,25 @@
 
 <!-- Delete Account Modal -->
 <div id="delete-account-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-  <div class="bg-white border-4 border-black p-8 max-w-md mx-4">
-    <h3 class="text-xl font-bold mb-4">CONFIRM ACCOUNT DELETION</h3>
-    <p class="mb-4">Are you absolutely sure you want to delete your entire account?</p>
-    <p class="text-sm mb-6 text-red-600 font-bold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
+  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-8 max-w-md mx-4">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Confirm account deletion</h3>
+    <p class="text-gray-600 leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
+    <p class="text-sm mb-6 text-red-600 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
     
     <div class="flex gap-4">
       <button 
-        class="px-4 py-2 bg-gray-200 text-black font-bold border-2 border-black"
+        class="border border-gray-300 text-gray-700 px-6 py-3 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
         onclick="hideDeleteAccountModal()"
       >
-        CANCEL
+        Cancel
       </button>
       <form action="/users/delete-account" method="POST" style="display: inline;">
         {{csrfField}}
         <button 
           type="submit"
-          class="px-4 py-2 bg-red-800 text-white font-bold border-2 border-red-800"
+          class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
         >
-          YES, DELETE MY ACCOUNT
+          Yes, delete my account
         </button>
       </form>
     </div>

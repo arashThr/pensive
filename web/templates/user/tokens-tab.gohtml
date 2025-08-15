@@ -1,39 +1,44 @@
 <div class="space-y-8">
   <!-- Header Section -->
   <div class="mb-8">
-    <h2 class="text-2xl font-bold mb-4 border-b-2 border-black pb-2">API TOKENS</h2>
-    <p class="text-lg">Apps and services connected to your account.</p>
+    <h2 class="text-xl font-bold mb-4 text-gray-900">API tokens</h2>
+    <p class="text-gray-600">Apps and services connected to your account.</p>
   </div>
 
   <!-- Integrations List -->
   <div id="token-container">
     {{if .Tokens}}
-      <div class="border-2 border-black bg-white">
+      <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <!-- Desktop Table -->
         <div class="hidden md:block">
           <table class="w-full">
-            <thead class="border-b-2 border-black">
+            <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="text-left px-6 py-3 text-sm font-bold">INTEGRATION</th>
-                <th class="text-left px-6 py-3 text-sm font-bold">CONNECTED</th>
-                <th class="text-left px-6 py-3 text-sm font-bold">LAST USED</th>
-                <th class="w-16 px-6 py-3"></th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-900">Integration</th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-900">Connected</th>
+                <th class="text-left px-6 py-4 text-sm font-semibold text-gray-900">Last used</th>
+                <th class="w-16 px-6 py-4"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
               {{range $index, $token := .Tokens}}
-                <tr id="token-{{$index}}" class="hover:bg-gray-100">
-                  <td class="px-6 py-4 font-mono">
-                    <div class="font-bold">
-                      {{$token.TokenSource}}
+                <tr id="token-{{$index}}" class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </div>
+                      <div class="font-semibold text-gray-900">{{$token.TokenSource}}</div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
-                  <td class="px-6 py-4 text-sm">
+                  <td class="px-6 py-4 text-sm text-gray-600">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
+                  <td class="px-6 py-4 text-sm text-gray-600">
                     {{if $token.LastUsedAt}}
                       {{$token.LastUsedAt.Format "Jan 2, 2006"}}
                     {{else}}
-                      <span>NEVER</span>
+                      <span class="text-gray-400">Never</span>
                     {{end}}
                   </td>
                   <td class="px-6 py-4 text-right">
@@ -42,13 +47,13 @@
                       <input type="hidden" name="token_id" value="{{$token.ID}}">
                       <button 
                         type="button"
-                        class="px-3 py-2 bg-black text-white font-bold hover:bg-gray-800"
+                        class="px-3 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
                         hx-post="/users/delete-token" 
                         hx-confirm="Are you sure?" 
                         hx-target="#token-{{$index}}" 
                         hx-swap="outerHTML"
                         title="Disconnect integration">
-                        REMOVE
+                        Remove
                       </button>
                     </form>
                   </td>
@@ -58,16 +63,23 @@
           </table>
         </div>
         <!-- Mobile Cards -->
-        <div class="md:hidden divide-y-2 divide-black">
+        <div class="md:hidden divide-y divide-gray-100">
           {{range $index, $token := .Tokens}}
-            <div id="token-{{$index}}" class="p-4">
+            <div id="token-{{$index}}" class="p-6">
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
-                  <p class="font-bold">{{$token.TokenSource}}</p>
-                  <div class="text-xs mt-1">
-                    <div>CONNECTED {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
-                    <div>
-                      LAST USED: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}NEVER{{end}}
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </div>
+                    <p class="font-semibold text-gray-900">{{$token.TokenSource}}</p>
+                  </div>
+                  <div class="text-sm space-y-1 pl-11">
+                    <div class="text-gray-600">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
+                    <div class="text-gray-600">
+                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-gray-400">Never</span>{{end}}
                     </div>
                   </div>
                 </div>
@@ -76,13 +88,13 @@
                   <input type="hidden" name="token_id" value="{{$token.ID}}">
                   <button 
                     type="button"
-                    class="px-3 py-2 bg-black text-white font-bold hover:bg-gray-800"
+                    class="px-3 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
                     hx-post="/users/delete-token" 
                     hx-confirm="Are you sure?" 
                     hx-target="#token-{{$index}}" 
                     hx-swap="outerHTML"
                     title="Disconnect integration">
-                    REMOVE
+                    Remove
                   </button>
                 </form>
               </div>
@@ -90,13 +102,30 @@
           {{end}}
         </div>
       </div>
-      <p class="text-xs mt-3">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
+      <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <p class="text-sm text-amber-800">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
+        </div>
+      </div>
     {{else}}
       <!-- Empty State -->
-      <div class="border-2 border-black bg-gray-100 p-8 text-center">
-        <h3 class="font-bold mb-2">NO TOKENS CONNECTED</h3>
-        <p class="mb-4">Connect apps and services to save and access your bookmarks.</p>
-        <a href="/integrations" class="underline font-bold">VIEW INTEGRATIONS</a>
+      <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-12 text-center">
+        <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold mb-3 text-gray-900">No tokens connected</h3>
+        <p class="mb-8 text-gray-600 max-w-sm mx-auto">Connect apps and services to save and access your bookmarks.</p>
+        <a href="/integrations" class="inline-flex items-center gap-2 bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          View integrations
+        </a>
       </div>
     {{end}}
   </div>

@@ -2,32 +2,32 @@
 
 <div class="px-8 py-16 max-w-4xl mx-auto">
   <div class="mb-16">
-    <h1 class="text-4xl font-bold mb-8 border-b-2 border-black pb-2">IMPORT FROM POCKET</h1>
-    <p class="text-lg">Upload your Pocket export file to migrate your saved articles.</p>
+    <h1 class="text-4xl font-bold text-gray-900 mb-6">Import from Pocket</h1>
+    <p class="text-gray-600 leading-relaxed">Upload your Pocket export file to migrate your saved articles.</p>
   </div>
-  <section class="border-2 border-black bg-white p-8">
-    <h3 class="text-2xl font-bold mb-6">UPLOAD EXPORT FILE</h3>
+  <section class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+    <h3 class="text-2xl font-bold text-gray-900 mb-6">Upload export file</h3>
     <form action="/users/pocket-import" method="post" enctype="multipart/form-data" class="space-y-6">
       {{csrfField}}
       <input type="hidden" name="source" value="pocket">
       <div>
-        <label for="import-file" class="block text-sm font-bold mb-2">CHOOSE ZIP FILE</label>
+        <label for="import-file" class="block text-sm font-semibold text-gray-900 mb-2">Choose ZIP file</label>
         <div class="relative">
-          <input id="import-file" name="import-file" type="file" accept=".zip" required class="block w-full border-2 border-black px-4 py-3 font-mono hover:bg-gray-100 cursor-pointer">
+          <input id="import-file" name="import-file" type="file" accept=".zip" required class="block w-full border border-gray-300 rounded-lg px-4 py-3 text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
           <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
             </svg>
           </div>
         </div>
-        <p class="text-xs mt-2 font-bold">CLICK ABOVE TO SELECT YOUR ZIP FILE</p>
+        <p class="text-xs mt-2 text-gray-500">Click above to select your ZIP file</p>
       </div>
-      <button type="submit" class="w-full py-3 px-6 bg-black text-white font-bold">BEGIN IMPORT</button>
+      <button type="submit" class="w-full py-3 px-6 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 transition-colors">Begin import</button>
     </form>
-    <div class="mt-8 border-t-2 border-black pt-8">
-      <h4 class="font-bold mb-2">HOW TO EXPORT FROM POCKET</h4>
-      <ol class="list-decimal list-inside space-y-1">
-        <li>Go to <a href="https://getpocket.com/export" target="_blank" class="underline">getpocket.com/export</a></li>
+    <div class="mt-8 border-t border-gray-200 pt-8">
+      <h4 class="font-semibold text-gray-900 mb-2">How to export from Pocket</h4>
+      <ol class="list-decimal list-inside space-y-1 text-gray-600">
+        <li>Go to <a href="https://getpocket.com/export" target="_blank" class="text-violet-600 hover:text-violet-700 font-medium transition-colors">getpocket.com/export</a></li>
         <li>Click "Export CSV file"</li>
         <li>Download the ZIP file when ready</li>
         <li>Upload that ZIP file here</li>
