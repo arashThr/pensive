@@ -50,6 +50,10 @@
 - [x] Fix redirects: http://www.defmacro.org/ramblings/fp.html
 - [x] Fix the join problem with path: `https://apps.arashtaher.com//extension/auth`
 - [x] Flex for the table
+- [x] Fix the Caddy file issue
+- [x] Don't fetch duplicates
+- [x] Fix the HTTP issue on production 
+    - tls: failed to verify certificate: x509: certificate signed by unknown authority: Scratch did not have ce-certificates
 
 ## Features
 - [ ] Ping server from Telegram bot to check the validity of the token
@@ -207,13 +211,12 @@
 - [ ] Bookmark only the selected text
 - [ ] Separate text extraction service
 - [ ] Extension: Future search
-- [ ] Google login
+- [x] Google login
 - [ ] Twitter posts
-- [ ] Look for changes in bookmarks parent folder
 - [ ] Tags from browser
 - [ ] Slash command for bookmarks in Telegram
 - [ ] Blue/green deployment
-- [ ] Accept Postgres connection strings so people can own their data
+- [ ] Accept Postgres connection strings so people can own their data(?)
 
 ### Stripe
 - [x] change `IsSubscribed` to subStatus
@@ -225,13 +228,6 @@
 - [ ] correct type for stripe amount in postgres
 - [ ] update cuurent period end time after invoice paid
 - [ ] use `4000 0000 0000 0341` to simulate payement failed
-
-## Fix
-- [x] Fix the Caddy file issue
-- [x] Don't fetch duplicates
-- [x] Fix the HTTP issue on production 
-    - tls: failed to verify certificate: x509: certificate signed by unknown authority: Scratch did not have ce-certificates
-- [ ] Remove telebot: Thousands of dependecies
 
 ## Integrations
 
