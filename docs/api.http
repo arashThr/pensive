@@ -17,7 +17,6 @@ Authorization: Bearer {{token}}
 {
     // "link": "https://ieeexplore.ieee.org/document/628099"
     "link": "https://stackoverflow.com/questions/75043889/manifest-v3-background-scripts-service-worker-on-firefox"
-    // "link": "http://localhost:3000/xss"
 }
 
 ### Search bookmark

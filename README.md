@@ -74,7 +74,7 @@ migrate -path db/migrations -database 'postgres://postgres:postgres@localhost:54
 Build the Ready-to-Publish zip file for extensions by running this command:
 ```bash
 cd integrations
-./build.sh  # Builds both Chrome and Firefox extensions
+./release.sh  # Builds both Chrome and Firefox extensions
 ```
 Build process with use the latest git tag to version the extension.
 

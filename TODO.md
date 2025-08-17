@@ -1,8 +1,4 @@
-## Tech
-- Check Cloudflare [D1](https://developers.cloudflare.com/d1/) for database
-- Get `recollectra.com` domain
-
-## Tasks
+# TODOs
 
 ## Fixes
 - [ ] getAllBookmarksForUser
@@ -140,8 +136,6 @@
 - [x] Generate API  tokens
 
 ## Changes
-- [ ] "Failed to parse image URL"
-- [ ] Remove password - Use email validation
 - [ ] readability.Check for links that don't have HTML
 - [ ] Use temp dir for pocket imports
 - [ ] If API is not set, or incorrect, don't send the request
@@ -153,10 +147,10 @@
     - [ ] Show the orginator of the token and date
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
-- [ ] Add passwordless login for production
-- [ ] Make the logo red - Add red buttons for actions
 - [ ] Write down about tech stack in FAQ
-- [ ] Update logging in API to use context logger
+- [x] Update logging in API to use context logger
+- [x] Add passwordless login for production
+- [x] Remove password - Use email validation
 - [x] ~~Add verified to user table~~: Use passwordless login
     - ~~[ ] Verify email~~
 - [x] Extension

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# Usage: ./build.sh chrome|firefox
+# Usage: ./release.sh chrome|firefox
 # Version is the latest tag in the repo
 
 version=$(git describe --tags --abbrev=0)

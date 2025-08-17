@@ -1,4 +1,3 @@
-.idea
 server_binary
 cmd/exp
 .env
@@ -6,3 +5,4 @@ uploads
 data
 integrations/dist
 web/assets/style.css
+.claude
