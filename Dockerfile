@@ -16,6 +16,6 @@ FROM alpine
 WORKDIR /app
 COPY ./web/assets ./web/assets
 COPY --from=build /app/server ./server
-COPY --from=tailwind-builder /style.css ./assets/style.css
+COPY --from=tailwind-builder /style.css ./web/assets/style.css
 COPY .env .env
 CMD [ "./server" ]
