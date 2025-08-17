@@ -11,7 +11,7 @@
       margin: 0;
       padding: 0;
       background-color: #ffffff;
-      color: #000000;
+      color: #374151;
       line-height: 1.5;
     }
     
@@ -24,7 +24,7 @@
       align-items: center;
       margin-bottom: 16px;
       padding-bottom: 16px;
-      border-bottom: 2px solid #000000;
+      border-bottom: 1px solid #e5e7eb;
     }
     
     .logo {
@@ -35,33 +35,34 @@
     
     .title {
       font-size: 16px;
-      font-weight: 700;
-      color: #000000;
+      font-weight: 600;
+      color: #111827;
       flex: 1;
-      text-transform: uppercase;
     }
     
     .beta-badge {
       font-size: 10px;
-      font-weight: 700;
-      color: #000000;
+      font-weight: 600;
+      color: #8b5cf6;
       background: #f3f4f6;
       padding: 2px 6px;
-      border: 1px solid #000000;
+      border: 1px solid #8b5cf6;
+      border-radius: 4px;
       text-transform: uppercase;
     }
     
     .page-info {
       margin-bottom: 16px;
       padding: 16px;
-      background-color: #f3f4f6;
-      border: 2px solid #000000;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
     }
     
     .page-title {
       font-size: 14px;
-      font-weight: 700;
-      color: #000000;
+      font-weight: 600;
+      color: #111827;
       margin-bottom: 6px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -73,7 +74,7 @@
     
     .page-url {
       font-size: 12px;
-      color: #000000;
+      color: #6b7280;
       word-break: break-all;
       display: -webkit-box;
       -webkit-line-clamp: 1;
@@ -88,33 +89,38 @@
       margin-bottom: 16px;
       padding: 12px 16px;
       font-size: 14px;
-      font-weight: 700;
-      border: 2px solid #000000;
+      font-weight: 600;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
     }
     
     .status.saved {
-      background-color: #ffffff;
-      color: #000000;
+      background-color: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
     }
     
     .status.not-saved {
-      background-color: #f3f4f6;
-      color: #000000;
+      background-color: #fef3c7;
+      color: #92400e;
+      border-color: #fbbf24;
     }
     
     .status.loading {
       background-color: #f3f4f6;
-      color: #000000;
+      color: #374151;
     }
     
     .status.error {
-      background-color: #f3f4f6;
-      color: #000000;
+      background-color: #fef2f2;
+      color: #991b1b;
+      border-color: #fca5a5;
     }
     
     .status.not-configured {
-      background-color: #f3f4f6;
-      color: #000000;
+      background-color: #f9fafb;
+      color: #374151;
+      border-color: #e5e7eb;
       padding: 0;
     }
     
@@ -125,10 +131,9 @@
     
     .not-configured-message {
       margin-bottom: 12px;
-      font-weight: 700;
+      font-weight: 600;
       font-size: 14px;
-      color: #000000;
-      text-transform: uppercase;
+      color: #111827;
     }
     
     .not-configured-actions {
@@ -141,22 +146,24 @@
     }
     
     .not-configured-btn {
-      color: #000000;
-      font-weight: 700;
+      color: #8b5cf6;
+      font-weight: 600;
       text-decoration: none;
       font-size: 11px;
       white-space: nowrap;
       padding: 8px 12px;
       background-color: #ffffff;
-      border: 2px solid #000000;
-      text-transform: uppercase;
+      border: 1px solid #8b5cf6;
+      border-radius: 6px;
       margin: 4px;
       min-width: 80px;
       text-align: center;
+      transition: all 0.2s;
     }
     
     .not-configured-btn:hover {
-      background-color: #f3f4f6;
+      background-color: #8b5cf6;
+      color: #ffffff;
     }
     
     .status-icon {
@@ -191,16 +198,17 @@
     .btn {
       flex: 1;
       padding: 12px 16px;
-      border: 2px solid #000000;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       text-decoration: none;
-      text-transform: uppercase;
       font-family: 'IBM Plex Sans', sans-serif;
+      transition: all 0.2s;
     }
     
     .btn:disabled {
@@ -209,44 +217,51 @@
     }
     
     .btn-primary {
-      background-color: #000000;
+      background-color: #8b5cf6;
       color: white;
+      border-color: #8b5cf6;
     }
     
     .btn-primary:hover:not(:disabled) {
-      background-color: #333333;
+      background-color: #7c3aed;
+      border-color: #7c3aed;
     }
     
     .btn-success {
-      background-color: #000000;
+      background-color: #059669;
       color: white;
+      border-color: #059669;
     }
     
     .btn-success:hover:not(:disabled) {
-      background-color: #333333;
+      background-color: #047857;
+      border-color: #047857;
     }
     
     .btn-secondary {
-      background-color: #f3f4f6;
-      color: #000000;
+      background-color: #ffffff;
+      color: #374151;
+      border-color: #d1d5db;
     }
     
     .btn-secondary:hover:not(:disabled) {
-      background-color: #e5e7eb;
+      background-color: #f9fafb;
     }
     
     .btn-danger {
-      background-color: #000000;
+      background-color: #dc2626;
       color: white;
+      border-color: #dc2626;
     }
     
     .btn-danger:hover:not(:disabled) {
-      background-color: #333333;
+      background-color: #b91c1c;
+      border-color: #b91c1c;
     }
     
     .footer {
       padding-top: 16px;
-      border-top: 2px solid #000000;
+      border-top: 1px solid #e5e7eb;
     }
     
     .footer-links {
@@ -256,19 +271,20 @@
     }
     
     .footer-link {
-      color: #000000;
+      color: #6b7280;
       text-decoration: none;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
       display: flex;
       align-items: center;
       padding: 6px 12px;
-      text-transform: uppercase;
+      border-radius: 6px;
+      transition: all 0.2s;
     }
     
     .footer-link:hover {
-      color: #000000;
-      background-color: #f3f4f6;
+      color: #8b5cf6;
+      background-color: #f9fafb;
     }
     
     .footer-link svg {
@@ -281,40 +297,49 @@
       display: inline-block;
       width: 18px;
       height: 18px;
-      border: 2px solid #000000;
-      background: #000000;
+      border: 2px solid #d1d5db;
+      border-top: 2px solid #8b5cf6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
       margin-right: 10px;
       flex-shrink: 0;
     }
     
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     .connection-required {
-      background-color: #f3f4f6;
-      color: #000000;
-      border: 2px solid #000000;
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fbbf24;
+      border-radius: 8px;
       text-align: center;
       padding: 16px;
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 600;
     }
     
     .connection-required a {
-      color: #000000;
-      font-weight: 700;
+      color: #8b5cf6;
+      font-weight: 600;
       text-decoration: underline;
     }
     
     .connection-required a:hover {
-      color: #000000;
+      color: #7c3aed;
     }
     
     .auto-save-notice {
       margin-bottom: 16px;
       padding: 12px 16px;
-      background-color: #f3f4f6;
-      border: 2px solid #000000;
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
       font-size: 13px;
-      color: #000000;
-      font-weight: 700;
+      color: #1e40af;
+      font-weight: 600;
     }
     
     .notice-content {

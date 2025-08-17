@@ -13,8 +13,8 @@
 
       body {
         font-family: 'IBM Plex Sans', sans-serif;
-        background-color: #ffffff;
-        color: #000000;
+        background-color: #f9fafb;
+        color: #374151;
         line-height: 1.5;
         min-height: 100vh;
       }
@@ -27,8 +27,10 @@
 
       .card {
         background: white;
-        border: 2px solid #000000;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
         padding: 32px;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
       }
 
       /* Header */
@@ -37,7 +39,7 @@
         align-items: center;
         margin-bottom: 32px;
         padding-bottom: 16px;
-        border-bottom: 2px solid #000000;
+        border-bottom: 1px solid #e5e7eb;
       }
 
       .header-icon {
@@ -52,8 +54,7 @@
       .header h1 {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #000000;
-        text-transform: uppercase;
+        color: #111827;
       }
 
       /* Status */
@@ -64,7 +65,8 @@
         margin-bottom: 24px;
         font-weight: 600;
         font-size: 0.875rem;
-        border: 2px solid #000000;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
       }
 
       .status-icon {
@@ -74,13 +76,15 @@
       }
 
       .status.connected {
-        background: #ffffff;
-        color: #000000;
+        background: #ecfdf5;
+        color: #065f46;
+        border-color: #a7f3d0;
       }
 
       .status.disconnected {
-        background: #f3f4f6;
-        color: #000000;
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #fbbf24;
       }
 
       /* Buttons */
@@ -88,40 +92,46 @@
         display: inline-flex;
         align-items: center;
         padding: 12px 24px;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
-        border: 2px solid #000000;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
         cursor: pointer;
         font-size: 0.875rem;
-        text-transform: uppercase;
         font-family: 'IBM Plex Sans', sans-serif;
+        transition: all 0.2s;
       }
 
       .btn-primary {
-        background: #000000;
+        background: #8b5cf6;
         color: white;
+        border-color: #8b5cf6;
       }
 
       .btn-primary:hover {
-        background: #333333;
+        background: #7c3aed;
+        border-color: #7c3aed;
       }
 
       .btn-secondary {
-        background: #f3f4f6;
-        color: #000000;
+        background: #ffffff;
+        color: #374151;
+        border-color: #d1d5db;
       }
 
       .btn-secondary:hover {
-        background: #e5e7eb;
+        background: #f9fafb;
       }
 
       .btn-danger {
-        background: #000000;
+        background: #dc2626;
         color: white;
+        border-color: #dc2626;
       }
 
       .btn-danger:hover {
-        background: #333333;
+        background: #b91c1c;
+        border-color: #b91c1c;
       }
 
       .btn:disabled {
@@ -139,23 +149,23 @@
 
       /* Info Sections */
       .info-section {
-        background: #f3f4f6;
-        border: 2px solid #000000;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
         padding: 24px;
         margin-bottom: 24px;
       }
 
       .info-section h3 {
-        font-size: 0.875rem;
-        font-weight: 700;
-        color: #000000;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111827;
         margin-bottom: 16px;
-        text-transform: uppercase;
       }
 
       .info-section p {
         font-size: 0.875rem;
-        color: #000000;
+        color: #6b7280;
         margin-bottom: 8px;
       }
 
@@ -171,22 +181,23 @@
 
       #user-info p {
         background: white;
-        border: 2px solid #000000;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
         padding: 12px;
-        color: #000000;
+        color: #374151;
         font-weight: 600;
       }
 
       .subscription-premium {
-        color: #000000 !important;
-        background: #ffffff !important;
-        border-color: #000000 !important;
+        color: #065f46 !important;
+        background: #ecfdf5 !important;
+        border-color: #a7f3d0 !important;
       }
 
       .subscription-free {
-        color: #000000 !important;
-        background: #f3f4f6 !important;
-        border-color: #000000 !important;
+        color: #92400e !important;
+        background: #fef3c7 !important;
+        border-color: #fbbf24 !important;
       }
 
       /* Website Link */
@@ -197,25 +208,25 @@
 
       .website-link h3 {
         font-size: 1rem;
-        font-weight: 700;
-        color: #000000;
+        font-weight: 600;
+        color: #111827;
         margin-bottom: 8px;
-        text-transform: uppercase;
       }
 
       .website-link p {
-        color: #000000;
+        color: #6b7280;
         margin-bottom: 16px;
       }
 
       .website-link a {
-        color: #000000;
+        color: #8b5cf6;
         text-decoration: underline;
-        font-weight: 700;
+        font-weight: 600;
+        transition: color 0.2s;
       }
 
       .website-link a:hover {
-        color: #000000;
+        color: #7c3aed;
         text-decoration: underline;
       }
 
@@ -223,15 +234,14 @@
       .advanced-settings {
         margin-top: 32px;
         padding-top: 24px;
-        border-top: 2px solid #000000;
+        border-top: 1px solid #e5e7eb;
       }
 
       .advanced-settings h2 {
         font-size: 1.125rem;
-        font-weight: 700;
-        color: #000000;
+        font-weight: 600;
+        color: #111827;
         margin-bottom: 20px;
-        text-transform: uppercase;
       }
 
       /* Toggle Options */
@@ -244,12 +254,14 @@
         align-items: flex-start;
         gap: 12px;
         padding: 16px;
-        border: 2px solid #000000;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
         background: #ffffff;
+        transition: background-color 0.2s;
       }
 
       .toggle-option:hover {
-        background: #f3f4f6;
+        background: #f9fafb;
       }
 
       .toggle-label {
@@ -266,8 +278,8 @@
       }
 
       .toggle-title {
-        font-weight: 700;
-        color: #000000;
+        font-weight: 600;
+        color: #111827;
         margin-bottom: 4px;
         display: flex;
         align-items: center;
@@ -276,7 +288,7 @@
 
       .toggle-desc {
         font-size: 0.875rem;
-        color: #000000;
+        color: #6b7280;
         line-height: 1.4;
       }
 
@@ -298,47 +310,51 @@
         display: inline-block;
         width: 54px;
         height: 28px;
-        background: #f3f4f6;
-        border: 2px solid #000000;
+        background: #e5e7eb;
+        border: 1px solid #d1d5db;
+        border-radius: 14px;
         cursor: pointer;
-        transition: background 0.2s ease;
+        transition: all 0.2s ease;
       }
 
       .toggle-slider::before {
         position: absolute;
         content: "";
-        height: 20px;
-        width: 20px;
+        height: 22px;
+        width: 22px;
         left: 2px;
         top: 2px;
-        background: #000000;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
         transition: transform 0.2s ease;
       }
 
       .toggle-input:checked + .toggle-slider {
-        background: #000000;
+        background: #8b5cf6;
+        border-color: #8b5cf6;
       }
 
       .toggle-input:checked + .toggle-slider::before {
-        background: #ffffff;
         transform: translateX(24px);
       }
 
       .toggle-slider:hover {
-        background: #e5e7eb;
+        background: #d1d5db;
       }
 
       .toggle-input:checked + .toggle-slider:hover {
-        background: #333333;
+        background: #7c3aed;
       }
 
       .recommended-tag {
-        background: #f3f4f6;
-        color: #000000;
+        background: #eff6ff;
+        color: #1e40af;
         padding: 2px 8px;
-        border: 1px solid #000000;
+        border: 1px solid #bfdbfe;
+        border-radius: 4px;
         font-size: 0.75rem;
-        font-weight: 700;
+        font-weight: 600;
         text-transform: uppercase;
       }
 
