@@ -39,7 +39,7 @@ Visit [getpensive.com](https://getpensive.com) for a free trial with 10 saves pe
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pensive.git
+git clone https://github.com/arashThr/pensive.git
 cd pensive
 
 # Start with Docker Compose
@@ -48,17 +48,15 @@ docker compose up
 
 ### Option 3: Local Development
 
-**Prerequisites:**
-- Go 1.24+
-- PostgreSQL
-- NPM (for building CSS file from Tailwind)
-
 **Setup:**
 ```bash
 # Start database and services
 docker compose up
 
-# Start the server in watch mode
+# Start the program
+go run cmd/server/main.go
+
+# OR, start the server in watch mode (recommended)
 modd
 
 # Run Telegram bot (optional)

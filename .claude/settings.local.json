@@ -7,7 +7,8 @@
       "Bash(mv:*)",
       "Bash(ls:*)",
       "Bash(sed:*)",
-      "Bash(go build:*)"
+      "Bash(go build:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": []
   }
