@@ -5,3 +5,4 @@ cmd/exp
 uploads
 data
 integrations/dist
+web/assets/style.css
