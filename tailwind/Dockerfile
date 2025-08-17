@@ -1,5 +1,5 @@
 FROM node:alpine
-WORKDIR /tailwind
-RUN npm init -y && npm install tailwindcss @tailwindcss/cli
-
-CMD ["npx", "@tailwindcss/cli", "--cwd", "/templates", "-i", "/src/style.css", "-o", "/dst/style.css", "--watch"]
+RUN wget https://github.com/tailwindlabs/tailwindcss/releases/download/v4.1.12/tailwindcss-linux-x64-musl -O /usr/local/bin/tailwindcss \
+    && chmod +x /usr/local/bin/tailwindcss
+ 
+CMD ["tailwindcss", "--cwd", "/templates", "-i", "/src/style.css", "-o", "/dst/style.css", "--watch"]

@@ -18,6 +18,8 @@ services:
     build:
       context: ./tailwind
       dockerfile: Dockerfile
+      platforms:
+        - "linux/amd64"
     tty: true
     restart: always
     volumes:
