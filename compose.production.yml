@@ -5,7 +5,7 @@ x-logging:
       fluentd-address: "tls://otel.highlight.io:24284"
       fluentd-async: "true"
       fluentd-sub-second-precision: "true"
-      tag: "highlight.project_id=4d7yjjjd"
+      tag: "highlight.project_id=${HIGHLIGHT_PROJECT_ID}"
 
 services:
   server:
