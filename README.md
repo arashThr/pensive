@@ -120,4 +120,25 @@ This project is licensed under the GNU Affero General Public License v3.0. This 
 
 ---
 
+## 🚧 Highlights: Future Development & Features
+
+Here are some of the most important upcoming tasks and feature ideas for Pensive:
+
+### Major Features & Improvements
+- [ ] YouTube support: transcript extraction and premium features
+- [ ] Separate text extraction service
+    - [ ] Use Mozilla Readability in a NodeJs service
+    - [ ] Use Puppeteer and Playwright for advanced page capture
+- [ ] Limitation on the tokens for LLM (accept user's API key)
+- [ ] Site specific text capture support:
+    - [ ] Twitter
+    - [ ] Reddit
+    - [ ] Stackoverflow
+- [ ] Tag support (including Pocket import)
+- [ ] Update current period end time after invoice paid
+- [ ] Enhanced extension and Telegram bot flows
+- [ ] Improved verification and onboarding emails
+
+---
+
 **Built with ❤️ for developers and researchers who want to own their data.**
