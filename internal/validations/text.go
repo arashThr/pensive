@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/arashthr/go-course/internal/logging"
+	"github.com/arashthr/pensive/internal/logging"
 	"github.com/microcosm-cc/bluemonday"
 )
 

@@ -3,7 +3,7 @@ package logging
 import (
 	"fmt"
 
-	"github.com/arashthr/go-course/internal/config"
+	"github.com/arashthr/pensive/internal/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

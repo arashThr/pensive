@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arashthr/go-course/internal/config"
+	"github.com/arashthr/pensive/internal/config"
 )
 
 type telegramLogging struct {

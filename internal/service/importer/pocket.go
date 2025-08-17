@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
-	"github.com/arashthr/go-course/internal/logging"
-	"github.com/arashthr/go-course/internal/models"
-	"github.com/arashthr/go-course/internal/types"
-	"github.com/arashthr/go-course/internal/validations"
+	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/logging"
+	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/internal/types"
+	"github.com/arashthr/pensive/internal/validations"
 	"github.com/jackc/pgx/v5"
 )
 

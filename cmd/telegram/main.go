@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"github.com/arashthr/go-course/integrations/telegram"
-	"github.com/arashthr/go-course/internal/config"
-	"github.com/arashthr/go-course/internal/db"
-	"github.com/arashthr/go-course/internal/logging"
+	"github.com/arashthr/pensive/integrations/telegram"
+	"github.com/arashthr/pensive/internal/config"
+	"github.com/arashthr/pensive/internal/db"
+	"github.com/arashthr/pensive/internal/logging"
 )
 
 func main() {

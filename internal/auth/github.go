@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
-	"github.com/arashthr/go-course/internal/config"
-	"github.com/arashthr/go-course/internal/errors"
-	"github.com/arashthr/go-course/internal/logging"
-	"github.com/arashthr/go-course/internal/models"
-	"github.com/arashthr/go-course/internal/rand"
+	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/config"
+	"github.com/arashthr/pensive/internal/errors"
+	"github.com/arashthr/pensive/internal/logging"
+	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/internal/rand"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 )

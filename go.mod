@@ -1,4 +1,4 @@
-module github.com/arashthr/go-course
+module github.com/arashthr/pensive
 
 go 1.24
 

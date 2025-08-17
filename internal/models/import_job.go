@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/arashthr/go-course/internal/errors"
-	"github.com/arashthr/go-course/internal/types"
+	"github.com/arashthr/pensive/internal/errors"
+	"github.com/arashthr/pensive/internal/types"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

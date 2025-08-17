@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/rand"
+	"github.com/arashthr/pensive/internal/rand"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 

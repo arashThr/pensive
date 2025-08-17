@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/arashthr/go-course/internal/logging"
-	internalModels "github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/pensive/internal/logging"
+	internalModels "github.com/arashthr/pensive/internal/models"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/jackc/pgx/v5/pgxpool"

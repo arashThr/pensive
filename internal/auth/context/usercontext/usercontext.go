@@ -3,7 +3,7 @@ package usercontext
 import (
 	"context"
 
-	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/pensive/internal/models"
 )
 
 type key string

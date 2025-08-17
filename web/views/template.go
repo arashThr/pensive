@@ -11,11 +11,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
-	"github.com/arashthr/go-course/internal/auth/context/usercontext"
-	"github.com/arashthr/go-course/internal/models"
-	"github.com/arashthr/go-course/web"
-	"github.com/arashthr/go-course/web/templates"
+	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/auth/context/usercontext"
+	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/web"
+	"github.com/arashthr/pensive/web/templates"
 	"github.com/gorilla/csrf"
 )
 

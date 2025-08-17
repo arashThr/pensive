@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
-	"github.com/arashthr/go-course/internal/models"
+	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/models"
 )
 
 type Token struct {

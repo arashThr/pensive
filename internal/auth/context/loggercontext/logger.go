@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/arashthr/go-course/internal/logging"
+	"github.com/arashthr/pensive/internal/logging"
 	"go.uber.org/zap"
 )
 

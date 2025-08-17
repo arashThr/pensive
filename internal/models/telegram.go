@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/arashthr/go-course/internal/types"
+	"github.com/arashthr/pensive/internal/types"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

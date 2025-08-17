@@ -3,12 +3,12 @@ package service
 import (
 	"net/http"
 
-	"github.com/arashthr/go-course/internal/auth/context/loggercontext"
-	"github.com/arashthr/go-course/internal/auth/context/usercontext"
-	"github.com/arashthr/go-course/internal/models"
-	"github.com/arashthr/go-course/internal/types"
-	"github.com/arashthr/go-course/internal/validations"
-	"github.com/arashthr/go-course/web"
+	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/auth/context/usercontext"
+	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/internal/types"
+	"github.com/arashthr/pensive/internal/validations"
+	"github.com/arashthr/pensive/web"
 )
 
 type Home struct {
@@ -32,10 +32,10 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Title            string
-		IsUserPremium    bool
-		EmailVerified    bool
-		RecentBookmark   types.RecentBookmarksType
+		Title              string
+		IsUserPremium      bool
+		EmailVerified      bool
+		RecentBookmark     types.RecentBookmarksType
 		RemainingBookmarks int
 	}{
 		Title:          "Home",

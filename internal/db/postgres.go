@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/arashthr/go-course/internal/config"
-	"github.com/arashthr/go-course/internal/db/migrations"
-	"github.com/arashthr/go-course/internal/logging"
+	"github.com/arashthr/pensive/internal/config"
+	"github.com/arashthr/pensive/internal/db/migrations"
+	"github.com/arashthr/pensive/internal/logging"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
