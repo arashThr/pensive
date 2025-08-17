@@ -23,9 +23,9 @@ import (
 const uploadDir = "uploads/imports"
 
 type ImportProcessor struct {
-	ImportJobModel *models.ImportJobModel
-	BookmarkModel  *models.BookmarkModel
-	UserModel      *models.UserModel
+	ImportJobModel *models.ImportJobRepo
+	BookmarkModel  *models.BookmarkRepo
+	UserModel      *models.UserRepo
 }
 
 type PocketItem struct {

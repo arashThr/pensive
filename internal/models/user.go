@@ -36,7 +36,7 @@ type User struct {
 	EmailVerifiedAt    *time.Time
 }
 
-type UserModel struct {
+type UserRepo struct {
 	Pool *pgxpool.Pool
 }
 
@@ -69,7 +69,7 @@ func (u *User) IsSubscriptionPremium() bool {
 		u.SubscriptionStatus == SubscriptionStatusFreePremium
 }
 
-func (us *UserModel) Create(email, password string) (*User, error) {
+func (us *UserRepo) Create(email, password string) (*User, error) {
 	email = normalizeEmail(email)
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -104,7 +104,7 @@ func (us *UserModel) Create(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserModel) Get(userId types.UserId) (*User, error) {
+func (us *UserRepo) Get(userId types.UserId) (*User, error) {
 	rows, err := us.Pool.Query(context.Background(), `
 		SELECT * FROM users WHERE id = $1;`, userId)
 
@@ -121,7 +121,7 @@ func (us *UserModel) Get(userId types.UserId) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserModel) Authenticate(email, password string) (*User, error) {
+func (us *UserRepo) Authenticate(email, password string) (*User, error) {
 	email = normalizeEmail(email)
 	user := User{
 		Email: email,
@@ -146,7 +146,7 @@ func (us *UserModel) Authenticate(email, password string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserModel) UpdatePassword(userId types.UserId, password string) error {
+func (us *UserRepo) UpdatePassword(userId types.UserId, password string) error {
 	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("update password: %w", err)
@@ -160,7 +160,7 @@ func (us *UserModel) UpdatePassword(userId types.UserId, password string) error 
 }
 
 // OAuth methods
-func (us *UserModel) GetByOAuth(provider, oauthID string) (*User, error) {
+func (us *UserRepo) GetByOAuth(provider, oauthID string) (*User, error) {
 	rows, err := us.Pool.Query(context.Background(), `
 		SELECT *
 		FROM users
@@ -182,7 +182,7 @@ func (us *UserModel) GetByOAuth(provider, oauthID string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserModel) CreateOAuthUser(provider, oauthID, email, oauthEmail string) (*User, error) {
+func (us *UserRepo) CreateOAuthUser(provider, oauthID, email, oauthEmail string) (*User, error) {
 	email = normalizeEmail(email)
 
 	logging.Logger.Infow("creating oauth user", "provider", provider, "oauth_id", oauthID)
@@ -218,7 +218,7 @@ func (us *UserModel) CreateOAuthUser(provider, oauthID, email, oauthEmail string
 	return &user, nil
 }
 
-func (us *UserModel) LinkOAuthToExistingUser(userID types.UserId, provider, oauthID, oauthEmail string) error {
+func (us *UserRepo) LinkOAuthToExistingUser(userID types.UserId, provider, oauthID, oauthEmail string) error {
 	_, err := us.Pool.Exec(context.Background(), `
 		UPDATE users SET oauth_provider = $1, oauth_id = $2, oauth_email = $3 
 		WHERE id = $4
@@ -229,7 +229,7 @@ func (us *UserModel) LinkOAuthToExistingUser(userID types.UserId, provider, oaut
 	return nil
 }
 
-func (us *UserModel) GetByEmail(email string) (*User, error) {
+func (us *UserRepo) GetByEmail(email string) (*User, error) {
 	email = normalizeEmail(email)
 	rows, err := us.Pool.Query(context.Background(), `
 		SELECT * FROM users WHERE email = $1
@@ -249,7 +249,7 @@ func (us *UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (us *UserModel) MarkEmailVerified(userID types.UserId) error {
+func (us *UserRepo) MarkEmailVerified(userID types.UserId) error {
 	_, err := us.Pool.Exec(context.Background(), `
 		UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE id = $1
 	`, userID)

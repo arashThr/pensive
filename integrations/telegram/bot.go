@@ -22,8 +22,8 @@ var (
 	apiEndpoint     string
 	httpClient      = &http.Client{Timeout: 10 * time.Second}
 	userAPITokens   = map[int64]string{}
-	telegramService *internalModels.TelegramService
-	TokenModel      *internalModels.TokenModel
+	telegramService *internalModels.TelegramRepo
+	TokenModel      *internalModels.TokenRepo
 )
 
 type BookmarkResponse struct {
@@ -55,10 +55,10 @@ func StartBot(telegramToken string, endpoint string, pool *pgxpool.Pool) {
 		log.Fatalf("failed to create bot: %v", err)
 	}
 
-	telegramService = &internalModels.TelegramService{
+	telegramService = &internalModels.TelegramRepo{
 		Pool: pool,
 	}
-	TokenModel = &internalModels.TokenModel{
+	TokenModel = &internalModels.TokenRepo{
 		Pool: pool,
 	}
 

@@ -27,11 +27,11 @@ type Session struct {
 	Token string
 }
 
-type SessionService struct {
+type SessionRepo struct {
 	Pool *pgxpool.Pool
 }
 
-func (ss *SessionService) Create(userId types.UserId, ipAddress string) (*Session, error) {
+func (ss *SessionRepo) Create(userId types.UserId, ipAddress string) (*Session, error) {
 	err := ss.CleanupExpiredSessions()
 	if err != nil {
 		return nil, fmt.Errorf("cleanup expired sessions: %w", err)
@@ -64,7 +64,7 @@ func (ss *SessionService) Create(userId types.UserId, ipAddress string) (*Sessio
 	return &session, nil
 }
 
-func (ss *SessionService) User(token string) (*User, error) {
+func (ss *SessionRepo) User(token string) (*User, error) {
 	tokenHash := ss.hash(token)
 	var user User
 
@@ -90,7 +90,7 @@ func (ss *SessionService) User(token string) (*User, error) {
 	return &user, nil
 }
 
-func (ss *SessionService) Delete(token string) error {
+func (ss *SessionRepo) Delete(token string) error {
 	tokenHash := ss.hash(token)
 	ex, err := ss.Pool.Exec(context.Background(), `
 		DELETE FROM sessions WHERE token_hash = $1;`, tokenHash)
@@ -102,7 +102,7 @@ func (ss *SessionService) Delete(token string) error {
 }
 
 // CleanupExpiredSessions removes all expired sessions from the database
-func (ss *SessionService) CleanupExpiredSessions() error {
+func (ss *SessionRepo) CleanupExpiredSessions() error {
 	result, err := ss.Pool.Exec(context.Background(), `
 		DELETE FROM sessions WHERE expires_at <= NOW()`)
 	if err != nil {
@@ -117,7 +117,7 @@ func (ss *SessionService) CleanupExpiredSessions() error {
 	return nil
 }
 
-func (ss *SessionService) hash(token string) string {
+func (ss *SessionRepo) hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }

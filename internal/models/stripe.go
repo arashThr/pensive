@@ -17,7 +17,7 @@ type StripeModel struct {
 	Pool *pgxpool.Pool
 }
 
-func NewStripeModel(stripKey string, pool *pgxpool.Pool) *StripeModel {
+func NewStripeRepo(stripKey string, pool *pgxpool.Pool) *StripeModel {
 	// Initialize stripe key
 	stripeclient.Key = stripKey
 	return &StripeModel{

@@ -10,7 +10,7 @@ import (
 )
 
 type Telegram struct {
-	TelegramModel *models.TelegramService
+	TelegramModel *models.TelegramRepo
 	BotName       string
 }
 

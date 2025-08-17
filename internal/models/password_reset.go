@@ -25,13 +25,13 @@ type PasswordReset struct {
 	ExpiresAt time.Time
 }
 
-type PasswordResetService struct {
+type PasswordResetRepo struct {
 	Pool     *pgxpool.Pool
 	Duration time.Duration
 	Now      func() time.Time
 }
 
-func (service *PasswordResetService) Create(email string) (*PasswordReset, error) {
+func (service *PasswordResetRepo) Create(email string) (*PasswordReset, error) {
 	email = strings.ToLower(email)
 	row := service.Pool.QueryRow(context.Background(),
 		`SELECT id FROM users WHERE email = $1;`, email)
@@ -66,7 +66,7 @@ func (service *PasswordResetService) Create(email string) (*PasswordReset, error
 	return &pwReset, nil
 }
 
-func (service *PasswordResetService) Consume(token string) (*User, error) {
+func (service *PasswordResetRepo) Consume(token string) (*User, error) {
 	tokenHash := service.hash(token)
 	var user User
 	var pwReset PasswordReset
@@ -91,12 +91,12 @@ func (service *PasswordResetService) Consume(token string) (*User, error) {
 	return &user, nil
 }
 
-func (service *PasswordResetService) hash(token string) string {
+func (service *PasswordResetRepo) hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }
 
-func (service *PasswordResetService) delete(id int) error {
+func (service *PasswordResetRepo) delete(id int) error {
 	_, err := service.Pool.Exec(context.Background(),
 		`DELETE FROM password_resets
 		WHERE id = $1;`, id)

@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type TokenModel struct {
+type TokenRepo struct {
 	Pool *pgxpool.Pool
 }
 
@@ -35,7 +35,7 @@ type GeneratedApiToken struct {
 	Token string
 }
 
-func (as *TokenModel) Create(userId types.UserId, source string) (*GeneratedApiToken, error) {
+func (as *TokenRepo) Create(userId types.UserId, source string) (*GeneratedApiToken, error) {
 	token, err := rand.String(ApiTokenBytes)
 	if err != nil {
 		return nil, fmt.Errorf("api token: %w", err)
@@ -85,7 +85,7 @@ func (as *TokenModel) Create(userId types.UserId, source string) (*GeneratedApiT
 	return &apiToken, nil
 }
 
-func (as *TokenModel) Delete(userId types.UserId, tokenId string) error {
+func (as *TokenRepo) Delete(userId types.UserId, tokenId string) error {
 	_, err := as.Pool.Exec(context.Background(), `
 		DELETE FROM api_tokens
 		WHERE user_id = $1 AND id = $2`, userId, tokenId)
@@ -95,7 +95,7 @@ func (as *TokenModel) Delete(userId types.UserId, tokenId string) error {
 	return nil
 }
 
-func (as *TokenModel) DeleteByToken(token string) error {
+func (as *TokenRepo) DeleteByToken(token string) error {
 	tokenHash := as.hash(token)
 	_, err := as.Pool.Exec(context.Background(), `
 		DELETE FROM api_tokens
@@ -106,7 +106,7 @@ func (as *TokenModel) DeleteByToken(token string) error {
 	return nil
 }
 
-func (as *TokenModel) Get(userId types.UserId) ([]ApiToken, error) {
+func (as *TokenRepo) Get(userId types.UserId) ([]ApiToken, error) {
 	rows, err := as.Pool.Query(context.Background(), `
 		SELECT id, user_id, token_hash, token_source, created_at, last_used_at
 		FROM api_tokens
@@ -123,7 +123,7 @@ func (as *TokenModel) Get(userId types.UserId) ([]ApiToken, error) {
 	return validTokens, nil
 }
 
-func (as *TokenModel) User(token string) (*User, error) {
+func (as *TokenRepo) User(token string) (*User, error) {
 	tokenHash := as.hash(token)
 
 	rows, err := as.Pool.Query(context.Background(), `
@@ -153,7 +153,7 @@ func (as *TokenModel) User(token string) (*User, error) {
 	return user, nil
 }
 
-func (as *TokenModel) hash(token string) string {
+func (as *TokenRepo) hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
 }

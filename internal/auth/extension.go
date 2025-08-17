@@ -10,7 +10,7 @@ import (
 )
 
 type Extension struct {
-	TokenModel *models.TokenModel
+	TokenModel *models.TokenRepo
 }
 
 type ExtensionAuthResponse struct {

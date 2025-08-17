@@ -9,7 +9,7 @@ import (
 )
 
 type Token struct {
-	TokenModel *models.TokenModel
+	TokenModel *models.TokenRepo
 }
 
 func (t *Token) AuthenticatedPing(w http.ResponseWriter, r *http.Request) {

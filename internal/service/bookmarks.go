@@ -26,7 +26,7 @@ type Bookmarks struct {
 		Markdown             web.Template
 		MarkdownNotAvailable web.Template
 	}
-	BookmarkModel *models.BookmarkModel
+	BookmarkModel *models.BookmarkRepo
 }
 
 func (b Bookmarks) New(w http.ResponseWriter, r *http.Request) {

@@ -11,7 +11,7 @@ import (
 )
 
 type User struct {
-	BookmarkModel    *models.BookmarkModel
+	BookmarkModel    *models.BookmarkRepo
 	AuthTokenService *models.AuthTokenService
 	EmailService     *EmailService
 	Domain           string

@@ -34,12 +34,12 @@ type ImportJob struct {
 	CompletedAt   *time.Time        `db:"completed_at,omitempty"`
 }
 
-type ImportJobModel struct {
+type ImportJobRepo struct {
 	Pool *pgxpool.Pool
 }
 
 // Create creates a new import job
-func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
+func (m *ImportJobRepo) Create(job ImportJob) (*ImportJob, error) {
 	query := `
 		INSERT INTO import_jobs (user_id, source, file_path, status)
 		VALUES ($1, $2, $3, $4)
@@ -58,7 +58,7 @@ func (m *ImportJobModel) Create(job ImportJob) (*ImportJob, error) {
 }
 
 // GetPendingJobs returns up to limit pending jobs
-func (m *ImportJobModel) GetPendingJobs(limit int) ([]types.ImportJobId, error) {
+func (m *ImportJobRepo) GetPendingJobs(limit int) ([]types.ImportJobId, error) {
 	query := `
 		SELECT id
 		FROM import_jobs 
@@ -81,7 +81,7 @@ func (m *ImportJobModel) GetPendingJobs(limit int) ([]types.ImportJobId, error) 
 }
 
 // PickupJob returns a job by ID
-func (m *ImportJobModel) GetByID(jobID types.ImportJobId) (*ImportJob, error) {
+func (m *ImportJobRepo) GetByID(jobID types.ImportJobId) (*ImportJob, error) {
 	query := `
 		SELECT *
 		FROM import_jobs 
@@ -159,7 +159,7 @@ func UpdateProgress(tx pgx.Tx, jobID types.ImportJobId, totalItems, importedCoun
 }
 
 // GetByUserID returns jobs for a specific user
-func (m *ImportJobModel) GetByUserID(userID types.UserId, limit int) ([]ImportJob, error) {
+func (m *ImportJobRepo) GetByUserID(userID types.UserId, limit int) ([]ImportJob, error) {
 	query := `
 		SELECT id, user_id, source, file_path, status, 
 		       total_items, imported_count, error_message, 

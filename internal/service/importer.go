@@ -27,8 +27,8 @@ type Importer struct {
 		ImportProcessing web.Template
 		ImportStatus     web.Template
 	}
-	ImportJobModel *models.ImportJobModel
-	BookmarkModel  *models.BookmarkModel
+	ImportJobModel *models.ImportJobRepo
+	BookmarkModel  *models.BookmarkRepo
 }
 
 // PocketImport displays the import/export page

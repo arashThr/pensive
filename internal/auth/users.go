@@ -41,12 +41,12 @@ type Users struct {
 		PasswordlessSignIn     web.Template
 		PasswordlessCheckEmail web.Template
 	}
-	UserService          *models.UserModel
-	SessionService       *models.SessionService
-	PasswordResetService *models.PasswordResetService
+	UserService          *models.UserRepo
+	SessionService       *models.SessionRepo
+	PasswordResetService *models.PasswordResetRepo
 	AuthTokenService     *models.AuthTokenService
 	EmailService         *service.EmailService
-	TokenModel           *models.TokenModel
+	TokenModel           *models.TokenRepo
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -389,7 +389,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserMiddleware struct {
-	SessionService *models.SessionService
+	SessionService *models.SessionRepo
 }
 
 func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
@@ -427,7 +427,7 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 }
 
 type ApiMiddleware struct {
-	TokenModel *models.TokenModel
+	TokenModel *models.TokenRepo
 }
 
 func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {

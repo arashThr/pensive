@@ -17,7 +17,7 @@ import (
 )
 
 type Api struct {
-	BookmarkModel *models.BookmarkModel
+	BookmarkModel *models.BookmarkRepo
 }
 
 type ErrorResponse struct {

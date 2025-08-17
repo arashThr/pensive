@@ -17,7 +17,7 @@ type Home struct {
 		RecentResults web.Template
 		SearchResults web.Template
 	}
-	BookmarkModel *models.BookmarkModel
+	BookmarkModel *models.BookmarkRepo
 }
 
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {

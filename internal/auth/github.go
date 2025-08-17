@@ -17,8 +17,8 @@ import (
 )
 
 type GitHub struct {
-	UserService    *models.UserModel
-	SessionService *models.SessionService
+	UserService    *models.UserRepo
+	SessionService *models.SessionRepo
 	OAuthConfig    *oauth2.Config
 	Domain         string
 }
@@ -34,8 +34,8 @@ type GitHubUser struct {
 func NewGitHubOAuth(
 	cfg config.GitHubOAuthConfig,
 	domain string,
-	userService *models.UserModel,
-	sessionService *models.SessionService,
+	userService *models.UserRepo,
+	sessionService *models.SessionRepo,
 ) *GitHub {
 	redirectURL, err := url.JoinPath(domain, "/oauth/github/callback")
 	if err != nil {

@@ -41,7 +41,7 @@ type AuthTokenService struct {
 	Now      func() time.Time
 }
 
-func NewAuthTokenService(pool *pgxpool.Pool) *AuthTokenService {
+func NewAuthTokenRepo(pool *pgxpool.Pool) *AuthTokenService {
 	return &AuthTokenService{
 		Pool:     pool,
 		Duration: DefaultAuthTokenDuration,

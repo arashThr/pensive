@@ -9,11 +9,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type TelegramService struct {
+type TelegramRepo struct {
 	Pool *pgxpool.Pool
 }
 
-func (t *TelegramService) CreateAuthToken(userId types.UserId) (string, error) {
+func (t *TelegramRepo) CreateAuthToken(userId types.UserId) (string, error) {
 	token := uuid.New().String()
 	_, err := t.Pool.Exec(context.Background(), `
 		INSERT INTO telegram_auth (user_id, auth_token, updated_at)
@@ -26,7 +26,7 @@ func (t *TelegramService) CreateAuthToken(userId types.UserId) (string, error) {
 	return token, nil
 }
 
-func (t *TelegramService) GetUserFromAuthToken(token string) (types.UserId, error) {
+func (t *TelegramRepo) GetUserFromAuthToken(token string) (types.UserId, error) {
 	var userId types.UserId
 	err := t.Pool.QueryRow(context.Background(), `
 		SELECT user_id
@@ -40,7 +40,7 @@ func (t *TelegramService) GetUserFromAuthToken(token string) (types.UserId, erro
 	return userId, nil
 }
 
-func (t *TelegramService) SetTokenForChatId(userId types.UserId, chatId int64, token *GeneratedApiToken) error {
+func (t *TelegramRepo) SetTokenForChatId(userId types.UserId, chatId int64, token *GeneratedApiToken) error {
 	_, err := t.Pool.Exec(context.Background(), `
 		UPDATE telegram_auth
 		SET telegram_user_id = $2, token = $3, updated_at = NOW()
@@ -51,7 +51,7 @@ func (t *TelegramService) SetTokenForChatId(userId types.UserId, chatId int64, t
 	return nil
 }
 
-func (t *TelegramService) GetToken(userId int64) string {
+func (t *TelegramRepo) GetToken(userId int64) string {
 	var token string
 	err := t.Pool.QueryRow(context.Background(), `
 		SELECT token

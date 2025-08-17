@@ -70,14 +70,14 @@ type BookmarkWithContent struct {
 	Content string // Full content of the bookmark
 }
 
-type BookmarkModel struct {
+type BookmarkRepo struct {
 	Pool        *pgxpool.Pool
 	GenAIClient *genai.Client
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
 // TODO: When LLMs are inlcuded, don't use them for imports, such as pocket
-func (model *BookmarkModel) Create(
+func (model *BookmarkRepo) Create(
 	ctx context.Context,
 	link string,
 	user *User,
@@ -88,7 +88,7 @@ func (model *BookmarkModel) Create(
 // CreateWithContent creates a bookmark with provided HTML and text content
 // If htmlContent and textContent are provided, they will be used instead of fetching the page
 // If title and excerpt are provided, they will be used instead of extracting from content
-func (model *BookmarkModel) CreateWithContent(
+func (model *BookmarkRepo) CreateWithContent(
 	ctx context.Context,
 	link string,
 	user *User,
@@ -263,7 +263,7 @@ func fetchLink(ctx context.Context, link string) (readability.Article, error) {
 	return article, nil
 }
 
-func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
+func (model *BookmarkRepo) GetById(id types.BookmarkId) (*Bookmark, error) {
 	bookmark := Bookmark{
 		Id: id,
 	}
@@ -279,7 +279,7 @@ func (model *BookmarkModel) GetById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
+func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
 	row := model.Pool.QueryRow(context.Background(), `
 		SELECT COUNT(*) FROM library_items WHERE user_id = $1`, userId)
 	var count int
@@ -327,7 +327,7 @@ func (model *BookmarkModel) GetByUserId(userId types.UserId, page int) ([]Bookma
 }
 
 // GetRecentBookmarks returns the most recent bookmarks for the home page
-func (model *BookmarkModel) GetRecentBookmarks(user *User, limit int) ([]Bookmark, error) {
+func (model *BookmarkRepo) GetRecentBookmarks(user *User, limit int) ([]Bookmark, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT * FROM library_items
 		WHERE user_id = $1
@@ -346,7 +346,7 @@ func (model *BookmarkModel) GetRecentBookmarks(user *User, limit int) ([]Bookmar
 	return bookmarks, nil
 }
 
-func (model *BookmarkModel) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
+func (model *BookmarkRepo) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {
 		return nil, fmt.Errorf("parse URL in get bookmark by link: %w", err)
@@ -421,7 +421,7 @@ func cleanHTMLForLLM(htmlContent string) string {
 	return strings.TrimSpace(cleaned)
 }
 
-func (model *BookmarkModel) generateAIData(ctx context.Context, content string, link string, bookmarkId string) {
+func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, link string, bookmarkId string) {
 	logger := loggercontext.Logger(ctx)
 	// Clean up HTML content to reduce LLM costs
 	htmlContent := cleanHTMLForLLM(content)
@@ -459,7 +459,7 @@ type aiDataResponseType struct {
 }
 
 // promptToGetAIData uses Gemini to convert HTML content to markdown format and generate additional AI content
-func (model *BookmarkModel) promptToGetAIData(htmlContent string) (*aiDataResponseType, error) {
+func (model *BookmarkRepo) promptToGetAIData(htmlContent string) (*aiDataResponseType, error) {
 	if model.GenAIClient == nil {
 		return nil, fmt.Errorf("GenAI client not initialized")
 	}
@@ -568,7 +568,7 @@ HTML content to process:
 	return aiDataResponse, nil
 }
 
-func (model *BookmarkModel) Update(bookmark *Bookmark) error {
+func (model *BookmarkRepo) Update(bookmark *Bookmark) error {
 	_, err := model.Pool.Exec(context.Background(),
 		`UPDATE library_items SET link = $1, title = $2 WHERE id = $3`,
 		bookmark.Link, bookmark.Title, bookmark.Id,
@@ -579,7 +579,7 @@ func (model *BookmarkModel) Update(bookmark *Bookmark) error {
 	return nil
 }
 
-func (model *BookmarkModel) Delete(id types.BookmarkId) error {
+func (model *BookmarkRepo) Delete(id types.BookmarkId) error {
 	_, err := model.Pool.Exec(context.Background(),
 		`DELETE FROM library_items WHERE id = $1;`, id)
 	if err != nil {
@@ -603,7 +603,7 @@ type SearchResult struct {
 	AITags    *string
 }
 
-func (model *BookmarkModel) Search(user *User, query string) ([]SearchResult, error) {
+func (model *BookmarkRepo) Search(user *User, query string) ([]SearchResult, error) {
 	// Sanitize and validate the search query
 	sanitizedQuery := sanitizeSearchQuery(query)
 	if sanitizedQuery == "" {
@@ -659,7 +659,7 @@ func sanitizeSearchQuery(query string) string {
 }
 
 // performFullTextSearch executes the full-text search using PostgreSQL's search capabilities
-func (model *BookmarkModel) performFullTextSearch(user *User, query string) ([]SearchResult, error) {
+func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]SearchResult, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		WITH search_terms AS (
 			SELECT string_agg(
@@ -722,7 +722,7 @@ func (model *BookmarkModel) performFullTextSearch(user *User, query string) ([]S
 }
 
 // performFallbackSearch performs a simpler pattern-based search when full-text search fails
-func (model *BookmarkModel) performFallbackSearch(user *User, query string) ([]SearchResult, error) {
+func (model *BookmarkRepo) performFallbackSearch(user *User, query string) ([]SearchResult, error) {
 	// Create a pattern for ILIKE search
 	pattern := "%" + strings.ReplaceAll(query, " ", "%") + "%"
 
@@ -771,7 +771,7 @@ func (model *BookmarkModel) performFallbackSearch(user *User, query string) ([]S
 	return results, nil
 }
 
-func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, error) {
+func (model *BookmarkRepo) GetBookmarkContent(id types.BookmarkId) (string, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT content
 		FROM library_contents
@@ -796,7 +796,7 @@ func (model *BookmarkModel) GetBookmarkContent(id types.BookmarkId) (string, err
 }
 
 // GetBookmarkMarkdown retrieves the AI-generated markdown content for a bookmark
-func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, error) {
+func (model *BookmarkRepo) GetBookmarkMarkdown(id types.BookmarkId) (string, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT ai_markdown
 		FROM library_contents
@@ -825,7 +825,7 @@ func (model *BookmarkModel) GetBookmarkMarkdown(id types.BookmarkId) (string, er
 	return markdown.String, nil
 }
 
-func (model *BookmarkModel) GetFullBookmark(id types.BookmarkId) (*BookmarkWithContent, error) {
+func (model *BookmarkRepo) GetFullBookmark(id types.BookmarkId) (*BookmarkWithContent, error) {
 	rows, err := model.Pool.Query(context.Background(), `
 	SELECT
 	li.id,
@@ -912,7 +912,7 @@ func getPage(link string) (*http.Response, error) {
 }
 
 // checkRateLimit checks if a user has exceeded their bookmark limits
-func (model *BookmarkModel) checkRateLimit(user *User) error {
+func (model *BookmarkRepo) checkRateLimit(user *User) error {
 	// For unverified users, check total bookmark count (not daily)
 	if !user.EmailVerified {
 		row := model.Pool.QueryRow(context.Background(), `
@@ -960,7 +960,7 @@ func (model *BookmarkModel) checkRateLimit(user *User) error {
 }
 
 // GetRemainingBookmarks returns the number of bookmarks a user can still create
-func (model *BookmarkModel) GetRemainingBookmarks(user *User) (int, error) {
+func (model *BookmarkRepo) GetRemainingBookmarks(user *User) (int, error) {
 	// For unverified users, return total remaining bookmarks (lifetime limit)
 	if !user.EmailVerified {
 		row := model.Pool.QueryRow(context.Background(), `

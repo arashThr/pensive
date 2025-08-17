@@ -17,8 +17,8 @@ import (
 )
 
 type GoogleAuth struct {
-	UserService    *models.UserModel
-	SessionService *models.SessionService
+	UserService    *models.UserRepo
+	SessionService *models.SessionRepo
 	OAuthConfig    *oauth2.Config
 	Domain         string
 }
@@ -36,8 +36,8 @@ type GoogleUser struct {
 func NewGoogleOAuth(
 	cfg config.GoogleOAuthConfig,
 	domain string,
-	userService *models.UserModel,
-	sessionService *models.SessionService,
+	userService *models.UserRepo,
+	sessionService *models.SessionRepo,
 ) *GoogleAuth {
 	redirectURL, err := url.JoinPath(domain, "/oauth/google/callback")
 	if err != nil {
