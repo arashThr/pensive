@@ -5,12 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{if .Title}}{{.Title}} - {{end}}Pensive</title>
-  <link rel="stylesheet" href="/assets/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  {{if and isProduction shouldUseAnalytics}}
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
+  {{if isProduction}}
+    <link rel="stylesheet" href="/assets/style.css" />
+    {{if shouldUseAnalytics}}
+      <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
+    {{end}}
   {{else}}
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -25,8 +27,15 @@
       }
     </script>
   {{end}}
+  <style>
+    .dot-grid-bg {
+      background-image: radial-gradient(circle, #e5e7eb 0.5px, transparent 0.5px);
+      background-size: 5px 5px;
+      background-position: 0 0;
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900 flex flex-col font-sans">
+<body class="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900 flex flex-col font-sans dot-grid-bg">
   
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
@@ -197,7 +206,11 @@
       <hr class="border-gray-200 my-8">
       
       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-        <div>© 2025 Pensive. Built with care for developers and researchers.</div>
+        <div>
+          © 2025 Pensive. Built with care for developers and researchers.
+          <br class="sm:hidden">
+          <a href="https://github.com/arashThr/pensive" class="text-violet-600 hover:text-violet-700 transition-colors">Open source</a> under AGPL-3.0 license.
+        </div>
         <div class="flex items-center gap-4">
           <span class="flex items-center gap-1">
             <span class="w-2 h-2 bg-green-500 rounded-full"></span>
