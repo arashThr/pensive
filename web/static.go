@@ -58,7 +58,11 @@ func FAQ(tpl Template) http.HandlerFunc {
 		},
 		{
 			Question: "How do I contact you?",
-			Answer:   `Email me - <a href="mailto:arash.thr@live.com">arash.thr@live.com</a>`,
+			Answer:   `You can find contact information in the <a href="/contact">Contact</a> page.`,
+		},
+		{
+			Question: "But there are many good alternatives: Raindrop, Wallabag, Instapaper, etc. Why you made another one?",
+			Answer:   "I know, but for me, it was a matter of priorities and design: I wanted an app with focus on search and a clean interface.",
 		},
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
