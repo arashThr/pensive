@@ -136,6 +136,9 @@ Here are some of the most important upcoming tasks and feature ideas for Pensive
 - [ ] Update current period end time after invoice paid
 - [ ] Enhanced extension and Telegram bot flows
 - [ ] Improved verification and onboarding emails
+- [ ] Separate "Saved pages" from "Indexed pages"
+    - Save pages are the ones I've read
+    - Indexed pages are the ones that are saved as reference for future
 
 ---
 
