@@ -12,6 +12,7 @@
     - When entering old link
 - [ ] Why this fails: `https://danielmiessler.com/blog/im-worried-it-might-get-bad`
 - [ ] Wait for Turnstile verified
+- [ ] Fix delete in library page
 - [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
     - [x] Fix the error: Only pending
     - [x] Send logs for the error
@@ -80,8 +81,9 @@
     - [ ] Reminder to install Telegram and Extensions
 - [ ] Tags
     - [ ] Read tags from Pocket
-- [ ] Full text search with part words
 - [ ] Telegram first message should help you sign up
+- [ ] YouTube: Save the title and description
+- [x] Full text search with part words
 - [x] Landing page: Here's how it works demo:
     - Save the link, show the summary
     - Result: Slider looks better and less complicated
@@ -149,6 +151,7 @@
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
 - [ ] Write down about tech stack in FAQ
+- [ ] Use Sec-Fetch-Site header and remove Gorilla's CSRF protection - [Ref](https://medium.com/@rahulreza920/go-1-25-is-released-faster-smarter-and-safer-9c97ff8b493d)
 - [x] Update logging in API to use context logger
 - [x] Add passwordless login for production
 - [x] Remove password - Use email validation

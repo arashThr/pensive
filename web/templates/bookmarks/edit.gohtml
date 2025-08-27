@@ -7,19 +7,19 @@
   <!-- Main Content Card -->
   <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
     <!-- Header Section -->
-    <div class="p-8 border-b border-gray-200">
+    <div class="p-4 border-b border-gray-200">
       <div class="flex items-start justify-between">
         <!-- Content Info -->
         <div class="flex-1 min-w-0">
           <div class="flex items-start gap-6 mb-6">
             <!-- Thumbnail -->
-            {{if .Thumbnail}}
+              {{if .Thumbnail}}
               <div class="w-20 h-20 flex-shrink-0">
-                <a href="{{.Link}}" target="_blank" class="block">
-                  <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded-lg border border-gray-200" />
-                </a>
-              </div>
-            {{end}}
+                  <a href="{{.Link}}" target="_blank" class="block">
+                    <img src="{{.Thumbnail}}" alt="{{.Title}}" class="w-full h-full object-cover rounded-lg border border-gray-200" />
+                  </a>
+                </div>
+              {{end}}
             
             <!-- Title and URL -->
             <div class="flex-1 min-w-0">
@@ -73,21 +73,21 @@
     </div>
 
     <!-- Content Section -->
-    <div class="p-8 space-y-8">
+    <div class="p-4 space-y-6">
       <!-- Primary Excerpt -->
       <div>
-        <div class="flex items-center mb-4">
-          <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+        <div class="flex items-center mb-3">
+          <div class="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
             <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
           </div>
-          <h3 class="text-lg font-semibold text-gray-900">Opening paragraph</h3>
+          <h3 class="text-base font-semibold text-gray-900">Opening paragraph</h3>
         </div>
         {{if .AIExcerpt}}
-          <p class="text-gray-700 leading-relaxed text-base pl-11">{{.AIExcerpt}}</p>
+          <p class="text-gray-700 leading-relaxed text-base">{{.AIExcerpt}}</p>
         {{else}}
-          <p class="text-gray-700 leading-relaxed text-base pl-11">{{.Excerpt}}</p>
+          <p class="text-gray-700 leading-relaxed text-base">{{.Excerpt}}</p>
         {{end}}
       </div>
 
@@ -102,7 +102,7 @@
               </div>
               <h3 class="text-lg font-semibold text-gray-900">Key insights</h3>
             </div>
-            <p class="text-gray-700 leading-relaxed text-base pl-11">{{.AISummary}}</p>
+            <p class="text-gray-700 leading-relaxed text-base">{{.AISummary}}</p>
           </div>
         {{end}}
         
@@ -116,7 +116,7 @@
               </div>
               <h3 class="text-lg font-semibold text-gray-900">Topics</h3>
             </div>
-            <div class="flex flex-wrap gap-2 pl-11">
+            <div class="flex flex-wrap gap-2">
               {{range split .AITags ","}}
                 <span class="inline-flex items-center px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-lg border border-gray-200">
                   {{trim .}}
@@ -127,21 +127,21 @@
         {{end}}
 
         <!-- Markdown Content Container (Initially Hidden) -->
-        <div id="markdownContainer" class="hidden">
-          <div class="flex items-center justify-between mb-4">
+        <div id="markdownContainer" class="hidden border-t border-gray-200 pt-6 bg-gray-50/30 -mx-4 px-4 rounded-lg">
+          <div class="flex items-center justify-between mb-3">
             <div class="flex items-center">
-              <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+              <div class="w-6 h-6 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
                 <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 class="text-lg font-semibold text-gray-900">AI-generated markdown</h3>
+              <h3 class="text-base font-semibold text-gray-900">AI-generated markdown</h3>
             </div>
             <button id="hideMarkdownBtn" class="text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 transition-colors">
               Hide
             </button>
           </div>
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-6 pl-11">
+          <div class="pl-9">
             <div id="markdownContent" 
                  class="markdown-content prose max-w-none"
                  hx-get="/bookmarks/{{.Id}}/markdown-content" 
@@ -158,7 +158,7 @@
   </div>
 
   <!-- Navigation -->
-  <div class="mt-8 flex items-center gap-6">
+  <div class="mt-6 flex items-center gap-4">
     <a href="/home" class="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium transition-colors">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
