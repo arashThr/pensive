@@ -62,10 +62,10 @@
         />
       </div>
       <div class="w-full flex justify-center">
-        <div class="cf-turnstile" data-sitekey="{{.TurnstileSiteKey}}"></div>
+        <div class="cf-turnstile" data-size="flexible" data-callback="onSuccess" data-sitekey="{{.TurnstileSiteKey}}"></div>
       </div>
       <div class="py-6">
-        <button class="w-full py-3 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 transition-colors" type="submit">Sign in</button>
+        <button id="signin-btn" class="w-full py-3 px-4 bg-gray-400 text-white font-semibold rounded-lg cursor-not-allowed transition-colors" type="submit" disabled>Sign in</button>
       </div>
       <div class="text-sm flex justify-between">
         <a class="text-violet-600 hover:text-violet-700 transition-colors" href="/signup">Need an account?</a>
@@ -74,5 +74,13 @@
     </form>
   </div>
 </div>
+
+<script>
+function onSuccess(token) {
+  const signinBtn = document.getElementById('signin-btn');
+  signinBtn.disabled = false;
+  signinBtn.className = 'w-full py-3 px-4 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 cursor-pointer transition-colors';
+}
+</script>
 
 {{template "footer" .}}
