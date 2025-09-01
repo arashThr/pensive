@@ -102,6 +102,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	logging.Telegram.SendMessage("New user signed up")
 
 	// For password users, create a session but also send verification email
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
