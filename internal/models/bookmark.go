@@ -101,10 +101,10 @@ func (model *BookmarkRepo) CreateWithContent(
 		return nil, fmt.Errorf("parse URL in create bookmark: %w", err)
 	}
 
-	cannonilizedLink := validations.CanonicalURL(parsedURL)
+	canonicalizedLink := validations.CanonicalURL(parsedURL)
 
 	// Check if the link already exists
-	existingBookmark, err := model.GetByLink(user.ID, cannonilizedLink)
+	existingBookmark, err := model.GetByLink(user.ID, canonicalizedLink)
 	if err != nil {
 		if !errors.Is(err, errors.ErrNotFound) {
 			return nil, fmt.Errorf("failed to collect row: %w", err)
@@ -117,8 +117,6 @@ func (model *BookmarkRepo) CreateWithContent(
 	if err := model.checkRateLimit(user); err != nil && source != Pocket {
 		return nil, err
 	}
-
-	var content string
 
 	extractionMethod := types.ExtractionMethodServer
 	if bookmarkRequest != nil {
@@ -166,26 +164,21 @@ func (model *BookmarkRepo) CreateWithContent(
 		logger.Infow("Using provided content from extension", "link", link, "htmlSize", len(htmlContent), "readabilityHtmlSize", len(article.Content))
 		textContent := allTagsRemoved(htmlContent)
 		article.TextContent = textContent
-		if article.Excerpt == "" {
-			article.Excerpt = textContent[:min(200, len(textContent))]
-		}
+		article.Content = htmlContent
 	}
-
+	if article.Excerpt == "" {
+		article.Excerpt = article.TextContent[:min(200, len(article.TextContent))]
+	}
 	if article.Title == "" {
 		article.Title = parsedURL.String()
 	}
-	if article.Excerpt == "" {
-		article.Excerpt = "(No excerpt available)"
-	}
-
-	content = validations.CleanUpText(article.TextContent)
 
 	bookmarkId := strings.ToLower(rand.Text())[:8]
 	inputBookmark := Bookmark{
 		Id:               types.BookmarkId(bookmarkId),
 		UserId:           user.ID,
 		Title:            validations.CleanUpText(article.Title),
-		Link:             cannonilizedLink,
+		Link:             canonicalizedLink,
 		Excerpt:          validations.CleanUpText(article.Excerpt),
 		ImageUrl:         article.Image,
 		PublishedTime:    article.PublishedTime,
@@ -195,8 +188,8 @@ func (model *BookmarkRepo) CreateWithContent(
 		ExtractionMethod: extractionMethod,
 	}
 
-	if article.Image != "" {
-		if _, err := url.ParseRequestURI(article.Image); err != nil {
+	if inputBookmark.ImageUrl != "" {
+		if _, err := url.ParseRequestURI(inputBookmark.ImageUrl); err != nil {
 			logger.Warnw("Failed to parse image URL", "error", err)
 			inputBookmark.ImageUrl = ""
 		}
@@ -220,17 +213,17 @@ func (model *BookmarkRepo) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $12);`,
-		bookmarkId, user.ID, cannonilizedLink, article.Title, sourceMapping[source], inputBookmark.Excerpt,
-		article.Image, article.Language, article.SiteName, article.PublishedTime, extractionMethod, content)
+		inputBookmark.Id, user.ID, canonicalizedLink, inputBookmark.Title, sourceMapping[source], inputBookmark.Excerpt,
+		inputBookmark.ImageUrl, inputBookmark.ArticleLang, inputBookmark.SiteName, inputBookmark.PublishedTime, extractionMethod, article.TextContent)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 
 	// Generate AI content for all users except for imports (like Pocket)
 	if source != Pocket {
-		contentForMarkdown := content
-		if htmlContent != "" {
-			contentForMarkdown = htmlContent
+		contentForMarkdown := article.TextContent
+		if article.Content != "" {
+			contentForMarkdown = article.Content
 		}
 		// Generate the markdown content using Gemini
 		go model.generateAIData(ctx, contentForMarkdown, link, bookmarkId)
