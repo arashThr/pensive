@@ -10,13 +10,65 @@
       width: 340px;
       margin: 0;
       padding: 0;
-      background-color: #ffffff;
-      color: #374151;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #f1f5f9;
       line-height: 1.5;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Kandinsky floating circles */
+    .kandinsky-circles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .kandinsky-circles::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, rgba(251, 146, 60, 0.15), rgba(239, 68, 68, 0.15));
+      border-radius: 50%;
+      filter: blur(1px);
+      animation: float 8s ease-in-out infinite;
+    }
+
+    .kandinsky-circles::after {
+      content: '';
+      position: absolute;
+      bottom: 20px;
+      right: 15px;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(59, 130, 246, 0.12));
+      border-radius: 50%;
+      filter: blur(1px);
+      animation: float-delayed 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-8px) scale(1.05); }
+    }
+
+    @keyframes float-delayed {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(6px) scale(0.95); }
     }
     
     .container {
       padding: 20px;
+      position: relative;
+      z-index: 10;
     }
     
     .header {
@@ -24,7 +76,7 @@
       align-items: center;
       margin-bottom: 16px;
       padding-bottom: 16px;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid rgba(100, 116, 139, 0.3);
     }
     
     .logo {
@@ -36,33 +88,35 @@
     .title {
       font-size: 16px;
       font-weight: 600;
-      color: #111827;
+      color: white;
       flex: 1;
     }
     
     .beta-badge {
       font-size: 10px;
       font-weight: 600;
-      color: #8b5cf6;
-      background: #f3f4f6;
+      color: #fb923c;
+      background: rgba(251, 146, 60, 0.1);
       padding: 2px 6px;
-      border: 1px solid #8b5cf6;
+      border: 1px solid rgba(251, 146, 60, 0.3);
       border-radius: 4px;
       text-transform: uppercase;
+      backdrop-filter: blur(8px);
     }
     
     .page-info {
       margin-bottom: 16px;
       padding: 16px;
-      background-color: #f9fafb;
-      border: 1px solid #e5e7eb;
+      background: rgba(71, 85, 105, 0.4);
+      border: 1px solid rgba(100, 116, 139, 0.3);
       border-radius: 8px;
+      backdrop-filter: blur(8px);
     }
     
     .page-title {
       font-size: 14px;
       font-weight: 600;
-      color: #111827;
+      color: white;
       margin-bottom: 6px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -74,7 +128,7 @@
     
     .page-url {
       font-size: 12px;
-      color: #6b7280;
+      color: #94a3b8;
       word-break: break-all;
       display: -webkit-box;
       -webkit-line-clamp: 1;
@@ -90,37 +144,38 @@
       padding: 12px 16px;
       font-size: 14px;
       font-weight: 600;
-      border: 1px solid #e5e7eb;
+      border: 1px solid rgba(100, 116, 139, 0.3);
       border-radius: 8px;
+      backdrop-filter: blur(8px);
     }
     
     .status.saved {
-      background-color: #ecfdf5;
-      color: #065f46;
-      border-color: #a7f3d0;
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.3);
     }
     
     .status.not-saved {
-      background-color: #fef3c7;
-      color: #92400e;
-      border-color: #fbbf24;
+      background: rgba(251, 146, 60, 0.1);
+      color: #fbbf24;
+      border-color: rgba(251, 146, 60, 0.3);
     }
     
     .status.loading {
-      background-color: #f3f4f6;
-      color: #374151;
+      background: rgba(71, 85, 105, 0.4);
+      color: #e2e8f0;
     }
     
     .status.error {
-      background-color: #fef2f2;
-      color: #991b1b;
-      border-color: #fca5a5;
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.3);
     }
     
     .status.not-configured {
-      background-color: #f9fafb;
-      color: #374151;
-      border-color: #e5e7eb;
+      background: rgba(71, 85, 105, 0.4);
+      color: #e2e8f0;
+      border-color: rgba(100, 116, 139, 0.3);
       padding: 0;
     }
     
@@ -133,7 +188,7 @@
       margin-bottom: 12px;
       font-weight: 600;
       font-size: 14px;
-      color: #111827;
+      color: white;
     }
     
     .not-configured-actions {
@@ -146,24 +201,26 @@
     }
     
     .not-configured-btn {
-      color: #8b5cf6;
+      color: #fb923c;
       font-weight: 600;
       text-decoration: none;
       font-size: 11px;
       white-space: nowrap;
       padding: 8px 12px;
-      background-color: #ffffff;
-      border: 1px solid #8b5cf6;
+      background: rgba(71, 85, 105, 0.6);
+      border: 1px solid rgba(251, 146, 60, 0.3);
       border-radius: 6px;
       margin: 4px;
       min-width: 80px;
       text-align: center;
       transition: all 0.2s;
+      backdrop-filter: blur(8px);
     }
     
     .not-configured-btn:hover {
-      background-color: #8b5cf6;
-      color: #ffffff;
+      background: linear-gradient(135deg, #f97316, #dc2626);
+      color: white;
+      border-color: rgba(251, 146, 60, 0.5);
     }
     
     .status-icon {
@@ -174,19 +231,19 @@
     }
     
     .status.saved .status-icon {
-      color: #059669;
+      color: #22c55e;
     }
-    
+
     .status.not-saved .status-icon {
-      color: #d97706;
+      color: #fb923c;
     }
-    
+
     .status.loading .status-icon {
-      color: #2563eb;
+      color: #60a5fa;
     }
-    
+
     .status.error .status-icon {
-      color: #dc2626;
+      color: #ef4444;
     }
     
     .actions {
@@ -198,7 +255,7 @@
     .btn {
       flex: 1;
       padding: 12px 16px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid rgba(100, 116, 139, 0.3);
       border-radius: 8px;
       font-size: 14px;
       font-weight: 600;
@@ -209,6 +266,7 @@
       text-decoration: none;
       font-family: 'IBM Plex Sans', sans-serif;
       transition: all 0.2s;
+      backdrop-filter: blur(8px);
     }
     
     .btn:disabled {
@@ -217,51 +275,57 @@
     }
     
     .btn-primary {
-      background-color: #8b5cf6;
+      background: linear-gradient(135deg, #f97316, #dc2626);
       color: white;
-      border-color: #8b5cf6;
+      border-color: rgba(249, 115, 22, 0.3);
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
     }
-    
+
     .btn-primary:hover:not(:disabled) {
-      background-color: #7c3aed;
-      border-color: #7c3aed;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
     }
     
     .btn-success {
-      background-color: #059669;
-      color: white;
-      border-color: #059669;
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
     }
-    
+
     .btn-success:hover:not(:disabled) {
-      background-color: #047857;
-      border-color: #047857;
+      background: rgba(34, 197, 94, 0.3);
+      border-color: rgba(34, 197, 94, 0.4);
+      transform: translateY(-1px);
     }
     
     .btn-secondary {
-      background-color: #ffffff;
-      color: #374151;
-      border-color: #d1d5db;
+      background: rgba(71, 85, 105, 0.4);
+      color: #e2e8f0;
+      border-color: rgba(100, 116, 139, 0.3);
     }
-    
+
     .btn-secondary:hover:not(:disabled) {
-      background-color: #f9fafb;
+      background: rgba(71, 85, 105, 0.6);
+      border-color: rgba(251, 146, 60, 0.3);
     }
     
     .btn-danger {
-      background-color: #dc2626;
-      color: white;
-      border-color: #dc2626;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border-color: rgba(239, 68, 68, 0.3);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
     }
-    
+
     .btn-danger:hover:not(:disabled) {
-      background-color: #b91c1c;
-      border-color: #b91c1c;
+      background: rgba(239, 68, 68, 0.3);
+      border-color: rgba(239, 68, 68, 0.4);
+      transform: translateY(-1px);
     }
     
     .footer {
       padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid rgba(100, 116, 139, 0.3);
     }
     
     .footer-links {
@@ -271,7 +335,7 @@
     }
     
     .footer-link {
-      color: #6b7280;
+      color: #94a3b8;
       text-decoration: none;
       font-size: 12px;
       font-weight: 600;
@@ -281,10 +345,10 @@
       border-radius: 6px;
       transition: all 0.2s;
     }
-    
+
     .footer-link:hover {
-      color: #8b5cf6;
-      background-color: #f9fafb;
+      color: #fb923c;
+      background: rgba(71, 85, 105, 0.4);
     }
     
     .footer-link svg {
@@ -297,8 +361,8 @@
       display: inline-block;
       width: 18px;
       height: 18px;
-      border: 2px solid #d1d5db;
-      border-top: 2px solid #8b5cf6;
+      border: 2px solid rgba(100, 116, 139, 0.3);
+      border-top: 2px solid #fb923c;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-right: 10px;
@@ -311,35 +375,37 @@
     }
     
     .connection-required {
-      background-color: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fbbf24;
+      background: rgba(251, 146, 60, 0.1);
+      color: #fbbf24;
+      border: 1px solid rgba(251, 146, 60, 0.3);
       border-radius: 8px;
       text-align: center;
       padding: 16px;
       font-size: 13px;
       font-weight: 600;
+      backdrop-filter: blur(8px);
     }
-    
+
     .connection-required a {
-      color: #8b5cf6;
+      color: #fb923c;
       font-weight: 600;
       text-decoration: underline;
     }
-    
+
     .connection-required a:hover {
-      color: #7c3aed;
+      color: #f97316;
     }
     
     .auto-save-notice {
       margin-bottom: 16px;
       padding: 12px 16px;
-      background-color: #eff6ff;
-      border: 1px solid #bfdbfe;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
       border-radius: 8px;
       font-size: 13px;
-      color: #1e40af;
+      color: #93c5fd;
       font-weight: 600;
+      backdrop-filter: blur(8px);
     }
     
     .notice-content {
@@ -356,6 +422,9 @@
   </style>
 </head>
 <body>
+  <!-- Kandinsky floating circles -->
+  <div class="kandinsky-circles"></div>
+
   <div class="container">
     <!-- Header -->
     <div class="header">
@@ -439,4 +508,4 @@
   
   <script src="popup.js"></script>
 </body>
-</html> 
+</html>
