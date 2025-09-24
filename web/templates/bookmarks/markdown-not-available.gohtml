@@ -1,35 +1,44 @@
 {{template "header" .}}
 
-<div class="px-6 py-8 max-w-2xl mx-auto">
+<div class="min-h-screen px-6 py-8 max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+  <!-- Kandinsky floating circles -->
+  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
+    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
+    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
+    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
+    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
+  </div>
+
   <!-- Not Available Card -->
-  <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
+  <div class="relative z-10 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-6 text-center">
     <div class="mb-6">
-      <svg class="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>
     
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Markdown Content Not Available</h1>
-    <p class="text-gray-600 mb-6">The AI-powered markdown version of this bookmark isn't ready yet.</p>
+    <h1 class="text-3xl font-bold text-white mb-4">Markdown Content Not Available</h1>
+    <p class="text-gray-300 mb-6">The AI-powered markdown version of this bookmark isn't ready yet.</p>
     
     <!-- Possible Reasons -->
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 text-left">
-      <h3 class="text-xl font-semibold text-gray-900 mb-4">Possible Reasons:</h3>
-      <ul class="space-y-2 text-sm text-gray-600">
+    <div class="bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6 text-left">
+      <h3 class="text-xl font-semibold text-white mb-4">Possible Reasons:</h3>
+      <ul class="space-y-2 text-sm text-gray-300">
         <li class="flex items-start gap-2">
-          <span class="font-bold text-gray-900">
+          <span class="font-bold text-white">
             
           </span>
           <span><strong>Processing in Progress:</strong> Our AI is still working on this bookmark</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="font-bold text-gray-900">
+          <span class="font-bold text-white">
             
           </span>
           <span><strong>Imported:</strong> We don't provide AI summaries for imported items</span>
         </li>
         <li class="flex items-start gap-2">
-          <span class="font-bold text-gray-900">
+          <span class="font-bold text-white">
             
           </span>
           <span><strong>Processing Failed:</strong> The content couldn't be converted to markdown</span>
@@ -39,12 +48,12 @@
     
     <!-- Action Buttons -->
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="/bookmarks/{{.Id}}/edit" 
-         class="bg-violet-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-violet-700 transition-colors">
+      <a href="/bookmarks/{{.Id}}/edit"
+         class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all transform hover:scale-105 shadow-lg">
         ← Back to bookmark
       </a>
-      <a href="/bookmarks" 
-         class="border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition-colors">
+      <a href="/bookmarks"
+         class="border border-gray-600/50 bg-gray-700/50 backdrop-blur-sm text-gray-200 font-semibold py-2 px-4 rounded-lg hover:bg-gray-600/50 transition-colors">
         View All Bookmarks
       </a>
     </div>

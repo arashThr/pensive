@@ -35,45 +35,63 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-50 to-white text-gray-900 flex flex-col font-sans dot-grid-bg">
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white flex flex-col font-sans relative overflow-x-hidden">
+  <!-- True Kandinsky-inspired floating circles on dark background -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <!-- Large sophisticated circles with subtle glows -->
+    <div class="absolute w-48 h-48 rounded-full top-20 left-10" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(29, 78, 216, 0.2) 70%, transparent 100%);"></div>
+    <div class="absolute w-32 h-32 rounded-full top-40 right-20" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.5) 0%, rgba(217, 119, 6, 0.3) 70%, transparent 100%);"></div>
+    <div class="absolute w-64 h-64 rounded-full bottom-32 left-20" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.15) 70%, transparent 100%);"></div>
+    <div class="absolute w-40 h-40 rounded-full top-60 right-40" style="background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(109, 40, 217, 0.2) 70%, transparent 100%);"></div>
+    <div class="absolute w-56 h-56 rounded-full bottom-40 right-10" style="background: radial-gradient(circle, rgba(239, 68, 68, 0.35) 0%, rgba(185, 28, 28, 0.18) 70%, transparent 100%);"></div>
+
+    <!-- Medium floating circles -->
+    <div class="absolute w-24 h-24 rounded-full top-80 left-1/3" style="background: radial-gradient(circle, rgba(236, 72, 153, 0.5) 0%, rgba(190, 24, 93, 0.3) 70%, transparent 100%);"></div>
+    <div class="absolute w-36 h-36 rounded-full top-1/3 left-2/3" style="background: radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, rgba(21, 128, 61, 0.2) 70%, transparent 100%);"></div>
+
+    <!-- Small accent circles -->
+    <div class="absolute w-16 h-16 rounded-full bottom-60 left-1/2" style="background: radial-gradient(circle, rgba(251, 191, 36, 0.6) 0%, rgba(245, 158, 11, 0.4) 70%, transparent 100%);"></div>
+    <div class="absolute w-20 h-20 rounded-full top-1/4 right-1/4" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(124, 58, 237, 0.3) 70%, transparent 100%);"></div>
+    <div class="absolute w-12 h-12 rounded-full bottom-80 right-1/3" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, rgba(8, 145, 178, 0.4) 70%, transparent 100%);"></div>
+  </div>
   
   <!-- Header -->
-  <header class="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-    <div class="px-6 max-w-6xl mx-auto">
+  <header class="bg-gray-900/90 backdrop-blur-md border-b border-gray-700/50 sticky top-0 z-50 shadow-xl">
+    <div class="px-4 sm:px-6 max-w-6xl mx-auto">
       <div class="flex items-center justify-between h-16">
         
         <!-- Logo -->
-        <div class="flex items-center gap-3">
-          <a href="{{if currentUser}}/home{{else}}/{{end}}" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="flex items-center gap-3 relative z-10">
+          <a href="{{if currentUser}}/home{{else}}/{{end}}" class="flex items-center gap-3 hover:opacity-80 transition-all transform hover:scale-105">
             <img src="/assets/title-logo.png" class="h-6" />
-            <div class="font-bold text-lg text-gray-900">
-              Pensive <span class="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-1 rounded-full">Beta</span>
+            <div class="font-bold text-lg text-white">
+              Pensive <span class="text-xs font-medium text-violet-400 bg-violet-900/50 px-2 py-1 rounded-full">Beta</span>
             </div>
           </a>
         </div>
 
         {{if currentUser}}
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center gap-8">
-            <a href="/home" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Search</a>
-            <a href="/bookmarks" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Library</a>
-            <a href="/integrations" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Extensions</a>
+          <div class="hidden md:flex items-center gap-6 lg:gap-8 relative z-10">
+            <a href="/home" class="text-gray-300 hover:text-white font-medium transition-colors">Search</a>
+            <a href="/bookmarks" class="text-gray-300 hover:text-white font-medium transition-colors">Library</a>
+            <a href="/integrations" class="text-gray-300 hover:text-white font-medium transition-colors">Extensions</a>
             
             <!-- Account Menu -->
             <div class="relative">
-              <button id="account-menu" class="flex items-center gap-1 text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <button id="account-menu" class="flex items-center gap-1 text-gray-300 hover:text-white font-medium transition-colors">
                 Account
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
-              
-              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                <a href="/users/me" class="block px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
-                <hr class="border-gray-100">
+
+              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm border border-gray-600 rounded-lg shadow-xl z-50">
+                <a href="/users/me" class="block px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-t-lg">Settings</a>
+                <hr class="border-gray-600">
                 <form action="/signout" method="post" class="block">
                   {{csrfField}}
-                  <button type="submit" class="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors">
+                  <button type="submit" class="w-full text-left px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-b-lg">
                     Sign out
                   </button>
                 </form>
@@ -82,7 +100,7 @@
           </div>
 
           <!-- Mobile Menu Button -->
-          <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <button id="mobile-menu-button" class="md:hidden p-2 text-gray-300 hover:text-white transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
@@ -90,25 +108,25 @@
 
         {{else}}
           <!-- Logged Out Navigation -->
-          <div class="flex items-center gap-4">
-            <a href="/signin" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">Sign in</a>
-            <a href="/signup" class="bg-violet-600 text-white px-4 py-2 font-semibold rounded-lg hover:bg-violet-700 transition-colors">Sign up</a>
+          <div class="flex items-center gap-3 sm:gap-4 relative z-10">
+            <a href="/signin" class="text-gray-300 hover:text-white font-medium transition-colors text-sm sm:text-base">Sign in</a>
+            <a href="/signup" class="bg-violet-600 text-white px-3 py-2 sm:px-4 font-semibold rounded-lg hover:bg-violet-700 transition-colors text-sm sm:text-base">Sign up</a>
           </div>
         {{end}}
       </div>
 
       {{if currentUser}}
         <!-- Mobile Navigation Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 bg-white">
-          <div class="py-4 space-y-1">
-            <a href="/home" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 transition-colors">Search</a>
-            <a href="/bookmarks" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 transition-colors">Library</a>
-            <a href="/integrations" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 transition-colors">Extensions</a>
-            <a href="/users/me" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
-            <hr class="border-gray-100 my-2">
+        <div id="mobile-menu" class="hidden md:hidden border-t border-gray-700 bg-gray-800/95 backdrop-blur-sm">
+          <div class="py-2 space-y-1 px-4 sm:px-6">
+            <a href="/home" class="block py-3 px-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-lg">Search</a>
+            <a href="/bookmarks" class="block py-3 px-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-lg">Library</a>
+            <a href="/integrations" class="block py-3 px-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-lg">Extensions</a>
+            <a href="/users/me" class="block py-3 px-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors rounded-lg">Settings</a>
+            <hr class="border-gray-600 my-2">
             <form action="/signout" method="post">
               {{csrfField}}
-              <button type="submit" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 transition-colors w-full text-left">
+              <button type="submit" class="block py-3 px-4 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors w-full text-left rounded-lg">
                 Sign out
               </button>
             </form>
@@ -145,68 +163,68 @@
     </div>
   {{end}}
 
-  <main class="flex-1">
+  <main class="flex-1 relative z-10">
 {{end}}
 
 {{define "footer"}}
   </main>
-  
-  <footer class="border-t border-gray-200 bg-white/50 backdrop-blur-sm py-12 mt-20">
-    <div class="max-w-6xl mx-auto px-6">
+
+  <footer class="border-t border-gray-700/50 bg-gray-900/80 backdrop-blur-sm py-8 sm:py-12 mt-20 relative z-10 shadow-xl">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
         <!-- Brand -->
         <div class="flex items-center gap-3">
           <img src="/assets/title-logo.png" class="h-6" />
           <div>
-            <div class="font-bold text-lg text-gray-900">Pensive</div>
-            <div class="text-sm text-gray-500">Your searchable memory of the web</div>
+            <div class="font-bold text-lg text-white">Pensive</div>
+            <div class="text-sm text-gray-400">Your searchable memory of the web</div>
           </div>
         </div>
         
         <!-- Links -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-sm w-full lg:w-auto">
           <div>
-            <h4 class="font-semibold text-gray-900 mb-3">Product</h4>
+            <h4 class="font-semibold text-white mb-3">Product</h4>
             <div class="space-y-2">
-              <a href="/" class="block text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+              <a href="/" class="block text-gray-400 hover:text-white transition-colors">Home</a>
             </div>
           </div>
-          
+
           <div>
-            <h4 class="font-semibold text-gray-900 mb-3">Resources</h4>
+            <h4 class="font-semibold text-white mb-3">Resources</h4>
             <div class="space-y-2">
-              <a href="/faq" class="block text-gray-600 hover:text-gray-900 transition-colors">FAQ</a>
-              <a href="/contact" class="block text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
-              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-gray-600 hover:text-gray-900 transition-colors" target="_blank" rel="noopener">Blog</a>
+              <a href="/faq" class="block text-gray-400 hover:text-white transition-colors">FAQ</a>
+              <a href="/contact" class="block text-gray-400 hover:text-white transition-colors">Contact</a>
+              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener">Blog</a>
             </div>
           </div>
-          
+
           <div>
-            <h4 class="font-semibold text-gray-900 mb-3">Extensions</h4>
+            <h4 class="font-semibold text-white mb-3">Extensions</h4>
             <div class="space-y-2">
-              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-gray-600 hover:text-gray-900 transition-colors" target="_blank" rel="noopener">Chrome</a>
-              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-gray-600 hover:text-gray-900 transition-colors" target="_blank" rel="noopener">Firefox</a>
-              <a href="https://t.me/GetPensiveBot" class="block text-gray-600 hover:text-gray-900 transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
+              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener">Chrome</a>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener">Firefox</a>
+              <a href="https://t.me/GetPensiveBot" class="block text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
             </div>
           </div>
-          
+
           <div>
-            <h4 class="font-semibold text-gray-900 mb-3">Legal</h4>
+            <h4 class="font-semibold text-white mb-3">Legal</h4>
             <div class="space-y-2">
-              <a href="/privacy" class="block text-gray-600 hover:text-gray-900 transition-colors">Privacy</a>
-              <a href="https://github.com/arashThr" class="block text-gray-600 hover:text-gray-900 transition-colors" target="_blank" rel="noopener">GitHub</a>
+              <a href="/privacy" class="block text-gray-400 hover:text-white transition-colors">Privacy</a>
+              <a href="https://github.com/arashThr" class="block text-gray-400 hover:text-white transition-colors" target="_blank" rel="noopener">GitHub</a>
             </div>
           </div>
         </div>
       </div>
       
-      <hr class="border-gray-200 my-8">
-      
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-        <div>
+      <hr class="border-gray-700/50 my-6 sm:my-8">
+
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+        <div class="text-center sm:text-left">
           © 2025 Pensive. Built with care for developers and researchers.
           <br class="sm:hidden">
-          <a href="https://github.com/arashThr/pensive" class="text-violet-600 hover:text-violet-700 transition-colors">Open source</a> under AGPL-3.0 license.
+          <a href="https://github.com/arashThr/pensive" class="text-violet-400 hover:text-violet-300 transition-colors">Open source</a> under AGPL-3.0 license.
         </div>
         <div class="flex items-center gap-4">
           <span class="flex items-center gap-1">
@@ -260,7 +278,7 @@
   <div class="mt-12 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
       <a href="?page={{.Pages.Previous}}" 
-         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors">
+         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-white hover:bg-gray-50 hover:border-gray-400 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
@@ -274,7 +292,7 @@
 
     {{if .MorePages}}
       <a href="?page={{.Pages.Next}}" 
-         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors">
+         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-white hover:bg-gray-50 hover:border-gray-400 transition-colors">
         Next
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

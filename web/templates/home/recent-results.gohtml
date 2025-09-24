@@ -2,14 +2,14 @@
 
 {{define "recent-results"}}
 {{if .HasBookmarksAtAll}}
-  <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900">Recent bookmarks</h2>
+  <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl">
+    <div class="p-6 border-b border-gray-600/50">
+      <h2 class="text-lg font-semibold text-white">Recent bookmarks</h2>
     </div>
     
-    <div class="divide-y divide-gray-100">
+    <div class="divide-y divide-gray-600/30">
       {{range .Bookmarks}}
-        <a href="/bookmarks/{{.Id}}/edit" class="block hover:bg-gray-50 transition-colors">
+        <a href="/bookmarks/{{.Id}}/edit" class="block hover:bg-gray-700/50 transition-colors">
           <div class="flex items-start gap-4 p-6">
             <!-- Favicon -->
             <div class="w-6 h-6 flex-shrink-0 mt-1">
@@ -19,8 +19,8 @@
                 class="w-full h-full rounded" 
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
               />
-              <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center hidden">
-                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center hidden">
+                <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
@@ -28,21 +28,21 @@
             
             <!-- Content -->
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold mb-2 text-gray-900 hover:text-violet-600 transition-colors line-clamp-2 break-words">
+              <h3 class="font-semibold mb-2 text-white hover:text-orange-400 transition-colors line-clamp-2 break-words">
                 {{.Title}}
               </h3>
               {{if .Excerpt}}
-                <p class="text-sm leading-relaxed mb-2 text-gray-600 line-clamp-2">{{.Excerpt}}</p>
+                <p class="text-sm leading-relaxed mb-2 text-gray-300 line-clamp-2">{{.Excerpt}}</p>
               {{end}}
-              <span class="text-xs text-gray-500">{{.CreatedAt}}</span>
+              <span class="text-xs text-gray-400">{{.CreatedAt}}</span>
             </div>
           </div>
         </a>
       {{end}}
     </div>
     
-    <div class="p-6 border-t border-gray-200 text-center">
-      <a href="/bookmarks" class="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 font-medium transition-colors">
+    <div class="p-6 border-t border-gray-600/50 text-center">
+      <a href="/bookmarks" class="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-medium transition-colors">
         View all bookmarks
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -52,17 +52,17 @@
   </div>
 {{else}}
   <!-- Empty State -->
-  <div class="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-12 text-center">
-    <div class="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-      <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-xl p-12 text-center">
+    <div class="w-16 h-16 bg-orange-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-400/30">
+      <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>
-    <h3 class="text-xl font-bold mb-3 text-gray-900">Your knowledge collection awaits</h3>
-    <p class="mb-8 max-w-sm mx-auto text-gray-600 leading-relaxed">
+    <h3 class="text-xl font-bold mb-3 text-white">Your knowledge collection awaits</h3>
+    <p class="mb-8 max-w-sm mx-auto text-gray-300 leading-relaxed">
       Start building your personal searchable library by adding your first bookmark.
     </p>
-    <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-violet-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-violet-700 transition-colors">
+    <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>

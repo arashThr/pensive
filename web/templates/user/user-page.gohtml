@@ -1,11 +1,19 @@
 {{template "header" .}}
 
-<div class="px-8 py-16 max-w-5xl mx-auto">
-  
+<div class="min-h-screen px-8 py-16 max-w-5xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+  <!-- Kandinsky floating circles -->
+  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
+    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
+    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
+    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
+    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
+  </div>
+
   <!-- Page Header -->
-  <div class="mb-16">
-    <h1 class="text-4xl font-bold mb-4 text-gray-900">Account Settings</h1>
-    <p class="text-lg text-gray-600">Manage your profile, integrations, and data.</p>
+  <div class="relative z-10 mb-16">
+    <h1 class="text-4xl font-bold mb-4 text-white">Account Settings</h1>
+    <p class="text-lg text-gray-300">Manage your profile, integrations, and data.</p>
   </div>
   
   <div class="flex flex-col lg:flex-row gap-8">
@@ -15,7 +23,7 @@
       <select 
         id="mobile-tab-select"
         name="tab"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 font-medium"
+        class="w-full px-4 py-3 border border-gray-600/50 rounded-lg bg-gray-700/50 backdrop-blur-sm text-white font-medium"
         hx-get="/users/tab-content"
         hx-target="#tab-content"
         hx-swap="innerHTML"
@@ -30,11 +38,11 @@
 
     <!-- Desktop Sidebar -->
     <div class="hidden lg:block lg:w-64 lg:flex-shrink-0">
-      <nav class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <nav class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl overflow-hidden">
         <ul class="space-y-1 p-2">
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors active"
+              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors active"
               data-tab="profile"
               hx-get="/users/tab-content?tab=profile"
               hx-target="#tab-content"
@@ -45,7 +53,7 @@
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
               data-tab="tokens"
               hx-get="/users/tab-content?tab=tokens"
               hx-target="#tab-content"
@@ -56,7 +64,7 @@
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
               data-tab="import-export"
               hx-get="/users/tab-content?tab=import-export"
               hx-target="#tab-content"
@@ -67,7 +75,7 @@
           </li>
           <li>
             <button 
-              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+              class="tab-button w-full text-left px-4 py-3 font-medium text-gray-300 hover:bg-gray-700/50 rounded-lg transition-colors"
               data-tab="data-management"
               hx-get="/users/tab-content?tab=data-management"
               hx-target="#tab-content"
@@ -82,15 +90,15 @@
 
     <!-- Tab Content Area -->
     <div class="flex-1">
-      <div id="tab-content" class="bg-white border border-gray-200 rounded-xl p-8"
+      <div id="tab-content" class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl p-8"
            hx-get="/users/tab-content?tab=profile"
            hx-trigger="load"
            hx-swap="innerHTML">
         
         <!-- Loading State -->
         <div class="text-center py-16">
-          <div class="inline-block w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-          <p class="mt-4 font-medium text-gray-600">Loading...</p>
+          <div class="inline-block w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <p class="mt-4 font-medium text-gray-300">Loading...</p>
         </div>
         
       </div>
@@ -109,13 +117,13 @@ document.addEventListener('DOMContentLoaded', function() {
     button.addEventListener('click', function() {
       // Remove active styles from all buttons
       tabButtons.forEach(btn => {
-        btn.classList.remove('active', 'bg-violet-600', 'text-white');
-        btn.classList.add('hover:bg-gray-50');
+        btn.classList.remove('active', 'bg-gradient-to-r', 'from-orange-500', 'to-red-500', 'text-white');
+        btn.classList.add('hover:bg-gray-700/50');
       });
       
       // Add active styles to clicked button
-      this.classList.add('active', 'bg-violet-600', 'text-white');
-      this.classList.remove('hover:bg-gray-50');
+      this.classList.add('active', 'bg-gradient-to-r', 'from-orange-500', 'to-red-500', 'text-white');
+      this.classList.remove('hover:bg-gray-700/50');
       
       // Update mobile select to match
       const tab = this.getAttribute('data-tab');
@@ -129,12 +137,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update desktop active state
     tabButtons.forEach(btn => {
-      btn.classList.remove('active', 'bg-violet-600', 'text-white');
-      btn.classList.add('hover:bg-gray-50');
+      btn.classList.remove('active', 'bg-gradient-to-r', 'from-orange-500', 'to-red-500', 'text-white');
+      btn.classList.add('hover:bg-gray-700/50');
       
       if (btn.getAttribute('data-tab') === selectedTab) {
-        btn.classList.add('active', 'bg-violet-600', 'text-white');
-        btn.classList.remove('hover:bg-gray-50');
+        btn.classList.add('active', 'bg-gradient-to-r', 'from-orange-500', 'to-red-500', 'text-white');
+        btn.classList.remove('hover:bg-gray-700/50');
       }
     });
   });
@@ -142,8 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set initial active state
   const profileButton = document.querySelector('[data-tab="profile"]');
   if (profileButton) {
-    profileButton.classList.add('active', 'bg-violet-600', 'text-white');
-    profileButton.classList.remove('hover:bg-gray-50');
+    profileButton.classList.add('active', 'bg-gradient-to-r', 'from-orange-500', 'to-red-500', 'text-white');
+    profileButton.classList.remove('hover:bg-gray-700/50');
   }
   
   // File upload utilities
@@ -156,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize) {
-    uploadArea.classList.remove('border-gray-300', 'hover:bg-gray-50');
-    uploadArea.classList.add('border-violet-300', 'bg-violet-50');
+    uploadArea.classList.remove('border-gray-600/50', 'hover:bg-gray-700/50');
+    uploadArea.classList.add('border-orange-500/50', 'bg-orange-900/20');
     
     uploadState.classList.add('hidden');
     fileSelected.classList.remove('hidden');
@@ -167,8 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function resetUploadState(uploadArea, uploadState, fileSelected, fileInput) {
-    uploadArea.classList.remove('bg-violet-50', 'border-violet-300');
-    uploadArea.classList.add('border-gray-300', 'hover:bg-gray-50');
+    uploadArea.classList.remove('bg-orange-900/20', 'border-orange-500/50');
+    uploadArea.classList.add('border-gray-600/50', 'hover:bg-gray-700/50');
     
     uploadState.classList.remove('hidden');
     fileSelected.classList.add('hidden');
@@ -214,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.add('bg-gray-50');
+        uploadArea.classList.add('bg-gray-700/50');
       }
     }
   });
@@ -224,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.remove('bg-gray-50');
+        uploadArea.classList.remove('bg-gray-700/50');
       }
     }
   });
@@ -234,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const uploadArea = document.getElementById('file-upload-area');
       if (uploadArea) {
-        uploadArea.classList.remove('bg-gray-50');
+        uploadArea.classList.remove('bg-gray-700/50');
       }
       
       const files = e.dataTransfer.files;

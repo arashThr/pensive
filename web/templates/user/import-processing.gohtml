@@ -1,39 +1,48 @@
 {{template "header" .}}
 
-<div class="px-8 py-16 max-w-2xl mx-auto">
-  <div class="text-center">
+<div class="min-h-screen px-8 py-16 max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+  <!-- Kandinsky floating circles -->
+  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
+    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
+    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
+    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
+    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
+  </div>
+
+  <div class="relative z-10 text-center">
     <!-- Processing Spinner -->
     <div class="mb-8">
-      <div class="mx-auto w-16 h-16 bg-white border border-gray-200 rounded-full flex items-center justify-center">
-        <svg class="animate-spin w-8 h-8 text-violet-600" fill="none" viewBox="0 0 24 24">
+      <div class="mx-auto w-16 h-16 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-full flex items-center justify-center">
+        <svg class="animate-spin w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       </div>
     </div>
 
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Processing Your Import</h1>
-    <p class="text-gray-600 mb-8">We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.</p>
-    <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-8">
-      <p class="text-lg font-semibold text-gray-900 mb-4">Import Progress</p>
-      <ul class="space-y-2 text-sm text-gray-600">
+    <h1 class="text-3xl font-bold text-white mb-4">Processing Your Import</h1>
+    <p class="text-gray-300 mb-8">We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.</p>
+    <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-8">
+      <p class="text-lg font-semibold text-white mb-4">Import Progress</p>
+      <ul class="space-y-2 text-sm text-gray-300">
         <li>
-          <span class="font-medium text-gray-900">•</span> File uploaded and validated
+          <span class="font-medium text-orange-400">•</span> File uploaded and validated
         </li>
         <li>
-          <span class="font-medium text-gray-900">•</span> Processing bookmarks and metadata
+          <span class="font-medium text-orange-400">•</span> Processing bookmarks and metadata
         </li>
         <li>
-          <span class="font-medium text-gray-900">•</span> Adding to your library
+          <span class="font-medium text-orange-400">•</span> Adding to your library
         </li>
       </ul>
     </div>
-    <div class="bg-white border border-gray-200 rounded-lg p-6">
-      <p class="text-gray-600 mb-4">You'll be automatically redirected when the import is complete.</p>
-      <p class="text-sm font-mono text-gray-600">Or check back in a few minutes.</p>
-      <a href="/users/import-status?job_id={{.JobID}}" class="text-violet-600 hover:text-violet-700 font-medium underline transition-colors">View Import Status</a>
-      <span class="hidden sm:inline"> | </span>
-      <a href="/bookmarks" class="text-violet-600 hover:text-violet-700 font-medium underline transition-colors">View Your Library</a>
+    <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6">
+      <p class="text-gray-300 mb-4">You'll be automatically redirected when the import is complete.</p>
+      <p class="text-sm font-mono text-gray-400">Or check back in a few minutes.</p>
+      <a href="/users/import-status?job_id={{.JobID}}" class="text-orange-400 hover:text-orange-300 font-medium underline transition-colors">View Import Status</a>
+      <span class="hidden sm:inline text-gray-400"> | </span>
+      <a href="/bookmarks" class="text-orange-400 hover:text-orange-300 font-medium underline transition-colors">View Your Library</a>
     </div>
     <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
   </div>

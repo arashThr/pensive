@@ -4,10 +4,10 @@
   <!-- Page Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Your Library</h1>
-      <p class="text-gray-600">{{len .Bookmarks}} saved {{if eq (len .Bookmarks) 1}}article{{else}}articles{{end}} in your searchable collection</p>
+      <h1 class="text-3xl font-bold text-white mb-2">Your Library</h1>
+      <p class="text-gray-300">{{len .Bookmarks}} saved {{if eq (len .Bookmarks) 1}}article{{else}}articles{{end}} in your searchable collection</p>
     </div>
-    <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors">
+    <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
       </svg>
@@ -17,10 +17,10 @@
 
   {{if .Bookmarks}}
     <!-- Bookmarks List -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-      <div class="divide-y divide-gray-200">
+    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl overflow-hidden">
+      <div class="divide-y divide-gray-600/30">
         {{range .Bookmarks}}
-          <div class="hover:bg-gray-50 transition-colors cursor-pointer group" onclick="window.location='/bookmarks/{{.Id}}/edit'">
+          <div class="hover:bg-gray-700/50 transition-colors cursor-pointer group" onclick="window.location='/bookmarks/{{.Id}}/edit'">
             <div class="flex items-start gap-4 p-6 min-w-0">
               <!-- Favicon -->
               <div class="w-8 h-8 flex-shrink-0 mt-1">
@@ -30,8 +30,8 @@
                   class="w-full h-full rounded" 
                   onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
                 />
-                <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center hidden">
-                  <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center hidden">
+                  <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
@@ -39,12 +39,12 @@
               
               <!-- Content -->
               <div class="flex-1 min-w-0 overflow-hidden">
-                <h3 class="font-semibold text-gray-900 group-hover:text-violet-600 transition-colors mb-2 line-clamp-2 overflow-hidden">
+                <h3 class="font-semibold text-white group-hover:text-orange-400 transition-colors mb-2 line-clamp-2 overflow-hidden">
                   {{.Title}}
                 </h3>
-                <div class="flex items-center gap-2 text-sm text-gray-500 min-w-0 overflow-hidden">
+                <div class="flex items-center gap-2 text-sm text-gray-400 min-w-0 overflow-hidden">
                   <span class="flex-shrink-0">{{.CreatedAt}}</span>
-                  <span class="flex-shrink-0 text-gray-300">•</span>
+                  <span class="flex-shrink-0 text-gray-600">•</span>
                   <span class="truncate min-w-0 text-gray-400">{{.Link}}</span>
                 </div>
               </div>
@@ -52,7 +52,7 @@
               <!-- Actions -->
               <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <a href="{{.Link}}" target="_blank" 
-                   class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
+                   class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors" 
                    onclick="event.stopPropagation()"
                    title="Visit original link">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,7 +60,7 @@
                   </svg>
                 </a>
                 <div class="relative">
-                  <button class="propertiesMenuButton p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
+                  <button class="propertiesMenuButton p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors" 
                           onclick="event.stopPropagation(); togglePropertiesMenu(this)" 
                           title="More options">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,19 +69,19 @@
                   </button>
                   
                   <!-- Actions Menu -->
-                  <div class="propertiesMenu hidden absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-10">
-                    <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                  <div class="propertiesMenu hidden absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-lg shadow-xl py-2 z-10">
+                    <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700/50 transition-colors">
                       View markdown
                     </a>
-                    <hr class="my-1 border-gray-100">
-                    <button class="reportBtn w-full text-left px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                    <hr class="my-1 border-gray-600/50">
+                    <button class="reportBtn w-full text-left px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700/50 transition-colors">
                       Report issue
                     </button>
-                    <hr class="my-1 border-gray-100">
+                    <hr class="my-1 border-gray-600/50">
                     <form action="/bookmarks/{{.Id}}/delete" method="post" class="block"
                           onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
                       {{csrfField}}
-                      <button class="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors" type="submit">
+                      <button class="w-full text-left px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/30 transition-colors" type="submit">
                         Delete bookmark
                       </button>
                     </form>
@@ -98,25 +98,25 @@
     {{template "pagination" .}}
   {{else}}
     <!-- Empty State -->
-    <div class="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-2xl p-12 text-center">
-      <div class="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-        <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-12 text-center">
+      <div class="w-16 h-16 bg-orange-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-400/30">
+        <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       </div>
-      <h3 class="text-2xl font-bold text-gray-900 mb-3">Your library is empty</h3>
-      <p class="text-gray-600 mb-8 max-w-sm mx-auto">
+      <h3 class="text-2xl font-bold text-white mb-3">Your library is empty</h3>
+      <p class="text-gray-300 mb-8 max-w-sm mx-auto">
         Start building your searchable knowledge collection by saving your first article.
       </p>
       <div class="space-y-3">
-        <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors">
+        <a href="/bookmarks/new" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
           Add your first bookmark
         </a>
-        <div class="text-sm text-gray-500">
-          Or install our <a href="/integrations" class="text-violet-600 hover:text-violet-700 font-medium">browser extension</a> for easy saving
+        <div class="text-sm text-gray-400">
+          Or install our <a href="/integrations" class="text-orange-400 hover:text-orange-300 font-medium">browser extension</a> for easy saving
         </div>
       </div>
     </div>
@@ -127,20 +127,24 @@
 function togglePropertiesMenu(button) {
   const menu = button.parentNode.querySelector('.propertiesMenu');
   const allMenus = document.querySelectorAll('.propertiesMenu');
-  
-  // Close all other menus
+
+  // Close all other menus first
   allMenus.forEach(m => {
     if (m !== menu) {
       m.classList.add('hidden');
     }
   });
-  
+
   // Toggle current menu
   menu.classList.toggle('hidden');
+
+  // Prevent event bubbling
+  event.stopPropagation();
 }
 
-// Close menu when clicking outside
+// Close menus when clicking outside
 document.addEventListener('click', function(e) {
+  // Check if click is outside any menu button or menu content
   if (!e.target.closest('.propertiesMenuButton') && !e.target.closest('.propertiesMenu')) {
     document.querySelectorAll('.propertiesMenu').forEach(menu => {
       menu.classList.add('hidden');
@@ -151,8 +155,21 @@ document.addEventListener('click', function(e) {
 // Handle report button clicks
 document.addEventListener('click', function(e) {
   if (e.target.classList.contains('reportBtn')) {
-    // Add your report functionality here
+    e.preventDefault();
+    e.stopPropagation();
     alert('Report functionality would be implemented here');
+    // Close the menu after reporting
+    e.target.closest('.propertiesMenu').classList.add('hidden');
+  }
+});
+
+// Prevent menu from closing when clicking inside the menu
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.propertiesMenu')) {
+    // Only allow form submissions and links to proceed normally
+    if (!e.target.closest('form') && !e.target.closest('a')) {
+      e.stopPropagation();
+    }
   }
 });
 </script>

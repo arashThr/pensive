@@ -1,52 +1,60 @@
 {{template "header" .}}
 
-<div class="px-8 py-16 max-w-4xl mx-auto">
-  
+<div class="min-h-screen px-8 py-16 max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
+  <!-- Kandinsky floating circles -->
+  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
+    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
+    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
+    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
+    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
+  </div>
+
   <!-- Page Header -->
-  <div class="mb-16">
-    <h1 class="text-4xl font-bold text-gray-900 mb-6">Integrations</h1>
-    <p class="text-gray-600 leading-relaxed">Connect your tools to save content from anywhere.</p>
+  <div class="relative z-10 mb-16">
+    <h1 class="text-4xl font-bold text-white mb-6">Integrations</h1>
+    <p class="text-gray-300 leading-relaxed">Connect your tools to save content from anywhere.</p>
   </div>
 
   <div class="space-y-8">
     
     <!-- Browser Extension -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Browser extension</h2>
-      <p class="text-gray-600 leading-relaxed mb-6">One click to save any webpage. Works on Chrome and Firefox.</p>
+    <div class="relative z-10 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-6">
+      <h2 class="text-2xl font-bold text-white mb-4">Browser extension</h2>
+      <p class="text-gray-300 leading-relaxed mb-6">One click to save any webpage. Works on Chrome and Firefox.</p>
 
       <!-- Setup Steps -->
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="font-semibold text-gray-900 mb-4">Setup:</h3>
-        <div class="space-y-2 text-gray-600">
+      <div class="bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6">
+        <h3 class="font-semibold text-white mb-4">Setup:</h3>
+        <div class="space-y-2 text-gray-300">
           <div><strong>1.</strong> Install extension from store</div>
-          <div><strong>2.</strong> Create API token in <a href="/users/me?tab=tokens" class="text-violet-600 hover:text-violet-700 font-medium transition-colors">account settings</a></div>
+          <div><strong>2.</strong> Create API token in <a href="/users/me?tab=tokens" class="text-orange-400 hover:text-orange-300 font-medium transition-colors">account settings</a></div>
           <div><strong>3.</strong> Click extension icon on any page to save</div>
         </div>
       </div>
 
       <!-- Download Links -->
       <div class="flex flex-col sm:flex-row gap-4">
-        <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" 
-           class="bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors text-center">
+        <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd"
+           class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg text-center">
           Install for Chrome
         </a>
-        <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" 
-           class="bg-violet-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-violet-700 transition-colors text-center">
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/"
+           class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg text-center">
           Install for Firefox
         </a>
       </div>
     </div>
     
     <!-- Telegram Bot -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Telegram bot</h2>
-      <p class="text-gray-600 leading-relaxed mb-6">Who installs apps anymore? Just use Telegram</p>
+    <div class="relative z-10 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-6">
+      <h2 class="text-2xl font-bold text-white mb-4">Telegram bot</h2>
+      <p class="text-gray-300 leading-relaxed mb-6">Who installs apps anymore? Just use Telegram</p>
 
       <!-- Features -->
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="font-semibold text-gray-900 mb-4">What it does:</h3>
-        <div class="space-y-2 text-gray-600">
+      <div class="bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6">
+        <h3 class="font-semibold text-white mb-4">What it does:</h3>
+        <div class="space-y-2 text-gray-300">
           <div>• Forward any link → instantly saved</div>
           <div>• Search your entire library via chat</div>
         </div>
@@ -54,42 +62,42 @@
 
       <!-- Connect Button -->
       <div class="text-center">
-        <a href="/telegram/auth" class="bg-violet-600 text-white px-8 py-4 font-semibold rounded-lg hover:bg-violet-700 transition-colors">
+        <a href="/telegram/auth" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
           Connect Telegram
         </a>
       </div>
     </div>
 
     <!-- Pocket Import -->
-    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">Pocket import</h2>
-      <p class="text-gray-600 leading-relaxed mb-6">Migrate your existing Pocket bookmarks. All articles, tags, and dates preserved.</p>
+    <div class="relative z-10 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-6">
+      <h2 class="text-2xl font-bold text-white mb-4">Pocket import</h2>
+      <p class="text-gray-300 leading-relaxed mb-6">Migrate your existing Pocket bookmarks. All articles, tags, and dates preserved.</p>
 
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="font-semibold text-gray-900 mb-4">How to import:</h3>
-        <div class="space-y-2 text-gray-600">
+      <div class="bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6">
+        <h3 class="font-semibold text-white mb-4">How to import:</h3>
+        <div class="space-y-2 text-gray-300">
           <div><strong>1.</strong> Export your data from Pocket</div>
           <div><strong>2.</strong> Upload the zip file here</div>
           <div><strong>3.</strong> We'll process everything in the background</div>
-          <div><strong>4.</strong> <a href="/contact" class="text-violet-600 hover:text-violet-700 font-medium transition-colors">Let me know</a> if you faced any problem</div>
+          <div><strong>4.</strong> <a href="/contact" class="text-orange-400 hover:text-orange-300 font-medium transition-colors">Let me know</a> if you faced any problem</div>
         </div>
       </div>
 
       <div class="text-center">
-        <a href="/pocket" class="bg-violet-600 text-white px-8 py-4 font-semibold rounded-lg hover:bg-violet-700 transition-colors">
+        <a href="/pocket" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
           Import from Pocket
         </a>
       </div>
     </div>
 
     <!-- API Access -->
-    <div class="bg-gray-50 border border-gray-200 rounded-xl p-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">API access (coming soon)</h2>
-      <p class="text-gray-600 leading-relaxed mb-6">Build your own integrations. Save bookmarks programmatically.</p>
+    <div class="relative z-10 bg-gray-700/40 backdrop-blur-sm border border-gray-600/50 rounded-xl p-6">
+      <h2 class="text-2xl font-bold text-white mb-4">API access (coming soon)</h2>
+      <p class="text-gray-300 leading-relaxed mb-6">Build your own integrations. Save bookmarks programmatically.</p>
 
-      <div class="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-        <h3 class="font-semibold text-gray-900 mb-4">For developers:</h3>
-        <div class="space-y-2 text-gray-600">
+      <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6">
+        <h3 class="font-semibold text-white mb-4">For developers:</h3>
+        <div class="space-y-2 text-gray-300">
           <div>• REST API for saving and searching</div>
           <div>• Webhook support for real-time updates</div>
           <div>• Rate limiting: 1000 requests/hour</div>
@@ -97,16 +105,16 @@
       </div>
 
       <div class="text-center">
-        <a href="/users/me?tab=tokens" class="border border-gray-300 text-gray-700 px-8 py-4 font-semibold rounded-lg hover:bg-gray-50 transition-colors">
+        <a href="/users/me?tab=tokens" class="border border-gray-600/50 bg-gray-700/50 backdrop-blur-sm text-gray-200 px-8 py-4 font-semibold rounded-lg hover:bg-gray-600/50 transition-colors">
           Manage API tokens
         </a>
       </div>
     </div>
 
     <!-- More Coming -->
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-6 text-center text-amber-800">
-      <h3 class="text-xl font-semibold mb-4">More integrations coming</h3>
-      <p>IFTTT, Zapier, RSS feeds, and more. <a href="/contact" class="text-violet-600 hover:text-violet-700 font-medium transition-colors">Suggest an integration</a>.</p>
+    <div class="relative z-10 bg-orange-900/20 backdrop-blur-sm border border-orange-500/30 rounded-lg p-6 text-center text-orange-200">
+      <h3 class="text-xl font-semibold mb-4 text-orange-300">More integrations coming</h3>
+      <p>IFTTT, Zapier, RSS feeds, and more. <a href="/contact" class="text-orange-400 hover:text-orange-300 font-medium transition-colors">Suggest an integration</a>.</p>
     </div>
 
   </div>
