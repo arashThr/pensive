@@ -38,21 +38,21 @@
 <body class="min-h-screen bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 text-white flex flex-col font-sans relative overflow-x-hidden">
   <!-- True Kandinsky-inspired floating circles on dark background -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <!-- Large sophisticated circles with subtle glows -->
-    <div class="absolute w-48 h-48 rounded-full top-20 left-10" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, rgba(29, 78, 216, 0.2) 70%, transparent 100%);"></div>
-    <div class="absolute w-32 h-32 rounded-full top-40 right-20" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.5) 0%, rgba(217, 119, 6, 0.3) 70%, transparent 100%);"></div>
-    <div class="absolute w-64 h-64 rounded-full bottom-32 left-20" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.15) 70%, transparent 100%);"></div>
-    <div class="absolute w-40 h-40 rounded-full top-60 right-40" style="background: radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(109, 40, 217, 0.2) 70%, transparent 100%);"></div>
-    <div class="absolute w-56 h-56 rounded-full bottom-40 right-10" style="background: radial-gradient(circle, rgba(239, 68, 68, 0.35) 0%, rgba(185, 28, 28, 0.18) 70%, transparent 100%);"></div>
+    <!-- Large sophisticated circles with subtle glows and blur -->
+    <div class="absolute w-48 h-48 rounded-full top-20 left-10" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(29, 78, 216, 0.1) 70%, transparent 100%); filter: blur(20px); box-shadow: 0 0 40px rgba(59, 130, 246, 0.15);"></div>
+    <div class="absolute w-32 h-32 rounded-full top-40 right-20" style="background: radial-gradient(circle, rgba(180, 120, 10, 0.3) 0%, rgba(140, 80, 6, 0.15) 70%, transparent 100%); filter: blur(18px); box-shadow: 0 0 35px rgba(180, 120, 10, 0.12);"></div>
+    <div class="absolute w-64 h-64 rounded-full bottom-32 left-20" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.08) 70%, transparent 100%); filter: blur(22px); box-shadow: 0 0 45px rgba(16, 185, 129, 0.1);"></div>
+    <div class="absolute w-40 h-40 rounded-full top-60 right-40" style="background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, rgba(109, 40, 217, 0.1) 70%, transparent 100%); filter: blur(19px); box-shadow: 0 0 38px rgba(139, 92, 246, 0.13);"></div>
+    <div class="absolute w-56 h-56 rounded-full bottom-40 right-10" style="background: radial-gradient(circle, rgba(200, 50, 50, 0.22) 0%, rgba(150, 20, 20, 0.1) 70%, transparent 100%); filter: blur(21px); box-shadow: 0 0 42px rgba(200, 50, 50, 0.11);"></div>
 
-    <!-- Medium floating circles -->
-    <div class="absolute w-24 h-24 rounded-full top-80 left-1/3" style="background: radial-gradient(circle, rgba(236, 72, 153, 0.5) 0%, rgba(190, 24, 93, 0.3) 70%, transparent 100%);"></div>
-    <div class="absolute w-36 h-36 rounded-full top-1/3 left-2/3" style="background: radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, rgba(21, 128, 61, 0.2) 70%, transparent 100%);"></div>
+    <!-- Medium floating circles with blur -->
+    <div class="absolute w-24 h-24 rounded-full top-80 left-1/3" style="background: radial-gradient(circle, rgba(200, 50, 120, 0.3) 0%, rgba(150, 20, 80, 0.15) 70%, transparent 100%); filter: blur(16px); box-shadow: 0 0 30px rgba(200, 50, 120, 0.12);"></div>
+    <div class="absolute w-36 h-36 rounded-full top-1/3 left-2/3" style="background: radial-gradient(circle, rgba(34, 197, 94, 0.25) 0%, rgba(21, 128, 61, 0.1) 70%, transparent 100%); filter: blur(18px); box-shadow: 0 0 35px rgba(34, 197, 94, 0.11);"></div>
 
-    <!-- Small accent circles -->
-    <div class="absolute w-16 h-16 rounded-full bottom-60 left-1/2" style="background: radial-gradient(circle, rgba(251, 191, 36, 0.6) 0%, rgba(245, 158, 11, 0.4) 70%, transparent 100%);"></div>
-    <div class="absolute w-20 h-20 rounded-full top-1/4 right-1/4" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.5) 0%, rgba(124, 58, 237, 0.3) 70%, transparent 100%);"></div>
-    <div class="absolute w-12 h-12 rounded-full bottom-80 right-1/3" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, rgba(8, 145, 178, 0.4) 70%, transparent 100%);"></div>
+    <!-- Small accent circles with blur -->
+    <div class="absolute w-16 h-16 rounded-full bottom-60 left-1/2" style="background: radial-gradient(circle, rgba(200, 150, 30, 0.35) 0%, rgba(180, 120, 10, 0.2) 70%, transparent 100%); filter: blur(14px); box-shadow: 0 0 28px rgba(200, 150, 30, 0.13);"></div>
+    <div class="absolute w-20 h-20 rounded-full top-1/4 right-1/4" style="background: radial-gradient(circle, rgba(140, 70, 200, 0.3) 0%, rgba(100, 40, 180, 0.15) 70%, transparent 100%); filter: blur(15px); box-shadow: 0 0 30px rgba(140, 70, 200, 0.12);"></div>
+    <div class="absolute w-12 h-12 rounded-full bottom-80 right-1/3" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, rgba(8, 145, 178, 0.2) 70%, transparent 100%); filter: blur(12px); box-shadow: 0 0 25px rgba(6, 182, 212, 0.14);"></div>
   </div>
   
   <!-- Header -->
