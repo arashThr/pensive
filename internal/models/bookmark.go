@@ -213,8 +213,9 @@ func (model *BookmarkRepo) CreateWithContent(
 		)
 		INSERT INTO library_contents (id, title, excerpt, content)
 		VALUES ($1, $4, $6, $12);`,
-		inputBookmark.Id, user.ID, canonicalizedLink, inputBookmark.Title, sourceMapping[source], inputBookmark.Excerpt,
-		inputBookmark.ImageUrl, inputBookmark.ArticleLang, inputBookmark.SiteName, inputBookmark.PublishedTime, extractionMethod, article.TextContent)
+		inputBookmark.Id, user.ID, inputBookmark.Link, inputBookmark.Title, inputBookmark.Source, inputBookmark.Excerpt,
+		inputBookmark.ImageUrl, inputBookmark.ArticleLang, inputBookmark.SiteName, inputBookmark.PublishedTime,
+		inputBookmark.ExtractionMethod, article.TextContent)
 	if err != nil {
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
