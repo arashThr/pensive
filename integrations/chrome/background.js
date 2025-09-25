@@ -1,5 +1,5 @@
-// For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
-const browserAPI = typeof chrome !== "undefined" ? chrome : browser;
+// For cross-browser compatibility (Firefox prefers 'browser', Chrome uses 'chrome')
+const browserAPI = typeof browser !== "undefined" ? browser : chrome;
 
 // Handle authentication token messages from content script
 browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {

@@ -1,4 +1,4 @@
-// For cross-browser compatibility (Chrome uses 'chrome', Firefox supports it but prefers 'browser')
+// For cross-browser compatibility
 const isChrome = !(window.browser && browser.runtime)
 const browserAPI = isChrome ? chrome : browser;
 

@@ -1,5 +1,5 @@
-// For cross-browser compatibility (Firefox prefers 'browser', Chrome uses 'chrome')
-const browserAPI = typeof browser !== "undefined" ? browser : chrome;
+// For cross-browser compatibility
+const browserAPI = !(window.browser && browser.runtime) ? chrome : browser;
 
 // Alternative approach that doesn't require waiting for DOMContentLoaded
 // and works even if the script runs after page load
