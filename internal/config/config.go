@@ -72,9 +72,9 @@ type AppConfig struct {
 	Google    GoogleOAuthConfig
 }
 
-func LoadEnvConfig() (*AppConfig, error) {
+func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	var cfg AppConfig
-	err := godotenv.Load()
+	err := godotenv.Load(envFiles...)
 	if err != nil {
 		return nil, fmt.Errorf("loading .env file: %w", err)
 	}
