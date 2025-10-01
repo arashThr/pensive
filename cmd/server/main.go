@@ -64,29 +64,57 @@ func main() {
 	logging.Init(cfg)
 	defer logging.Sync()
 
-	err = run(cfg)
+	// Database
+	pool, err := setupDb(cfg.PSQL)
+	if err != nil {
+		panic(err)
+	}
+	defer pool.Close()
+
+	err = run(cfg, pool)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func run(cfg *config.AppConfig) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+// ServiceContainer holds all the repositories and services
+type ServiceContainer struct {
+	// Repositories
+	UserRepo          *models.UserRepo
+	SessionRepo       *models.SessionRepo
+	PasswordResetRepo *models.PasswordResetRepo
+	TokenRepo         *models.TokenRepo
+	StripeRepo        *models.StripeModel
+	BookmarkRepo      *models.BookmarkRepo
+	TelegramRepo      *models.TelegramRepo
+	ImportJobRepo     *models.ImportJobRepo
+	AuthTokenRepo     *models.AuthTokenService
 
-	// Database
-	pool, err := setupDb(cfg.PSQL)
-	if err != nil {
-		return err
-	}
-	defer pool.Close()
+	// Services
+	EmailService     *service.EmailService
+	UsersService     auth.Users
+	BookmarksService service.Bookmarks
+	HomeService      service.Home
+	ImporterService  service.Importer
+	UserService      service.User
+	ApiService       service.Api
+	TokenService     service.Token
+	StripeService    service.Stripe
+	ExtensionService auth.Extension
+	TelegramService  auth.Telegram
 
+	// Import processor
+	ImportProcessor importer.ImportProcessor
+}
+
+// newServiceContainer creates and initializes all repositories and services
+func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.Context) (*ServiceContainer, error) {
 	genAIClient, err := genai.NewClient(ctx, nil)
 	if err != nil {
 		logging.Logger.Errorw("failed to create Gemini client", "error", err)
 	}
 
-	// Models
+	// Repositories
 	userRepo := &models.UserRepo{
 		Pool: pool,
 	}
@@ -97,34 +125,21 @@ func run(cfg *config.AppConfig) error {
 		Pool: pool,
 		Now:  func() time.Time { return time.Now() },
 	}
-	tokenModel := &models.TokenRepo{
+	tokenRepo := &models.TokenRepo{
 		Pool: pool,
 	}
-	stripeModel := models.NewStripeRepo(cfg.Stripe.Key, pool)
-	bookmarksModel := &models.BookmarkRepo{
+	stripeRepo := models.NewStripeRepo(cfg.Stripe.Key, pool)
+	bookmarkRepo := &models.BookmarkRepo{
 		Pool:        pool,
 		GenAIClient: genAIClient,
 	}
-	telegramModel := &models.TelegramRepo{
+	telegramRepo := &models.TelegramRepo{
 		Pool: pool,
 	}
-	importJobModel := &models.ImportJobRepo{
+	importJobRepo := &models.ImportJobRepo{
 		Pool: pool,
 	}
-	authTokenService := models.NewAuthTokenRepo(pool)
-
-	// Middlewares
-	umw := auth.UserMiddleware{
-		SessionService: sessionRepo,
-	}
-	amw := auth.ApiMiddleware{
-		TokenModel: tokenModel,
-	}
-	csrfMw := csrf.Protect(
-		[]byte(cfg.CSRF.Key),
-		csrf.Secure(cfg.CSRF.Secure),
-		csrf.Path("/"),
-	)
+	authTokenRepo := models.NewAuthTokenRepo(pool)
 
 	// Services
 	emailService := service.NewEmailService(cfg.SMTP)
@@ -135,11 +150,12 @@ func run(cfg *config.AppConfig) error {
 		UserService:          userRepo,
 		SessionService:       sessionRepo,
 		PasswordResetService: passwordResetRepo,
-		AuthTokenService:     authTokenService,
+		AuthTokenService:     authTokenRepo,
 		EmailService:         emailService,
-		TokenModel:           tokenModel,
+		TokenModel:           tokenRepo,
 	}
 
+	// Initialize user service templates
 	usersService.Templates.New = views.Must(views.ParseTemplate("signup.gohtml", "tailwind.gohtml"))
 	usersService.Templates.SignIn = views.Must(views.ParseTemplate("signin.gohtml", "tailwind.gohtml"))
 	usersService.Templates.ForgotPassword = views.Must(views.ParseTemplate("forgot-pw.gohtml", "tailwind.gohtml"))
@@ -157,7 +173,7 @@ func run(cfg *config.AppConfig) error {
 	usersService.Templates.PasswordlessCheckEmail = views.Must(views.ParseTemplate("passwordless-check-email.gohtml", "tailwind.gohtml"))
 
 	bookmarksService := service.Bookmarks{
-		BookmarkModel: bookmarksModel,
+		BookmarkModel: bookmarkRepo,
 	}
 	bookmarksService.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksService.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml", "bookmarks/markdown.gohtml"))
@@ -166,66 +182,126 @@ func run(cfg *config.AppConfig) error {
 	bookmarksService.Templates.MarkdownNotAvailable = views.Must(views.ParseTemplate("bookmarks/markdown-not-available.gohtml", "tailwind.gohtml"))
 
 	homeService := service.Home{
-		BookmarkModel: bookmarksModel,
+		BookmarkModel: bookmarkRepo,
 	}
 	homeService.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml", "home/recent-results.gohtml"))
 	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml"))
 	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml"))
 
 	importerService := service.Importer{
-		ImportJobModel: importJobModel,
-		BookmarkModel:  bookmarksModel,
+		ImportJobModel: importJobRepo,
+		BookmarkModel:  bookmarkRepo,
 	}
 	importerService.Templates.PocketImport = views.Must(views.ParseTemplate("user/pocket-import.gohtml", "tailwind.gohtml"))
 	importerService.Templates.ImportProcessing = views.Must(views.ParseTemplate("user/import-processing.gohtml", "tailwind.gohtml"))
 	importerService.Templates.ImportStatus = views.Must(views.ParseTemplate("user/import-status.gohtml", "tailwind.gohtml"))
 
 	userService := service.User{
-		BookmarkModel:    bookmarksModel,
-		AuthTokenService: authTokenService,
+		BookmarkModel:    bookmarkRepo,
+		AuthTokenService: authTokenRepo,
 		EmailService:     emailService,
 		Domain:           cfg.Domain,
 	}
 
 	apiService := service.Api{
-		BookmarkModel: bookmarksModel,
+		BookmarkModel: bookmarkRepo,
 	}
 
 	tokenService := service.Token{
-		TokenModel: tokenModel,
+		TokenModel: tokenRepo,
 	}
 
-	stripService := service.Stripe{
+	stripeService := service.Stripe{
 		Domain:              cfg.Domain,
 		PriceId:             cfg.Stripe.PriceId,
 		StripeWebhookSecret: cfg.Stripe.StripeWebhookSecret,
-		StripeModel:         stripeModel,
+		StripeModel:         stripeRepo,
 	}
-	stripService.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
-	stripService.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
+	stripeService.Templates.Success = views.Must(views.ParseTemplate("payments/success.gohtml", "tailwind.gohtml"))
+	stripeService.Templates.Cancel = views.Must(views.ParseTemplate("payments/cancel.gohtml", "tailwind.gohtml"))
 
 	extensionService := auth.Extension{
-		TokenModel: tokenModel,
+		TokenModel: tokenRepo,
 	}
 
 	telegramService := auth.Telegram{
-		TelegramModel: telegramModel,
+		TelegramModel: telegramRepo,
 		BotName:       cfg.Telegram.BotName,
 	}
 
-	// OAuth services
-	githubService := auth.NewGitHubOAuth(cfg.GitHub, cfg.Domain, userRepo, sessionRepo)
-	googleService := auth.NewGoogleOAuth(cfg.Google, cfg.Domain, userRepo, sessionRepo)
-
-	// Start import processor in background
 	importProcessor := importer.ImportProcessor{
-		ImportJobModel: importJobModel,
-		BookmarkModel:  bookmarksModel,
+		ImportJobModel: importJobRepo,
+		BookmarkModel:  bookmarkRepo,
 		UserModel:      userRepo,
 	}
-	go importProcessor.Start(ctx)
+
+	return &ServiceContainer{
+		// Repositories
+		UserRepo:          userRepo,
+		SessionRepo:       sessionRepo,
+		PasswordResetRepo: passwordResetRepo,
+		TokenRepo:         tokenRepo,
+		StripeRepo:        stripeRepo,
+		BookmarkRepo:      bookmarkRepo,
+		TelegramRepo:      telegramRepo,
+		ImportJobRepo:     importJobRepo,
+		AuthTokenRepo:     authTokenRepo,
+
+		// Services
+		EmailService:     emailService,
+		UsersService:     usersService,
+		BookmarksService: bookmarksService,
+		HomeService:      homeService,
+		ImporterService:  importerService,
+		UserService:      userService,
+		ApiService:       apiService,
+		TokenService:     tokenService,
+		StripeService:    stripeService,
+		ExtensionService: extensionService,
+		TelegramService:  telegramService,
+
+		// Import processor
+		ImportProcessor: importProcessor,
+	}, nil
+}
+
+func run(cfg *config.AppConfig, pool *pgxpool.Pool) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Create service container with all repositories and services
+	container, err := newServiceContainer(cfg, pool, ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create service container: %w", err)
+	}
+
+	// Start import processor in background
+	go container.ImportProcessor.Start(ctx)
+
+	// Create routes with the service container
+	r := Routes(cfg, container)
+
+	fmt.Printf("Starting server on %s...", cfg.Server.Address)
+	return http.ListenAndServe(cfg.Server.Address, r)
+}
+
+func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
+	githubService := auth.NewGitHubOAuth(cfg.GitHub, cfg.Domain, c.UserRepo, c.SessionRepo)
+	googleService := auth.NewGoogleOAuth(cfg.Google, cfg.Domain, c.UserRepo, c.SessionRepo)
 
 	// Middlewares
+	umw := auth.UserMiddleware{
+		SessionService: c.SessionRepo,
+	}
+	amw := auth.ApiMiddleware{
+		TokenModel: c.TokenRepo,
+	}
+	csrfMw := csrf.Protect(
+		[]byte(cfg.CSRF.Key),
+		csrf.Secure(cfg.CSRF.Secure),
+		csrf.Path("/"),
+	)
+
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 
@@ -235,28 +311,28 @@ func run(cfg *config.AppConfig) error {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "api"))
 
 		r.Get("/ping", healthCheck)
-		r.Post("/stripe-webhooks", stripService.Webhook)
+		r.Post("/stripe-webhooks", c.StripeService.Webhook)
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)
 			// TODO: Remove this
-			r.Get("/ping", tokenService.AuthenticatedPing)
+			r.Get("/ping", c.TokenService.AuthenticatedPing)
 			r.Route("/tokens", func(r chi.Router) {
-				r.Delete("/current", tokenService.DeleteToken)
+				r.Delete("/current", c.TokenService.DeleteToken)
 			})
 			r.Route("/user", func(r chi.Router) {
-				r.Get("/", userService.CurrentUserAPI)
-				r.Post("/request-verification", userService.RequestVerificationEmailAPI)
+				r.Get("/", c.UserService.CurrentUserAPI)
+				r.Post("/request-verification", c.UserService.RequestVerificationEmailAPI)
 			})
 			r.Route("/bookmarks", func(r chi.Router) {
-				r.Get("/", apiService.IndexAPI)
-				r.Post("/", apiService.CreateAPI)
-				r.Delete("/", apiService.DeleteByLinkAPI)
-				r.Get("/check", apiService.CheckBookmarkByLinkAPI)
-				r.Get("/{id}", apiService.GetAPI)
-				r.Put("/{id}", apiService.UpdateAPI)
-				r.Delete("/{id}", apiService.DeleteAPI)
-				r.Get("/search", apiService.SearchAPI)
+				r.Get("/", c.ApiService.IndexAPI)
+				r.Post("/", c.ApiService.CreateAPI)
+				r.Delete("/", c.ApiService.DeleteByLinkAPI)
+				r.Get("/check", c.ApiService.CheckBookmarkByLinkAPI)
+				r.Get("/{id}", c.ApiService.GetAPI)
+				r.Put("/{id}", c.ApiService.UpdateAPI)
+				r.Delete("/{id}", c.ApiService.DeleteAPI)
+				r.Get("/search", c.ApiService.SearchAPI)
 			})
 		})
 	})
@@ -299,76 +375,76 @@ func run(cfg *config.AppConfig) error {
 			"Pocket import",
 			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),
 		))
-		r.Get("/signup", usersService.New)
-		r.Get("/signin", usersService.SignIn)
-		r.Post("/signin", usersService.ProcessSignIn)
-		r.Post("/signout", usersService.ProcessSignOut)
-		r.Get("/forgot-pw", usersService.ForgotPassword)
-		r.Post("/forgot-pw", usersService.ProcessForgotPassword)
-		r.Get("/reset-password", usersService.ResetPassword)
-		r.Post("/reset-password", usersService.ProcessResetPassword)
+		r.Get("/signup", c.UsersService.New)
+		r.Get("/signin", c.UsersService.SignIn)
+		r.Post("/signin", c.UsersService.ProcessSignIn)
+		r.Post("/signout", c.UsersService.ProcessSignOut)
+		r.Get("/forgot-pw", c.UsersService.ForgotPassword)
+		r.Post("/forgot-pw", c.UsersService.ProcessForgotPassword)
+		r.Get("/reset-password", c.UsersService.ResetPassword)
+		r.Post("/reset-password", c.UsersService.ProcessResetPassword)
 
 		// Email verification routes
 		r.Route("/auth", func(r chi.Router) {
-			r.Get("/verify-email", usersService.VerifyEmail)
+			r.Get("/verify-email", c.UsersService.VerifyEmail)
 
 			r.Route("/resend-verification", func(r chi.Router) {
 				r.Use(umw.RequireUser)
-				r.Post("/", usersService.ResendVerificationEmail)
+				r.Post("/", c.UsersService.ResendVerificationEmail)
 			})
 
 			r.Route("/passwordless", func(r chi.Router) {
-				r.Get("/signup", usersService.PasswordlessNew)
-				r.Post("/signup", usersService.ProcessPasswordlessSignup)
-				r.Get("/signin", usersService.PasswordlessSignIn)
-				r.Post("/signin", usersService.ProcessPasswordlessSignIn)
-				r.Get("/verify", usersService.VerifyPasswordlessAuth)
+				r.Get("/signup", c.UsersService.PasswordlessNew)
+				r.Post("/signup", c.UsersService.ProcessPasswordlessSignup)
+				r.Get("/signin", c.UsersService.PasswordlessSignIn)
+				r.Post("/signin", c.UsersService.ProcessPasswordlessSignIn)
+				r.Get("/verify", c.UsersService.VerifyPasswordlessAuth)
 			})
 		})
 		r.Route("/home", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Get("/", homeService.Index)
-			r.Get("/search", homeService.Search)
+			r.Get("/", c.HomeService.Index)
+			r.Get("/search", c.HomeService.Search)
 		})
 		r.Route("/users", func(r chi.Router) {
-			r.Post("/", usersService.Create)
+			r.Post("/", c.UsersService.Create)
 			// Auth
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
 				// Subscriptions
-				r.Get("/subscribe", usersService.Subscribe)
-				r.Get("/me", usersService.CurrentUser)
-				r.Get("/tab-content", usersService.TabContent)
-				r.Post("/delete-token", usersService.DeleteToken)
-				r.Post("/delete-content", usersService.DeleteAllContent)
-				r.Post("/delete-account", usersService.DeleteAccount)
+				r.Get("/subscribe", c.UsersService.Subscribe)
+				r.Get("/me", c.UsersService.CurrentUser)
+				r.Get("/tab-content", c.UsersService.TabContent)
+				r.Post("/delete-token", c.UsersService.DeleteToken)
+				r.Post("/delete-content", c.UsersService.DeleteAllContent)
+				r.Post("/delete-account", c.UsersService.DeleteAccount)
 			})
 			// Import/export
 			r.Group(func(r chi.Router) {
 				r.Use(umw.RequireUser)
-				r.Get("/pocket-import", importerService.PocketImport)
-				r.Post("/pocket-import", importerService.ProcessImport)
-				r.Post("/export", importerService.ProcessExport)
-				r.Get("/import-status", importerService.ImportStatus)
+				r.Get("/pocket-import", c.ImporterService.PocketImport)
+				r.Post("/pocket-import", c.ImporterService.ProcessImport)
+				r.Post("/export", c.ImporterService.ProcessExport)
+				r.Get("/import-status", c.ImporterService.ImportStatus)
 			})
 		})
 		r.Route("/payments", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Post("/create-checkout-session", stripService.CreateCheckoutSession)
-			r.Post("/create-portal-session", stripService.CreatePortalSession)
-			r.Get("/portal-session", stripService.GoToBillingPortal)
-			r.Get("/success", stripService.Success)
-			r.Get("/cancel", stripService.Cancel)
+			r.Post("/create-checkout-session", c.StripeService.CreateCheckoutSession)
+			r.Post("/create-portal-session", c.StripeService.CreatePortalSession)
+			r.Get("/portal-session", c.StripeService.GoToBillingPortal)
+			r.Get("/success", c.StripeService.Success)
+			r.Get("/cancel", c.StripeService.Cancel)
 		})
 
 		r.Route("/extension", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Get("/auth", extensionService.GenerateToken)
+			r.Get("/auth", c.ExtensionService.GenerateToken)
 		})
 
 		r.Route("/telegram", func(r chi.Router) {
 			r.Use(umw.RequireUser)
-			r.Get("/auth", telegramService.RedirectWithAuthToken)
+			r.Get("/auth", c.TelegramService.RedirectWithAuthToken)
 		})
 
 		assetHandler := http.FileServer(http.Dir("./web/assets"))
@@ -382,16 +458,16 @@ func run(cfg *config.AppConfig) error {
 			r.Group(func(r chi.Router) {
 				// For routes that are accessible by user
 				r.Use(umw.RequireUser)
-				r.Get("/", bookmarksService.Index)
-				r.Post("/", bookmarksService.Create)
-				r.Get("/new", bookmarksService.New)
-				r.Get("/{id}/edit", bookmarksService.Edit)
-				r.Post("/{id}", bookmarksService.Update)
-				r.Post("/{id}/delete", bookmarksService.Delete)
-				r.Get("/{id}/full", bookmarksService.GetFullBookmark)
-				r.Get("/{id}/markdown", bookmarksService.GetBookmarkMarkdown)
-				r.Get("/{id}/markdown-content", bookmarksService.GetBookmarkMarkdownHTMX)
-				r.Post("/{id}/report", bookmarksService.ReportBookmark)
+				r.Get("/", c.BookmarksService.Index)
+				r.Post("/", c.BookmarksService.Create)
+				r.Get("/new", c.BookmarksService.New)
+				r.Get("/{id}/edit", c.BookmarksService.Edit)
+				r.Post("/{id}", c.BookmarksService.Update)
+				r.Post("/{id}/delete", c.BookmarksService.Delete)
+				r.Get("/{id}/full", c.BookmarksService.GetFullBookmark)
+				r.Get("/{id}/markdown", c.BookmarksService.GetBookmarkMarkdown)
+				r.Get("/{id}/markdown-content", c.BookmarksService.GetBookmarkMarkdownHTMX)
+				r.Post("/{id}/report", c.BookmarksService.ReportBookmark)
 			})
 		})
 
@@ -406,9 +482,7 @@ func run(cfg *config.AppConfig) error {
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
-
-	fmt.Printf("Starting server on %s...", cfg.Server.Address)
-	return http.ListenAndServe(cfg.Server.Address, r)
+	return r
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
