@@ -152,6 +152,7 @@
 - [ ] Optional host permission + explicit user permission
 - [ ] Write down about tech stack in FAQ
 - [ ] Use Sec-Fetch-Site header and remove Gorilla's CSRF protection - [Ref](https://medium.com/@rahulreza920/go-1-25-is-released-faster-smarter-and-safer-9c97ff8b493d)
+- [ ] Build Firefox addon from Chrome
 - [x] Update logging in API to use context logger
 - [x] Add passwordless login for production
 - [x] Remove password - Use email validation
@@ -204,6 +205,9 @@
     - I have created a type to represent them
     - uint ids are good enough for my user case
 - [x] Ids from uint to string
+
+## UI/UX
+- Double column home page (Check `landing-page` branch)
 
 ### Future
 - [ ] Bookmark only the selected text
