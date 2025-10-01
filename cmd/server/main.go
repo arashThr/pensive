@@ -187,6 +187,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	homeService.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml", "home/recent-results.gohtml"))
 	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml"))
 	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml"))
+	homeService.Templates.ChatAnswer = views.Must(views.ParseTemplate("home/chat-answer.gohtml"))
 
 	importerService := service.Importer{
 		ImportJobModel: importJobRepo,
@@ -405,6 +406,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			r.Use(umw.RequireUser)
 			r.Get("/", c.HomeService.Index)
 			r.Get("/search", c.HomeService.Search)
+			r.Post("/ask", c.HomeService.AskQuestion)
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", c.UsersService.Create)

@@ -1,0 +1,51 @@
+{{if .Answer}}
+<div class="space-y-4">
+  <!-- Answer -->
+  <div class="p-4 bg-gradient-to-br from-purple-800/40 to-indigo-800/40 backdrop-blur-sm rounded-2xl border border-purple-400/30">
+    <div class="flex items-start gap-3 mb-2">
+      <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h4 class="font-semibold text-purple-200 mb-2">Answer</h4>
+        <div class="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{{.Answer}}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  {{if .Sources}}
+  <div class="space-y-2">
+    <h4 class="text-sm font-semibold text-purple-300 px-2">Sources ({{len .Sources}})</h4>
+    <div class="space-y-2">
+      {{range .Sources}}
+      <a href="/bookmarks/{{.Id}}"
+         class="block p-3 bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl border border-purple-500/20 hover:border-purple-400/50 transition-all group hover:shadow-lg">
+        <div class="flex items-start gap-3">
+          {{if .Thumbnail}}
+          <img src="{{.Thumbnail}}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+          {{else}}
+          <div class="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          {{end}}
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-medium text-white truncate group-hover:text-purple-200">{{.Title}}</div>
+            <div class="text-xs text-gray-400 truncate">{{.Hostname}}</div>
+          </div>
+        </div>
+      </a>
+      {{end}}
+    </div>
+  </div>
+  {{end}}
+</div>
+{{else}}
+<div class="p-4 bg-yellow-900/20 backdrop-blur-sm rounded-2xl border border-yellow-500/30 text-center">
+  <p class="text-sm text-yellow-200">No answer available. Try asking a different question.</p>
+</div>
+{{end}}

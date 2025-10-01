@@ -40,6 +40,56 @@
       </div>
     </div>
 
+    <!-- Chat/Ask Question Section -->
+    <div class="mb-8 max-w-2xl mx-auto">
+      <div class="p-6 bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border-2 border-purple-500/50 rounded-3xl shadow-lg">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+            </svg>
+          </div>
+          <h3 class="font-bold text-white text-lg">Ask about your bookmarks</h3>
+        </div>
+
+        <form id="chat-form" class="space-y-4">
+          <input type="hidden" name="gorilla.csrf.Token" value="{{csrfToken}}" />
+          <div class="relative">
+            <textarea
+              name="question"
+              placeholder="Ask me anything about your bookmarked content..."
+              class="w-full p-4 border-2 border-purple-500/50 rounded-2xl outline-none bg-gray-800/60 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all resize-none"
+              rows="2"
+              id="question-input"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold rounded-full transition-all transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            hx-post="/home/ask"
+            hx-target="#chat-answer"
+            hx-swap="innerHTML"
+            hx-indicator="#chat-loading"
+            hx-include="[name='question']"
+          >
+            Ask Question
+          </button>
+        </form>
+
+        <!-- Loading indicator -->
+        <div id="chat-loading" class="htmx-indicator mt-4 text-center">
+          <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full">
+            <div class="w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+            <span class="text-sm text-purple-200">Thinking...</span>
+          </div>
+        </div>
+
+        <!-- Answer area -->
+        <div id="chat-answer" class="mt-4"></div>
+      </div>
+    </div>
+
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}
     <div class="mb-8 max-w-2xl mx-auto">

@@ -16,6 +16,7 @@ type Home struct {
 		Home          web.Template
 		RecentResults web.Template
 		SearchResults web.Template
+		ChatAnswer    web.Template
 	}
 	BookmarkModel *models.BookmarkRepo
 }
@@ -96,6 +97,50 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	data.HasResults = len(data.Bookmarks) > 0
 
 	h.Templates.SearchResults.Execute(w, r, data)
+}
+
+// AskQuestion handles RAG-based question answering about bookmarks
+func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+
+	question := r.FormValue("question")
+	if question == "" {
+		http.Error(w, "Question is required", http.StatusBadRequest)
+		return
+	}
+
+	// Call the RAG method
+	response, err := h.BookmarkModel.AskQuestion(r.Context(), user, question)
+	if err != nil {
+		logger.Errorw("failed to answer question", "error", err, "question", question)
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Prepare response data
+	var sources []types.BookmarkSearchResult
+	for _, bookmark := range response.SourceBookmarks {
+		sources = append(sources, types.BookmarkSearchResult{
+			Id:        bookmark.Id,
+			Title:     bookmark.Title,
+			Link:      bookmark.Link,
+			Hostname:  validations.ExtractHostname(bookmark.Link),
+			Headline:  bookmark.Headline,
+			Thumbnail: bookmark.ImageUrl,
+			CreatedAt: bookmark.CreatedAt,
+		})
+	}
+
+	data := struct {
+		Answer  string
+		Sources []types.BookmarkSearchResult
+	}{
+		Answer:  response.Answer,
+		Sources: sources,
+	}
+
+	h.Templates.ChatAnswer.Execute(w, r, data)
 }
 
 func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {

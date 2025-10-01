@@ -447,7 +447,8 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, l
 
 	// Generate and store embedding for the content
 	logger.Infow("generating embedding for bookmark", "link", link)
-	embedding, err := model.generateEmbedding(ctx, htmlContent)
+	// Use context.Background() since this runs in a goroutine and the request context may be canceled
+	embedding, err := model.generateEmbedding(context.Background(), htmlContent)
 	if err != nil {
 		logger.Warnw("Failed to generate embedding", "error", err, "link", link)
 		return
@@ -590,17 +591,17 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, text string) (
 	}
 
 	// Limit content length to avoid API limits
-	// Google's text-embedding-005 supports up to ~20k tokens, but we'll use ~2000 chars (~500 tokens) for efficiency
+	// Google's text-embedding-004 supports up to ~20k tokens, but we'll use ~2000 chars (~500 tokens) for efficiency
 	maxLength := 2000
 	if len(text) > maxLength {
 		// Take first 1000 and last 1000 chars to capture both intro and conclusion
 		text = text[:1000] + "..." + text[len(text)-1000:]
 	}
 
-	// Use Google's text-embedding-005 model (768 dimensions)
+	// Use Google's text-embedding-004 model (768 dimensions)
 	result, err := model.GenAIClient.Models.EmbedContent(
 		ctx,
-		"text-embedding-005",
+		"text-embedding-004",
 		genai.Text(text),
 		nil,
 	)
@@ -657,6 +658,8 @@ type SearchResult struct {
 }
 
 func (model *BookmarkRepo) Search(user *User, query string) ([]SearchResult, error) {
+	ctx := context.Background()
+
 	// Sanitize and validate the search query
 	sanitizedQuery := sanitizeSearchQuery(query)
 	if sanitizedQuery == "" {
@@ -664,19 +667,50 @@ func (model *BookmarkRepo) Search(user *User, query string) ([]SearchResult, err
 		return []SearchResult{}, nil
 	}
 
-	// Try full-text search first
-	results, err := model.performFullTextSearch(user, sanitizedQuery)
-	if err != nil {
-		// If full-text search fails, fall back to simple pattern matching
+	// Perform both full-text and vector searches in parallel
+	type searchResult struct {
+		results []SearchResult
+		err     error
+	}
+
+	fullTextChan := make(chan searchResult, 1)
+	vectorChan := make(chan searchResult, 1)
+
+	// Run full-text search
+	go func() {
+		results, err := model.performFullTextSearch(user, sanitizedQuery)
+		fullTextChan <- searchResult{results, err}
+	}()
+
+	// Run vector search
+	go func() {
+		results, err := model.performVectorSearch(ctx, user, sanitizedQuery)
+		vectorChan <- searchResult{results, err}
+	}()
+
+	// Collect results from both searches
+	fullTextResult := <-fullTextChan
+	vectorResult := <-vectorChan
+
+	// If both searches fail, try fallback search
+	if fullTextResult.err != nil && vectorResult.err != nil {
 		return model.performFallbackSearch(user, sanitizedQuery)
 	}
 
-	// If full-text search returns no results, try fallback search
-	if len(results) == 0 {
+	// Combine and rank results using weighted scoring
+	combinedResults := model.combineSearchResults(
+		fullTextResult.results,
+		vectorResult.results,
+		0.6, // Full-text weight
+		0.4, // Vector weight
+	)
+
+	// If no results from hybrid search, try fallback
+	if len(combinedResults) == 0 {
 		return model.performFallbackSearch(user, sanitizedQuery)
 	}
 
-	return results, nil
+	return combinedResults, nil
 }
 
 // sanitizeSearchQuery cleans and validates search input
@@ -868,6 +902,160 @@ func (model *BookmarkRepo) performVectorSearch(ctx context.Context, user *User, 
 	}
 
 	return results, nil
+}
+
+// combineSearchResults merges and ranks results from full-text and vector searches
+func (model *BookmarkRepo) combineSearchResults(
+	fullTextResults []SearchResult,
+	vectorResults []SearchResult,
+	fullTextWeight float32,
+	vectorWeight float32,
+) []SearchResult {
+	// Create a map to combine results by bookmark ID
+	resultMap := make(map[types.BookmarkId]*SearchResult)
+
+	// Add full-text results with weighted scores
+	for _, result := range fullTextResults {
+		result.Rank = result.Rank * fullTextWeight
+		resultMap[result.Id] = &result
+	}
+
+	// Add or merge vector results with weighted scores
+	for _, result := range vectorResults {
+		if existing, exists := resultMap[result.Id]; exists {
+			// Bookmark appears in both searches - combine scores
+			existing.Rank += result.Rank * vectorWeight
+		} else {
+			// Only in vector search
+			result.Rank = result.Rank * vectorWeight
+			resultMap[result.Id] = &result
+		}
+	}
+
+	// Convert map back to slice
+	combined := make([]SearchResult, 0, len(resultMap))
+	for _, result := range resultMap {
+		combined = append(combined, *result)
+	}
+
+	// Sort by combined rank (descending)
+	// Using a simple bubble sort since we have at most 20 items (10 from each search)
+	for i := 0; i < len(combined); i++ {
+		for j := i + 1; j < len(combined); j++ {
+			if combined[j].Rank > combined[i].Rank {
+				combined[i], combined[j] = combined[j], combined[i]
+			}
+		}
+	}
+
+	// Return top 10 results
+	if len(combined) > 10 {
+		combined = combined[:10]
+	}
+
+	return combined
+}
+
+// RAGResponse represents the response from asking a question about bookmarks
+type RAGResponse struct {
+	Answer          string
+	SourceBookmarks []SearchResult
+}
+
+// AskQuestion uses RAG (Retrieval-Augmented Generation) to answer questions about bookmarks
+// It retrieves relevant bookmarks using semantic search, then uses Gemini to answer the question
+func (model *BookmarkRepo) AskQuestion(ctx context.Context, user *User, question string) (*RAGResponse, error) {
+	logger := loggercontext.Logger(ctx)
+
+	if model.GenAIClient == nil {
+		return nil, fmt.Errorf("GenAI client not initialized")
+	}
+
+	// Use vector search to find relevant bookmarks
+	relevantBookmarks, err := model.performVectorSearch(ctx, user, question)
+	if err != nil {
+		logger.Warnw("Failed to retrieve relevant bookmarks", "error", err)
+		return nil, fmt.Errorf("retrieve relevant bookmarks: %w", err)
+	}
+
+	if len(relevantBookmarks) == 0 {
+		return &RAGResponse{
+			Answer:          "I couldn't find any relevant bookmarks to answer your question.",
+			SourceBookmarks: []SearchResult{},
+		}, nil
+	}
+
+	// Limit to top 5 most relevant bookmarks to avoid token limits
+	if len(relevantBookmarks) > 5 {
+		relevantBookmarks = relevantBookmarks[:5]
+	}
+
+	// Fetch full content for the relevant bookmarks
+	var contexts []string
+	for i, bookmark := range relevantBookmarks {
+		content, err := model.GetBookmarkContent(bookmark.Id)
+		if err != nil {
+			logger.Warnw("Failed to get bookmark content", "error", err, "bookmarkId", bookmark.Id)
+			continue
+		}
+
+		// Limit each content to 1000 chars to avoid excessive tokens
+		if len(content) > 1000 {
+			content = content[:1000] + "..."
+		}
+
+		contexts = append(contexts, fmt.Sprintf(
+			"[Source %d: %s]\nURL: %s\nContent: %s\n",
+			i+1, bookmark.Title, bookmark.Link, content,
+		))
+	}
+
+	if len(contexts) == 0 {
+		return &RAGResponse{
+			Answer:          "I found relevant bookmarks but couldn't access their content.",
+			SourceBookmarks: relevantBookmarks,
+		}, nil
+	}
+
+	// Build the prompt for Gemini
+	prompt := fmt.Sprintf(`You are a helpful assistant that answers questions based on the user's bookmarked content.
+
+Question: %s
+
+Here are the relevant bookmarks from the user's library:
+
+%s
+
+Instructions:
+- Answer the question using ONLY the information provided in the bookmarks above
+- Be concise and direct
+- If the bookmarks don't contain enough information to answer the question, say so
+- Cite your sources by mentioning the bookmark titles
+- If multiple bookmarks provide relevant information, synthesize them into a coherent answer
+- Keep your answer under 300 words
+
+Answer:`, question, strings.Join(contexts, "\n---\n"))
+
+	logger.Infow("generating RAG answer", "question", question, "numSources", len(contexts))
+
+	// Generate answer using Gemini
+	result, err := model.GenAIClient.Models.GenerateContent(
+		ctx,
+		"gemini-2.5-flash-lite-preview-06-17",
+		genai.Text(prompt),
+		nil,
+	)
+	if err != nil {
+		logger.Warnw("Failed to generate RAG answer", "error", err)
+		return nil, fmt.Errorf("generate RAG answer: %w", err)
+	}
+
+	answer := result.Text()
+
+	return &RAGResponse{
+		Answer:          answer,
+		SourceBookmarks: relevantBookmarks,
+	}, nil
 }
 
 func (model *BookmarkRepo) GetBookmarkContent(id types.BookmarkId) (string, error) {
