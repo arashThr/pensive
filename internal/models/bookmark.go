@@ -20,6 +20,7 @@ import (
 	"github.com/go-shiori/go-readability"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pgvector/pgvector-go"
 	"google.golang.org/genai"
 )
 
@@ -443,6 +444,24 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, l
 	if err != nil {
 		logger.Warnw("Failed to update bookmark markdown content", "error", err)
 	}
+
+	// Generate and store embedding for the content
+	logger.Infow("generating embedding for bookmark", "link", link)
+	embedding, err := model.generateEmbedding(ctx, htmlContent)
+	if err != nil {
+		logger.Warnw("Failed to generate embedding", "error", err, "link", link)
+		return
+	}
+
+	// Convert to pgvector type and store
+	_, err = model.Pool.Exec(context.Background(), `
+		UPDATE library_contents SET content_embedding = $1 WHERE id = $2`,
+		pgvector.NewVector(embedding), bookmarkId)
+	if err != nil {
+		logger.Warnw("Failed to store embedding", "error", err, "link", link)
+	} else {
+		logger.Infow("embedding stored successfully", "link", link, "dimensions", len(embedding))
+	}
 }
 
 type aiDataResponseType struct {
@@ -560,6 +579,46 @@ HTML content to process:
 	}
 
 	return aiDataResponse, nil
+}
+
+// generateEmbedding generates a vector embedding for the given text using Google's embedding model
+func (model *BookmarkRepo) generateEmbedding(ctx context.Context, text string) ([]float32, error) {
+	logger := loggercontext.Logger(ctx)
+
+	if model.GenAIClient == nil {
+		return nil, fmt.Errorf("GenAI client not initialized")
+	}
+
+	// Limit content length to avoid API limits
+	// Google's text-embedding-005 supports up to ~20k tokens, but we'll use ~2000 chars (~500 tokens) for efficiency
+	maxLength := 2000
+	if len(text) > maxLength {
+		// Take first 1000 and last 1000 chars to capture both intro and conclusion
+		text = text[:1000] + "..." + text[len(text)-1000:]
+	}
+
+	// Use Google's text-embedding-005 model (768 dimensions)
+	result, err := model.GenAIClient.Models.EmbedContent(
+		ctx,
+		"text-embedding-005",
+		genai.Text(text),
+		nil,
+	)
+	if err != nil {
+		logger.Warnw("Failed to generate embedding", "error", err)
+		return nil, fmt.Errorf("generate embedding: %w", err)
+	}
+
+	if len(result.Embeddings) == 0 {
+		return nil, fmt.Errorf("empty embedding returned")
+	}
+
+	// Extract the float32 values from the first embedding
+	if len(result.Embeddings[0].Values) == 0 {
+		return nil, fmt.Errorf("embedding has no values")
+	}
+
+	return result.Embeddings[0].Values, nil
 }
 
 func (model *BookmarkRepo) Update(bookmark *Bookmark) error {
@@ -760,6 +819,52 @@ func (model *BookmarkRepo) performFallbackSearch(user *User, query string) ([]Se
 	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
 	if err != nil {
 		return nil, fmt.Errorf("collect fallback search rows: %w", err)
+	}
+
+	return results, nil
+}
+
+// performVectorSearch performs semantic similarity search using embeddings
+func (model *BookmarkRepo) performVectorSearch(ctx context.Context, user *User, query string) ([]SearchResult, error) {
+	logger := loggercontext.Logger(ctx)
+
+	// Generate embedding for the search query
+	queryEmbedding, err := model.generateEmbedding(ctx, query)
+	if err != nil {
+		logger.Warnw("Failed to generate query embedding", "error", err)
+		return nil, fmt.Errorf("generate query embedding: %w", err)
+	}
+
+	// Search for similar bookmarks using cosine similarity
+	// The <=> operator in pgvector computes cosine distance (lower is more similar)
+	// We convert distance to similarity score for consistency with full-text search
+	rows, err := model.Pool.Query(ctx, `
+		SELECT
+			COALESCE(li.excerpt, lc.excerpt, '(No excerpt available)') AS headline,
+			li.id AS id,
+			li.title AS title,
+			li.link AS link,
+			li.excerpt AS excerpt,
+			li.image_url AS image_url,
+			li.created_at AS created_at,
+			(1 - (lc.content_embedding <=> $1)) AS rank,
+			li.ai_summary AS ai_summary,
+			li.ai_excerpt AS ai_excerpt,
+			li.ai_tags AS ai_tags
+		FROM library_items li
+		JOIN library_contents lc ON li.id = lc.id
+		WHERE li.user_id = $2
+			AND lc.content_embedding IS NOT NULL
+		ORDER BY lc.content_embedding <=> $1
+		LIMIT 10`, pgvector.NewVector(queryEmbedding), user.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("vector search failed: %w", err)
+	}
+
+	results, err := pgx.CollectRows(rows, pgx.RowToStructByName[SearchResult])
+	if err != nil {
+		return nil, fmt.Errorf("collect vector search rows: %w", err)
 	}
 
 	return results, nil
