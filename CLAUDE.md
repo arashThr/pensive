@@ -7,12 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Go web application for bookmarking and content management, featuring:
 - Web scraping and content extraction using Mozilla Readability
 - AI-powered content summarization with Google Gemini
+- Semantic search using pgvector and embeddings (text-embedding-004)
+- RAG-based Q&A system for asking questions about bookmarked content
 - Multiple authentication methods (GitHub, Google, Telegram OAuth, password-based)
 - Email verification system for password signups with usage limitations
 - Browser extensions (Chrome/Firefox) for easy bookmark saving
 - Telegram bot integration
 - Stripe payment processing for premium features
-- PostgreSQL database with migrations
+- PostgreSQL database with pgvector extension and migrations
 - Docker containerization
 
 ## Development Commands
@@ -66,6 +68,14 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Logging**: Zap for structured logging
 - **CSS**: TailwindCSS (built in separate container)
 
+### Semantic Search & RAG Features
+- **pgvector**: Vector similarity search using text-embedding-004 (768 dimensions) with HNSW index
+- **Dual Search Modes**:
+  - **Search Tab**: Traditional full-text search for instant results
+  - **Ask AI Tab**: RAG-based Q&A using vector search + Gemini to answer questions about bookmarks
+- **Implementation**: `AskQuestion()` in `internal/models/bookmark.go` retrieves relevant bookmarks via vector search, then generates AI answers with source citations
+- **UI**: Tabbed HTMX interface with loading indicators and error handling for AI service failures
+
 ### Configuration
 - Environment variables loaded via `godotenv`
 - Configuration centralized in `internal/config/config.go`
@@ -77,6 +87,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - Email verification system with auth tokens
 - API tokens for extension/bot authentication
 - Library/bookmarks with full-text search (tsvector)
+- Vector embeddings (vector(768)) with HNSW index for semantic search
 - Stripe subscription management tables
 - Import job tracking for Pocket imports
 - Telegram authentication tables
