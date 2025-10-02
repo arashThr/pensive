@@ -658,8 +658,6 @@ type SearchResult struct {
 }
 
 func (model *BookmarkRepo) Search(user *User, query string) ([]SearchResult, error) {
-	ctx := context.Background()
-
 	// Sanitize and validate the search query
 	sanitizedQuery := sanitizeSearchQuery(query)
 	if sanitizedQuery == "" {
@@ -667,50 +665,19 @@ func (model *BookmarkRepo) Search(user *User, query string) ([]SearchResult, err
 		return []SearchResult{}, nil
 	}
 
-	// Perform both full-text and vector searches in parallel
-	type searchResult struct {
-		results []SearchResult
-		err     error
-	}
-
-	fullTextChan := make(chan searchResult, 1)
-	vectorChan := make(chan searchResult, 1)
-
-	// Run full-text search
-	go func() {
-		results, err := model.performFullTextSearch(user, sanitizedQuery)
-		fullTextChan <- searchResult{results, err}
-	}()
-
-	// Run vector search
-	go func() {
-		results, err := model.performVectorSearch(ctx, user, sanitizedQuery)
-		vectorChan <- searchResult{results, err}
-	}()
-
-	// Collect results from both searches
-	fullTextResult := <-fullTextChan
-	vectorResult := <-vectorChan
-
-	// If both searches fail, try fallback search
-	if fullTextResult.err != nil && vectorResult.err != nil {
+	// Try full-text search first (instant, keyword-based)
+	results, err := model.performFullTextSearch(user, sanitizedQuery)
+	if err != nil {
+		// If full-text search fails, fall back to simple pattern matching
 		return model.performFallbackSearch(user, sanitizedQuery)
 	}
 
-	// Combine and rank results using weighted scoring
-	combinedResults := model.combineSearchResults(
-		fullTextResult.results,
-		vectorResult.results,
-		0.6, // Full-text weight
-		0.4, // Vector weight
-	)
-
-	// If no results from hybrid search, try fallback
-	if len(combinedResults) == 0 {
+	// If full-text search returns no results, try fallback search
+	if len(results) == 0 {
 		return model.performFallbackSearch(user, sanitizedQuery)
 	}
 
-	return combinedResults, nil
+	return results, nil
 }
 
 // sanitizeSearchQuery cleans and validates search input
@@ -902,58 +869,6 @@ func (model *BookmarkRepo) performVectorSearch(ctx context.Context, user *User, 
 	}
 
 	return results, nil
-}
-
-// combineSearchResults merges and ranks results from full-text and vector searches
-func (model *BookmarkRepo) combineSearchResults(
-	fullTextResults []SearchResult,
-	vectorResults []SearchResult,
-	fullTextWeight float32,
-	vectorWeight float32,
-) []SearchResult {
-	// Create a map to combine results by bookmark ID
-	resultMap := make(map[types.BookmarkId]*SearchResult)
-
-	// Add full-text results with weighted scores
-	for _, result := range fullTextResults {
-		result.Rank = result.Rank * fullTextWeight
-		resultMap[result.Id] = &result
-	}
-
-	// Add or merge vector results with weighted scores
-	for _, result := range vectorResults {
-		if existing, exists := resultMap[result.Id]; exists {
-			// Bookmark appears in both searches - combine scores
-			existing.Rank += result.Rank * vectorWeight
-		} else {
-			// Only in vector search
-			result.Rank = result.Rank * vectorWeight
-			resultMap[result.Id] = &result
-		}
-	}
-
-	// Convert map back to slice
-	combined := make([]SearchResult, 0, len(resultMap))
-	for _, result := range resultMap {
-		combined = append(combined, *result)
-	}
-
-	// Sort by combined rank (descending)
-	// Using a simple bubble sort since we have at most 20 items (10 from each search)
-	for i := 0; i < len(combined); i++ {
-		for j := i + 1; j < len(combined); j++ {
-			if combined[j].Rank > combined[i].Rank {
-				combined[i], combined[j] = combined[j], combined[i]
-			}
-		}
-	}
-
-	// Return top 10 results
-	if len(combined) > 10 {
-		combined = combined[:10]
-	}
-
-	return combined
 }
 
 // RAGResponse represents the response from asking a question about bookmarks
