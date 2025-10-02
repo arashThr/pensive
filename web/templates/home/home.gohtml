@@ -4,34 +4,94 @@
 
   <!-- Content overlay -->
   <div class="relative z-10 px-6 py-12 max-w-5xl mx-auto">
-    <!-- Search Section -->
-    <div class="mb-8">
-      <div class="flex items-center gap-4 max-w-2xl mx-auto">
+    <!-- Unified Search/Ask Section with Tabs -->
+    <div class="mb-8 max-w-2xl mx-auto">
+      <!-- Tabs -->
+      <div class="flex gap-2 mb-4">
+        <button
+          id="search-tab"
+          class="flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
+          onclick="switchTab('search')"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Search
+        </button>
+        <button
+          id="ask-tab"
+          class="flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700/70"
+          onclick="switchTab('ask')"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+          Ask AI
+        </button>
+      </div>
+
+      <!-- Input Container -->
+      <div class="flex items-start gap-4">
         <div class="relative flex-1">
-          <input
-            type="text"
-            placeholder="Search through your collection..."
-            class="w-full p-4 pr-12 border-2 border-gray-600 rounded-full outline-none bg-gray-800/80 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-200/50 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-            id="search-input"
-            hx-get="/home/search"
-            hx-target="#results"
-            hx-trigger="input delay:300ms"
-            hx-indicator=".htmx-indicator"
-            name="query"
-          />
-          <div class="absolute right-4 top-1/2 -translate-y-1/2">
-            <svg class="w-5 h-5 text-gray-400 htmx-indicator-hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <div class="htmx-indicator hidden">
-              <div class="w-5 h-5 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin"></div>
+          <!-- Hidden CSRF token for Ask mode -->
+          <input type="hidden" name="gorilla.csrf.Token" value="{{csrfToken}}" id="csrf-token" />
+
+          <!-- Search Mode Input -->
+          <div id="search-mode">
+            <input
+              type="text"
+              placeholder="Search through your collection..."
+              class="w-full p-4 pr-12 border-2 border-gray-600 rounded-3xl outline-none bg-gray-800/80 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-200/50 transition-all shadow-lg"
+              id="search-input"
+              hx-get="/home/search"
+              hx-target="#results"
+              hx-trigger="input delay:300ms"
+              hx-indicator="#search-loading"
+              name="query"
+            />
+            <div class="absolute right-4 top-1/2 -translate-y-1/2">
+              <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="search-icon">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <div id="search-loading" class="htmx-indicator hidden">
+                <div class="w-5 h-5 border-2 border-orange-300 border-t-orange-600 rounded-full animate-spin"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ask Mode Input -->
+          <div id="ask-mode" class="hidden">
+            <textarea
+              name="question"
+              placeholder="Ask me anything about your bookmarked content..."
+              class="w-full p-4 border-2 border-purple-500/50 rounded-3xl outline-none bg-gray-800/80 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all resize-none shadow-lg"
+              rows="2"
+              id="question-input"
+            ></textarea>
+            <button
+              type="button"
+              class="mt-3 w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold rounded-full transition-all transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
+              hx-post="/home/ask"
+              hx-target="#results"
+              hx-swap="innerHTML"
+              hx-indicator="#ask-loading"
+              hx-include="[name='question']"
+            >
+              Ask Question
+            </button>
+            <div id="ask-loading" class="htmx-indicator mt-3 text-center">
+              <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full">
+                <div class="w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
+                <span class="text-sm text-purple-200 font-medium">Thinking...</span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Add bookmark button -->
         <a href="/bookmarks/new"
-           class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-red-400 to-orange-500 hover:from-red-500 hover:to-orange-600 rounded-full flex items-center justify-center transition-all group shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12"
+           class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-red-400 to-orange-500 hover:from-red-500 hover:to-orange-600 rounded-full flex items-center justify-center transition-all group shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 mt-0"
            title="Add bookmark manually">
           <svg class="w-6 h-6 text-white transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -40,55 +100,39 @@
       </div>
     </div>
 
-    <!-- Chat/Ask Question Section -->
-    <div class="mb-8 max-w-2xl mx-auto">
-      <div class="p-6 bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-sm border-2 border-purple-500/50 rounded-3xl shadow-lg">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-            </svg>
-          </div>
-          <h3 class="font-bold text-white text-lg">Ask about your bookmarks</h3>
-        </div>
+    <script>
+      function switchTab(mode) {
+        const searchTab = document.getElementById('search-tab');
+        const askTab = document.getElementById('ask-tab');
+        const searchMode = document.getElementById('search-mode');
+        const askMode = document.getElementById('ask-mode');
+        const results = document.getElementById('results');
 
-        <form id="chat-form" class="space-y-4">
-          <input type="hidden" name="gorilla.csrf.Token" value="{{csrfToken}}" />
-          <div class="relative">
-            <textarea
-              name="question"
-              placeholder="Ask me anything about your bookmarked content..."
-              class="w-full p-4 border-2 border-purple-500/50 rounded-2xl outline-none bg-gray-800/60 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all resize-none"
-              rows="2"
-              id="question-input"
-            ></textarea>
-          </div>
+        if (mode === 'search') {
+          // Update tab styles
+          searchTab.className = 'flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg';
+          askTab.className = 'flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700/70';
 
-          <button
-            type="submit"
-            class="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold rounded-full transition-all transform hover:scale-[1.02] hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-            hx-post="/home/ask"
-            hx-target="#chat-answer"
-            hx-swap="innerHTML"
-            hx-indicator="#chat-loading"
-            hx-include="[name='question']"
-          >
-            Ask Question
-          </button>
-        </form>
+          // Show/hide inputs
+          searchMode.classList.remove('hidden');
+          askMode.classList.add('hidden');
 
-        <!-- Loading indicator -->
-        <div id="chat-loading" class="htmx-indicator mt-4 text-center">
-          <div class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 rounded-full">
-            <div class="w-4 h-4 border-2 border-purple-300 border-t-purple-600 rounded-full animate-spin"></div>
-            <span class="text-sm text-purple-200">Thinking...</span>
-          </div>
-        </div>
+          // Clear results if switching from ask mode
+          document.getElementById('search-input').value = '';
+        } else {
+          // Update tab styles
+          askTab.className = 'flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg';
+          searchTab.className = 'flex-1 px-6 py-3 rounded-t-2xl font-semibold transition-all flex items-center justify-center gap-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700/70';
 
-        <!-- Answer area -->
-        <div id="chat-answer" class="mt-4"></div>
-      </div>
-    </div>
+          // Show/hide inputs
+          askMode.classList.remove('hidden');
+          searchMode.classList.add('hidden');
+
+          // Clear question input
+          document.getElementById('question-input').value = '';
+        }
+      }
+    </script>
 
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}

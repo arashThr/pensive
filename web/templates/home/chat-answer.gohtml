@@ -1,7 +1,7 @@
 {{if .Answer}}
-<div class="space-y-4">
+<div class="max-w-2xl mx-auto space-y-4">
   <!-- Answer -->
-  <div class="p-4 bg-gradient-to-br from-purple-800/40 to-indigo-800/40 backdrop-blur-sm rounded-2xl border border-purple-400/30">
+  <div class="p-6 bg-gradient-to-br from-purple-800/40 to-indigo-800/40 backdrop-blur-sm rounded-2xl border border-purple-400/30 shadow-lg">
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -9,7 +9,7 @@
         </svg>
       </div>
       <div class="flex-1">
-        <h4 class="font-semibold text-purple-200 mb-2">Answer</h4>
+        <h4 class="font-semibold text-purple-200 mb-3 text-lg">AI Answer</h4>
         <div class="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{{.Answer}}</div>
       </div>
     </div>
