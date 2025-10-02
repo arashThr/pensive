@@ -77,6 +77,7 @@
               hx-swap="innerHTML"
               hx-indicator="#ask-loading"
               hx-include="[name='question']"
+              id="ask-button"
             >
               Ask Question
             </button>
@@ -91,6 +92,7 @@
 
         <!-- Add bookmark button -->
         <a href="/bookmarks/new"
+           id="add-bookmark-button"
            class="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-red-400 to-orange-500 hover:from-red-500 hover:to-orange-600 rounded-full flex items-center justify-center transition-all group shadow-lg hover:shadow-xl transform hover:scale-110 hover:rotate-12 mt-0"
            title="Add bookmark manually">
           <svg class="w-6 h-6 text-white transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -107,6 +109,7 @@
         const searchMode = document.getElementById('search-mode');
         const askMode = document.getElementById('ask-mode');
         const results = document.getElementById('results');
+        const addButton = document.getElementById('add-bookmark-button');
 
         if (mode === 'search') {
           // Update tab styles
@@ -117,7 +120,16 @@
           searchMode.classList.remove('hidden');
           askMode.classList.add('hidden');
 
-          // Clear results if switching from ask mode
+          // Show results area and reload recent bookmarks
+          results.classList.remove('hidden');
+
+          // Reload recent bookmarks (search endpoint with no query returns recent bookmarks)
+          htmx.ajax('GET', '/home/search', {target: '#results', swap: 'innerHTML'});
+
+          // Show add bookmark button
+          if (addButton) addButton.classList.remove('hidden');
+
+          // Clear input
           document.getElementById('search-input').value = '';
         } else {
           // Update tab styles
@@ -128,10 +140,43 @@
           askMode.classList.remove('hidden');
           searchMode.classList.add('hidden');
 
+          // Hide results area (don't show recent bookmarks in Ask AI mode)
+          results.classList.add('hidden');
+
+          // Hide add bookmark button in Ask AI mode
+          if (addButton) addButton.classList.add('hidden');
+
           // Clear question input
           document.getElementById('question-input').value = '';
         }
       }
+
+      // Enable Enter key to submit question in Ask AI mode
+      document.addEventListener('DOMContentLoaded', function() {
+        const questionInput = document.getElementById('question-input');
+        const askButton = document.querySelector('#ask-mode button[type="button"]');
+
+        if (questionInput && askButton) {
+          questionInput.addEventListener('keydown', function(e) {
+            // Submit on Enter, but allow Shift+Enter for new lines
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              askButton.click();
+            }
+          });
+        }
+
+        // Listen for HTMX afterSwap event to show results after Ask AI response
+        const results = document.getElementById('results');
+        if (results) {
+          results.addEventListener('htmx:afterSwap', function(event) {
+            // Only show results if the swap came from the Ask button
+            if (event.detail.target.id === 'results') {
+              results.classList.remove('hidden');
+            }
+          });
+        }
+      });
     </script>
 
     <!-- Email Verification Notice -->

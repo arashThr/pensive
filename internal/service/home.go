@@ -2,6 +2,7 @@ package service
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
@@ -114,7 +115,31 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 	response, err := h.BookmarkModel.AskQuestion(r.Context(), user, question)
 	if err != nil {
 		logger.Errorw("failed to answer question", "error", err, "question", question)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+
+		// Render a user-friendly error message instead of HTTP error
+		errorMsg := "I'm having trouble answering your question right now. "
+
+		// Check for specific error types
+		errStr := err.Error()
+		if strings.Contains(errStr, "overloaded") || strings.Contains(errStr, "503") {
+			errorMsg += "The AI service is currently overloaded. Please try again in a moment."
+		} else if strings.Contains(errStr, "couldn't find any relevant bookmarks") {
+			errorMsg += "I couldn't find any bookmarks related to your question."
+		} else {
+			errorMsg += "Please try again or rephrase your question."
+		}
+
+		data := struct {
+			Answer  string
+			Sources []types.BookmarkSearchResult
+			IsError bool
+		}{
+			Answer:  errorMsg,
+			Sources: []types.BookmarkSearchResult{},
+			IsError: true,
+		}
+
+		h.Templates.ChatAnswer.Execute(w, r, data)
 		return
 	}
 
@@ -135,9 +160,11 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 	data := struct {
 		Answer  string
 		Sources []types.BookmarkSearchResult
+		IsError bool
 	}{
 		Answer:  response.Answer,
 		Sources: sources,
+		IsError: false,
 	}
 
 	h.Templates.ChatAnswer.Execute(w, r, data)

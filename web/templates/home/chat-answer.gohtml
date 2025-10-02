@@ -1,6 +1,23 @@
 {{if .Answer}}
 <div class="max-w-2xl mx-auto space-y-4">
   <!-- Answer -->
+  {{if .IsError}}
+  <!-- Error State -->
+  <div class="p-6 bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-2xl border border-yellow-500/40 shadow-lg">
+    <div class="flex items-start gap-3 mb-2">
+      <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <h4 class="font-semibold text-yellow-200 mb-3 text-lg">Unable to Answer</h4>
+        <div class="text-sm text-gray-200 leading-relaxed">{{.Answer}}</div>
+      </div>
+    </div>
+  </div>
+  {{else}}
+  <!-- Success State -->
   <div class="p-6 bg-gradient-to-br from-purple-800/40 to-indigo-800/40 backdrop-blur-sm rounded-2xl border border-purple-400/30 shadow-lg">
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
@@ -14,6 +31,7 @@
       </div>
     </div>
   </div>
+  {{end}}
 
   <!-- Sources -->
   {{if .Sources}}
