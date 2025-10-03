@@ -35,6 +35,11 @@ const (
 )
 
 const (
+	FreeUserDailyAIQuestions    = 1  // Free users: 1 AI question per day
+	PremiumUserDailyAIQuestions = 10 // Premium users: 10 AI questions per day
+)
+
+const (
 	WebSource BookmarkSource = iota
 	TelegramSource
 	Api
@@ -1201,5 +1206,90 @@ func (model *BookmarkRepo) GetRemainingBookmarks(user *User) (int, error) {
 
 	remaining := max(limit-count, 0)
 
+	return remaining, nil
+}
+
+// CheckAndIncrementAIQuestionLimit checks if the user can ask another AI question
+// and increments the count if they can. Returns an error if limit is exceeded.
+func (model *BookmarkRepo) CheckAndIncrementAIQuestionLimit(ctx context.Context, user *User) error {
+	// Get today's date
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
+	// Determine the user's limit
+	var limit int
+	if user.IsSubscriptionPremium() {
+		limit = PremiumUserDailyAIQuestions
+	} else {
+		limit = FreeUserDailyAIQuestions
+	}
+
+	// Use a transaction to ensure atomicity
+	tx, err := model.Pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Get or create today's record
+	var currentCount int
+	err = tx.QueryRow(ctx, `
+		INSERT INTO daily_ai_limits (user_id, day, question_count)
+		VALUES ($1, $2, 1)
+		ON CONFLICT (user_id, day) DO UPDATE
+		SET question_count = daily_ai_limits.question_count + 1,
+		    updated_at = NOW()
+		RETURNING question_count
+	`, user.ID, today).Scan(&currentCount)
+
+	if err != nil {
+		return fmt.Errorf("increment AI question count: %w", err)
+	}
+
+	// Check if the limit has been exceeded
+	if currentCount > limit {
+		// Rollback the increment
+		tx.Rollback(ctx)
+		return fmt.Errorf("daily AI question limit exceeded (%d/%d)", currentCount-1, limit)
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// GetRemainingAIQuestions returns how many AI questions the user has left today
+func (model *BookmarkRepo) GetRemainingAIQuestions(user *User) (int, error) {
+	// Get today's date
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+
+	// Determine the user's limit
+	var limit int
+	if user.IsSubscriptionPremium() {
+		limit = PremiumUserDailyAIQuestions
+	} else {
+		limit = FreeUserDailyAIQuestions
+	}
+
+	// Get current count for today
+	var count int
+	err := model.Pool.QueryRow(context.Background(), `
+		SELECT question_count FROM daily_ai_limits
+		WHERE user_id = $1 AND day = $2
+	`, user.ID, today).Scan(&count)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			// No record yet, user has full limit
+			return limit, nil
+		}
+		return 0, fmt.Errorf("get AI question count: %w", err)
+	}
+
+	remaining := max(limit-count, 0)
 	return remaining, nil
 }

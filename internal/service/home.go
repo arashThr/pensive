@@ -34,11 +34,12 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Title              string
-		IsUserPremium      bool
-		EmailVerified      bool
-		RecentBookmark     types.RecentBookmarksType
-		RemainingBookmarks int
+		Title                string
+		IsUserPremium        bool
+		EmailVerified        bool
+		RecentBookmark       types.RecentBookmarksType
+		RemainingBookmarks   int
+		RemainingAIQuestions int
 	}{
 		Title:          "Home",
 		IsUserPremium:  user.IsSubscriptionPremium(),
@@ -53,6 +54,15 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		data.RemainingBookmarks = 0
 	} else {
 		data.RemainingBookmarks = remaining
+	}
+
+	// Get remaining AI questions for this month
+	remainingAI, err := h.BookmarkModel.GetRemainingAIQuestions(user)
+	if err != nil {
+		logger.Warnw("failed to get remaining AI questions", "error", err)
+		data.RemainingAIQuestions = 0
+	} else {
+		data.RemainingAIQuestions = remainingAI
 	}
 
 	h.Templates.Home.Execute(w, r, data)
@@ -108,6 +118,32 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 	question := r.FormValue("question")
 	if question == "" {
 		http.Error(w, "Question is required", http.StatusBadRequest)
+		return
+	}
+
+	// Check and increment AI question limit
+	if err := h.BookmarkModel.CheckAndIncrementAIQuestionLimit(r.Context(), user); err != nil {
+		logger.Warnw("AI question limit exceeded", "error", err, "user_id", user.ID)
+
+		// Render a user-friendly error message
+		errorMsg := "You've reached your daily limit for AI questions. "
+		if user.IsSubscriptionPremium() {
+			errorMsg += "You seem to have used all your questions for today. Contact me if you need more."
+		} else {
+			errorMsg += "Upgrade to premium for more questions, or wait until tomorrow."
+		}
+
+		data := struct {
+			Answer  string
+			Sources []types.BookmarkSearchResult
+			IsError bool
+		}{
+			Answer:  errorMsg,
+			Sources: []types.BookmarkSearchResult{},
+			IsError: true,
+		}
+
+		h.Templates.ChatAnswer.Execute(w, r, data)
 		return
 	}
 
