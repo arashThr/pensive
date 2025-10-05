@@ -106,7 +106,7 @@ func (a *Api) IndexAPI(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
-	bookmarks, _, err := a.BookmarkModel.GetByUserId(user.ID, page)
+	bookmarks, _, _, err := a.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
 		logger.Errorw("fetching bookmarks", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

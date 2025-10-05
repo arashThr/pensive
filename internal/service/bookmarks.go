@@ -163,9 +163,9 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	page := validations.GetPageOffset(r.FormValue("page"))
-	bookmarks, morePages, err := b.BookmarkModel.GetByUserId(user.ID, page)
+	bookmarks, count, morePages, err := b.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
-		logger.Errorw("ubdex bookmark by user id", "error", err, "user_id", user.ID, "page", page)
+		logger.Errorw("index bookmark by user id", "error", err, "user_id", user.ID, "page", page)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -186,7 +186,9 @@ func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
 		Pages     PagesData
 		MorePages bool
 		Bookmarks []Bookmark
+		Count     int
 	}
+	data.Count = count
 	data.Title = "Library"
 	data.Pages = PagesData{
 		Previous: page - 1,

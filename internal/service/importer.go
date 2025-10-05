@@ -241,7 +241,7 @@ func (p Importer) getAllBookmarksForUser(userID types.UserId) ([]models.Bookmark
 	page := 1
 
 	for {
-		bookmarks, morePages, err := p.BookmarkModel.GetByUserId(userID, page)
+		bookmarks, _, morePages, err := p.BookmarkModel.GetByUserId(userID, page)
 		if err != nil {
 			return nil, fmt.Errorf("get bookmarks page %d: %w", page, err)
 		}

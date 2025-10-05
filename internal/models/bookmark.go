@@ -279,20 +279,20 @@ func (model *BookmarkRepo) GetById(id types.BookmarkId) (*Bookmark, error) {
 	return &bookmark, nil
 }
 
-func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmark, bool, error) {
+func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmark, int, bool, error) {
 	row := model.Pool.QueryRow(context.Background(), `
 		SELECT COUNT(*) FROM library_items WHERE user_id = $1`, userId)
 	var count int
 	err := row.Scan(&count)
 	if err != nil {
-		return nil, false, fmt.Errorf("count bookmarks to get all by user ID: %w", err)
+		return nil, 0, false, fmt.Errorf("count bookmarks to get all by user ID: %w", err)
 	}
 	if count == 0 {
-		return []Bookmark{}, false, nil
+		return []Bookmark{}, 0, false, nil
 	}
 
 	if page <= 0 || page >= 100 {
-		return nil, false, fmt.Errorf("page number out of range")
+		return nil, 0, false, fmt.Errorf("page number out of range")
 	}
 	page -= 1
 	rows, err := model.Pool.Query(context.Background(),
@@ -304,7 +304,7 @@ func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmar
 		OFFSET $3
 		`, userId, PageSize, page*PageSize)
 	if err != nil {
-		return nil, false, fmt.Errorf("query bookmark by user id: %w", err)
+		return nil, 0, false, fmt.Errorf("query bookmark by user id: %w", err)
 	}
 	defer rows.Close()
 	// TODO: Get all the row elements
@@ -314,16 +314,16 @@ func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmar
 		var bookmark Bookmark
 		err := rows.Scan(&bookmark.Id, &bookmark.Title, &bookmark.Link, &bookmark.Excerpt, &bookmark.CreatedAt)
 		if err != nil {
-			return nil, false, fmt.Errorf("scan bookmark: %w", err)
+			return nil, 0, false, fmt.Errorf("scan bookmark: %w", err)
 		}
 		bookmarks = append(bookmarks, bookmark)
 	}
 	if rows.Err() != nil {
-		return nil, false, fmt.Errorf("iterating rows: %w", rows.Err())
+		return nil, 0, false, fmt.Errorf("iterating rows: %w", rows.Err())
 	}
 	morePages := PageSize+page*PageSize < count
 
-	return bookmarks, morePages, nil
+	return bookmarks, count, morePages, nil
 }
 
 // GetRecentBookmarks returns the most recent bookmarks for the home page
