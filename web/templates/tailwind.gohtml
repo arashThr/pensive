@@ -291,26 +291,26 @@
 {{define "pagination"}}
   <div class="mt-12 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
-      <a href="?page={{.Pages.Previous}}" 
-         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-white hover:bg-gray-50 hover:border-gray-400 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-        </svg>
-        Previous
+      <a href="?page={{.Pages.Previous}}"
+       class="inline-flex items-center gap-2 py-2 px-4 border border-gray-600 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Previous
       </a>
     {{else}}
       <span class="invisible py-2 px-4"></span>
     {{end}}
 
-    <span class="text-sm font-medium text-gray-600">Page {{.Pages.Current}}</span>
+    <span class="text-sm font-medium text-gray-300">Page {{.Pages.Current}}</span>
 
     {{if .MorePages}}
-      <a href="?page={{.Pages.Next}}" 
-         class="inline-flex items-center gap-2 py-2 px-4 border border-gray-300 rounded-lg text-sm font-medium text-white hover:bg-gray-50 hover:border-gray-400 transition-colors">
-        Next
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
+      <a href="?page={{.Pages.Next}}"
+       class="inline-flex items-center gap-2 py-2 px-4 border border-gray-600 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800 hover:border-gray-500 hover:text-white transition-colors">
+      Next
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
       </a>
     {{else}}
       <span class="invisible py-2 px-4"></span>
