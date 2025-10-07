@@ -83,7 +83,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 	}
 	disableAnalytics := false
 	requestPath := r.URL.Path
-	re := regexp.MustCompile(`\/bookmarks/\w+\/edit`)
+	re := regexp.MustCompile(`\/bookmarks/\w+`)
 	if re.MatchString(requestPath) {
 		disableAnalytics = true
 	}

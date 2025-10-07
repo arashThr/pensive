@@ -77,7 +77,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: Load the same page with the message: Bookmark added
-	editPath := fmt.Sprintf("/bookmarks/%s/edit", bookmark.Id)
+	editPath := fmt.Sprintf("/bookmarks/%s", bookmark.Id)
 	http.Redirect(w, r, editPath, http.StatusFound)
 }
 

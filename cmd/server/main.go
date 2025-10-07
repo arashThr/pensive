@@ -463,7 +463,11 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				r.Get("/", c.BookmarksService.Index)
 				r.Post("/", c.BookmarksService.Create)
 				r.Get("/new", c.BookmarksService.New)
+
+				// TODO: Remove when new addon version is released
 				r.Get("/{id}/edit", c.BookmarksService.Edit)
+				r.Get("/{id}", c.BookmarksService.Edit)
+
 				r.Post("/{id}", c.BookmarksService.Update)
 				r.Post("/{id}/delete", c.BookmarksService.Delete)
 				r.Get("/{id}/full", c.BookmarksService.GetFullBookmark)

@@ -433,7 +433,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Open the specific bookmark page using the bookmark ID
-      const bookmarkUrl = new URL(`/bookmarks/${bookmarkId}/edit`, endpoint);
+      const bookmarkUrl = new URL(`/bookmarks/${bookmarkId}`, endpoint);
       await browserAPI.tabs.create({ url: bookmarkUrl.href });
 
       // Close the popup
