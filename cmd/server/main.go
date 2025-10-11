@@ -344,19 +344,10 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "web"))
 		r.Use(csrfMw)
 
-		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			user := usercontext.User(r.Context())
-			if user != nil {
-				// User is authenticated, redirect to /home
-				http.Redirect(w, r, "/home", http.StatusFound)
-				return
-			}
-			// User is not authenticated, show the regular home page
-			web.StaticHandler(
-				"Home",
-				views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-			)(w, r)
-		})
+		r.Get("/", web.StaticHandler(
+			"Home",
+			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
+		))
 		r.Get("/contact", web.StaticHandler(
 			"Contact",
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
