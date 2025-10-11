@@ -228,12 +228,13 @@ func (model *BookmarkRepo) CreateWithContent(
 
 	// Generate AI content for all users except for imports (like Pocket)
 	if source != Pocket {
+		// TODO: Should I also put content in db?
 		contentForMarkdown := article.TextContent
 		if article.Content != "" {
 			contentForMarkdown = article.Content
 		}
 		// Generate the markdown content using Gemini
-		go model.generateAIData(ctx, contentForMarkdown, link, bookmarkId)
+		go model.generateAIData(ctx, article.Title, contentForMarkdown, link, bookmarkId)
 	}
 
 	return &inputBookmark, nil
@@ -421,8 +422,10 @@ func cleanHTMLForLLM(htmlContent string) string {
 	return strings.TrimSpace(cleaned)
 }
 
-func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, link string, bookmarkId string) {
+func (model *BookmarkRepo) generateAIData(ctx context.Context, title string, content string, link string, bookmarkId string) {
 	logger := loggercontext.Logger(ctx)
+	// Use context.Background() since this runs in a goroutine and the request context may be canceled
+	genCtx := context.Background()
 	// Clean up HTML content to reduce LLM costs
 	htmlContent := cleanHTMLForLLM(content)
 	// Log the duration of the function and size of the content
@@ -435,7 +438,7 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, l
 	}
 	logger.Infow("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
 	// Update the bookmark with all AI-generated content in library_items table
-	_, err = model.Pool.Exec(context.Background(), `
+	_, err = model.Pool.Exec(genCtx, `
 		UPDATE library_items SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE id = $4`,
 		aiDataResponse.Summary, aiDataResponse.Excerpt, aiDataResponse.Tags, bookmarkId)
 	if err != nil {
@@ -443,7 +446,7 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, l
 	}
 
 	// Also update the markdown content in library_contents table
-	_, err = model.Pool.Exec(context.Background(), `
+	_, err = model.Pool.Exec(genCtx, `
 		UPDATE library_contents SET ai_markdown = $1 WHERE id = $2`,
 		aiDataResponse.Markdown, bookmarkId)
 	if err != nil {
@@ -452,15 +455,15 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, content string, l
 
 	// Generate and store embedding for the content
 	logger.Infow("generating embedding for bookmark", "link", link)
-	// Use context.Background() since this runs in a goroutine and the request context may be canceled
-	embedding, err := model.generateEmbedding(context.Background(), htmlContent)
+	fullAIText := aiDataResponse.Markdown + "\n\n" + aiDataResponse.Excerpt + "\n\n" + aiDataResponse.Summary
+	embedding, err := model.generateEmbedding(genCtx, title, fullAIText)
 	if err != nil {
 		logger.Warnw("Failed to generate embedding", "error", err, "link", link)
 		return
 	}
 
 	// Convert to pgvector type and store
-	_, err = model.Pool.Exec(context.Background(), `
+	_, err = model.Pool.Exec(genCtx, `
 		UPDATE library_contents SET content_embedding = $1 WHERE id = $2`,
 		pgvector.NewVector(embedding), bookmarkId)
 	if err != nil {
@@ -588,7 +591,7 @@ HTML content to process:
 }
 
 // generateEmbedding generates a vector embedding for the given text using Google's embedding model
-func (model *BookmarkRepo) generateEmbedding(ctx context.Context, text string) ([]float32, error) {
+func (model *BookmarkRepo) generateEmbedding(ctx context.Context, title, text string) ([]float32, error) {
 	logger := loggercontext.Logger(ctx)
 
 	if model.GenAIClient == nil {
@@ -596,19 +599,25 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, text string) (
 	}
 
 	// Limit content length to avoid API limits
-	// Google's text-embedding-004 supports up to ~20k tokens, but we'll use ~2000 chars (~500 tokens) for efficiency
+	// Google's gemini-embedding-001 supports up to 2,048 tokens, but we'll use ~2000 chars (~500 tokens) for efficiency
 	maxLength := 2000
 	if len(text) > maxLength {
 		// Take first 1000 and last 1000 chars to capture both intro and conclusion
 		text = text[:1000] + "..." + text[len(text)-1000:]
 	}
 
-	// Use Google's text-embedding-004 model (768 dimensions)
+	// Use Google's gemini-embedding-001 model (768 dimensions)
+	var dimension int32 = 768
+	geminiConfigs := genai.EmbedContentConfig{
+		OutputDimensionality: &dimension,
+		TaskType:             "RETRIEVAL_DOCUMENT",
+		Title:                title,
+	}
 	result, err := model.GenAIClient.Models.EmbedContent(
 		ctx,
-		"text-embedding-004",
+		"gemini-embedding-001",
 		genai.Text(text),
-		nil,
+		&geminiConfigs,
 	)
 	if err != nil {
 		logger.Warnw("Failed to generate embedding", "error", err)
@@ -625,6 +634,48 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, text string) (
 	}
 
 	return result.Embeddings[0].Values, nil
+}
+
+func (model *BookmarkRepo) generateQueryEmbedding(ctx context.Context, query string) ([]float32, error) {
+	logger := loggercontext.Logger(ctx)
+
+	if model.GenAIClient == nil {
+		return nil, fmt.Errorf("GenAI client not initialized")
+	}
+
+	// Limit query length to avoid API limits
+	maxLength := 100
+	if len(query) > maxLength {
+		query = query[:maxLength] + "..."
+	}
+
+	var dimension int32 = 768
+	geminiConfigs := genai.EmbedContentConfig{
+		OutputDimensionality: &dimension,
+		TaskType:             "RETRIEVAL_QUERY",
+	}
+	result, err := model.GenAIClient.Models.EmbedContent(
+		ctx,
+		"gemini-embedding-001",
+		genai.Text(query),
+		&geminiConfigs,
+	)
+	if err != nil {
+		logger.Warnw("Failed to generate embedding for query", "error", err)
+		return nil, fmt.Errorf("generate query embedding: %w", err)
+	}
+
+	if len(result.Embeddings) == 0 {
+		return nil, fmt.Errorf("empty query embedding returned")
+	}
+
+	// Extract the float32 values from the first embedding
+	if len(result.Embeddings[0].Values) == 0 {
+		return nil, fmt.Errorf("query embedding has no values")
+	}
+
+	return result.Embeddings[0].Values, nil
+
 }
 
 func (model *BookmarkRepo) Update(bookmark *Bookmark) error {
@@ -835,7 +886,7 @@ func (model *BookmarkRepo) performVectorSearch(ctx context.Context, user *User, 
 	logger := loggercontext.Logger(ctx)
 
 	// Generate embedding for the search query
-	queryEmbedding, err := model.generateEmbedding(ctx, query)
+	queryEmbedding, err := model.generateQueryEmbedding(ctx, query)
 	if err != nil {
 		logger.Warnw("Failed to generate query embedding", "error", err)
 		return nil, fmt.Errorf("generate query embedding: %w", err)

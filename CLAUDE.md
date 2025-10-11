@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a Go web application for bookmarking and content management, featuring:
 - Web scraping and content extraction using Mozilla Readability
 - AI-powered content summarization with Google Gemini
-- Semantic search using pgvector and embeddings (text-embedding-004)
+- Semantic search using pgvector and embeddings (gemini-embedding-001)
 - RAG-based Q&A system for asking questions about bookmarked content
 - Multiple authentication methods (GitHub, Google, Telegram OAuth, password-based)
 - Email verification system for password signups with usage limitations
@@ -69,7 +69,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - **CSS**: TailwindCSS (built in separate container)
 
 ### Semantic Search & RAG Features
-- **pgvector**: Vector similarity search using text-embedding-004 (768 dimensions) with HNSW index
+- **pgvector**: Vector similarity search using gemini-embedding-001 (768 dimensions) with HNSW index
 - **Dual Search Modes**:
   - **Search Tab**: Traditional full-text search for instant results
   - **Ask AI Tab**: RAG-based Q&A using vector search + Gemini to answer questions about bookmarks

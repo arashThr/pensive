@@ -1,5 +1,12 @@
 # TODOs
 
+Publish:
+- Ask for beta testers
+    - [ ] PR Podcast: 
+    - [ ] Reddit pages for Pocket users:
+        - Find them and ask them
+
+
 ## Fixes
 - [ ] getAllBookmarksForUser
 - [ ] Getting non-existant bookmark: Something went wrong
@@ -13,6 +20,7 @@
 - [ ] Why this fails: `https://danielmiessler.com/blog/im-worried-it-might-get-bad`
 - [ ] Wait for Turnstile verified
 - [ ] Fix delete in library page
+- [ ] Should I also put article.content in db? beside text content
 - [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
     - [x] Fix the error: Only pending
     - [x] Send logs for the error
@@ -77,6 +85,7 @@
     - [ ] Remove time from logs
     - [x] Zap is possible?
 - [ ] Add like and dislike buttons
+- [ ] Add explanations to the bookmarks in extension
 - [ ] Send verification email
     - [ ] Reminder to install Telegram and Extensions
 - [ ] Tags
@@ -152,6 +161,10 @@
 - [ ] Optional host permission + explicit user permission
 - [ ] Write down about tech stack in FAQ
 - [ ] Use Sec-Fetch-Site header and remove Gorilla's CSRF protection - [Ref](https://medium.com/@rahulreza920/go-1-25-is-released-faster-smarter-and-safer-9c97ff8b493d)
+- [ ] Update the embeddings based on [this](https://ai.google.dev/gemini-api/docs/embeddings)
+    - RETRIEVAL_DOCUMENT
+    - `gemini-embedding-001`
+    - `EmbedContent`
 - [ ] Build Firefox addon from Chrome
 - [x] Update logging in API to use context logger
 - [x] Add passwordless login for production

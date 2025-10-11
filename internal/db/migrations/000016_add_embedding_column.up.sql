@@ -1,5 +1,5 @@
 -- Add embedding column to library_contents table
--- Using 768 dimensions for Google's text-embedding-004 model
+-- Using 768 dimensions for Google's gemini-embedding-001 model
 ALTER TABLE library_contents ADD COLUMN content_embedding vector(768);
 
 -- Create HNSW index for fast similarity search
