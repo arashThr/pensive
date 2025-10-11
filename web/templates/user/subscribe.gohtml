@@ -33,12 +33,12 @@
           <p class="text-sm text-gray-300">Forever free</p>
         </div>
         <ul class="space-y-3 text-gray-300">
-          <li>• 10 bookmarks/day</li>
+          <li class="font-semibold text-orange-400">• 10 bookmarks/day</li>
+          <li class="font-semibold text-blue-400">• 1 AI question/day</li>
           <li>• Full-text search</li>
           <li>• Browser extension</li>
           <li>• AI summaries & tags</li>
-          <li>• Markdown extraction</li>
-          <li>• Pocket import</li>
+          <li>• Telegram bot</li>
         </ul>
         {{if not .IsSubscribed}}
         <div class="mt-8">
@@ -54,11 +54,11 @@
           <p class="text-sm text-gray-300">Per month</p>
         </div>
         <ul class="space-y-3 text-gray-300">
-          <li>• 100 bookmarks/day</li>
-          <li>• Telegram integration</li>
+          <li class="font-semibold text-violet-400">• 100 bookmarks/day</li>
+          <li class="font-semibold text-purple-400">• 10 AI questions/day</li>
           <li>• All free features</li>
           <li>• Priority support</li>
-          <li>• Future features</li>
+          <li>• Early access to new features</li>
         </ul>
         {{if .IsSubscribed}}
         <div class="mt-8">
@@ -86,7 +86,7 @@
   {{if .IsSubscribed}}
     <div class="bg-green-900/20 backdrop-blur-sm border border-green-500/30 rounded-lg p-8 text-center mb-8">
       <h3 class="font-semibold mb-2 text-green-300">You're all set with premium!</h3>
-      <p class="mb-6 text-green-200">Enjoy 100 bookmarks per day, Telegram integration, and priority support.</p>
+      <p class="mb-6 text-green-200">Enjoy 100 bookmarks per day, 10 AI questions per day, and priority support.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <a href="/payments/portal-session" class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">Manage billing</a>
         <a href="/home" class="px-6 py-3 border border-gray-600/50 text-gray-300 font-semibold rounded-lg hover:bg-gray-700/50 transition-colors">Start exploring</a>

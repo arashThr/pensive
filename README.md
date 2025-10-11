@@ -16,7 +16,6 @@ Pensive helps developers, researchers, and knowledge workers build their persona
 - **Telegram bot** integration for mobile saving
 - **Data portability** - import/export your bookmarks
 - **Self-hostable** with Docker
-- **Open source** under AGPL-3.0 license
 
 ## 🏗️ Components
 
