@@ -17,18 +17,18 @@
 
   {{if .Bookmarks}}
     <!-- Bookmarks List -->
-    <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl overflow-hidden">
+    <div class="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-600/30 rounded-xl shadow-2xl overflow-hidden">
       <div class="divide-y divide-gray-600/30">
         {{range .Bookmarks}}
           <div class="hover:bg-gray-700/50 transition-colors cursor-pointer group" onclick="window.location='/bookmarks/{{.Id}}'">
             <div class="flex items-start gap-4 p-6 min-w-0">
               <!-- Favicon -->
               <div class="w-8 h-8 flex-shrink-0 mt-1">
-                <img 
-                  src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" 
-                  alt="{{.Title}}" 
-                  class="w-full h-full rounded" 
-                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
+                <img
+                  src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64"
+                  alt="{{.Title}}"
+                  class="w-full h-full rounded"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 />
                 <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center hidden">
                   <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
                   </svg>
                 </div>
               </div>
-              
+
               <!-- Content -->
               <div class="flex-1 min-w-0 overflow-hidden">
                 <h3 class="font-semibold text-white group-hover:text-orange-400 transition-colors mb-2 line-clamp-2 overflow-hidden">
@@ -48,11 +48,11 @@
                   <span class="truncate min-w-0 text-gray-400">{{.Link}}</span>
                 </div>
               </div>
-              
+
               <!-- Actions -->
               <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <a href="{{.Link}}" target="_blank" 
-                   class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors" 
+                <a href="{{.Link}}" target="_blank"
+                   class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors"
                    onclick="event.stopPropagation()"
                    title="Visit original link">
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -60,16 +60,16 @@
                   </svg>
                 </a>
                 <div class="relative">
-                  <button class="propertiesMenuButton p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors" 
+                  <button class="propertiesMenuButton p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-700/50 rounded-lg transition-colors"
                           onclick="event.stopPropagation(); togglePropertiesMenu(this)" 
                           title="More options">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                     </svg>
                   </button>
-                  
+
                   <!-- Actions Menu -->
-                  <div class="propertiesMenu hidden absolute right-0 mt-2 w-48 bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-lg shadow-xl py-2 z-10">
+                  <div class="propertiesMenu hidden absolute right-0 mt-2 w-48 bg-gray-800 border border-gray-600/50 rounded-lg shadow-xl py-2 z-10">
                     <a href="/bookmarks/{{.Id}}/markdown" class="block px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-700/50 transition-colors">
                       View markdown
                     </a>
@@ -98,7 +98,7 @@
     {{template "pagination" .}}
   {{else}}
     <!-- Empty State -->
-    <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-12 text-center">
+    <div class="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-600/50 rounded-2xl p-12 text-center">
       <div class="w-16 h-16 bg-orange-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-400/30">
         <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -126,23 +126,23 @@
 <script>
 function togglePropertiesMenu(button) {
   const menu = button.parentNode.querySelector('.propertiesMenu');
-  const allMenus = document.querySelectorAll('.propertiesMenu');
+      const allMenus = document.querySelectorAll('.propertiesMenu');
 
   // Close all other menus first
   allMenus.forEach(m => {
     if (m !== menu) {
       m.classList.add('hidden');
     }
-  });
+      });
 
-  // Toggle current menu
-  menu.classList.toggle('hidden');
+      // Toggle current menu
+      menu.classList.toggle('hidden');
 
   // Prevent event bubbling
   event.stopPropagation();
 }
 
-// Close menus when clicking outside
+  // Close menus when clicking outside
 document.addEventListener('click', function(e) {
   // Check if click is outside any menu button or menu content
   if (!e.target.closest('.propertiesMenuButton') && !e.target.closest('.propertiesMenu')) {
@@ -150,7 +150,7 @@ document.addEventListener('click', function(e) {
       menu.classList.add('hidden');
     });
   }
-});
+  });
 
 // Handle report button clicks
 document.addEventListener('click', function(e) {

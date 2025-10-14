@@ -41,7 +41,7 @@
             <input
               type="text"
               placeholder="Search through your collection..."
-              class="w-full p-4 pr-12 border-2 border-gray-600 rounded-3xl outline-none bg-gray-800/80 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-200/50 transition-all shadow-lg"
+              class="w-full p-4 pr-12 border-2 border-gray-600 rounded-3xl outline-none bg-gray-900 text-white placeholder:text-gray-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-200/50 transition-all shadow-lg"
               id="search-input"
               hx-get="/home/search"
               hx-target="#results"
@@ -64,7 +64,7 @@
             <textarea
               name="question"
               placeholder="Ask me anything about your bookmarked content..."
-              class="w-full p-4 border-2 border-purple-500/50 rounded-3xl outline-none bg-gray-800/80 backdrop-blur-sm text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all resize-none shadow-lg"
+              class="w-full p-4 border-2 border-purple-500/50 rounded-3xl outline-none bg-gray-900 text-white placeholder:text-gray-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/30 transition-all resize-none shadow-lg"
               rows="2"
               id="question-input"
             ></textarea>
@@ -185,7 +185,7 @@
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}
     <div class="mb-8 max-w-2xl mx-auto">
-      <div class="p-6 bg-gradient-to-br from-yellow-100/80 to-orange-100/80 backdrop-blur-sm border-2 border-yellow-300 rounded-3xl shadow-lg">
+      <div class="p-6 bg-gradient-to-br from-yellow-100 to-orange-100 border-2 border-yellow-300 rounded-3xl shadow-lg">
         <div class="flex items-start gap-4">
           <div class="flex-shrink-0">
             <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">

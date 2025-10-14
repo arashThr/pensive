@@ -9,22 +9,21 @@ Publish:
 
 ## Fixes
 - [ ] getAllBookmarksForUser
-- [ ] Getting non-existant bookmark: Something went wrong
 - [ ] Faster build
 - [ ] Add context for imports with import id
-- [ ] Remove context.Background
 - [ ] Send email for reset password takes time. Do we wait for sending email?
 - [ ] Why YouTube is not working?
 - [ ] failed to collect row: bookmark by link: too many rows in result set
     - When entering old link
 - [ ] Why this fails: `https://danielmiessler.com/blog/im-worried-it-might-get-bad`
-- [ ] Wait for Turnstile verified
-- [ ] Fix delete in library page
 - [ ] Should I also put article.content in db? beside text content
 - [ ] `msg="job processing failed" error="part_000000.csv not found in ZIP file"`
     - [x] Fix the error: Only pending
     - [x] Send logs for the error
     - [ ] Better user response
+- [ ] Getting non-existant bookmark: Something went wrong
+- [ ] Fix delete in library page
+- [x] Wait for Turnstile verified
 - [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket
 - [x] Adding bookmark from website brings the image, but the extension does not:

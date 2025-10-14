@@ -2,7 +2,7 @@
 
 {{define "recent-results"}}
 {{if .HasBookmarksAtAll}}
-  <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl">
+  <div class="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-600/30 rounded-xl shadow-2xl">
     <div class="p-6 border-b border-gray-600/50">
       <h2 class="text-lg font-semibold text-white">Recent bookmarks</h2>
     </div>
@@ -52,7 +52,7 @@
   </div>
 {{else}}
   <!-- Empty State -->
-  <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-xl p-12 text-center">
+  <div class="bg-gradient-to-b from-gray-800 to-gray-900 border border-gray-600/50 rounded-xl p-12 text-center">
     <div class="w-16 h-16 bg-orange-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-orange-400/30">
       <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

@@ -3,7 +3,7 @@
   <!-- Answer -->
   {{if .IsError}}
   <!-- Error State -->
-  <div class="p-6 bg-gradient-to-br from-yellow-900/40 to-orange-900/40 backdrop-blur-sm rounded-2xl border border-yellow-500/40 shadow-lg">
+  <div class="p-6 bg-gradient-to-br from-yellow-900/50 to-orange-900/70 rounded-2xl border border-yellow-500/40 shadow-lg">
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -18,7 +18,7 @@
   </div>
   {{else}}
   <!-- Success State -->
-  <div class="p-6 bg-gradient-to-br from-purple-800/40 to-indigo-800/40 backdrop-blur-sm rounded-2xl border border-purple-400/30 shadow-lg">
+  <div class="p-6 bg-gradient-to-br from-purple-900/50 to-indigo-950/70 rounded-2xl border border-purple-400/30 shadow-lg">
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center">
         <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,7 +40,7 @@
     <div class="space-y-2">
       {{range .Sources}}
       <a href="/bookmarks/{{.Id}}"
-         class="block p-3 bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm rounded-xl border border-purple-500/20 hover:border-purple-400/50 transition-all group hover:shadow-lg">
+         class="block p-3 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-purple-500/20 hover:border-purple-400/50 transition-all group hover:shadow-lg">
         <div class="flex items-start gap-3">
           {{if .Thumbnail}}
           <img src="{{.Thumbnail}}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
@@ -63,7 +63,7 @@
   {{end}}
 </div>
 {{else}}
-<div class="p-4 bg-yellow-900/20 backdrop-blur-sm rounded-2xl border border-yellow-500/30 text-center">
+<div class="p-4 bg-yellow-900/40 rounded-2xl border border-yellow-500/30 text-center">
   <p class="text-sm text-yellow-200">No answer available. Try asking a different question.</p>
 </div>
 {{end}}

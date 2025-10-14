@@ -373,7 +373,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 			http.Error(w, "Bookmark not found", http.StatusNotFound)
 			return nil, err
 		}
-		logger.Errorw("get bookmark", "error", err, "boomark_id", id)
+		logger.Errorw("get bookmark", "error", err, "bookmark_id", id)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return nil, err
 	}
