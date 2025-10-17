@@ -20,7 +20,8 @@ fi
 if [ "$1" == "firefox" ]; then
     echo "Building Firefox extension"
     mkdir -p dist/firefox
-    cp -r firefox/* dist/firefox/
+    cp -r chrome/* dist/firefox/
+    cp firefox/manifest.json dist/firefox/
     sed -i -e '/localhost/d' dist/firefox/manifest.json
     sed -i -e "s/\"version\":.*/\"version\": \"$version\",/g" dist/firefox/manifest.json
     # Zip the content of the dist/firefox directory, and not the dist/firefox directory itself

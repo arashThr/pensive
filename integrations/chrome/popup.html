@@ -17,44 +17,6 @@
       overflow: hidden;
     }
 
-    /* Kandinsky floating circles */
-    .kandinsky-circles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 1;
-    }
-
-    .kandinsky-circles::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, rgba(251, 146, 60, 0.15), rgba(239, 68, 68, 0.15));
-      border-radius: 50%;
-      filter: blur(1px);
-      animation: float 8s ease-in-out infinite;
-    }
-
-    .kandinsky-circles::after {
-      content: '';
-      position: absolute;
-      bottom: 20px;
-      right: 15px;
-      width: 24px;
-      height: 24px;
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(59, 130, 246, 0.12));
-      border-radius: 50%;
-      filter: blur(1px);
-      animation: float-delayed 6s ease-in-out infinite;
-    }
-
     @keyframes float {
       0%, 100% { transform: translateY(0px) scale(1); }
       50% { transform: translateY(-8px) scale(1.05); }
@@ -422,9 +384,6 @@
   </style>
 </head>
 <body>
-  <!-- Kandinsky floating circles -->
-  <div class="kandinsky-circles"></div>
-
   <div class="container">
     <!-- Header -->
     <div class="header">
