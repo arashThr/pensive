@@ -275,6 +275,9 @@ func (model *BookmarkRepo) GetById(id types.BookmarkId) (*Bookmark, error) {
 	}
 	bookmark, err = pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[Bookmark])
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, errors.ErrNotFound
+		}
 		return nil, fmt.Errorf("collect exactly one row: %w", err)
 	}
 	return &bookmark, nil
@@ -957,14 +960,14 @@ func (model *BookmarkRepo) AskQuestion(ctx context.Context, user *User, question
 	}
 
 	// Limit to top 5 most relevant bookmarks to avoid token limits
-	if len(relevantBookmarks) > 5 {
-		relevantBookmarks = relevantBookmarks[:5]
+	if len(relevantBookmarks) > 3 {
+		relevantBookmarks = relevantBookmarks[:3]
 	}
 
 	// Fetch full content for the relevant bookmarks
 	var contexts []string
 	for i, bookmark := range relevantBookmarks {
-		content, err := model.GetBookmarkContent(bookmark.Id)
+		content, err := model.GetBookmarkMarkdown(bookmark.Id)
 		if err != nil {
 			logger.Warnw("Failed to get bookmark content", "error", err, "bookmarkId", bookmark.Id)
 			continue
