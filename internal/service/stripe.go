@@ -92,10 +92,11 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 				Quantity: stripeclient.Int64(1),
 			},
 		},
-		SuccessURL:          stripeclient.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
-		CancelURL:           stripeclient.String(s.Domain + "/payments/cancel"),
-		Customer:            &customerId,
-		AllowPromotionCodes: stripeclient.Bool(true),
+		SuccessURL:              stripeclient.String(s.Domain + "/payments/success?session_id={CHECKOUT_SESSION_ID}"),
+		CancelURL:               stripeclient.String(s.Domain + "/payments/cancel"),
+		Customer:                &customerId,
+		AllowPromotionCodes:     stripeclient.Bool(true),
+		PaymentMethodCollection: stripeclient.String("if_required"),
 	}
 
 	sess, err := session.New(checkoutParams)
