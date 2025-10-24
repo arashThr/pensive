@@ -15,6 +15,7 @@ import (
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/errors"
+	"github.com/arashthr/pensive/internal/logging"
 	"github.com/arashthr/pensive/internal/types"
 	"github.com/arashthr/pensive/internal/validations"
 	"github.com/go-shiori/go-readability"
@@ -562,6 +563,7 @@ HTML content to process:
 		nil,
 	)
 	if err != nil {
+		logging.Telegram.SendMessage(fmt.Sprintf("Failed to generate content with Gemini: %v", err))
 		return nil, fmt.Errorf("generate content with Gemini: %w", err)
 	}
 
@@ -623,11 +625,13 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, title, text st
 		&geminiConfigs,
 	)
 	if err != nil {
+		logging.Telegram.SendMessage(fmt.Sprintf("Failed to generate embedding with Gemini: %v", err))
 		logger.Warnw("Failed to generate embedding", "error", err)
 		return nil, fmt.Errorf("generate embedding: %w", err)
 	}
 
 	if len(result.Embeddings) == 0 {
+		logging.Telegram.SendMessage("Empty embedding returned from Gemini")
 		return nil, fmt.Errorf("empty embedding returned")
 	}
 
