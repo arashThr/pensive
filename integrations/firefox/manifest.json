@@ -48,7 +48,15 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "pensive-extension@getpensive.com"
+      "id": "pensive-extension@getpensive.com",
+      "data_collection_permissions": {
+        "required": [
+          "browsingActivity"
+        ],
+        "optional": [
+          "websiteContent"
+        ]
+      }
     }
   }
 }

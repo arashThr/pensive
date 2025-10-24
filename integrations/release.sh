@@ -5,6 +5,20 @@ set -euo pipefail
 # Usage: ./release.sh chrome|firefox
 # Version is the latest tag in the repo
 
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 chrome|firefox"
+    exit 1
+fi
+
+latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || true)
+echo "Latest tag detected: $latest_tag"
+
+read -r -p "Have you created and pushed the correct tag for this release? [y/N] " answer
+case "$answer" in
+    y|yes) ;;
+    *) echo "Aborting. Please create/push the tag first."; exit 1 ;;
+esac
+
 version=$(git describe --tags --abbrev=0)
 
 if [ "$1" == "chrome" ]; then
