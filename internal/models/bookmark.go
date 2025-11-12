@@ -492,7 +492,7 @@ func (model *BookmarkRepo) promptToGetAIData(htmlContent string) (*aiDataRespons
 
 	// Limit content length to avoid excessive costs (roughly 8000 characters = ~2000 tokens)
 	if len(htmlContent) > 8000 {
-		htmlContent = htmlContent[:8000] + "..."
+		htmlContent = htmlContent[:8000] + "... [SKIPPED CONTENT] ..." + htmlContent[len(htmlContent)-2000:]
 	}
 
 	prompt := `You are an expert at analyzing HTML content and converting it to clean, well-formatted Markdown. Your task is to process the provided HTML content and return FOUR separate outputs using the following structured format:
@@ -542,7 +542,7 @@ EXCERPT:
 - Look for what can be considered as the main content of the article
 - The main content is the content that is most relevant to the user
 - Pick the first paragraph of the main content
-- Use the exact text as it appears in the article (verbatim)
+- Use the exact text (in HTML format) as it appears in the article (verbatim)
 - Keep it under 200 words
 
 TAGS:
