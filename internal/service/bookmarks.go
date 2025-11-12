@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -99,8 +100,8 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		Thumbnail string
 		Host      string
 		// AI-generated fields for premium users
-		AISummary *string
-		AIExcerpt *string
+		AISummary string
+		AIExcerpt template.HTML
 		AITags    *string
 		IsPremium bool
 	}
@@ -121,8 +122,12 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	logger.Infow("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
 
 	// AI-generated content is now available for all users
-	data.AISummary = bookmark.AISummary
-	data.AIExcerpt = bookmark.AIExcerpt
+	if bookmark.AISummary != nil {
+		data.AISummary = *bookmark.AISummary
+	}
+	if bookmark.AIExcerpt != nil {
+		data.AIExcerpt = template.HTML(*bookmark.AIExcerpt)
+	}
 	data.AITags = bookmark.AITags
 
 	b.Templates.Edit.Execute(w, r, data)
