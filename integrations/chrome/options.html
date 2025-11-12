@@ -477,8 +477,37 @@
           <p><strong>3.</strong> Search your saved content anytime at getpensive.com</p>
         </div>
 
-        <!-- Content Capture Settings -->
+        <!-- Server Configuration -->
         <div class="advanced-settings">
+          <h2>Server Configuration</h2>
+          <div class="toggle-section">
+            <div class="toggle-option">
+              <label class="toggle-label">
+                <div class="toggle-content">
+                  <div class="toggle-title">
+                    Use custom server
+                  </div>
+                  <p class="toggle-desc">Enable this to connect to your own self-hosted Pensive instance instead of the default server.</p>
+                </div>
+                <div class="toggle-switch">
+                  <input type="checkbox" id="customServerToggle" class="toggle-input">
+                  <span class="toggle-slider"></span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div id="customServerConfig" class="info-section" style="display: none; margin-top: 16px;">
+            <h3>Server Address</h3>
+            <p style="margin-bottom: 12px; color: #94a3b8; font-size: 0.875rem;">Enter the URL of your self-hosted Pensive server (e.g., https://pensive.yourdomain.com)</p>
+            <input type="text" id="customServerUrl" placeholder="https://pensive.yourdomain.com" style="width: 100%; padding: 12px; background: rgba(71, 85, 105, 0.4); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 6px; color: #e2e8f0; font-family: 'IBM Plex Sans', sans-serif; font-size: 0.875rem; backdrop-filter: blur(8px);">
+            <button id="saveServerUrl" class="btn btn-primary" style="margin-top: 12px; width: 100%;">Save Server URL</button>
+            <p id="serverUrlStatus" style="margin-top: 8px; font-size: 0.875rem; display: none;"></p>
+          </div>
+        </div>
+
+        <!-- Content Capture Settings -->
+        <div class="advanced-settings" style="margin-top: 32px;">
           <h2>Content Capture Settings</h2>
           <div class="toggle-section">
             <div class="toggle-option">

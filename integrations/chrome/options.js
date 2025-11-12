@@ -15,16 +15,36 @@ document.addEventListener('DOMContentLoaded', async function () {
   const statusDiv = document.getElementById('status');
   const authSection = document.getElementById('auth-section');
   const fullPageCaptureToggle = document.getElementById('fullPageCaptureToggle');
+  const customServerToggle = document.getElementById('customServerToggle');
+  const customServerConfig = document.getElementById('customServerConfig');
+  const customServerUrlInput = document.getElementById('customServerUrl');
+  const saveServerUrlButton = document.getElementById('saveServerUrl');
+  const serverUrlStatus = document.getElementById('serverUrlStatus');
 
-  let grantOrigins = ['https://getpensive.com/*'];
-  if (devMode) {
-    grantOrigins.push('http://localhost:8000/*');
+  // Get stored values
+  const result = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture', 'customServerUrl']);
+
+  // Determine endpoint
+  let endpoint;
+  let grantOrigins = [];
+
+  if (result.customServerUrl) {
+    // Use custom server
+    endpoint = result.customServerUrl;
+    grantOrigins = [endpoint + '/*'];
+    customServerToggle.checked = true;
+    customServerConfig.style.display = 'block';
+    customServerUrlInput.value = result.customServerUrl;
+  } else {
+    // Use default server based on dev mode
+    endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
+    grantOrigins = ['https://getpensive.com/*'];
+    if (devMode) {
+      grantOrigins.push('http://localhost:8000/*');
+    }
   }
 
-  // Use fixed endpoint based on dev mode
-  const endpoint = devMode ? "http://localhost:8000" : "https://getpensive.com";
-
-  const result = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
+  // Update stored endpoint if changed
   if (result.endpoint !== endpoint) {
     await browserAPI.storage.local.set({ endpoint: endpoint });
   }
@@ -44,6 +64,93 @@ document.addEventListener('DOMContentLoaded', async function () {
   fullPageCaptureToggle.addEventListener('change', async () => {
     await browserAPI.storage.local.set({ fullPageCapture: fullPageCaptureToggle.checked });
   });
+
+  // Handle custom server toggle
+  customServerToggle.addEventListener('change', async () => {
+    if (customServerToggle.checked) {
+      customServerConfig.style.display = 'block';
+    } else {
+      customServerConfig.style.display = 'none';
+      // Clear custom server URL and revert to default
+      await browserAPI.storage.local.remove(['customServerUrl']);
+      // Reload the page to apply changes
+      location.reload();
+    }
+  });
+
+  // Handle save server URL button
+  saveServerUrlButton.addEventListener('click', async () => {
+    const customUrl = customServerUrlInput.value.trim();
+
+    // Validate URL
+    if (!customUrl) {
+      showServerUrlError('Please enter a server URL');
+      return;
+    }
+
+    try {
+      const url = new URL(customUrl);
+      if (!url.protocol.startsWith('http')) {
+        showServerUrlError('URL must start with http:// or https://');
+        return;
+      }
+
+      // Remove trailing slash
+      const cleanUrl = customUrl.replace(/\/$/, '');
+
+      // Test connection to the server
+      saveServerUrlButton.disabled = true;
+      saveServerUrlButton.textContent = 'Testing connection...';
+
+      try {
+        const testResponse = await fetch(cleanUrl + '/api/ping', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!testResponse.ok) {
+          showServerUrlError('Could not connect to server. Please check the URL.');
+          saveServerUrlButton.disabled = false;
+          saveServerUrlButton.textContent = 'Save Server URL';
+          return;
+        }
+
+        // Save the custom server URL
+        await browserAPI.storage.local.set({
+          customServerUrl: cleanUrl,
+          endpoint: cleanUrl
+        });
+
+        showServerUrlSuccess('Server URL saved successfully! Reloading...');
+
+        // Reload after a short delay to show success message
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
+
+      } catch (error) {
+        console.error('Connection test failed:', error);
+        showServerUrlError('Could not connect to server. Please check the URL and try again.');
+        saveServerUrlButton.disabled = false;
+        saveServerUrlButton.textContent = 'Save Server URL';
+      }
+
+    } catch (error) {
+      showServerUrlError('Invalid URL format');
+    }
+  });
+
+  function showServerUrlError(message) {
+    serverUrlStatus.textContent = message;
+    serverUrlStatus.style.color = '#fca5a5';
+    serverUrlStatus.style.display = 'block';
+  }
+
+  function showServerUrlSuccess(message) {
+    serverUrlStatus.textContent = message;
+    serverUrlStatus.style.color = '#86efac';
+    serverUrlStatus.style.display = 'block';
+  }
 
   // Add sign out button functionality
   function addSignOutButton() {
