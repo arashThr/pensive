@@ -12,7 +12,7 @@
         <a href="/bookmarks/{{.Id}}" class="block hover:bg-gray-700/50 transition-colors">
           <div class="flex items-start gap-4 p-6">
             <!-- Favicon -->
-            <div class="w-6 h-6 flex-shrink-0 mt-1">
+            <div class="w-6 h-6 shrink-0 mt-1">
               <img 
                 src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" 
                 alt="{{.Title}}" 
@@ -28,7 +28,7 @@
             
             <!-- Content -->
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold mb-2 text-white hover:text-orange-400 transition-colors line-clamp-2 break-words">
+              <h3 class="font-semibold mb-2 text-white hover:text-orange-400 transition-colors line-clamp-2 wrap-break-word">
                 {{.Title}}
               </h3>
               {{if .Excerpt}}

@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"net/http"
 	"time"
 
@@ -101,8 +100,8 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		Host      string
 		// AI-generated fields for premium users
 		AISummary string
-		AIExcerpt template.HTML
-		AITags    *string
+		AIExcerpt string
+		AITags    string
 		IsPremium bool
 	}
 	host := validations.ExtractHostname(bookmark.Link)
@@ -126,9 +125,11 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		data.AISummary = *bookmark.AISummary
 	}
 	if bookmark.AIExcerpt != nil {
-		data.AIExcerpt = template.HTML(*bookmark.AIExcerpt)
+		data.AIExcerpt = *bookmark.AIExcerpt
 	}
-	data.AITags = bookmark.AITags
+	if bookmark.AITags != nil {
+		data.AITags = *bookmark.AITags
+	}
 
 	b.Templates.Edit.Execute(w, r, data)
 }

@@ -240,12 +240,13 @@ func (h Home) getRecentBookmarksData(user *models.User, limit int) (types.Recent
 		if b.AIExcerpt != nil {
 			excerpt = *b.AIExcerpt
 		}
+		cleanedExcerpt := validations.CleanUpText(excerpt)
 		data.Bookmarks = append(data.Bookmarks, types.RecentBookmark{
 			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
 			Hostname:  validations.ExtractHostname(b.Link),
-			Excerpt:   excerpt,
+			Excerpt:   cleanedExcerpt,
 			Thumbnail: b.ImageUrl,
 			CreatedAt: b.CreatedAt.Format("Jan 02, 2006"),
 		})

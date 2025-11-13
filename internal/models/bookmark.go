@@ -542,7 +542,7 @@ EXCERPT:
 - Look for what can be considered as the main content of the article
 - The main content is the content that is most relevant to the user
 - Pick the first paragraph of the main content
-- Use the exact text (in HTML format) as it appears in the article (verbatim)
+- Use the exact text (in plain text) as it appears in the article (verbatim)
 - Keep it under 200 words
 
 TAGS:
