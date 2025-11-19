@@ -558,7 +558,7 @@ HTML content to process:
 	ctx := context.Background()
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-2.5-flash-lite-preview-06-17",
+		"gemini-2.5-flash-lite",
 		genai.Text(prompt),
 		nil,
 	)
@@ -1019,7 +1019,7 @@ Answer:`, question, strings.Join(contexts, "\n---\n"))
 	// Generate answer using Gemini
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-2.5-flash-lite-preview-06-17",
+		"gemini-2.5-flash-lite",
 		genai.Text(prompt),
 		nil,
 	)
