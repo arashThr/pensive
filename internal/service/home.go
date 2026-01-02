@@ -26,9 +26,10 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 
-	recent, err := h.getRecentBookmarksData(user, 5)
+	page := validations.GetPageOffset(r.FormValue("page"))
+	paginatedData, err := h.getPaginatedBookmarksData(user, page)
 	if err != nil {
-		logger.Errorw("failed to get recent bookmarks data", "error", err)
+		logger.Errorw("failed to get paginated bookmarks", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -37,14 +38,22 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		Title                string
 		IsUserPremium        bool
 		EmailVerified        bool
-		RecentBookmark       types.RecentBookmarksType
+		Pages                types.PagesData
+		MorePages            bool
+		Bookmarks            []types.BookmarkListItem
+		Count                int
+		HasBookmarksAtAll    bool
 		RemainingBookmarks   int
 		RemainingAIQuestions int
 	}{
-		Title:          "Home",
-		IsUserPremium:  user.IsSubscriptionPremium(),
-		EmailVerified:  user.EmailVerified,
-		RecentBookmark: recent,
+		Title:             "Home",
+		IsUserPremium:     user.IsSubscriptionPremium(),
+		EmailVerified:     user.EmailVerified,
+		Pages:             paginatedData.Pages,
+		MorePages:         paginatedData.MorePages,
+		Bookmarks:         paginatedData.Bookmarks,
+		Count:             paginatedData.Count,
+		HasBookmarksAtAll: paginatedData.HasBookmarksAtAll,
 	}
 
 	// Get remaining bookmarks for unverified users
@@ -73,9 +82,18 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 
 	query := r.FormValue("query")
+	page := validations.GetPageOffset(r.FormValue("page"))
+
 	if query == "" {
-		// Return recent bookmarks when no query
-		h.RecentBookmarksResult(w, r)
+		// Return paginated bookmarks when no query
+		data, err := h.getPaginatedBookmarksData(user, page)
+		if err != nil {
+			logger.Errorw("failed to get paginated bookmarks", "error", err)
+			http.Error(w, "Something went wrong", http.StatusInternalServerError)
+			return
+		}
+
+		h.Templates.RecentResults.Execute(w, r, data)
 		return
 	}
 
@@ -206,34 +224,21 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 	h.Templates.ChatAnswer.Execute(w, r, data)
 }
 
-func (h Home) RecentBookmarksResult(w http.ResponseWriter, r *http.Request) {
-	user := usercontext.User(r.Context())
-	logger := loggercontext.Logger(r.Context())
-
-	data, err := h.getRecentBookmarksData(user, 5)
+// getPaginatedBookmarksData fetches paginated bookmarks and returns the data structure
+func (h Home) getPaginatedBookmarksData(user *models.User, page int) (types.PaginatedBookmarksType, error) {
+	bookmarks, count, morePages, err := h.BookmarkModel.GetByUserId(user.ID, page)
 	if err != nil {
-		logger.Errorw("failed to get recent bookmarks data", "error", err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
+		return types.PaginatedBookmarksType{}, err
 	}
 
-	h.Templates.RecentResults.Execute(w, r, data)
-}
-
-// getRecentBookmarksData fetches recent bookmarks and returns the data structure
-func (h Home) getRecentBookmarksData(user *models.User, limit int) (types.RecentBookmarksType, error) {
-	bookmarks, err := h.BookmarkModel.GetRecentBookmarks(user, limit)
-	if err != nil {
-		return struct {
-			Bookmarks         []types.RecentBookmark
-			HasBookmarksAtAll bool
-		}{}, err
+	var data types.PaginatedBookmarksType
+	data.Count = count
+	data.Pages = types.PagesData{
+		Previous: page - 1,
+		Current:  page,
+		Next:     page + 1,
 	}
-
-	var data struct {
-		Bookmarks         []types.RecentBookmark
-		HasBookmarksAtAll bool
-	}
+	data.MorePages = morePages
 
 	for _, b := range bookmarks {
 		excerpt := b.Excerpt
@@ -241,14 +246,12 @@ func (h Home) getRecentBookmarksData(user *models.User, limit int) (types.Recent
 			excerpt = *b.AIExcerpt
 		}
 		cleanedExcerpt := validations.CleanUpText(excerpt)
-		data.Bookmarks = append(data.Bookmarks, types.RecentBookmark{
+		data.Bookmarks = append(data.Bookmarks, types.BookmarkListItem{
 			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
-			Hostname:  validations.ExtractHostname(b.Link),
+			CreatedAt: b.CreatedAt.Format("Jan 02"),
 			Excerpt:   cleanedExcerpt,
-			Thumbnail: b.ImageUrl,
-			CreatedAt: b.CreatedAt.Format("Jan 02, 2006"),
 		})
 	}
 

@@ -4,7 +4,7 @@
 {{if .HasBookmarksAtAll}}
   <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl">
     <div class="p-6 border-b border-gray-600/50">
-      <h2 class="text-lg font-semibold text-white">Recent bookmarks</h2>
+      <h2 class="text-lg font-semibold text-white">Your bookmarks ({{.Count}} total)</h2>
     </div>
     
     <div class="divide-y divide-gray-600/30">
@@ -40,16 +40,10 @@
         </a>
       {{end}}
     </div>
-    
-    <div class="p-6 border-t border-gray-600/50 text-center">
-      <a href="/bookmarks" class="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-medium transition-colors">
-        View all bookmarks
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-        </svg>
-      </a>
-    </div>
   </div>
+
+  <!-- Pagination -->
+  {{template "pagination" .}}
 {{else}}
   <!-- Empty State -->
   <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-xl p-12 text-center">

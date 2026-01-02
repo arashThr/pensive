@@ -331,26 +331,6 @@ func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmar
 	return bookmarks, count, morePages, nil
 }
 
-// GetRecentBookmarks returns the most recent bookmarks for the home page
-func (model *BookmarkRepo) GetRecentBookmarks(user *User, limit int) ([]Bookmark, error) {
-	rows, err := model.Pool.Query(context.Background(), `
-		SELECT * FROM library_items
-		WHERE user_id = $1
-		ORDER BY created_at DESC
-		LIMIT $2
-	`, user.ID, limit)
-	if err != nil {
-		return nil, fmt.Errorf("query recent bookmarks: %w", err)
-	}
-	defer rows.Close()
-
-	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
-	if err != nil {
-		return nil, fmt.Errorf("collect rows: %w", err)
-	}
-	return bookmarks, nil
-}
-
 func (model *BookmarkRepo) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {

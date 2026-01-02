@@ -76,6 +76,13 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Implementation**: `AskQuestion()` in `internal/models/bookmark.go` retrieves relevant bookmarks via vector search, then generates AI answers with source citations
 - **UI**: Tabbed HTMX interface with loading indicators and error handling for AI service failures
 
+### Page Structure
+- **Home Page** (`/home`): Main interface with two tabs:
+  - Search tab: Full-text search and paginated bookmark list (default view)
+  - Ask AI tab: RAG-based Q&A about bookmarked content
+- **Individual Bookmark Pages** (`/bookmarks/{id}`): View and edit bookmarks
+- **Settings Page** (`/users/me`): User profile, tokens, import/export, data management
+
 ### Configuration
 - Environment variables loaded via `godotenv`
 - Configuration centralized in `internal/config/config.go`

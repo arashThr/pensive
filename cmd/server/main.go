@@ -177,7 +177,6 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	}
 	bookmarksService.Templates.New = views.Must(views.ParseTemplate("bookmarks/new.gohtml", "tailwind.gohtml"))
 	bookmarksService.Templates.Edit = views.Must(views.ParseTemplate("bookmarks/edit.gohtml", "tailwind.gohtml", "bookmarks/markdown.gohtml"))
-	bookmarksService.Templates.Index = views.Must(views.ParseTemplate("bookmarks/index.gohtml", "tailwind.gohtml"))
 	bookmarksService.Templates.Markdown = views.Must(views.ParseTemplate("bookmarks/markdown.gohtml", "tailwind.gohtml"))
 	bookmarksService.Templates.MarkdownNotAvailable = views.Must(views.ParseTemplate("bookmarks/markdown-not-available.gohtml", "tailwind.gohtml"))
 
@@ -451,7 +450,6 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			r.Group(func(r chi.Router) {
 				// For routes that are accessible by user
 				r.Use(umw.RequireUser)
-				r.Get("/", c.BookmarksService.Index)
 				r.Post("/", c.BookmarksService.Create)
 				r.Get("/new", c.BookmarksService.New)
 

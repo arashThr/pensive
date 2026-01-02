@@ -24,18 +24,25 @@ type BookmarkSearchResult struct {
 	CreatedAt time.Time
 }
 
-type RecentBookmark struct {
+type BookmarkListItem struct {
 	Id        BookmarkId
 	Title     string
 	Link      string
-	Hostname  string
-	Excerpt   string
-	Thumbnail string
 	CreatedAt string
+	Excerpt   string
 }
 
-type RecentBookmarksType struct {
-	Bookmarks         []RecentBookmark
+type PagesData struct {
+	Previous int
+	Current  int
+	Next     int
+}
+
+type PaginatedBookmarksType struct {
+	Pages             PagesData
+	MorePages         bool
+	Bookmarks         []BookmarkListItem
+	Count             int
 	HasBookmarksAtAll bool
 }
 

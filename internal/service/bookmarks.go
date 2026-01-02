@@ -21,7 +21,6 @@ type Bookmarks struct {
 	Templates struct {
 		New                  web.Template
 		Edit                 web.Template
-		Index                web.Template
 		Show                 web.Template
 		Markdown             web.Template
 		MarkdownNotAvailable web.Template
@@ -163,55 +162,6 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 		Message: "Bookmark updated",
 		IsError: false,
 	})
-}
-
-func (b Bookmarks) Index(w http.ResponseWriter, r *http.Request) {
-	user := usercontext.User(r.Context())
-	logger := loggercontext.Logger(r.Context())
-	page := validations.GetPageOffset(r.FormValue("page"))
-	bookmarks, count, morePages, err := b.BookmarkModel.GetByUserId(user.ID, page)
-	if err != nil {
-		logger.Errorw("index bookmark by user id", "error", err, "user_id", user.ID, "page", page)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-
-	type Bookmark struct {
-		Id        types.BookmarkId
-		Title     string
-		Link      string
-		CreatedAt string
-	}
-	type PagesData struct {
-		Previous int
-		Current  int
-		Next     int
-	}
-	var data struct {
-		Title     string
-		Pages     PagesData
-		MorePages bool
-		Bookmarks []Bookmark
-		Count     int
-	}
-	data.Count = count
-	data.Title = "Library"
-	data.Pages = PagesData{
-		Previous: page - 1,
-		Current:  page,
-		Next:     page + 1,
-	}
-	data.MorePages = morePages
-	for _, b := range bookmarks {
-		data.Bookmarks = append(data.Bookmarks, Bookmark{
-			Id:        b.Id,
-			Title:     b.Title,
-			Link:      b.Link,
-			CreatedAt: b.CreatedAt.Format("Jan 02"),
-		})
-	}
-
-	b.Templates.Index.Execute(w, r, data)
 }
 
 func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
