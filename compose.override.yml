@@ -6,7 +6,7 @@ services:
   # Adminer provides a nice little web UI to connect to databases
   adminer:
     image: adminer
-    restart: always
+    restart: unless-stopped
     environment:
       ADMINER_DESIGN: dracula # Pick a theme - https://github.com/vrana/adminer/tree/master/designs
     ports:
@@ -21,7 +21,7 @@ services:
       platforms:
         - "linux/amd64"
     tty: true
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./tailwind:/src:ro
       - ./web/templates:/templates:ro

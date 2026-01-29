@@ -5,7 +5,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_HOST=db
     depends_on:
@@ -17,7 +17,7 @@ services:
     build:
       context: ./
       dockerfile: ./integrations/telegram/Dockerfile
-    restart: always
+    restart: unless-stopped
     environment:
       - POSTGRES_HOST=db
       - DOMAIN=http://server:8000
