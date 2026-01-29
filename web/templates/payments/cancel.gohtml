@@ -1,54 +1,44 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-6 py-8 max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
-  <!-- Kandinsky floating circles -->
-  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
-    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
-    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
-    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
-    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
-    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
-  </div>
-
-  <div class="relative z-10">
-    <!-- Cancel Card -->
-    <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl p-8 text-center">
+<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 text-center">
       <h1 class="text-2xl font-bold text-white mb-4">Checkout cancelled</h1>
-      <p class="text-gray-300 leading-relaxed mb-8">No worries! Your subscription checkout was cancelled and no payment has been processed.</p>
+      <p class="text-slate-300 leading-relaxed mb-8">No worries! Your subscription checkout was cancelled and no payment has been processed.</p>
 
       <!-- Options -->
-      <div class="bg-gray-700/50 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6 mb-6">
+      <div class="bg-white/5 border border-white/10 rounded-lg p-6 mb-6 text-left">
         <h3 class="font-semibold text-white mb-4">What would you like to do next?</h3>
         <div class="space-y-3">
-          <div class="flex items-center gap-2 text-sm text-gray-300">
-            <span class="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+          <div class="flex items-center gap-2 text-sm text-slate-300">
+            <span class="w-1.5 h-1.5 bg-violet-300 rounded-full"></span>
             <span>Continue using Pensive with the free tier</span>
           </div>
-          <div class="flex items-center gap-2 text-sm text-gray-300">
-            <span class="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+          <div class="flex items-center gap-2 text-sm text-slate-300">
+            <span class="w-1.5 h-1.5 bg-violet-300 rounded-full"></span>
             <span>Try subscribing again when you're ready</span>
           </div>
-          <div class="flex items-center gap-2 text-sm text-gray-300">
-            <span class="w-1.5 h-1.5 bg-orange-400 rounded-full"></span>
+          <div class="flex items-center gap-2 text-sm text-slate-300">
+            <span class="w-1.5 h-1.5 bg-violet-300 rounded-full"></span>
             <span>Learn more about premium features</span>
           </div>
         </div>
       </div>
 
     <!-- Actions -->
-    <div class="space-y-4">
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/home" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg">
-          Continue with free account
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/home" class="bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+            Continue with free account
+          </a>
+          <a href="/users/subscribe" class="border border-white/10 bg-white/5 text-slate-200 hover:bg-white/10 font-semibold py-3 px-6 rounded-lg transition-colors">
+            View premium features
+          </a>
+        </div>
+        
+        <a href="/users/me" class="inline-block text-violet-200 hover:text-white font-medium transition-colors">
+          Back to Account Settings
         </a>
-        <a href="/users/subscribe" class="border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 font-semibold py-3 px-6 rounded-lg transition-colors">
-          View premium features
-        </a>
-      </div>
-      
-      <a href="/users/me" class="inline-block text-orange-400 hover:text-orange-300 font-medium transition-colors">
-        Back to Account Settings
-      </a>
       </div>
     </div>
   </div>

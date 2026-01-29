@@ -2,43 +2,43 @@
   <!-- Header Section -->
   <div class="mb-8">
     <h2 class="text-xl font-bold mb-4 text-white">API tokens</h2>
-    <p class="text-gray-300">Apps and services connected to your account.</p>
+    <p class="text-slate-300">Apps and services connected to your account.</p>
   </div>
 
   <!-- Integrations List -->
   <div id="token-container">
     {{if .Tokens}}
-      <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl overflow-hidden">
+      <div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
         <!-- Desktop Table -->
         <div class="hidden md:block">
           <table class="w-full">
-            <thead class="bg-gray-700/50 backdrop-blur-sm border-b border-gray-600/50">
+            <thead class="border-b border-white/10 bg-white/5">
               <tr>
-                <th class="text-left px-6 py-4 text-sm font-semibold text-white">Integration</th>
-                <th class="text-left px-6 py-4 text-sm font-semibold text-white">Connected</th>
-                <th class="text-left px-6 py-4 text-sm font-semibold text-white">Last used</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Integration</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Connected</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Last used</th>
                 <th class="w-16 px-6 py-4"></th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-600/30">
+            <tbody class="divide-y divide-white/10">
               {{range $index, $token := .Tokens}}
-                <tr id="token-{{$index}}" class="hover:bg-gray-700/50 transition-colors">
+                <tr id="token-{{$index}}" class="transition-colors hover:bg-white/5">
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                      <div class="w-8 h-8 bg-orange-900/30 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                        <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                        <svg class="h-4 w-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                       </div>
                       <div class="font-semibold text-white">{{$token.TokenSource}}</div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-300">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
-                  <td class="px-6 py-4 text-sm text-gray-300">
+                  <td class="px-6 py-4 text-sm text-slate-300">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
+                  <td class="px-6 py-4 text-sm text-slate-300">
                     {{if $token.LastUsedAt}}
                       {{$token.LastUsedAt.Format "Jan 2, 2006"}}
                     {{else}}
-                      <span class="text-gray-500">Never</span>
+                      <span class="text-slate-500">Never</span>
                     {{end}}
                   </td>
                   <td class="px-6 py-4 text-right">
@@ -63,27 +63,27 @@
           </table>
         </div>
         <!-- Mobile Cards -->
-        <div class="md:hidden divide-y divide-gray-600/30">
+        <div class="divide-y md:hidden divide-white/10">
           {{range $index, $token := .Tokens}}
             <div id="token-{{$index}}" class="p-6">
               <div class="flex items-start justify-between">
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-3 mb-2">
-                    <div class="w-8 h-8 bg-orange-900/30 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                      <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                      <svg class="h-4 w-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </div>
                     <p class="font-semibold text-white">{{$token.TokenSource}}</p>
                   </div>
                   <div class="text-sm space-y-1 pl-11">
-                    <div class="text-gray-300">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
-                    <div class="text-gray-300">
-                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-gray-500">Never</span>{{end}}
+                    <div class="text-slate-300">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
+                    <div class="text-slate-300">
+                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-slate-500">Never</span>{{end}}
                     </div>
                   </div>
                 </div>
-                <form id="delete-form-{{$index}}" class="ml-4 flex-shrink-0">
+                <form id="delete-form-{{$index}}" class="ml-4 shrink-0">
                   {{csrfField}}
                   <input type="hidden" name="token_id" value="{{$token.ID}}">
                   <button 
@@ -102,25 +102,25 @@
           {{end}}
         </div>
       </div>
-      <div class="mt-4 p-4 bg-orange-900/20 backdrop-blur-sm border border-orange-500/30 rounded-lg">
+      <div class="mt-4 rounded-lg border border-amber-400/20 bg-amber-500/10 p-4">
         <div class="flex items-start gap-3">
-          <svg class="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
-          <p class="text-sm text-orange-300">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
+          <p class="text-sm text-amber-200">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
         </div>
       </div>
     {{else}}
       <!-- Empty State -->
-      <div class="bg-gray-800/40 backdrop-blur-sm border border-gray-600/50 rounded-xl p-12 text-center">
-        <div class="w-16 h-16 bg-gray-700/50 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <div class="rounded-xl border border-white/10 bg-white/5 p-12 text-center">
+        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
           <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
         </div>
         <h3 class="text-xl font-bold mb-3 text-white">No tokens connected</h3>
-        <p class="mb-8 text-gray-300 max-w-sm mx-auto">Connect apps and services to save and access your bookmarks.</p>
-        <a href="/integrations" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
+        <p class="mx-auto mb-8 max-w-sm text-slate-300">Connect apps and services to save and access your bookmarks.</p>
+        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>

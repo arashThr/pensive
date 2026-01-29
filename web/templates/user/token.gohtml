@@ -1,19 +1,19 @@
 {{if .ErrorMessage}}
-  <div class="bg-red-900/20 backdrop-blur-sm border border-red-500/30 rounded-lg p-4 mb-4">
+  <div class="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
     <h3 class="text-lg font-semibold text-red-300 mb-2">Error Generating Token</h3>
-    <p class="text-sm text-gray-300 font-mono">{{.ErrorMessage}}</p>
+    <p class="font-mono text-sm text-slate-300">{{.ErrorMessage}}</p>
   </div>
 {{else}}
-  <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-lg p-6">
+  <div class="rounded-lg border border-white/10 bg-white/5 p-6">
     <h3 class="text-xl font-bold text-white mb-4">Token Generated Successfully</h3>
-    <label class="block text-sm font-medium text-gray-300 mb-2">Your New API Token:</label>
+    <label class="mb-2 block text-sm font-medium text-slate-300">Your New API Token:</label>
     <div class="flex items-center gap-2 mb-4">
-      <input class="flex-1 px-4 py-2 border border-gray-600/50 rounded-lg bg-gray-700/50 backdrop-blur-sm font-mono text-sm text-white" type="text" value="{{.APIToken}}" readonly id="api-token" onclick="this.select()" />
-      <button class="px-3 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg" onclick="copyToken()" title="Copy token">Copy</button>
+      <input class="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-mono text-sm text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20" type="text" value="{{.APIToken}}" readonly id="api-token" onclick="this.select()" />
+      <button class="rounded-lg bg-violet-600 px-3 py-2 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20" onclick="copyToken()" title="Copy token">Copy</button>
     </div>
     <div id="copy-message" class="hidden mt-2 text-sm font-medium text-green-400">Token copied to clipboard!</div>
-    <div class="bg-orange-900/20 backdrop-blur-sm border border-orange-500/30 rounded-lg p-4 mt-4">
-      <p class="text-sm font-medium text-orange-300">Keep this token secure. Store it safely as it won't be shown again and provides full access to your bookmarks.</p>
+    <div class="mt-4 rounded-lg border border-amber-400/20 bg-amber-500/10 p-4">
+      <p class="text-sm font-medium text-amber-200">Keep this token secure. Store it safely as it won't be shown again and provides full access to your bookmarks.</p>
     </div>
   </div>
   <script>

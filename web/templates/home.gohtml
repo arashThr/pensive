@@ -1,594 +1,384 @@
 {{template "header" .}}
 
-<div class="relative min-h-screen">
-  <!-- Enhanced Kandinsky-inspired circles for landing page - more visible on dark background -->
-  <div class="absolute inset-0 pointer-events-none overflow-hidden">
-    <!-- Large sophisticated circles with enhanced visibility -->
-    <div class="absolute w-80 h-80 rounded-full -top-10 -left-10" style="background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(109, 40, 217, 0.15) 70%, transparent 100%);"></div>
-    <div class="absolute w-96 h-96 rounded-full top-20 right-20" style="background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(29, 78, 216, 0.18) 70%, transparent 100%);"></div>
-    <div class="absolute w-64 h-64 rounded-full bottom-40 left-10" style="background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, rgba(185, 28, 28, 0.2) 70%, transparent 100%);"></div>
-    <div class="absolute w-72 h-72 rounded-full bottom-10 right-40" style="background: radial-gradient(circle, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.18) 70%, transparent 100%);"></div>
-    <div class="absolute w-56 h-56 rounded-full top-80 left-1/3" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.45) 0%, rgba(217, 119, 6, 0.25) 70%, transparent 100%);"></div>
+<div class="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 max-w-6xl mx-auto">
 
-    <!-- Medium floating circles -->
-    <div class="absolute w-32 h-32 rounded-full top-40 left-1/2" style="background: radial-gradient(circle, rgba(236, 72, 153, 0.5) 0%, rgba(190, 24, 93, 0.3) 70%, transparent 100%);"></div>
-    <div class="absolute w-28 h-28 rounded-full bottom-80 right-1/4" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, rgba(8, 145, 178, 0.4) 70%, transparent 100%);"></div>
-    <div class="absolute w-36 h-36 rounded-full top-1/3 right-10" style="background: radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, rgba(124, 58, 237, 0.2) 70%, transparent 100%);"></div>
+  <!-- Hero -->
+  <section class="grid lg:grid-cols-2 gap-12 lg:gap-14 items-start">
+    <div>
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-white">
+        Your searchable <span class="text-violet-200">memory</span> of the web
+      </h1>
+      <p class="mt-4 text-slate-300 max-w-prose">
+        Open source bookmarking with full-content capture and fast search.
+      </p>
 
-    <!-- Small accent circles -->
-    <div class="absolute w-16 h-16 rounded-full top-60 left-20" style="background: radial-gradient(circle, rgba(251, 191, 36, 0.7) 0%, rgba(245, 158, 11, 0.5) 70%, transparent 100%);"></div>
-    <div class="absolute w-20 h-20 rounded-full bottom-60 left-2/3" style="background: radial-gradient(circle, rgba(34, 197, 94, 0.6) 0%, rgba(21, 128, 61, 0.4) 70%, transparent 100%);"></div>
-  </div>
+      <div class="mt-6 flex flex-col sm:flex-row gap-3">
+        <a href="/signup" class="inline-flex justify-center rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-500 transition-colors">
+          Try hosted version
+        </a>
+        <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="inline-flex justify-center rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white hover:bg-white/10 transition-colors">
+          View on GitHub
+        </a>
+      </div>
 
-  <!-- Content overlay -->
-  <div class="relative z-10 px-4 sm:px-6 lg:px-8 py-12 sm:py-16 max-w-6xl mx-auto">
+      <div class="mt-8 grid gap-2 text-sm text-slate-300">
+        <div>• Full content capture (not just titles)</div>
+        <div>• Search across everything you saved</div>
+        <div>• Save from browser + Telegram</div>
+      </div>
+    </div>
 
-    <!-- Hero -->
-    <div class="mb-24">
-      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-        <!-- Left Column: Text Content -->
+    <div class="rounded-xl overflow-hidden border border-white/10 bg-white/5">
+      <div class="aspect-video">
+        <iframe
+          class="w-full h-full"
+          src="https://www.youtube.com/embed/N7tQpBjNMck"
+          title="Pensive Demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Save from anywhere (Integrations) -->
+  <section id="integrations" class="mt-16 sm:mt-20">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div class="max-w-3xl">
+        <h2 class="text-xl font-semibold text-white">Save from anywhere</h2>
+        <p class="mt-2 text-sm text-slate-400">One-click saving on desktop, and forwarding from mobile via Telegram.</p>
+      </div>
+      <a href="/integrations" class="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 transition-colors">
+        See integrations
+      </a>
+    </div>
+
+    <div class="mt-8 rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+      <div class="grid md:grid-cols-2 gap-8 items-start">
         <div>
-          <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Your searchable<br>
-            <span class="bg-gradient-to-r from-orange-400 via-red-400 to-violet-400 bg-clip-text text-transparent">memory of the web</span>
-          </h1>
-          <p class="text-lg sm:text-xl text-gray-200 leading-relaxed mb-8 bg-gray-800/60 backdrop-blur-sm p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-600/50 shadow-lg">
-            <strong class="text-violet-400">Open source</strong> bookmarking solution that captures full article content and makes everything <strong class="text-orange-400">searchable</strong>. Self-host your own personal knowledge base to remember and find everything you read online.
+          <h3 class="text-lg font-semibold text-white">Browser extensions</h3>
+          <p class="mt-2 text-sm text-slate-300">Save pages as you browse (Chrome + Firefox).</p>
+          <div class="mt-4 flex flex-col sm:flex-row items-center gap-4">
+            <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="hover:opacity-90 transition-opacity">
+              <img src="/assets/promo/google-store.png" alt="Install for Chrome" class="h-12 w-auto">
+            </a>
+            <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="hover:opacity-90 transition-opacity">
+              <img src="/assets/promo/get-the-addon.png" alt="Install for Firefox" class="h-12 w-auto">
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center gap-3">
+            <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-6 w-6">
+            <h3 class="text-lg font-semibold text-white">Telegram</h3>
+          </div>
+          <p class="mt-2 text-sm text-slate-300">
+            Forward links to <a class="text-violet-200 hover:text-white transition-colors" href="https://t.me/GetPensiveBot" target="_blank" rel="noopener">@GetPensiveBot</a>.
           </p>
-
-          <div class="flex flex-col sm:flex-row gap-4 mb-8">
-            <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener"
-               class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white px-8 py-4 font-bold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all">
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              View on GitHub
-            </a>
-            <a href="/signup"
-               class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 font-bold rounded-full shadow-xl hover:shadow-2xl transform hover:scale-110 transition-all">
-              Try hosted version
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-              </svg>
+          <div class="mt-4">
+            <a class="inline-flex items-center justify-center rounded-lg bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15 transition-colors" href="https://t.me/GetPensiveBot" target="_blank" rel="noopener">
+              Open bot
             </a>
           </div>
-
-          <p class="text-sm text-gray-300 bg-gray-800/40 backdrop-blur-sm px-4 sm:px-6 py-3 rounded-full border border-gray-600/50 shadow-md inline-block">Open source & self-hostable • Hosted version available</p>
-        </div>
-
-        <!-- Right Column: Video -->
-        <div>
-          <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-600/50 bg-gray-800/60 backdrop-blur-sm">
-            <div class="aspect-video">
-              <iframe
-                class="w-full h-full"
-                src="https://www.youtube.com/embed/N7tQpBjNMck"
-                title="Pensive Demo"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowfullscreen>
-              </iframe>
-            </div>
-          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <!-- The Problem We Solve -->
-    <div id="how-it-works" class="mb-20">
-      <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl p-8 sm:p-12 mb-12 shadow-xl">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6 text-center">The problem every developer knows</h2>
-      
-        <div class="max-w-4xl mx-auto">
-          <div class="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div class="space-y-6">
-              <div class="flex items-start gap-4">
-                <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                  <span class="text-white text-sm font-bold">!</span>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-white mb-2">You find the perfect solution</h3>
-                  <p class="text-gray-300 text-sm">That Stack Overflow answer, that brilliant blog post, that GitHub issue that solves your exact problem.</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-4">
-                <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                  <span class="text-black text-sm font-bold">⏰</span>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-white mb-2">You think "I'll bookmark this"</h3>
-                  <p class="text-gray-300 text-sm">But browser bookmarks become a graveyard, and "I'll remember to search for it later" never works.</p>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-4">
-                <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-lg">
-                  <span class="text-white text-sm font-bold">?</span>
-                </div>
-                <div>
-                  <h3 class="font-semibold text-white mb-2">Six months later, you need it again</h3>
-                  <p class="text-gray-300 text-sm">You remember the solution exists, but Google only shows you SEO spam and outdated tutorials.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-gray-700/60 backdrop-blur-sm border border-gray-500/50 rounded-xl p-6 sm:p-8 shadow-lg">
-              <h3 class="font-semibold text-xl mb-4 text-violet-400">Pensive fixes this</h3>
-              <div class="space-y-4 text-sm text-gray-200">
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
-                  <span>Open source & self-hostable</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
-                  <span>Captures full content, not just titles</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
-                  <span>Searches through actual article text</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
-                  <span>Works from anywhere: browser, mobile, Telegram</span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-2 h-2 bg-violet-400 rounded-full"></div>
-                  <span>AI-powered summaries and tags</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-    </div>
-
-    <!-- Screenshots Slider -->
-    <div class="relative max-w-4xl mx-auto mb-16">
-      <!-- Slider Container -->
-      <div class="overflow-hidden rounded-2xl sm:rounded-3xl border border-gray-600/50 shadow-2xl bg-gray-800/60 backdrop-blur-sm">
-      <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
-        <!-- Slide 1: Library View -->
-        <div class="w-full flex-shrink-0">
-          <img src="/assets/promo/screenshots/library.jpg"
-            alt="Pensive Library - Your personal collection of saved content" class="w-full h-auto">
-        </div>
-        <!-- Slide 2: Search Interface -->
-        <div class="w-full flex-shrink-0">
-          <img src="/assets/promo/screenshots/search.jpg" alt="Powerful search through your saved content"
-            class="w-full h-auto">
-        </div>
-        <!-- Slide 3: Search Results -->
-        <div class="w-full flex-shrink-0">
-          <img src="/assets/promo/screenshots/search-recent.jpg" alt="Recent search results showing relevant content"
-            class="w-full h-auto">
-        </div>
-        <!-- Slide 4: Individual Link Page -->
-        <div class="w-full flex-shrink-0">
-          <img src="/assets/promo/screenshots/link-page.jpg" alt="Detailed view of saved content with full text search"
-            class="w-full h-auto">
-        </div>
-        <!-- Slide 5: Extension Saving -->
-        <div class="w-full flex-shrink-0">
-          <img src="/assets/promo/screenshots/extension-saved.jpg" alt="Browser extension seamlessly saving content"
-            class="w-full h-auto">
-        </div>
+  <!-- Screenshots -->
+  <section class="mt-16 sm:mt-20">
+    <div class="flex items-end justify-center gap-6">
+      <div>
+        <h2 class="text-xl font-semibold text-white">Save and search with the help of AI</h2>
       </div>
     </div>
-      <!-- Navigation Arrows -->
-      <button id="prev-btn"
-        class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-full p-3 shadow-lg transition-all transform hover:scale-110">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
+
+    <div id="slider" class="relative mt-8 max-w-2xl mx-auto">
+      <div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+        <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
+          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/library.jpg" alt="Library view" class="w-full h-auto"></div>
+          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/search.jpg" alt="Search" class="w-full h-auto"></div>
+          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/search-recent.jpg" alt="Recent search" class="w-full h-auto"></div>
+          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/link-page.jpg" alt="Link page" class="w-full h-auto"></div>
+          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/extension-saved.jpg" alt="Saved from extension" class="w-full h-auto"></div>
+        </div>
+      </div>
+
+      <button id="prev-btn" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-slate-950/70 border border-white/10 p-2 text-white hover:bg-slate-950 transition-colors" aria-label="Previous slide">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button id="next-btn"
-        class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-full p-3 shadow-lg transition-all transform hover:scale-110">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-        </svg>
+      <button id="next-btn" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-slate-950/70 border border-white/10 p-2 text-white hover:bg-slate-950 transition-colors" aria-label="Next slide">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       </button>
 
-      <!-- Artistic Dot Indicators -->
-      <div class="flex justify-center mt-6 gap-3">
-        <button class="slider-dot w-4 h-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 shadow-lg transition-all transform hover:scale-125" data-slide="0"></button>
-        <button class="slider-dot w-4 h-4 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-500 hover:to-indigo-500 shadow-lg transition-all transform hover:scale-125"
-          data-slide="1"></button>
-        <button class="slider-dot w-4 h-4 rounded-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 shadow-lg transition-all transform hover:scale-125"
-          data-slide="2"></button>
-        <button class="slider-dot w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-violet-400 hover:from-purple-500 hover:to-violet-500 shadow-lg transition-all transform hover:scale-125"
-          data-slide="3"></button>
-        <button class="slider-dot w-4 h-4 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 shadow-lg transition-all transform hover:scale-125"
-          data-slide="4"></button>
-      </div>
+      <div class="mt-4 flex items-center justify-between gap-4">
+        <div id="slide-caption" class="text-sm text-slate-300">
+          <span data-slide="0">Library</span>
+          <span data-slide="1" class="hidden">Search</span>
+          <span data-slide="2" class="hidden">Recent</span>
+          <span data-slide="3" class="hidden">Link</span>
+          <span data-slide="4" class="hidden">Extension</span>
+        </div>
 
-      <!-- Artistic Slide Captions -->
-      <div class="text-center mt-4">
-        <div id="slide-caption" class="text-gray-200 bg-gray-800/70 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 mx-4 sm:mx-8 border border-gray-600/50 shadow-lg text-sm sm:text-base">
-          <span data-slide="0">Your personal library of saved content, beautifully organized and searchable</span>
-          <span data-slide="1" class="hidden">Powerful search that finds exactly what you're looking for</span>
-          <span data-slide="2" class="hidden">Recent searches help you quickly access frequently needed content</span>
-          <span data-slide="3" class="hidden">Full content capture means every word is searchable and accessible</span>
-          <span data-slide="4" class="hidden">Browser extension makes saving content effortless and automatic</span>
+        <div class="flex gap-2">
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="0" aria-label="Go to slide 1"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="1" aria-label="Go to slide 2"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="2" aria-label="Go to slide 3"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="3" aria-label="Go to slide 4"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="4" aria-label="Go to slide 5"></button>
         </div>
       </div>
     </div>
+  </section>
 
-  </div>
-
-      <!-- Getting Started -->
-      <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-xl p-6 sm:p-8">
-        <h3 class="text-xl font-semibold text-white mb-6 text-center">Get the browser extensions</h3>
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-6 max-w-2xl mx-auto">
-          <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd"
-            class="transition-all transform hover:scale-105">
-            <img src="/assets/promo/google-store.png" alt="Install for Chrome" class="h-14 w-auto">
-          </a>
-          <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/"
-            class="transition-all transform hover:scale-105">
-            <img src="/assets/promo/get-the-addon.png" alt="Install for Firefox" class="h-14 w-auto">
-          </a>
-        </div>
-        <p class="text-center text-gray-400 text-sm mt-6">One-click saving directly from your browser</p>
-      </div>
-
-      <!-- Telegram Bot -->
-      <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-xl p-6 sm:p-8 mt-8">
-        <h3 class="text-xl font-semibold text-white mb-6 text-center">Save from Telegram</h3>
-        <div class="flex flex-col items-center justify-center gap-4 max-w-2xl mx-auto">
-          <div class="flex items-center gap-4">
-            <img src="/assets/icons/telegram.svg" alt="Telegram" class="w-12 h-12">
-            <a href="https://t.me/GetPensiveBot" target="_blank" rel="noopener" class="text-2xl font-bold text-violet-400 hover:text-violet-300 transition-colors">@GetPensiveBot</a>
-          </div>
-        </div>
-        <p class="text-center text-gray-400 text-sm mt-6">Forward links and messages to save them instantly</p>
-      </div>
-
-    <!-- Features -->
-    <div class="mt-20 mb-20">
-      <div class="text-center mb-16">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Everything you need to build your knowledge base</h2>
-        <p class="text-lg sm:text-xl text-gray-200 max-w-2xl mx-auto">Powerful tools designed to capture, organize, and search through everything you read online.</p>
-      </div>
-
-      <div class="grid lg:grid-cols-2 gap-8 sm:gap-12 mb-16">
-        <!-- Feature 1: Full-text Search -->
-        <div class="group">
-          <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-6 sm:p-8 h-full hover:shadow-xl transition-all duration-300">
-            <div class="w-12 h-12 bg-blue-600/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-blue-500/30">
-              <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-4">Designed for Search</h3>
-            <p class="text-gray-200 leading-relaxed mb-6">Find content within articles, not just titles. Search through full text, summaries, and AI-generated tags to discover exactly what you're looking for.</p>
-            <div class="space-y-2">
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
-                <span>Full-text search across all content</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
-                <span>AI-powered semantic search (ask questions!)</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
-                <span>Search by tags, dates, and domains</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 2: Save from Anywhere -->
-        <div class="group">
-          <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-6 sm:p-8 h-full hover:shadow-xl transition-all duration-300">
-            <div class="w-12 h-12 bg-green-600/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-green-500/30">
-              <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-4">Save from Anywhere</h3>
-            <p class="text-gray-200 leading-relaxed mb-6">Seamlessly capture content from any device. Our browser extension and Telegram bot ensure you never lose a valuable piece of information.</p>
-            <div class="space-y-3">
-              <div class="flex items-center gap-3">
-                <img src="/assets/promo/google-store.png" alt="Chrome" class="h-6 w-auto">
-                <img src="/assets/promo/get-the-addon.png" alt="Firefox" class="h-6 w-auto">
-              </div>
-              <div class="flex items-center gap-3 text-sm text-gray-300">
-                <img src="/assets/icons/telegram.svg" alt="Telegram" class="w-6 h-6">
-                <span>Telegram bot: <a href="https://t.me/GetPensiveBot" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">@GetPensiveBot</a></span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-green-400 rounded-full mr-3"></div>
-                <span>One-click saving with full content capture</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 3: AI Enhancement -->
-        <div class="group">
-          <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-6 sm:p-8 h-full hover:shadow-xl transition-all duration-300">
-            <div class="w-12 h-12 bg-violet-600/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-violet-500/30">
-              <svg class="w-6 h-6 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-4">AI-Powered Insights</h3>
-            <p class="text-gray-200 leading-relaxed mb-6">Get automatic summaries and smart tags for every article. AI extracts key insights and organizes your content intelligently.</p>
-            <div class="space-y-2">
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-violet-400 rounded-full mr-3"></div>
-                <span>Automatic article summaries</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-violet-400 rounded-full mr-3"></div>
-                <span>Smart topic tagging</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-violet-400 rounded-full mr-3"></div>
-                <span>Clean markdown extraction</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feature 4: Open Source & Self-Hosted -->
-        <div class="group">
-          <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-6 sm:p-8 h-full hover:shadow-xl transition-all duration-300">
-            <div class="w-12 h-12 bg-orange-600/20 backdrop-blur-sm rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-orange-500/30">
-              <svg class="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </div>
-            <h3 class="text-xl font-semibold text-white mb-4">Open Source & Self-Hosted</h3>
-            <p class="text-gray-200 leading-relaxed mb-6">Own your data completely. Deploy Pensive on your own infrastructure with full source code access and complete control.</p>
-            <div class="space-y-2">
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-3"></div>
-                <span><a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">Open source on GitHub</a></span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-3"></div>
-                <span>Self-host on your own server</span>
-              </div>
-              <div class="flex items-center gap-2 text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-3"></div>
-                <span>Import from <a href="/pocket" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">Pocket</a> & export anytime</span>
-              </div>
-              <div class="flex items-center text-sm text-gray-300">
-                <div class="w-1.5 h-1.5 bg-orange-400 rounded-full mr-3"></div>
-                <span>Docker & standard deployment</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
-
-    <!-- Beta Warning -->
-    <div class="bg-yellow-900/60 backdrop-blur-sm border border-yellow-600/50 rounded-lg p-6 mb-16 text-yellow-200 shadow-lg">
-      <h3 class="font-semibold mb-2 text-yellow-100">🔧 Actively developing</h3>
-      <p>
-        Pensive is actively developed with community feedback. While we prioritize data safety,
-        please back up important bookmarks during this development phase.
+  <!-- Everything you need -->
+  <section class="mt-16 sm:mt-20">
+    <div class="max-w-3xl">
+      <h2 class="text-xl font-semibold text-white">Everything you need to build your knowledge base</h2>
+      <p class="mt-2 text-sm text-slate-400">
+        Capture what you read, keep it searchable, and own it long-term.
       </p>
     </div>
 
-    <!-- Personal Note -->
-    <div class="mb-16">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Why I built this</h2>
+    <div class="mt-8 grid md:grid-cols-2 gap-6">
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Designed for search</h3>
+        </div>
+        <p class="mt-2 text-sm text-slate-300">Full content capture so you can search inside what you saved, not just titles.</p>
+        <ul class="mt-4 space-y-1 text-sm text-slate-300">
+          <li>• Full-text indexing</li>
+          <li>• Tags, domains, and dates</li>
+          <li>• Ask questions with AI (hosted)</li>
+        </ul>
+      </div>
 
-      <p class="text-gray-200 leading-relaxed mb-4">
-        Years ago, I discovered Gordon Bell and <a href="https://en.wikipedia.org/wiki/MyLifeBits"
-          class="text-violet-400 hover:text-violet-300 font-medium transition-colors">MyLifeBits</a> research project. It was an experiment to document and make searchable
-        everything in a person's life. The idea stuck with me: is it possible to preserve everything I see and hear, and
-        make it searchable?
-      </p>
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l4-4 4 4m-4-4v9" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 16.5a4.5 4.5 0 00-3.5-4.4 6 6 0 10-11 2A4 4 0 006 18h14" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Save from anywhere</h3>
+        </div>
+        <p class="mt-2 text-sm text-slate-300">Browser extensions and Telegram make saving fast on desktop and mobile.</p>
+        <ul class="mt-4 space-y-1 text-sm text-slate-300">
+          <li>• Chrome + Firefox extensions</li>
+          <li>• Telegram bot forwarding</li>
+          <li>• One-click capture</li>
+        </ul>
+      </div>
 
-      <p class="text-gray-200 leading-relaxed mb-4">
-        As someone who loves reading articles (especially on Hacker News) and enjoys sharing links, I kept losing the good
-        stuff. That <a href="https://ciechanow.ski/mechanical-watch/" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">mechanical watch article</a>?
-        Buried under SEO spam. The personal web is drowning in corporate content farms.
-      </p>
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-11.314l1.414 1.414m11.314 11.314l1.414 1.414" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8a4 4 0 100 8 4 4 0 000-8z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">AI summaries and tags</h3>
+        </div>
+        <p class="mt-2 text-sm text-slate-300">Optional AI helps you skim, organize, and revisit later.</p>
+        <ul class="mt-4 space-y-1 text-sm text-slate-300">
+          <li>• Automatic summaries</li>
+          <li>• Smart topic tags</li>
+          <li>• Clean text extraction</li>
+        </ul>
+      </div>
 
-      <p class="text-gray-200 leading-relaxed mb-4">
-        I tried everything. Pocket was one of them and I really liked it, at least until Mozilla turned it into another ad
-        platform and finally <a href="https://support.mozilla.org/en-US/kb/future-of-pocket" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">shut it
-          down</a>. There are other options, but at this point I wanted my own solution. So I built Pensive.
-      </p>
-
-      <p class="text-gray-200 leading-relaxed mb-4">
-        After building it, I decided to <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">open source</a> the entire project. Your bookmarks and notes are too important to trust to yet another service that might shut down or change direction. With Pensive, you can self-host your own instance and have complete control over your data.
-      </p>
-
-      <p class="text-gray-200 leading-relaxed">
-        No growth hacking. No daily recommendations you'll never read. Just a quiet tool that remembers what you found
-        valuable. You can read more about the creation of Pensive in <a
-          href="https://arashtaher.com/blog/introducing-pensive/" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">this</a> blog post. <a
-          href="/contact" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">Let me know</a> what you think.
-      </p>
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v4" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-white">Open source and self-hostable</h3>
+        </div>
+        <p class="mt-2 text-sm text-slate-300">Own your data. Run it yourself, or use the hosted version.</p>
+        <ul class="mt-4 space-y-1 text-sm text-slate-300">
+          <li>• Docker-friendly deployment</li>
+          <li>• Import and export anytime</li>
+          <li>• No lock-in</li>
+        </ul>
+      </div>
     </div>
+  </section>
 
-    <!-- Pricing Plans -->
-    <div class="mb-16">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-3">Self-host for free or use our hosted version</h2>
-        <p class="text-gray-300">Self-host with unlimited features or use our managed hosting with simple pricing</p>
+  <!-- Why I built this -->
+  <section class="mt-16 sm:mt-20">
+    <div class="max-w-3xl">
+      <h2 class="text-xl font-semibold text-white">Why I built this</h2>
+      <div class="mt-3 space-y-4 text-sm text-slate-300">
+        <p>
+          Years ago I found Gordon Bell’s <a class="text-violet-200 hover:text-white transition-colors" href="https://en.wikipedia.org/wiki/MyLifeBits" target="_blank" rel="noopener">MyLifeBits</a> research project.
+          The idea stuck: can we preserve what we read and make it searchable?
+        </p>
+        <p>
+          I read and share a lot of links (Hacker News, blogs, docs). The good stuff gets lost in browser bookmarks and buried by SEO.
+          Pocket was the closest fit for me for a while, until it shut down.
+        </p>
+        <p>
+          So I built Pensive and then made it open source. Your bookmarks shouldn’t depend on a service that can change direction.
+          Read the longer story <a class="text-violet-200 hover:text-white transition-colors" href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a class="text-violet-200 hover:text-white transition-colors" href="/contact">tell me</a> what you think.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing (kept, simplified) -->
+  <section class="mt-16 sm:mt-20">
+    <h2 class="text-xl font-semibold text-white text-center">Self-host for free or use our hosted version</h2>
+    <p class="mt-2 text-sm text-slate-400 text-center">Unlimited self-hosting, or simple hosted pricing.</p>
+
+    <div class="mt-8 grid lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <!-- Self-host -->
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-baseline justify-between gap-4">
+          <div class="text-lg font-semibold text-white">Self-host</div>
+          <div class="text-sm text-slate-400">Bring your own infra</div>
+        </div>
+        <div class="mt-2 text-4xl font-bold text-white">$0</div>
+        <div class="mt-2 text-sm text-slate-300">Unlimited usage (no hosted limits).</div>
+
+        <ul class="mt-5 space-y-2 text-sm text-slate-300">
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Full-content capture + fast search</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Browser extensions + Telegram support</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Import/export anytime (no lock-in)</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Docker-friendly deployment</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>AI features supported (configure your own keys)</span></li>
+        </ul>
+
+        <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="mt-6 inline-flex w-full justify-center rounded-lg bg-white/10 px-4 py-2 font-semibold text-white hover:bg-white/15 transition-colors">
+          View on GitHub
+        </a>
       </div>
 
-      <div class="bg-violet-900/40 backdrop-blur-sm border border-violet-500/50 rounded-xl p-6 mb-8 text-center max-w-3xl mx-auto">
-        <div class="flex items-center justify-center gap-3 mb-3">
-          <svg class="w-6 h-6 text-violet-400" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
-          <h3 class="text-xl font-bold text-white">Completely free to self-host</h3>
+      <!-- Hosted Free -->
+      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
+        <div class="flex items-baseline justify-between gap-4">
+          <div class="text-lg font-semibold text-white">Hosted</div>
+          <div class="text-sm text-slate-400">Free</div>
         </div>
-        <p class="text-gray-200">Deploy Pensive on your own infrastructure with full access to all features. No limits, no subscriptions. <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="text-violet-400 hover:text-violet-300 font-medium transition-colors">View on GitHub</a></p>
+        <div class="mt-2 text-4xl font-bold text-white">$0</div>
+        <div class="mt-2 text-sm text-slate-300">Try it out with generous daily limits.</div>
+
+        <ul class="mt-5 space-y-2 text-sm text-slate-300">
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>All core features (capture, search, tags)</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Browser extension saving</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Telegram bot saving</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-slate-400">•</span><span>10 bookmarks/day</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-slate-400">•</span><span>1 AI question/day</span></li>
+        </ul>
+
+        <a href="/signup" class="mt-6 inline-flex w-full justify-center rounded-lg bg-white/10 px-4 py-2 font-semibold text-white hover:bg-white/15 transition-colors">
+          Get started
+        </a>
       </div>
 
-      <p class="text-center text-gray-300 mb-6 text-lg">Or use our hosted version:</p>
-
-      <div class="grid md:grid-cols-2 gap-6 sm:gap-8 max-w-3xl mx-auto">
-        <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-2xl p-8 shadow-xl text-center">
-          <h3 class="text-2xl font-bold text-white mb-2">Free</h3>
-          <div class="text-5xl font-bold text-white mb-1">$0</div>
-          <p class="text-gray-400 text-sm mb-6">Forever</p>
-          <div class="space-y-4 mb-8">
-            <div>
-              <div class="text-3xl font-bold text-orange-400 mb-1">10</div>
-              <p class="text-gray-300 text-sm">bookmarks per day</p>
-            </div>
-            <div>
-              <div class="text-3xl font-bold text-blue-400 mb-1">1</div>
-              <p class="text-gray-300 text-sm">AI question per day</p>
-            </div>
-          </div>
-          <a href="/signup" class="inline-block w-full bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 font-semibold rounded-lg transition-colors">Get started</a>
+      <!-- Hosted Premium -->
+      <div class="rounded-xl border border-violet-500/30 bg-violet-500/10 p-6 sm:p-8">
+        <div class="flex items-baseline justify-between gap-4">
+          <div class="text-lg font-semibold text-white">Hosted</div>
+          <div class="text-sm text-violet-200">Premium</div>
         </div>
+        <div class="mt-2 text-4xl font-bold text-white">$5</div>
+        <div class="mt-2 text-sm text-slate-200">More headroom for daily saving and AI.</div>
 
-        <div class="bg-gradient-to-br from-violet-900/60 to-purple-900/60 backdrop-blur-sm border-2 border-violet-500/60 rounded-2xl p-8 shadow-2xl text-center relative">
-          <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1 rounded-full">
-            POPULAR
-          </div>
-          <h3 class="text-2xl font-bold text-white mb-2">Premium</h3>
-          <div class="text-5xl font-bold text-white mb-1">$5</div>
-          <p class="text-gray-300 text-sm mb-6">per month</p>
-          <div class="space-y-4 mb-8">
-            <div>
-              <div class="text-3xl font-bold text-violet-400 mb-1">100</div>
-              <p class="text-gray-200 text-sm">bookmarks per day</p>
-            </div>
-            <div>
-              <div class="text-3xl font-bold text-purple-400 mb-1">10</div>
-              <p class="text-gray-200 text-sm">AI questions per day</p>
-            </div>
-          </div>
-          <a href="/users/subscribe" class="inline-block w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-6 py-3 font-bold rounded-lg transition-colors shadow-lg">Upgrade to Premium</a>
-        </div>
+        <ul class="mt-5 space-y-2 text-sm text-slate-200">
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Everything in Hosted Free</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>100 bookmarks/day</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>10 AI questions/day</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>AI summaries and smart tags</span></li>
+          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Support ongoing development</span></li>
+        </ul>
+
+        <a href="/users/subscribe" class="mt-6 inline-flex w-full justify-center rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500 transition-colors">
+          Upgrade
+        </a>
       </div>
-  </div>
+    </div>
+  </section>
 
-    <!-- Final CTA -->
-    <div class="text-center bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-xl p-6 sm:p-8">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white mb-6">Ready to build your searchable memory of the web?</h2>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white px-8 py-4 font-bold rounded-lg hover:shadow-xl transition-all">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-          </svg>
+  <!-- Final CTA -->
+  <section class="mt-16 sm:mt-20">
+    <div class="rounded-xl border border-white/10 bg-white/5 p-8 sm:p-10 text-center">
+      <h2 class="text-2xl sm:text-3xl font-bold text-white">Ready to build your searchable memory of the web?</h2>
+      <p class="mt-3 text-sm text-slate-300">Self-host for full control, or use the hosted version to get started in minutes.</p>
+      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="https://github.com/arashtaher/pensive" target="_blank" rel="noopener" class="inline-flex justify-center rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white hover:bg-white/10 transition-colors">
           Self-host for free
         </a>
-        <a href="/signup" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-4 font-bold rounded-lg hover:shadow-xl transition-all">Try hosted version</a>
+        <a href="/signup" class="inline-flex justify-center rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-500 transition-colors">
+          Try hosted version
+        </a>
       </div>
     </div>
-  </div>
+  </section>
 
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const sliderTrack = document.getElementById('slider-track');
+  document.addEventListener('DOMContentLoaded', () => {
+    const slider = document.getElementById('slider');
+    const track = document.getElementById('slider-track');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    const dots = document.querySelectorAll('.slider-dot');
-    const captions = document.querySelectorAll('#slide-caption span');
+    const dots = Array.from(document.querySelectorAll('.slider-dot'));
+    const captions = Array.from(document.querySelectorAll('#slide-caption span'));
 
-    let currentSlide = 0;
-    const totalSlides = 5;
+    if (!slider || !track || !prevBtn || !nextBtn || dots.length === 0) return;
 
-    function updateSlider() {
-      // Move the slider
-      const translateX = -(currentSlide * 100);
-      sliderTrack.style.transform = `translateX(${translateX}%)`;
+    let index = 0;
+    const total = dots.length;
 
-      // Update dots
-      dots.forEach((dot, index) => {
-        if (index === currentSlide) {
-          dot.classList.remove('bg-gray-300', 'hover:bg-gray-400');
-          dot.classList.add('bg-violet-600');
-        } else {
-          dot.classList.remove('bg-violet-600');
-          dot.classList.add('bg-gray-300', 'hover:bg-gray-400');
-        }
-      });
+    const render = () => {
+      track.style.transform = `translateX(${-index * 100}%)`;
+      dots.forEach((d, i) => d.classList.toggle('bg-white/60', i === index));
+      dots.forEach((d, i) => d.classList.toggle('bg-white/20', i !== index));
+      captions.forEach((c, i) => c.classList.toggle('hidden', i !== index));
+    };
 
-      // Update captions
-      captions.forEach((caption, index) => {
-        if (index === currentSlide) {
-          caption.classList.remove('hidden');
-        } else {
-          caption.classList.add('hidden');
-        }
-      });
-    }
+    const go = (next) => {
+      index = (next + total) % total;
+      render();
+    };
 
-    function nextSlide() {
-      currentSlide = (currentSlide + 1) % totalSlides;
-      updateSlider();
-    }
+    prevBtn.addEventListener('click', () => go(index - 1));
+    nextBtn.addEventListener('click', () => go(index + 1));
+    dots.forEach((d) => d.addEventListener('click', () => go(Number(d.dataset.slide || 0))));
 
-    function prevSlide() {
-      currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-      updateSlider();
-    }
+    const onKey = (e) => {
+      if (e.key === 'ArrowLeft') go(index - 1);
+      if (e.key === 'ArrowRight') go(index + 1);
+    };
+    document.addEventListener('keydown', onKey);
 
-    function goToSlide(slideIndex) {
-      currentSlide = slideIndex;
-      updateSlider();
-    }
+    let timer = setInterval(() => go(index + 1), 5000);
+    slider.addEventListener('mouseenter', () => clearInterval(timer));
+    slider.addEventListener('mouseleave', () => (timer = setInterval(() => go(index + 1), 5000)));
 
-    // Event listeners
-    nextBtn.addEventListener('click', nextSlide);
-    prevBtn.addEventListener('click', prevSlide);
-
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => goToSlide(index));
-    });
-
-    // Auto-play functionality (optional - pauses on hover)
-    let autoPlayInterval = setInterval(nextSlide, 5000);
-
-    const sliderContainer = document.querySelector('.relative.max-w-4xl');
-    sliderContainer.addEventListener('mouseenter', () => {
-      clearInterval(autoPlayInterval);
-    });
-
-    sliderContainer.addEventListener('mouseleave', () => {
-      autoPlayInterval = setInterval(nextSlide, 5000);
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') {
-        prevSlide();
-      } else if (e.key === 'ArrowRight') {
-        nextSlide();
-      }
-    });
-
-    // Touch/swipe support for mobile
     let startX = 0;
-    let endX = 0;
-
-    sliderTrack.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].clientX;
+    track.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
+    track.addEventListener('touchend', (e) => {
+      const endX = e.changedTouches[0].clientX;
+      const dx = startX - endX;
+      if (Math.abs(dx) < 50) return;
+      go(dx > 0 ? index + 1 : index - 1);
     });
 
-    sliderTrack.addEventListener('touchend', (e) => {
-      endX = e.changedTouches[0].clientX;
-      const threshold = 50; // minimum swipe distance
-
-      if (startX - endX > threshold) {
-        nextSlide(); // swipe left - go to next
-      } else if (endX - startX > threshold) {
-        prevSlide(); // swipe right - go to previous
-      }
-    });
+    render();
   });
 </script>
-
-
-  </div>
-</div>
 
 {{template "footer" .}}

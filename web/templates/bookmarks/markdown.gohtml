@@ -1,34 +1,26 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-6 py-8 max-w-4xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
-  <!-- Kandinsky floating circles -->
-  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
-    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
-    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
-    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
-    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
-    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
-  </div>
+<div class="min-h-screen max-w-4xl mx-auto px-6 py-12">
 
   <!-- Header Card -->
-  <div class="relative z-10 bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl mb-6">
-    <div class="p-6 border-b border-gray-600/50">
+  <div class="mb-6 rounded-xl border border-white/10 bg-white/5">
+    <div class="border-b border-white/10 p-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex-1 min-w-0">
           <h1 class="text-4xl font-bold text-white mb-2 line-clamp-2">{{.Title}}</h1>
           <a href="{{.Link}}" target="_blank"
-             class="text-sm text-orange-400 hover:text-orange-300 font-medium underline break-all transition-colors">
+             class="break-all text-sm font-medium text-violet-200 underline transition-colors hover:text-violet-100">
             {{.Link}}
           </a>
         </div>
         
         <div class="flex items-center gap-2">
           <a href="/bookmarks/{{.Id}}"
-             class="px-4 py-2 text-sm border border-gray-600/50 bg-gray-700/50 backdrop-blur-sm text-gray-200 font-semibold rounded-lg hover:bg-gray-600/50 transition-colors">
+             class="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/10">
             ← Back to bookmark
           </a>
           <a href="/bookmarks/{{.Id}}/full"
-             class="px-4 py-2 text-sm bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-lg transition-all transform hover:scale-105 shadow-lg">
+             class="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
             View Raw Text
           </a>
         </div>
@@ -120,13 +112,13 @@
   }
   
   .markdown-content a {
-    color: #fb923c;
+    color: #c4b5fd;
     text-decoration: underline;
     font-weight: 500;
   }
 
   .markdown-content a:hover {
-    color: #f97316;
+    color: #ddd6fe;
   }
   
   .markdown-content img {

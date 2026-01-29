@@ -1,17 +1,17 @@
 <div class="space-y-8">
   <div>
     <h2 class="text-xl font-bold mb-6 text-white">Data management</h2>
-    <p class="text-gray-300 leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
+    <p class="text-slate-300 leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
   </div>
 
   <!-- Delete All Content -->
-  <div class="bg-red-900/20 backdrop-blur-sm border border-red-500/30 rounded-lg p-6">
-    <h3 class="text-xl font-semibold mb-2 text-red-300">Delete all content</h3>
-    <p class="mb-4 text-red-200">This will permanently delete all your saved bookmarks and their content. Your account will remain active and you can continue using Pensive.</p>
-    <p class="text-sm mb-4 text-red-300 font-semibold">⚠️ This action cannot be undone. Consider exporting your data first from the Import/Export tab.</p>
+  <div class="rounded-xl border border-red-400/20 bg-red-500/10 p-6">
+    <h3 class="text-xl font-semibold mb-2 text-red-200">Delete all content</h3>
+    <p class="mb-4 text-red-100">This will permanently delete all your saved bookmarks and their content. Your account will remain active and you can continue using Pensive.</p>
+    <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Consider exporting your data first from the Import/Export tab.</p>
     <button 
       id="delete-content-btn"
-      class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
+      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
       onclick="showDeleteContentModal()"
     >
       Delete all content
@@ -19,13 +19,13 @@
   </div>
 
   <!-- Delete Account -->
-  <div class="bg-red-900/20 backdrop-blur-sm border border-red-500/30 rounded-lg p-6">
-    <h3 class="text-xl font-semibold mb-2 text-red-300">Delete account</h3>
-    <p class="mb-4 text-red-200">This will permanently delete your entire account, including all content, settings, subscription information, and API tokens.</p>
-    <p class="text-sm mb-4 text-red-300 font-semibold">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
+  <div class="rounded-xl border border-red-400/20 bg-red-500/10 p-6">
+    <h3 class="text-xl font-semibold mb-2 text-red-200">Delete account</h3>
+    <p class="mb-4 text-red-100">This will permanently delete your entire account, including all content, settings, subscription information, and API tokens.</p>
+    <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
     <button 
       id="delete-account-btn"
-      class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
+      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
       onclick="showDeleteAccountModal()"
     >
       Delete account
@@ -34,15 +34,15 @@
 </div>
 
 <!-- Delete Content Modal -->
-<div id="delete-content-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-50">
-  <div class="bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-8 max-w-md mx-4">
+<div id="delete-content-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-white/10 bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
     <h3 class="text-xl font-semibold text-white mb-4">Confirm content deletion</h3>
-    <p class="text-gray-300 leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
-    <p class="text-sm mb-6 text-red-300 font-semibold">This action cannot be undone. Have you backed up your data?</p>
+    <p class="text-slate-300 leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
+    <p class="text-sm mb-6 text-red-200 font-semibold">This action cannot be undone. Have you backed up your data?</p>
     
     <div class="flex gap-4">
       <button
-        class="border border-gray-600/50 text-gray-300 px-6 py-3 font-semibold rounded-lg hover:bg-gray-700/50 transition-colors"
+        class="rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10"
         onclick="hideDeleteContentModal()"
       >
         Cancel
@@ -51,7 +51,7 @@
         {{csrfField}}
         <button 
           type="submit"
-          class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
+          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
         >
           Yes, delete all content
         </button>
@@ -61,15 +61,15 @@
 </div>
 
 <!-- Delete Account Modal -->
-<div id="delete-account-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center z-50">
-  <div class="bg-gray-800/95 backdrop-blur-sm border border-gray-600/50 rounded-xl shadow-2xl p-8 max-w-md mx-4">
+<div id="delete-account-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-white/10 bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
     <h3 class="text-xl font-semibold text-white mb-4">Confirm account deletion</h3>
-    <p class="text-gray-300 leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
-    <p class="text-sm mb-6 text-red-300 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
+    <p class="text-slate-300 leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
+    <p class="text-sm mb-6 text-red-200 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
     
     <div class="flex gap-4">
       <button
-        class="border border-gray-600/50 text-gray-300 px-6 py-3 font-semibold rounded-lg hover:bg-gray-700/50 transition-colors"
+        class="rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10"
         onclick="hideDeleteAccountModal()"
       >
         Cancel
@@ -78,7 +78,7 @@
         {{csrfField}}
         <button 
           type="submit"
-          class="bg-red-600 text-white px-6 py-3 font-semibold rounded-lg hover:bg-red-700 transition-colors"
+          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
         >
           Yes, delete my account
         </button>
@@ -90,18 +90,26 @@
 
 <script>
 function showDeleteContentModal() {
-  document.getElementById('delete-content-modal').classList.remove('hidden');
+  const modal = document.getElementById('delete-content-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
 }
 
 function hideDeleteContentModal() {
-  document.getElementById('delete-content-modal').classList.add('hidden');
+  const modal = document.getElementById('delete-content-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
 }
 
 function showDeleteAccountModal() {
-  document.getElementById('delete-account-modal').classList.remove('hidden');
+  const modal = document.getElementById('delete-account-modal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
 }
 
 function hideDeleteAccountModal() {
-  document.getElementById('delete-account-modal').classList.add('hidden');
+  const modal = document.getElementById('delete-account-modal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
 }
 </script>

@@ -1,49 +1,39 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-6 py-8 max-w-2xl mx-auto bg-gradient-to-br from-slate-900 via-gray-800 to-slate-900">
-  <!-- Kandinsky floating circles -->
-  <div class="kandinsky-circles fixed inset-0 pointer-events-none overflow-hidden">
-    <div class="absolute top-20 left-10 w-24 h-24 bg-gradient-to-br from-orange-400/20 to-red-500/20 rounded-full blur-sm animate-float"></div>
-    <div class="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-400/15 to-blue-500/15 rounded-full blur-sm animate-float-delayed"></div>
-    <div class="absolute bottom-32 left-1/4 w-20 h-20 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 rounded-full blur-sm animate-float-slow"></div>
-    <div class="absolute top-1/2 right-10 w-12 h-12 bg-gradient-to-br from-green-400/15 to-teal-500/15 rounded-full blur-sm animate-float"></div>
-    <div class="absolute bottom-20 right-1/3 w-18 h-18 bg-gradient-to-br from-pink-400/10 to-purple-500/10 rounded-full blur-sm animate-float-delayed"></div>
-  </div>
-
-  <div class="relative z-10">
-    <!-- Success Card -->
-    <div class="bg-gray-800/60 backdrop-blur-sm border border-gray-600/50 rounded-xl p-8 text-center">
+<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+  <div class="max-w-2xl mx-auto">
+    <div class="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 text-center">
       <h1 class="text-2xl font-bold text-white mb-4">Welcome to premium!</h1>
-      <p class="text-gray-300 leading-relaxed mb-2">Your subscription to the Starter plan has been successfully activated.</p>
-      <p class="text-sm text-gray-400 mb-8">You'll receive an email confirmation shortly with all the details.</p>
+      <p class="text-slate-300 leading-relaxed mb-2">Your subscription to the Starter plan has been successfully activated.</p>
+      <p class="text-sm text-slate-400 mb-8">You'll receive an email confirmation shortly with all the details.</p>
 
       <!-- Success Actions -->
-      <div class="bg-green-900/20 backdrop-blur-sm border border-green-500/30 rounded-lg p-6 mb-6">
+      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 mb-6 text-left">
         <div class="flex items-center gap-2 mb-3">
-          <span class="font-semibold text-green-300">Premium features now active</span>
+          <span class="font-semibold text-emerald-200">Premium features now active</span>
         </div>
-        <p class="text-sm text-green-200">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
+        <p class="text-sm text-emerald-100">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
       </div>
 
     <!-- Billing Management -->
-    <div class="space-y-4">
-      <form action="/payments/create-portal-session" method="POST">
-        {{csrfField}}
-        <input type="hidden" name="session_id" value="{{.SessionId}}" />
-        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg">
-          Manage billing & subscription
-        </button>
-      </form>
-      
-      <a href="/home" class="inline-block text-orange-400 hover:text-orange-300 font-medium transition-colors">
-        Start exploring premium features →
-      </a>
-    </div>
+      <div class="space-y-4">
+        <form action="/payments/create-portal-session" method="POST">
+          {{csrfField}}
+          <input type="hidden" name="session_id" value="{{.SessionId}}" />
+          <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+            Manage billing & subscription
+          </button>
+        </form>
+        
+        <a href="/home" class="inline-block text-violet-200 hover:text-white font-medium transition-colors">
+          Start exploring premium features →
+        </a>
+      </div>
 
       <!-- Support -->
-      <div class="mt-8 pt-6 border-t border-gray-600/50">
-        <p class="text-sm text-gray-300">
-          Need help? <a href="/contact" class="text-orange-400 hover:text-orange-300 font-medium transition-colors">Contact our support team</a>
+      <div class="mt-8 pt-6 border-t border-white/10">
+        <p class="text-sm text-slate-300">
+          Need help? <a href="/contact" class="text-violet-200 hover:text-white font-medium transition-colors underline">Contact our support team</a>
         </p>
       </div>
     </div>
