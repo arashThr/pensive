@@ -515,6 +515,7 @@ MARKDOWN:
 SUMMARY:
 - Write a concise one-paragraph summary (2-3 sentences) of the main content
 - Focus on the key points and main message of the article
+- Preferably present the key points in bullet points if possible
 - Use clear, professional language
 - Keep it under 200 words
 
@@ -522,7 +523,7 @@ EXCERPT:
 - Look for what can be considered as the main content of the article
 - The main content is the content that is most relevant to the user
 - Pick the first paragraph of the main content
-- Use the exact text (in plain text) as it appears in the article (verbatim)
+- Use the exact text (without any formatting) as it appears in the article (verbatim)
 - Keep it under 200 words
 
 TAGS:

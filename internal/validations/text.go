@@ -1,7 +1,9 @@
 package validations
 
 import (
+	"fmt"
 	"html"
+	"html/template"
 	"regexp"
 	"strconv"
 
@@ -11,13 +13,13 @@ import (
 
 var spacesRegex *regexp.Regexp = regexp.MustCompile("[\t|\n]+")
 
-var sanitization = bluemonday.UGCPolicy()
+var policy = bluemonday.UGCPolicy()
 
 func CleanUpText(text string) string {
-	return html.UnescapeString(
-		sanitization.Sanitize(
-			spacesRegex.ReplaceAllLiteralString(text, " "),
-		))
+	// Important: unescape first, then sanitize. This prevents encoded tags like
+	// "&lt;script&gt;" from bypassing the sanitizer.
+	unescaped := html.UnescapeString(spacesRegex.ReplaceAllLiteralString(text, " "))
+	return policy.Sanitize(unescaped)
 }
 
 func GetPageOffset(pageStr string) int {
@@ -33,4 +35,26 @@ func GetPageOffset(pageStr string) int {
 		return 1
 	}
 	return page
+}
+
+func GetString(v any) string {
+	if v == nil {
+		return ""
+	}
+
+	var raw string
+	switch x := v.(type) {
+	case template.HTML:
+		raw = string(x)
+	case string:
+		raw = x
+	case *string:
+		if x == nil {
+			return ""
+		}
+		raw = *x
+	default:
+		raw = fmt.Sprint(v)
+	}
+	return raw
 }

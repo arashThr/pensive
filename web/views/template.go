@@ -14,6 +14,7 @@ import (
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
 	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/internal/validations"
 	"github.com/arashthr/pensive/web"
 	"github.com/arashthr/pensive/web/templates"
 	"github.com/gorilla/csrf"
@@ -47,6 +48,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		},
 		"safe": func(s string) template.HTML {
 			return template.HTML(s) // Trust ts_headline output
+		},
+		"safeHTML": func(_ any) (template.HTML, error) {
+			return "", fmt.Errorf("safeHTML not implemented")
 		},
 		"isProduction": func() (template.HTML, error) {
 			return "", fmt.Errorf("isProduction not implemented")
@@ -110,6 +114,11 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 			},
 			"shouldUseAnalytics": func() bool {
 				return !disableAnalytics
+			},
+			"safeHTML": func(v any) template.HTML {
+				raw := validations.GetString(v)
+				safe := validations.CleanUpText(raw)
+				return template.HTML(safe)
 			},
 		},
 	)
