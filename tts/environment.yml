@@ -1,0 +1,12 @@
+name: kokoro
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - flask
+  - pip:
+      - kokoro>=0.3.1
+      - soundfile
+      - misaki[en]

@@ -41,6 +41,10 @@ type GoogleOAuthConfig struct {
 	ClientSecret string
 }
 
+type PodcastConfig struct {
+	TTSServiceURL string
+}
+
 type TelegramLoggerConfig struct {
 	Token  string
 	ChatID string
@@ -70,6 +74,7 @@ type AppConfig struct {
 	Turnstile TurnstileConfig
 	GitHub    GitHubOAuthConfig
 	Google    GoogleOAuthConfig
+	Podcast   PodcastConfig
 }
 
 func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
@@ -138,6 +143,10 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	cfg.Google = GoogleOAuthConfig{
 		ClientID:     GetEnvOrDie("GOOGLE_CLIENT_ID"),
 		ClientSecret: GetEnvOrDie("GOOGLE_CLIENT_SECRET"),
+	}
+
+	cfg.Podcast = PodcastConfig{
+		TTSServiceURL: GetEnvWithDefault("TTS_SERVICE_URL", "http://tts:5000"),
 	}
 
 	return &cfg, nil

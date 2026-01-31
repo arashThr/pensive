@@ -8,8 +8,10 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_HOST=db
+      - TTS_SERVICE_URL=http://tts:5000
     depends_on:
       - db
+      - tts
     networks:
       - app-network
   

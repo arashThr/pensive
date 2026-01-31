@@ -102,6 +102,7 @@ type ServiceContainer struct {
 	StripeService    service.Stripe
 	ExtensionService auth.Extension
 	TelegramService  auth.Telegram
+	PodcastService   service.Podcast
 
 	// Import processor
 	ImportProcessor importer.ImportProcessor
@@ -231,6 +232,11 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		BotName:       cfg.Telegram.BotName,
 	}
 
+	podcastService := service.Podcast{
+		BookmarkModel: bookmarkRepo,
+		TTSServiceURL: cfg.Podcast.TTSServiceURL,
+	}
+
 	importProcessor := importer.ImportProcessor{
 		ImportJobModel: importJobRepo,
 		BookmarkModel:  bookmarkRepo,
@@ -261,6 +267,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		StripeService:    stripeService,
 		ExtensionService: extensionService,
 		TelegramService:  telegramService,
+		PodcastService:   podcastService,
 
 		// Import processor
 		ImportProcessor: importProcessor,
@@ -340,6 +347,9 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				r.Put("/{id}", c.ApiService.UpdateAPI)
 				r.Delete("/{id}", c.ApiService.DeleteAPI)
 				r.Get("/search", c.ApiService.SearchAPI)
+			})
+			r.Route("/podcast", func(r chi.Router) {
+				r.Get("/generate", c.PodcastService.GeneratePodcast)
 			})
 		})
 	})

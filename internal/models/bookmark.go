@@ -331,6 +331,28 @@ func (model *BookmarkRepo) GetByUserId(userId types.UserId, page int) ([]Bookmar
 	return bookmarks, count, morePages, nil
 }
 
+// GetRecentRandomByUserId fetches up to `limit` random bookmarks from the past `days` days
+// Returns the bookmarks with Title, AIExcerpt (or Excerpt as fallback)
+func (model *BookmarkRepo) GetRecentRandomByUserId(userId types.UserId, days int, limit int) ([]Bookmark, error) {
+	cutoffDate := time.Now().AddDate(0, 0, -days)
+
+	rows, err := model.Pool.Query(context.Background(),
+		`SELECT *
+		FROM library_items
+		WHERE user_id = $1 AND created_at >= $2
+		ORDER BY RANDOM()
+		LIMIT $3`,
+		userId, cutoffDate, limit)
+	if err != nil {
+		return nil, fmt.Errorf("query recent random bookmarks: %w", err)
+	}
+	bookmarks, err := pgx.CollectRows(rows, pgx.RowToStructByName[Bookmark])
+	if err != nil {
+		return nil, fmt.Errorf("recent bookmarks: %w", err)
+	}
+	return bookmarks, nil
+}
+
 func (model *BookmarkRepo) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {
