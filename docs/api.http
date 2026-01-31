@@ -1,6 +1,18 @@
 @bookmarkId = fvtnxo5c
 @query = search
 
+### Issue API token (dev-only)
+# Disabled when ENVIRONMENT=production
+POST {{host}}/api/v1/tokens/issue
+content-type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+# Copy the returned `token` into {{token}} below.
+
 ### Get bookmarks
 GET {{host}}/api/v1/bookmarks?page=1
 Authorization: Bearer {{token}}
@@ -26,3 +38,11 @@ Authorization: Bearer {{token}}
 ### Delete bookmark
 DELETE {{host}}/api/v1/bookmarks/{{bookmarkId}}
 Authorization: Bearer {{token}}
+
+
+### Audio generation with TTS service
+GET {{host}}/api/v1/podcast/generate
+Authorization: Bearer {{token}}
+
+### Check TTS health endpoint
+GET http://localhost:5000/health

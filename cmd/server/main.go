@@ -208,7 +208,9 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	}
 
 	tokenService := service.Token{
-		TokenModel: tokenRepo,
+		TokenModel:  tokenRepo,
+		UserModel:   userRepo,
+		Environment: cfg.Environment,
 	}
 
 	stripeService := service.Stripe{
@@ -312,6 +314,11 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 
 		r.Get("/ping", healthCheck)
 		r.Post("/stripe-webhooks", c.StripeService.Webhook)
+
+		r.Route("/dev", func(r chi.Router) {
+			// Dev-only routes can be added here
+			r.Post("/tokens/issue", c.TokenService.IssueTokenWithPassword)
+		})
 
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(amw.RequireUser)
