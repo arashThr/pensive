@@ -10,3 +10,4 @@ dependencies:
       - kokoro>=0.3.1
       - soundfile
       - misaki[en]
+      - requests

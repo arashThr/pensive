@@ -7,6 +7,7 @@ Exposes a simple HTTP endpoint for text-to-speech generation using Kokoro.
 import os
 import time
 import threading
+import requests
 
 import numpy as np
 from flask import Flask, request, jsonify
@@ -39,7 +40,30 @@ except Exception as e:
     pipeline = None
 
 
-def generate_audio_async(text: str, filename: str):
+def send_callback(callback_url: str, filename: str, user_email: str, user_id: int, success: bool, error: str = None):
+    """Send completion callback to the server."""
+    if not callback_url:
+        log("No callback URL provided, skipping callback")
+        return
+    
+    try:
+        payload = {
+            "filename": filename,
+            "user_email": user_email,
+            "user_id": user_id,
+            "success": success,
+        }
+        if error:
+            payload["error"] = error
+        
+        log(f"Sending callback to {callback_url}")
+        resp = requests.post(callback_url, json=payload, timeout=30)
+        log(f"Callback response: {resp.status_code}")
+    except Exception as e:
+        log(f"Failed to send callback: {e}")
+
+
+def generate_audio_async(text: str, filename: str, user_email: str, user_id: int, callback_url: str):
     """Generate audio in background thread and save to disk."""
     try:
         output_path = os.path.join(OUTPUT_DIR, filename)
@@ -47,6 +71,7 @@ def generate_audio_async(text: str, filename: str):
         
         if pipeline is None:
             log("Error: Pipeline not initialized")
+            send_callback(callback_url, filename, user_email, user_id, False, "Pipeline not initialized")
             return
         
         start_time = time.time()
@@ -62,6 +87,7 @@ def generate_audio_async(text: str, filename: str):
         
         if not audio_segments:
             log(f"Error: No audio generated for {filename}")
+            send_callback(callback_url, filename, user_email, user_id, False, "No audio segments generated")
             return
         
         # Concatenate and save
@@ -74,8 +100,12 @@ def generate_audio_async(text: str, filename: str):
         
         log(f"Saved {filename}: {duration:.1f}s audio, {file_size} bytes, {duration/generation_time:.1f}x realtime")
         
+        # Send success callback
+        send_callback(callback_url, filename, user_email, user_id, True)
+        
     except Exception as e:
         log(f"Error generating {filename}: {e}")
+        send_callback(callback_url, filename, user_email, user_id, False, str(e))
 
 
 @app.route('/health', methods=['GET'])
@@ -93,7 +123,12 @@ def generate():
     Accept text and start audio generation in background.
     
     Request body:
-        {"text": "Your text here", "filename": "output.wav"}
+        {
+            "text": "Your text here",
+            "filename": "output.wav",
+            "user_email": "user@example.com",
+            "callback_url": "http://server:8000/internal/podcast/complete"
+        }
     
     Returns immediately with acknowledgment.
     """
@@ -111,15 +146,19 @@ def generate():
         if not filename.endswith('.wav'):
             filename += '.wav'
         
+        user_email = data.get('user_email', '')
+        user_id = data.get('user_id', 0)
+        callback_url = data.get('callback_url', '')
+        
         if pipeline is None:
             return jsonify({"error": "TTS pipeline not initialized"}), 500
         
-        log(f"Request received: {filename} ({len(text)} chars)")
+        log(f"Request received: {filename} ({len(text)} chars, email: {user_email}, user_id: {user_id})")
         
         # Start generation in background thread
         thread = threading.Thread(
             target=generate_audio_async,
-            args=(text, filename),
+            args=(text, filename, user_email, user_id, callback_url),
             daemon=True
         )
         thread.start()

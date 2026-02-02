@@ -63,3 +63,17 @@ func (t *TelegramRepo) GetToken(userId int64) string {
 	}
 	return token
 }
+
+// GetChatIdByUserId returns the Telegram chat ID for a given Pensive user ID
+func (t *TelegramRepo) GetChatIdByUserId(userId types.UserId) (int64, error) {
+	var chatId int64
+	err := t.Pool.QueryRow(context.Background(), `
+		SELECT telegram_user_id
+		FROM telegram_auth
+		WHERE user_id = $1 AND telegram_user_id IS NOT NULL
+	`, userId).Scan(&chatId)
+	if err != nil {
+		return 0, fmt.Errorf("get telegram chat id: %w", err)
+	}
+	return chatId, nil
+}

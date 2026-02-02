@@ -9,17 +9,24 @@ import (
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
+	"github.com/arashthr/pensive/internal/logging"
 	"github.com/arashthr/pensive/internal/models"
+	"github.com/arashthr/pensive/internal/types"
 )
 
 const (
 	PodcastDays         = 7  // Look back 7 days for bookmarks
 	PodcastArticleLimit = 10 // Max 10 articles per podcast
+	PodcastUploadDir    = "uploads/podcasts"
 )
 
 type Podcast struct {
 	BookmarkModel *models.BookmarkRepo
+	EmailService  *EmailService
+	TelegramRepo  *models.TelegramRepo
 	TTSServiceURL string
+	TelegramToken string
+	Domain        string
 }
 
 type PodcastResponse struct {
@@ -29,8 +36,19 @@ type PodcastResponse struct {
 }
 
 type ttsRequest struct {
-	Text     string `json:"text"`
-	Filename string `json:"filename"`
+	Text        string `json:"text"`
+	Filename    string `json:"filename"`
+	UserEmail   string `json:"user_email"`
+	UserID      int64  `json:"user_id"`
+	CallbackURL string `json:"callback_url"`
+}
+
+type podcastCompleteRequest struct {
+	Filename  string `json:"filename"`
+	UserEmail string `json:"user_email"`
+	UserID    int64  `json:"user_id"`
+	Success   bool   `json:"success"`
+	Error     string `json:"error,omitempty"`
 }
 
 // GeneratePodcast initiates podcast generation from recent bookmarks
@@ -72,9 +90,12 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 	// Generate filename
 	filename := fmt.Sprintf("%v_%d.wav", user.ID, time.Now().Unix())
 
+	// Build callback URL for TTS service to notify when complete
+	callbackURL := fmt.Sprintf("%s/internal/podcast/complete", p.Domain)
+
 	// Send request to TTS service
 	logger.Infow("[podcast] Sending request to TTS service", "url", p.TTSServiceURL, "filename", filename)
-	err = p.sendTTSRequest(text, filename)
+	err = p.sendTTSRequest(text, filename, user.Email, int64(user.ID), callbackURL)
 	if err != nil {
 		logger.Errorw("[podcast] TTS service call failed", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
@@ -113,8 +134,14 @@ func formatPodcastText(bookmarks []models.Bookmark) string {
 }
 
 // sendTTSRequest sends text to the TTS service which saves the audio file
-func (p *Podcast) sendTTSRequest(text, filename string) error {
-	reqBody := ttsRequest{Text: text, Filename: filename}
+func (p *Podcast) sendTTSRequest(text, filename, userEmail string, userID int64, callbackURL string) error {
+	reqBody := ttsRequest{
+		Text:        text,
+		Filename:    filename,
+		UserEmail:   userEmail,
+		UserID:      userID,
+		CallbackURL: callbackURL,
+	}
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
 		return fmt.Errorf("marshal TTS request: %w", err)
@@ -132,4 +159,73 @@ func (p *Podcast) sendTTSRequest(text, filename string) error {
 	}
 
 	return nil
+}
+
+// PodcastComplete handles the callback from TTS service when audio generation is complete
+func (p *Podcast) PodcastComplete(w http.ResponseWriter, r *http.Request) {
+	logger := logging.Logger
+
+	var req podcastCompleteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		logger.Errorw("[podcast] Failed to decode complete request", "error", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	logger.Infow("[podcast] Received completion callback", "filename", req.Filename, "email", req.UserEmail, "userId", req.UserID, "success", req.Success)
+
+	if !req.Success {
+		logger.Errorw("[podcast] TTS generation failed", "filename", req.Filename, "error", req.Error)
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	// Build download URL
+	downloadURL := fmt.Sprintf("%s/%s/%s", p.Domain, PodcastUploadDir, req.Filename)
+
+	// Send email with download link
+	err := p.EmailService.SendPodcastReady(req.UserEmail, downloadURL)
+	if err != nil {
+		logger.Errorw("[podcast] Failed to send podcast email", "error", err, "email", req.UserEmail)
+		// Continue to try Telegram even if email fails
+	} else {
+		logger.Infow("[podcast] Sent podcast ready email", "email", req.UserEmail)
+	}
+
+	// Send Telegram notification if user has linked their account
+	p.sendTelegramNotification(req.UserID, downloadURL)
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// sendTelegramNotification sends podcast ready message to user's Telegram
+func (p *Podcast) sendTelegramNotification(userID int64, downloadURL string) {
+	if p.TelegramRepo == nil || p.TelegramToken == "" {
+		return
+	}
+
+	chatID, err := p.TelegramRepo.GetChatIdByUserId(types.UserId(userID))
+	if err != nil {
+		logging.Logger.Infow("[podcast] User has no Telegram linked", "userId", userID)
+		return
+	}
+
+	message := fmt.Sprintf("🎧 Your Pensive podcast is ready!\n\nDownload here: %s", downloadURL)
+
+	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", p.TelegramToken)
+	body := fmt.Sprintf(`{"chat_id": %d, "text": %q}`, chatID, message)
+
+	resp, err := http.Post(endpoint, "application/json", bytes.NewBufferString(body))
+	if err != nil {
+		logging.Logger.Errorw("[podcast] Failed to send Telegram message", "error", err, "userId", userID)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logging.Logger.Errorw("[podcast] Telegram API returned error", "status", resp.StatusCode, "userId", userID)
+		return
+	}
+
+	logging.Logger.Infow("[podcast] Sent Telegram notification", "userId", userID, "chatId", chatID)
 }

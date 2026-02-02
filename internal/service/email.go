@@ -252,6 +252,60 @@ The Pensive Team`, verificationURL)
 	return nil
 }
 
+func (es *EmailService) SendPodcastReady(to, downloadURL string) error {
+	plaintext := fmt.Sprintf(`Your Pensive Podcast is Ready!
+
+Your weekly podcast summary is now available. Click the link below to download:
+
+%s
+
+This audio file contains a summary of your saved articles from the past week.
+
+---
+The Pensive Team`, downloadURL)
+
+	html := fmt.Sprintf(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Podcast is Ready</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #000; margin-bottom: 10px;">🎧 Your Podcast is Ready!</h1>
+        <p style="color: #666; font-size: 16px;">Your weekly summary is now available</p>
+    </div>
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="%s" style="background-color: #000; color: #fff; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: 600; display: inline-block;">Download Podcast</a>
+    </div>
+    
+    <p style="color: #666; font-size: 14px; text-align: center;">
+        This audio file contains a summary of your saved articles from the past week.
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+    <p style="color: #999; font-size: 12px; text-align: center;">
+        The Pensive Team
+    </p>
+</body>
+</html>`, downloadURL)
+
+	email := Email{
+		Subject:   "🎧 Your Pensive Podcast is Ready",
+		From:      DefaultSender,
+		To:        to,
+		Plaintext: plaintext,
+		HTML:      html,
+	}
+	err := es.Send(email)
+	if err != nil {
+		return fmt.Errorf("podcast ready email: %w", err)
+	}
+	return nil
+}
+
 func (es *EmailService) setFrom(msg *mail.Message, email Email) {
 	var from string
 	switch {
