@@ -37,6 +37,7 @@ type Users struct {
 		TokensTab              web.Template
 		ImportExportTab        web.Template
 		DataManagementTab      web.Template
+		PreferencesTab         web.Template
 		PasswordlessNew        web.Template
 		PasswordlessSignIn     web.Template
 		PasswordlessCheckEmail web.Template
@@ -47,6 +48,7 @@ type Users struct {
 	AuthTokenService     *models.AuthTokenService
 	EmailService         *service.EmailService
 	TokenModel           *models.TokenRepo
+	TelegramModel        *models.TelegramRepo
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -350,9 +352,11 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data struct {
-		Email        string
-		IsSubscribed bool
-		Tokens       []models.ApiToken
+		Email          string
+		IsSubscribed   bool
+		Tokens         []models.ApiToken
+		Preferences    *models.WeeklySummaryPreferences
+		TelegramLinked bool
 	}
 	data.Email = user.Email
 	data.IsSubscribed = user.IsSubscriptionPremium()
@@ -373,11 +377,35 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Get preferences for preferences tab
+	if tab == "preferences" {
+		prefs, err := u.UserService.GetWeeklySummaryPreferences(user.ID)
+		if err != nil {
+			logger.Errorw("get weekly summary preferences", "error", err)
+			// Use defaults if error
+			prefs = &models.WeeklySummaryPreferences{
+				Enabled:  false,
+				Day:      "sunday",
+				Email:    true,
+				Telegram: false,
+			}
+		}
+		data.Preferences = prefs
+
+		// Check if user has Telegram linked
+		if u.TelegramModel != nil {
+			_, err := u.TelegramModel.GetChatIdByUserId(user.ID)
+			data.TelegramLinked = err == nil
+		}
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 
 	switch tab {
 	case "profile":
 		u.Templates.ProfileTab.Execute(w, r, data)
+	case "preferences":
+		u.Templates.PreferencesTab.Execute(w, r, data)
 	case "tokens":
 		u.Templates.TokensTab.Execute(w, r, data)
 	case "import-export":
@@ -387,6 +415,44 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 	default:
 		u.Templates.ProfileTab.Execute(w, r, data)
 	}
+}
+
+// SavePreferences handles POST /users/preferences to save weekly summary preferences
+func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+
+	if err := r.ParseForm(); err != nil {
+		logger.Errorw("parse preferences form", "error", err)
+		http.Error(w, "Invalid form data", http.StatusBadRequest)
+		return
+	}
+
+	prefs := models.WeeklySummaryPreferences{
+		Enabled:  r.FormValue("enabled") == "true",
+		Day:      r.FormValue("day"),
+		Email:    r.FormValue("email") == "true",
+		Telegram: r.FormValue("telegram") == "true",
+	}
+
+	// Validate day
+	validDays := map[string]bool{
+		"sunday": true, "monday": true, "tuesday": true, "wednesday": true,
+		"thursday": true, "friday": true, "saturday": true,
+	}
+	if !validDays[prefs.Day] {
+		prefs.Day = "sunday"
+	}
+
+	err := u.UserService.UpdateWeeklySummaryPreferences(user.ID, prefs)
+	if err != nil {
+		logger.Errorw("update weekly summary preferences", "error", err)
+		http.Error(w, "Failed to save preferences", http.StatusInternalServerError)
+		return
+	}
+
+	logger.Infow("saved weekly summary preferences", "userId", user.ID, "enabled", prefs.Enabled, "day", prefs.Day)
+	w.WriteHeader(http.StatusOK)
 }
 
 type UserMiddleware struct {

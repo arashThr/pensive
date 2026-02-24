@@ -1,0 +1,178 @@
+<div class="space-y-8">
+  <div>
+    <h2 class="text-xl font-bold mb-2 text-white">Weekly Podcast Summary</h2>
+    <p class="text-sm text-slate-400 mb-6">Get an AI-generated audio summary of your bookmarks delivered weekly.</p>
+    
+    <form 
+      hx-post="/users/preferences" 
+      hx-swap="none"
+      hx-on::after-request="if(event.detail.successful) { document.getElementById('save-success').classList.remove('hidden'); setTimeout(() => document.getElementById('save-success').classList.add('hidden'), 3000); }"
+      class="space-y-6"
+    >
+      <!-- Enable/Disable Toggle -->
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-semibold text-white">Enable weekly summary</h3>
+            <p class="text-sm text-slate-400 mt-1">Receive an audio podcast of your saved articles</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" name="enabled" value="true" class="sr-only peer" {{if .Preferences.Enabled}}checked{{end}}>
+            <div class="w-11 h-6 bg-white/10 peer-focus:ring-2 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Day of Week Selector -->
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
+        <h3 class="font-semibold text-white mb-3">Delivery day</h3>
+        <p class="text-sm text-slate-400 mb-4">Choose which day to receive your weekly summary</p>
+        <select 
+          name="day" 
+          class="w-full sm:w-auto rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+        >
+          <option value="sunday" {{if eq .Preferences.Day "sunday"}}selected{{end}}>Sunday</option>
+          <option value="monday" {{if eq .Preferences.Day "monday"}}selected{{end}}>Monday</option>
+          <option value="tuesday" {{if eq .Preferences.Day "tuesday"}}selected{{end}}>Tuesday</option>
+          <option value="wednesday" {{if eq .Preferences.Day "wednesday"}}selected{{end}}>Wednesday</option>
+          <option value="thursday" {{if eq .Preferences.Day "thursday"}}selected{{end}}>Thursday</option>
+          <option value="friday" {{if eq .Preferences.Day "friday"}}selected{{end}}>Friday</option>
+          <option value="saturday" {{if eq .Preferences.Day "saturday"}}selected{{end}}>Saturday</option>
+        </select>
+      </div>
+
+      <!-- Delivery Method -->
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
+        <h3 class="font-semibold text-white mb-3">Delivery method</h3>
+        <p class="text-sm text-slate-400 mb-4">Choose how you want to receive your podcast</p>
+        
+        <div class="space-y-4">
+          <!-- Email Option -->
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input 
+              type="checkbox" 
+              name="email" 
+              value="true"
+              class="h-5 w-5 rounded border-white/20 bg-white/5 text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
+              {{if .Preferences.Email}}checked{{end}}
+            >
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span class="text-white">Email</span>
+              <span class="text-sm text-slate-400">({{.Email}})</span>
+            </div>
+          </label>
+
+          <!-- Telegram Option -->
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input 
+              type="checkbox" 
+              name="telegram" 
+              value="true"
+              class="h-5 w-5 rounded border-white/20 bg-white/5 text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
+              {{if .Preferences.Telegram}}checked{{end}}
+            >
+            <div class="flex items-center gap-2">
+              <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-5 w-5">
+              <span class="text-white">Telegram</span>
+            </div>
+          </label>
+
+          {{if not .TelegramLinked}}
+          <!-- Telegram Not Linked Warning -->
+          <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mt-2">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-amber-300 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p class="text-sm text-amber-200">Your Telegram account is not linked yet.</p>
+                <a 
+                  href="https://t.me/GetPensiveBot" 
+                  target="_blank" 
+                  rel="noopener"
+                  class="inline-flex items-center gap-2 mt-2 text-sm font-medium text-violet-200 hover:text-white transition-colors"
+                >
+                  Connect via @GetPensiveBot
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+          {{end}}
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <div class="flex items-center gap-4">
+        <button 
+          type="submit" 
+          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+        >
+          Save preferences
+        </button>
+        <span id="save-success" class="hidden text-sm text-emerald-300">
+          ✓ Preferences saved
+        </span>
+      </div>
+    </form>
+  </div>
+
+  <!-- Generate Now Section -->
+  <div class="border-t border-white/10 pt-8">
+    <h2 class="text-xl font-bold mb-2 text-white">Generate podcast now</h2>
+    <p class="text-sm text-slate-400 mb-6">Create a podcast from your recent bookmarks right now.</p>
+    
+    <div class="rounded-lg border border-white/10 bg-white/5 p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <p class="text-white">Generate a podcast from your bookmarks saved in the past 7 days</p>
+          <p class="text-sm text-slate-400 mt-1">Up to 10 articles will be included</p>
+        </div>
+        <button 
+          hx-post="/users/podcast/generate"
+          hx-swap="none"
+          hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
+          hx-indicator="#generate-spinner"
+          hx-on::before-request="this.disabled = true; this.classList.add('opacity-50');"
+          hx-on::after-request="this.disabled = false; this.classList.remove('opacity-50'); if(event.detail.successful) { document.getElementById('generate-success').classList.remove('hidden'); } else { document.getElementById('generate-error').classList.remove('hidden'); }"
+          class="shrink-0 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+        >
+          <span id="generate-spinner" class="htmx-indicator">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Generate now
+        </button>
+      </div>
+      
+      <div id="generate-success" class="hidden mt-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-emerald-200">Podcast generation started! You'll receive it via your selected delivery method.</p>
+        </div>
+      </div>
+      
+      <div id="generate-error" class="hidden mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-red-200">Failed to generate podcast. Please try again later.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

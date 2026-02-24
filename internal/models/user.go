@@ -258,3 +258,51 @@ func (us *UserRepo) MarkEmailVerified(userID types.UserId) error {
 	}
 	return nil
 }
+
+// WeeklySummaryPreferences contains user preferences for weekly podcast summary
+type WeeklySummaryPreferences struct {
+	Enabled  bool   `json:"enabled"`
+	Day      string `json:"day"`
+	Email    bool   `json:"email"`
+	Telegram bool   `json:"telegram"`
+}
+
+// GetWeeklySummaryPreferences retrieves the user's weekly summary preferences
+func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySummaryPreferences, error) {
+	var prefs WeeklySummaryPreferences
+	err := us.Pool.QueryRow(context.Background(), `
+		SELECT enabled, day, email, telegram
+		FROM weekly_summaries WHERE user_id = $1
+	`, userID).Scan(&prefs.Enabled, &prefs.Day, &prefs.Email, &prefs.Telegram)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			// Return defaults if no preferences exist yet
+			return &WeeklySummaryPreferences{
+				Enabled:  false,
+				Day:      "sunday",
+				Email:    true,
+				Telegram: false,
+			}, nil
+		}
+		return nil, fmt.Errorf("get weekly summary preferences: %w", err)
+	}
+	return &prefs, nil
+}
+
+// UpdateWeeklySummaryPreferences updates the user's weekly summary preferences
+func (us *UserRepo) UpdateWeeklySummaryPreferences(userID types.UserId, prefs WeeklySummaryPreferences) error {
+	_, err := us.Pool.Exec(context.Background(), `
+		INSERT INTO weekly_summaries (user_id, enabled, day, email, telegram, updated_at)
+		VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+		ON CONFLICT (user_id) DO UPDATE 
+		SET enabled = EXCLUDED.enabled,
+		    day = EXCLUDED.day,
+		    email = EXCLUDED.email,
+		    telegram = EXCLUDED.telegram,
+		    updated_at = CURRENT_TIMESTAMP
+	`, userID, prefs.Enabled, prefs.Day, prefs.Email, prefs.Telegram)
+	if err != nil {
+		return fmt.Errorf("update weekly summary preferences: %w", err)
+	}
+	return nil
+}

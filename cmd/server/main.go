@@ -154,6 +154,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		AuthTokenService:     authTokenRepo,
 		EmailService:         emailService,
 		TokenModel:           tokenRepo,
+		TelegramModel:        telegramRepo,
 	}
 
 	// Initialize user service templates
@@ -168,6 +169,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	usersService.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
 	usersService.Templates.ImportExportTab = views.Must(views.ParseTemplate("user/import-export-tab.gohtml"))
 	usersService.Templates.DataManagementTab = views.Must(views.ParseTemplate("user/data-management-tab.gohtml"))
+	usersService.Templates.PreferencesTab = views.Must(views.ParseTemplate("user/preferences-tab.gohtml"))
 	usersService.Templates.Subscribe = views.Must(views.ParseTemplate("user/subscribe.gohtml", "tailwind.gohtml"))
 	usersService.Templates.PasswordlessNew = views.Must(views.ParseTemplate("passwordless-signup.gohtml", "tailwind.gohtml"))
 	usersService.Templates.PasswordlessSignIn = views.Must(views.ParseTemplate("passwordless-signin.gohtml", "tailwind.gohtml"))
@@ -358,9 +360,6 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				r.Delete("/{id}", c.ApiService.DeleteAPI)
 				r.Get("/search", c.ApiService.SearchAPI)
 			})
-			r.Route("/podcast", func(r chi.Router) {
-				r.Get("/generate", c.PodcastService.GeneratePodcast)
-			})
 		})
 	})
 
@@ -434,6 +433,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				r.Get("/subscribe", c.UsersService.Subscribe)
 				r.Get("/me", c.UsersService.CurrentUser)
 				r.Get("/tab-content", c.UsersService.TabContent)
+				r.Post("/preferences", c.UsersService.SavePreferences)
 				r.Post("/delete-token", c.UsersService.DeleteToken)
 				r.Post("/delete-content", c.UsersService.DeleteAllContent)
 				r.Post("/delete-account", c.UsersService.DeleteAccount)
@@ -445,6 +445,12 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				r.Post("/pocket-import", c.ImporterService.ProcessImport)
 				r.Post("/export", c.ImporterService.ProcessExport)
 				r.Get("/import-status", c.ImporterService.ImportStatus)
+			})
+
+			r.Group(func(r chi.Router) {
+				r.Route("/podcast", func(r chi.Router) {
+					r.Post("/generate", c.PodcastService.GeneratePodcast)
+				})
 			})
 		})
 		r.Route("/payments", func(r chi.Router) {
@@ -469,7 +475,6 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		assetHandler := http.FileServer(http.Dir("./web/assets"))
 		r.Get("/assets/*", http.StripPrefix("/assets", assetHandler).ServeHTTP)
 		r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("favicon")
 			http.ServeFile(w, r, "./web/assets/favicon.ico")
 		})
 

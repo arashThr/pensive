@@ -74,7 +74,7 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 
 	if len(bookmarks) == 0 {
 		logger.Infow("[podcast] No bookmarks found for user", "userId", user.ID)
-		writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
+		writeErrorResponse(w, http.StatusNoContent, ErrorResponse{
 			Code:    "NO_BOOKMARKS",
 			Message: fmt.Sprintf("No bookmarks found in the past %d days", PodcastDays),
 		})
