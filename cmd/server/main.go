@@ -235,12 +235,12 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	}
 
 	podcastService := service.Podcast{
-		BookmarkModel: bookmarkRepo,
-		EmailService:  emailService,
-		TelegramRepo:  telegramRepo,
-		TTSServiceURL: cfg.Podcast.TTSServiceURL,
-		TelegramToken: cfg.Telegram.Token,
-		Domain:        cfg.Domain,
+		BookmarkModel:      bookmarkRepo,
+		TelegramRepo:       telegramRepo,
+		GCPProjectID:       cfg.Podcast.GCPProjectID,
+		ServiceAccountPath: cfg.Podcast.ServiceAccountPath,
+		TelegramToken:      cfg.Telegram.Token,
+		Environment:        cfg.Environment,
 	}
 
 	importProcessor := importer.ImportProcessor{
@@ -323,7 +323,6 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	// Internal routes (no auth, network-isolated)
 	r.Route("/internal", func(r chi.Router) {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "internal"))
-		r.Post("/podcast/complete", c.PodcastService.PodcastComplete)
 	})
 
 	// API Routes

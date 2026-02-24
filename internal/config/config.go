@@ -42,7 +42,8 @@ type GoogleOAuthConfig struct {
 }
 
 type PodcastConfig struct {
-	TTSServiceURL string
+	GCPProjectID       string
+	ServiceAccountPath string // path to service-account.json; used in prod
 }
 
 type TelegramLoggerConfig struct {
@@ -146,7 +147,8 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	}
 
 	cfg.Podcast = PodcastConfig{
-		TTSServiceURL: GetEnvWithDefault("TTS_SERVICE_URL", "http://tts:5000"),
+		GCPProjectID:       GetEnvOrDie("GCP_PROJECT_ID"),
+		ServiceAccountPath: GetEnvWithDefault("GCP_SERVICE_ACCOUNT_PATH", ""),
 	}
 
 	return &cfg, nil
