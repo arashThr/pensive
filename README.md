@@ -62,6 +62,8 @@ modd
 go run cmd/telegram/main.go
 ```
 
+**Note**: To setup Gemini for TTS check [this](./docs/gemini-tts.md) document.
+
 ## 🛠️ Development
 
 ### Database Migrations
