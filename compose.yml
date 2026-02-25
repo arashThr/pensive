@@ -19,17 +19,6 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/
 
-  tts:
-    build:
-      context: ./tts
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    networks:
-      - app-network
-    volumes:
-      - ./uploads/podcasts:/app/uploads/podcasts
-    # No external ports - only accessible within app-network
-
 networks:
   app-network:
     driver: bridge
