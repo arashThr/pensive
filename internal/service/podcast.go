@@ -146,7 +146,7 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		"voice": map[string]interface{}{
 			"languageCode": "en-us",
 			"name":         "Achird",
-			"model_name":   "gemini-2.5-flash-lite-preview-tts",
+			"model_name":   "gemini-2.5-flash-tts",
 		},
 		"audioConfig": map[string]interface{}{
 			"audioEncoding":   "OGG_OPUS",
