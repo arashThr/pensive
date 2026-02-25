@@ -1,5 +1,5 @@
 FROM node:alpine
-RUN wget https://github.com/tailwindlabs/tailwindcss/releases/download/latest/tailwindcss-linux-x64-musl \
+RUN wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64-musl \
     -O /usr/local/bin/tailwindcss \
     && chmod +x /usr/local/bin/tailwindcss
  
