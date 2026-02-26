@@ -49,6 +49,7 @@ type Users struct {
 	EmailService         *service.EmailService
 	TokenModel           *models.TokenRepo
 	TelegramModel        *models.TelegramRepo
+	PodcastScheduleRepo  *models.PodcastScheduleRepo
 }
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
@@ -449,6 +450,21 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		logger.Errorw("update weekly summary preferences", "error", err)
 		http.Error(w, "Failed to save preferences", http.StatusInternalServerError)
 		return
+	}
+
+	// Maintain the podcast schedule row in sync with the preferences.
+	if u.PodcastScheduleRepo != nil {
+		if prefs.Enabled {
+			nextAt := service.NextPublishAt(prefs.Day, 1)
+			if schedErr := u.PodcastScheduleRepo.Upsert(user.ID, nextAt); schedErr != nil {
+				// Non-fatal: log and continue.
+				logger.Errorw("upsert podcast schedule", "error", schedErr)
+			}
+		} else {
+			if schedErr := u.PodcastScheduleRepo.Delete(user.ID); schedErr != nil {
+				logger.Errorw("delete podcast schedule", "error", schedErr)
+			}
+		}
 	}
 
 	logger.Infow("saved weekly summary preferences", "userId", user.ID, "enabled", prefs.Enabled, "day", prefs.Day)

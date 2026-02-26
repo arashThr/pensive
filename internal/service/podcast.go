@@ -10,31 +10,57 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
+	"github.com/arashthr/pensive/internal/errors"
 	"github.com/arashthr/pensive/internal/logging"
 	"github.com/arashthr/pensive/internal/models"
 	"github.com/arashthr/pensive/internal/types"
+	"github.com/go-chi/chi/v5"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
 const (
-	PodcastDays         = 7  // Look back 7 days for bookmarks
-	PodcastArticleLimit = 10 // Max 10 articles per podcast
-	PodcastUploadDir    = "uploads/podcasts"
-	gcpTTSEndpoint      = "https://texttospeech.googleapis.com/v1/text:synthesize"
+	PodcastDays              = 7  // Look back 7 days for bookmarks
+	PodcastArticleLimit      = 10 // Max 10 articles per podcast
+	PodcastUploadDir         = "uploads/podcasts"
+	PodcastWeeklySummaryDir  = "uploads/podcasts/weekly_summary"
+	gcpTTSEndpoint           = "https://texttospeech.googleapis.com/v1/text:synthesize"
+	gcpTTSTimeout            = 10 * time.Minute // generous timeout; TTS can be slow for long texts
+	podcastSchedulerInterval = time.Hour
 )
 
+// userPodcastDir returns the upload directory for a specific user's weekly episodes.
+func userPodcastDir(userID int64) string {
+	return fmt.Sprintf("%s/%d", PodcastWeeklySummaryDir, userID)
+}
+
+// weekdayNumbers maps lowercase day names to time.Weekday values.
+var weekdayNumbers = map[string]time.Weekday{
+	"sunday":    time.Sunday,
+	"monday":    time.Monday,
+	"tuesday":   time.Tuesday,
+	"wednesday": time.Wednesday,
+	"thursday":  time.Thursday,
+	"friday":    time.Friday,
+	"saturday":  time.Saturday,
+}
+
 type Podcast struct {
-	BookmarkModel      *models.BookmarkRepo
-	TelegramRepo       *models.TelegramRepo
-	GCPProjectID       string
-	ServiceAccountPath string // path to service-account.json; used in prod
-	TelegramToken      string
-	Environment        string // "prod" uses service account; anything else uses ADC
+	BookmarkModel       *models.BookmarkRepo
+	TelegramRepo        *models.TelegramRepo
+	PodcastScheduleRepo *models.PodcastScheduleRepo
+	UserRepo            *models.UserRepo
+	EmailService        *EmailService
+	GCPProjectID        string
+	ServiceAccountPath  string // path to service-account.json; used in prod
+	TelegramToken       string
+	Environment         string // "prod" uses service account; anything else uses ADC
+	Domain              string
 }
 
 type PodcastResponse struct {
@@ -49,7 +75,7 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(ctx)
 	user := usercontext.User(ctx)
 
-	logger.Infow("[podcast] Starting podcast generation", "userId", user.ID)
+	logger.Infow("[podcast] Starting on-demand podcast", "userId", user.ID)
 
 	if p.GCPProjectID == "" || p.ServiceAccountPath == "" {
 		logger.Warn("[podcast] Google TTS not configured properly")
@@ -82,10 +108,9 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 	logger.Infow("[podcast] Found bookmarks", "count", len(bookmarks))
 
 	text := formatPodcastText(bookmarks)
-	filename := fmt.Sprintf("%v_%d.ogg", user.ID, time.Now().Unix())
 
-	logger.Infow("[podcast] Dispatching generation goroutine", "userId", user.ID, "filename", filename)
-	go p.generateAndSend(int64(user.ID), text, filename)
+	logger.Infow("[podcast] Dispatching generation goroutine", "userId", user.ID)
+	go p.generateAndSend(int64(user.ID), user.Email, text)
 
 	response := PodcastResponse{
 		Message:  fmt.Sprintf("Podcast generation started for %d articles.", len(bookmarks)),
@@ -96,10 +121,204 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// generateAndSend calls Google TTS, saves the audio file, and delivers it via Telegram.
-// Runs in a goroutine so it does not block the HTTP handler.
-func (p *Podcast) generateAndSend(userID int64, text, filename string) {
+// ServeEpisode serves a podcast audio file to its authenticated owner.
+// URL: GET /podcast/episodes/{filename}
+func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
+	logger := loggercontext.Logger(r.Context())
+
+	filename := chi.URLParam(r, "filename")
+	if filename == "" {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Restrict to safe filenames (no path traversal).
+	if strings.ContainsAny(filename, "/\\") {
+		http.Error(w, "invalid filename", http.StatusBadRequest)
+		return
+	}
+
+	filePath := fmt.Sprintf("%s/%d/%s", PodcastWeeklySummaryDir, user.ID, filename)
+	if _, err := os.Stat(filePath); err != nil {
+		logger.Infow("[podcast] Episode file not found", "userId", user.ID, "filename", filename)
+		http.NotFound(w, r)
+		return
+	}
+
+	w.Header().Set("Content-Type", "audio/ogg")
+	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	http.ServeFile(w, r, filePath)
+}
+
+// ---- Scheduler ---------------------------------------------------------------
+
+// StartScheduler launches the hourly background job that processes due podcast
+// schedules. It blocks until ctx is cancelled – call it in a goroutine.
+func (p *Podcast) StartScheduler(ctx context.Context) {
+	logging.Logger.Infow("[podcast-scheduler] Starting")
+
+	// Run once immediately on startup to catch anything that was missed.
+	p.runSchedulerTick(ctx)
+
+	ticker := time.NewTicker(podcastSchedulerInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			logging.Logger.Infow("[podcast-scheduler] Stopping")
+			return
+		case <-ticker.C:
+			p.runSchedulerTick(ctx)
+		}
+	}
+}
+
+func (p *Podcast) runSchedulerTick(ctx context.Context) {
 	logger := logging.Logger
+
+	// Reap any schedules stuck in 'processing' for too long.
+	reaped, err := p.PodcastScheduleRepo.ReapTimedOut()
+	if err != nil {
+		logger.Errorw("[podcast-scheduler] ReapTimedOut failed", "error", err)
+	} else if reaped > 0 {
+		logger.Infow("[podcast-scheduler] Reaped stale schedules", "count", reaped)
+	}
+
+	due, err := p.PodcastScheduleRepo.GetDue()
+	if err != nil {
+		logger.Errorw("[podcast-scheduler] GetDue failed", "error", err)
+		return
+	}
+
+	if len(due) == 0 {
+		return
+	}
+
+	logger.Infow("[podcast-scheduler] Dispatching due episodes", "count", len(due))
+
+	for _, schedule := range due {
+		// Atomically claim the row before spawning the goroutine to avoid
+		// double-processing in case of concurrent scheduler instances.
+		if err := p.PodcastScheduleRepo.MarkProcessing(schedule.ID); err != nil {
+			if errors.Is(err, errors.ErrNotFound) {
+				continue // already claimed
+			}
+			logger.Errorw("[podcast-scheduler] MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
+			continue
+		}
+		s := schedule // capture loop variable - We're go 1.22+, so just to be sure :)
+		go p.processSchedule(ctx, s)
+	}
+}
+
+// processSchedule generates and delivers one scheduled episode, then updates the DB.
+func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule) {
+	logger := logging.Logger
+	logger.Infow("[podcast-scheduler] Processing episode", "scheduleId", s.ID, "userId", s.UserID)
+
+	fail := func(err error) {
+		logger.Errorw("[podcast-scheduler] Episode failed", "error", err, "scheduleId", s.ID)
+		if dbErr := p.PodcastScheduleRepo.MarkFailed(s.ID); dbErr != nil {
+			logger.Errorw("[podcast-scheduler] MarkFailed error", "error", dbErr)
+		}
+	}
+
+	prefs, err := p.UserRepo.GetWeeklySummaryPreferences(s.UserID)
+	if err != nil {
+		fail(fmt.Errorf("get weekly summary preferences: %w", err))
+		return
+	}
+
+	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(s.UserID, PodcastDays, PodcastArticleLimit)
+	if err != nil {
+		fail(fmt.Errorf("fetch bookmarks: %w", err))
+		return
+	}
+
+	if len(bookmarks) == 0 {
+		logger.Infow("[podcast-scheduler] No bookmarks, skipping and rescheduling", "userId", s.UserID)
+		next := NextPublishAt(prefs.Day, 7)
+		if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
+			logger.Errorw("[podcast-scheduler] MarkSent (no bookmarks) error", "error", dbErr)
+		}
+		return
+	}
+
+	text := formatPodcastText(bookmarks)
+	ts := time.Now().Unix()
+	baseFilename := fmt.Sprintf("%d", ts) // shared timestamp stem for both files
+
+	uploadDir := userPodcastDir(int64(s.UserID))
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		fail(fmt.Errorf("create upload dir: %w", err))
+		return
+	}
+
+	// Save the podcast script alongside the audio for reference / debugging.
+	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
+	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+		logger.Warnw("[podcast-scheduler] Failed to write script file", "error", err, "path", scriptPath)
+		// Non-fatal — continue with audio generation.
+	}
+
+	audioBytes, err := p.callGoogleTTS(ctx, text)
+	if err != nil {
+		fail(fmt.Errorf("google TTS: %w", err))
+		return
+	}
+
+	audioFilename := fmt.Sprintf("%s.ogg", baseFilename)
+	audioPath := fmt.Sprintf("%s/%s", uploadDir, audioFilename)
+	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
+		fail(fmt.Errorf("write audio file: %w", err))
+		return
+	}
+
+	logger.Infow("[podcast-scheduler] Audio saved", "path", audioPath, "bytes", len(audioBytes))
+
+	sentViaTelegram := false
+	if prefs.Telegram {
+		sentViaTelegram = p.sendTelegramAudio(int64(s.UserID), audioPath, audioFilename)
+	}
+
+	// Fall back to email when Telegram is not enabled or sending failed (e.g. user hasn't linked Telegram).
+	if !sentViaTelegram {
+		user, err := p.UserRepo.Get(s.UserID)
+		if err != nil {
+			logger.Errorw("[podcast-scheduler] Could not look up user email for podcast notification", "error", err, "userId", s.UserID)
+		} else {
+			p.sendPodcastEmail(user.Email, int64(s.UserID), audioFilename)
+		}
+	}
+
+	next := NextPublishAt(prefs.Day, 7)
+	if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
+		logger.Errorw("[podcast-scheduler] MarkSent error", "error", dbErr, "scheduleId", s.ID)
+	}
+
+	logger.Infow("[podcast-scheduler] Episode complete, next scheduled", "userId", s.UserID, "nextAt", next)
+}
+
+// ---- Generation helpers ------------------------------------------------------
+
+// generateAndSend is used by the on-demand HTTP handler.
+func (p *Podcast) generateAndSend(userID int64, userEmail string, text string) {
+	logger := logging.Logger
+
+	uploadDir := userPodcastDir(userID)
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		logger.Errorw("[podcast] Failed to create upload dir", "error", err)
+		return
+	}
+
+	baseFilename := fmt.Sprintf("%d", time.Now().Unix())
+
+	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
+	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+		logger.Warnw("[podcast] Failed to write script file", "error", err, "path", scriptPath)
+	}
 
 	logger.Infow("[podcast] Calling Google TTS", "userId", userID)
 	audioBytes, err := p.callGoogleTTS(context.Background(), text)
@@ -108,25 +327,33 @@ func (p *Podcast) generateAndSend(userID int64, text, filename string) {
 		return
 	}
 
-	if err := os.MkdirAll(PodcastUploadDir, 0755); err != nil {
-		logger.Errorw("[podcast] Failed to create upload dir", "error", err)
+	audioFilename := fmt.Sprintf("%s.ogg", baseFilename)
+	audioPath := fmt.Sprintf("%s/%s", uploadDir, audioFilename)
+	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
+		logger.Errorw("[podcast] Failed to write audio file", "error", err, "path", audioPath)
 		return
 	}
 
-	filePath := fmt.Sprintf("%s/%s", PodcastUploadDir, filename)
-	if err := os.WriteFile(filePath, audioBytes, 0644); err != nil {
-		logger.Errorw("[podcast] Failed to write audio file", "error", err, "path", filePath)
-		return
+	logger.Infow("[podcast] Audio file saved", "path", audioPath, "bytes", len(audioBytes))
+
+	sentViaTelegram := p.sendTelegramAudio(userID, audioPath, audioFilename)
+	if !sentViaTelegram {
+		p.sendPodcastEmail(userEmail, userID, audioFilename)
 	}
-
-	logger.Infow("[podcast] Audio file saved", "path", filePath, "bytes", len(audioBytes))
-
-	p.sendTelegramAudio(userID, filePath, filename)
 }
 
 // callGoogleTTS calls the Google Cloud Text-to-Speech API and returns raw OGG Opus bytes.
 // Uses Application Default Credentials locally and a service account JSON in prod.
+// A gcpTTSTimeout deadline is applied on top of the caller's context.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
+	defer cancel()
+
+	start := time.Now()
+	defer func() {
+		logging.Logger.Infow("[podcast] Google TTS call completed", "elapsed", time.Since(start).Round(time.Millisecond).String())
+	}()
+
 	var httpClient *http.Client
 
 	if p.Environment == "prod" && p.ServiceAccountPath != "" {
@@ -202,24 +429,25 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 }
 
 // sendTelegramAudio uploads the generated audio file to the user's Telegram chat.
-func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) {
+// Returns true if the audio was successfully sent.
+func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) bool {
 	logger := logging.Logger
 
 	if p.TelegramRepo == nil || p.TelegramToken == "" {
 		logger.Infow("[podcast] Telegram not configured, skipping", "userId", userID)
-		return
+		return false
 	}
 
 	chatID, err := p.TelegramRepo.GetChatIdByUserId(types.UserId(userID))
 	if err != nil {
 		logger.Infow("[podcast] User has no Telegram linked", "userId", userID)
-		return
+		return false
 	}
 
 	f, err := os.Open(filePath)
 	if err != nil {
 		logger.Errorw("[podcast] Failed to open audio file", "error", err, "path", filePath)
-		return
+		return false
 	}
 	defer f.Close()
 
@@ -230,11 +458,11 @@ func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) {
 	part, err := mw.CreateFormFile("audio", filename)
 	if err != nil {
 		logger.Errorw("[podcast] Failed to create multipart form file", "error", err)
-		return
+		return false
 	}
 	if _, err := io.Copy(part, f); err != nil {
 		logger.Errorw("[podcast] Failed to copy audio into form", "error", err)
-		return
+		return false
 	}
 	mw.Close()
 
@@ -242,17 +470,32 @@ func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) {
 	resp, err := http.Post(endpoint, mw.FormDataContentType(), &buf)
 	if err != nil {
 		logger.Errorw("[podcast] Failed to send Telegram audio", "error", err, "userId", userID)
-		return
+		return false
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		logger.Errorw("[podcast] Telegram API returned error", "status", resp.StatusCode, "body", string(body), "userId", userID)
-		return
+		return false
 	}
 
 	logger.Infow("[podcast] Sent Telegram audio", "userId", userID, "chatId", chatID)
+	return true
+}
+
+// sendPodcastEmail sends the authenticated download link to the user's email address.
+func (p *Podcast) sendPodcastEmail(userEmail string, userID int64, audioFilename string) {
+	if p.EmailService == nil || p.Domain == "" {
+		logging.Logger.Warnw("[podcast] Email service not configured, skipping email", "userId", userID)
+		return
+	}
+	downloadURL := fmt.Sprintf("%s/podcast/episodes/%s", p.Domain, audioFilename)
+	if err := p.EmailService.SendPodcastReady(userEmail, downloadURL); err != nil {
+		logging.Logger.Errorw("[podcast] Failed to send podcast email", "error", err, "userId", userID, "email", userEmail)
+		return
+	}
+	logging.Logger.Infow("[podcast] Sent podcast email", "userId", userID, "email", userEmail)
 }
 
 // formatPodcastText creates article summaries formatted for TTS narration.
@@ -268,4 +511,25 @@ func formatPodcastText(bookmarks []models.Bookmark) string {
 	buf.WriteString("That's all for this week. Happy reading!")
 
 	return buf.String()
+}
+
+// NextPublishAt returns the next occurrence of the given weekday name that is
+// at least minDays from now, at noon UTC. Defaults to Sunday on unknown input.
+func NextPublishAt(day string, minDays int) time.Time {
+	target, ok := weekdayNumbers[strings.ToLower(day)]
+	if !ok {
+		target = time.Sunday
+	}
+
+	now := time.Now().UTC()
+	// Start from minDays ahead, truncated to noon UTC.
+	candidate := now.AddDate(0, 0, minDays)
+	candidate = time.Date(candidate.Year(), candidate.Month(), candidate.Day(), 12, 0, 0, 0, time.UTC)
+
+	// Advance until we land on the right weekday.
+	for candidate.Weekday() != target {
+		candidate = candidate.AddDate(0, 0, 1)
+	}
+
+	return candidate
 }

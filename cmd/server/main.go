@@ -80,15 +80,16 @@ func main() {
 // ServiceContainer holds all the repositories and services
 type ServiceContainer struct {
 	// Repositories
-	UserRepo          *models.UserRepo
-	SessionRepo       *models.SessionRepo
-	PasswordResetRepo *models.PasswordResetRepo
-	TokenRepo         *models.TokenRepo
-	StripeRepo        *models.StripeModel
-	BookmarkRepo      *models.BookmarkRepo
-	TelegramRepo      *models.TelegramRepo
-	ImportJobRepo     *models.ImportJobRepo
-	AuthTokenRepo     *models.AuthTokenService
+	UserRepo            *models.UserRepo
+	SessionRepo         *models.SessionRepo
+	PasswordResetRepo   *models.PasswordResetRepo
+	TokenRepo           *models.TokenRepo
+	StripeRepo          *models.StripeModel
+	BookmarkRepo        *models.BookmarkRepo
+	TelegramRepo        *models.TelegramRepo
+	ImportJobRepo       *models.ImportJobRepo
+	AuthTokenRepo       *models.AuthTokenService
+	PodcastScheduleRepo *models.PodcastScheduleRepo
 
 	// Services
 	EmailService     *service.EmailService
@@ -141,6 +142,9 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		Pool: pool,
 	}
 	authTokenRepo := models.NewAuthTokenRepo(pool)
+	podcastScheduleRepo := &models.PodcastScheduleRepo{
+		Pool: pool,
+	}
 
 	// Services
 	emailService := service.NewEmailService(cfg.SMTP)
@@ -155,6 +159,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		EmailService:         emailService,
 		TokenModel:           tokenRepo,
 		TelegramModel:        telegramRepo,
+		PodcastScheduleRepo:  podcastScheduleRepo,
 	}
 
 	// Initialize user service templates
@@ -235,12 +240,16 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	}
 
 	podcastService := service.Podcast{
-		BookmarkModel:      bookmarkRepo,
-		TelegramRepo:       telegramRepo,
-		GCPProjectID:       cfg.Podcast.GCPProjectID,
-		ServiceAccountPath: cfg.Podcast.ServiceAccountPath,
-		TelegramToken:      cfg.Telegram.Token,
-		Environment:        cfg.Environment,
+		BookmarkModel:       bookmarkRepo,
+		TelegramRepo:        telegramRepo,
+		PodcastScheduleRepo: podcastScheduleRepo,
+		UserRepo:            userRepo,
+		EmailService:        emailService,
+		GCPProjectID:        cfg.Podcast.GCPProjectID,
+		ServiceAccountPath:  cfg.Podcast.ServiceAccountPath,
+		TelegramToken:       cfg.Telegram.Token,
+		Environment:         cfg.Environment,
+		Domain:              cfg.Domain,
 	}
 
 	importProcessor := importer.ImportProcessor{
@@ -251,15 +260,16 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 
 	return &ServiceContainer{
 		// Repositories
-		UserRepo:          userRepo,
-		SessionRepo:       sessionRepo,
-		PasswordResetRepo: passwordResetRepo,
-		TokenRepo:         tokenRepo,
-		StripeRepo:        stripeRepo,
-		BookmarkRepo:      bookmarkRepo,
-		TelegramRepo:      telegramRepo,
-		ImportJobRepo:     importJobRepo,
-		AuthTokenRepo:     authTokenRepo,
+		UserRepo:            userRepo,
+		SessionRepo:         sessionRepo,
+		PasswordResetRepo:   passwordResetRepo,
+		TokenRepo:           tokenRepo,
+		StripeRepo:          stripeRepo,
+		BookmarkRepo:        bookmarkRepo,
+		TelegramRepo:        telegramRepo,
+		ImportJobRepo:       importJobRepo,
+		AuthTokenRepo:       authTokenRepo,
+		PodcastScheduleRepo: podcastScheduleRepo,
 
 		// Services
 		EmailService:     emailService,
@@ -292,6 +302,9 @@ func run(cfg *config.AppConfig, pool *pgxpool.Pool) error {
 
 	// Start import processor in background
 	go container.ImportProcessor.Start(ctx)
+
+	// Start podcast scheduler in background
+	go container.PodcastService.StartScheduler(ctx)
 
 	// Create routes with the service container
 	r := Routes(cfg, container)
@@ -449,6 +462,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			r.Group(func(r chi.Router) {
 				r.Route("/podcast", func(r chi.Router) {
 					r.Post("/generate", c.PodcastService.GeneratePodcast)
+					r.Get("/episodes/{filename}", c.PodcastService.ServeEpisode)
 				})
 			})
 		})

@@ -88,6 +88,7 @@
     - [x] TTS
     - [ ] Send to Telegram
     - [ ] Scheduler
+    - [ ] Update `formatPodcastText` to make it Podcast like
     - [ ] Endpoint to check the ongoing tasks/stop the scheduler
 - [x] Full text search with part words
 - [x] Landing page: Here's how it works demo:
