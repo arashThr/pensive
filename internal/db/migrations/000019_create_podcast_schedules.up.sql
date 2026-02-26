@@ -6,7 +6,7 @@ CREATE TYPE podcast_schedule_status AS ENUM (
     'timed_out'
 );
 
-CREATE TABLE podcast_schedules (
+CREATE TABLE IF NOT EXISTS podcast_schedules (
     id               SERIAL PRIMARY KEY,
     user_id          INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     next_publish_at  TIMESTAMPTZ NOT NULL,
