@@ -51,6 +51,15 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 
 	logger.Infow("[podcast] Starting podcast generation", "userId", user.ID)
 
+	if p.GCPProjectID == "" || p.ServiceAccountPath == "" {
+		logger.Warn("[podcast] Google TTS not configured properly")
+		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
+			Code:    "TTS_NOT_CONFIGURED",
+			Message: "Podcast generation is not configured properly. Please contact support.",
+		})
+		return
+	}
+
 	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(user.ID, PodcastDays, PodcastArticleLimit)
 	if err != nil {
 		logger.Errorw("[podcast] Failed to fetch bookmarks", "error", err)

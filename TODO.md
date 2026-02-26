@@ -1,12 +1,5 @@
 # TODOs
 
-Publish:
-- Ask for beta testers
-    - [ ] PR Podcast: 
-    - [ ] Reddit pages for Pocket users:
-        - Find them and ask them
-
-
 ## Fixes
 - [ ] getAllBookmarksForUser
 - [ ] Faster build
@@ -91,6 +84,11 @@ Publish:
     - [ ] Read tags from Pocket
 - [ ] Telegram first message should help you sign up
 - [ ] YouTube: Save the title and description
+- [ ] **Generate podcasts**
+    - [x] TTS
+    - [ ] Send to Telegram
+    - [ ] Scheduler
+    - [ ] Endpoint to check the ongoing tasks/stop the scheduler
 - [x] Full text search with part words
 - [x] Landing page: Here's how it works demo:
     - Save the link, show the summary

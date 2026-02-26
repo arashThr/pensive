@@ -147,7 +147,7 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	}
 
 	cfg.Podcast = PodcastConfig{
-		GCPProjectID:       GetEnvOrDie("GCP_PROJECT_ID"),
+		GCPProjectID:       GetEnvWithDefault("GCP_PROJECT_ID", ""),
 		ServiceAccountPath: GetEnvWithDefault("GCP_SERVICE_ACCOUNT_PATH", ""),
 	}
 
