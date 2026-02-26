@@ -195,40 +195,20 @@
         <!-- Audio Wave Visualization -->
         <div class="flex items-center justify-center">
           <div class="relative w-full max-w-xs aspect-square">
-            <!-- Circular background -->
-            <div class="absolute inset-0 rounded-full bg-violet-500/10 border border-violet-500/20"></div>
-            
-            <!-- Audio wave bars -->
-            <div class="absolute inset-0 flex items-center justify-center gap-1">
-              <style>
-                @keyframes audioWave {
-                  0%, 100% { height: 20%; }
-                  50% { height: 80%; }
-                }
-                .audio-bar { animation: audioWave 1s ease-in-out infinite; }
-                .audio-bar:nth-child(1) { animation-delay: 0s; }
-                .audio-bar:nth-child(2) { animation-delay: 0.1s; }
-                .audio-bar:nth-child(3) { animation-delay: 0.2s; }
-                .audio-bar:nth-child(4) { animation-delay: 0.3s; }
-                .audio-bar:nth-child(5) { animation-delay: 0.4s; }
-                .audio-bar:nth-child(6) { animation-delay: 0.3s; }
-                .audio-bar:nth-child(7) { animation-delay: 0.2s; }
-              </style>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 30%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 50%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 70%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-500 rounded-full" style="height: 90%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 70%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 50%;"></div>
-              <div class="audio-bar w-2 sm:w-3 bg-violet-400 rounded-full" style="height: 30%;"></div>
-            </div>
-            
-            <!-- Headphone icon overlay -->
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-950/80 border border-white/10 flex items-center justify-center">
-                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-                </svg>
+            <div class="wrap relative w-full h-full">
+              <canvas id="audio-viz" width="320" height="320" class="absolute inset-0"></canvas>
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div class="w-20 h-20 rounded-full border border-violet-400/25 flex items-center justify-center backdrop-blur-sm">
+                  <!-- Podcast icon: mic with radiating arcs -->
+                  <svg width="44" height="44" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <!-- mic capsule -->
+                    <rect x="9" y="2" width="6" height="11" rx="3"/>
+                    <!-- mic stand + base -->
+                    <path d="M12 19v3M8 23h8"/>
+                    <!-- left arc -->
+                    <path d="M5 10a7 7 0 0 0 14 0"/>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -454,57 +434,7 @@
 
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const slider = document.getElementById('slider');
-    const track = document.getElementById('slider-track');
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const dots = Array.from(document.querySelectorAll('.slider-dot'));
-    const captions = Array.from(document.querySelectorAll('#slide-caption span'));
-
-    if (!slider || !track || !prevBtn || !nextBtn || dots.length === 0) return;
-
-    let index = 0;
-    const total = dots.length;
-
-    const render = () => {
-      track.style.transform = `translateX(${-index * 100}%)`;
-      dots.forEach((d, i) => d.classList.toggle('bg-white/60', i === index));
-      dots.forEach((d, i) => d.classList.toggle('bg-white/20', i !== index));
-      captions.forEach((c, i) => c.classList.toggle('hidden', i !== index));
-    };
-
-    const go = (next) => {
-      index = (next + total) % total;
-      render();
-    };
-
-    prevBtn.addEventListener('click', () => go(index - 1));
-    nextBtn.addEventListener('click', () => go(index + 1));
-    dots.forEach((d) => d.addEventListener('click', () => go(Number(d.dataset.slide || 0))));
-
-    const onKey = (e) => {
-      if (e.key === 'ArrowLeft') go(index - 1);
-      if (e.key === 'ArrowRight') go(index + 1);
-    };
-    document.addEventListener('keydown', onKey);
-
-    let timer = setInterval(() => go(index + 1), 5000);
-    slider.addEventListener('mouseenter', () => clearInterval(timer));
-    slider.addEventListener('mouseleave', () => (timer = setInterval(() => go(index + 1), 5000)));
-
-    let startX = 0;
-    track.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
-    track.addEventListener('touchend', (e) => {
-      const endX = e.changedTouches[0].clientX;
-      const dx = startX - endX;
-      if (Math.abs(dx) < 50) return;
-      go(dx > 0 ? index + 1 : index - 1);
-    });
-
-    render();
-  });
-</script>
+<script src="/assets/scripts/animation.js"></script>
+<script src="/assets/scripts/slider.js"></script>
 
 {{template "footer" .}}
