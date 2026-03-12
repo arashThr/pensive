@@ -498,6 +498,115 @@ func (p *Podcast) sendPodcastEmail(userEmail string, userID int64, audioFilename
 	logging.Logger.Infow("[podcast] Sent podcast email", "userId", userID, "email", userEmail)
 }
 
+// TriggerEpisode is an internal admin endpoint that generates a fresh podcast episode
+// for a given user and delivers it via the requested channel.
+//
+// POST /internal/podcast/trigger
+//
+//	{"user_id": 42, "channel": "email|telegram|both"}
+//
+// Returns 202 immediately; generation runs in a background goroutine.
+func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
+	logger := logging.Logger
+
+	var req struct {
+		UserID  int64  `json:"user_id"`
+		Channel string `json:"channel"` // "email", "telegram", "both"
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON body", http.StatusBadRequest)
+		return
+	}
+	if req.UserID == 0 {
+		http.Error(w, "user_id is required", http.StatusBadRequest)
+		return
+	}
+	if req.Channel == "" {
+		req.Channel = "both"
+	}
+	switch req.Channel {
+	case "email", "telegram", "both":
+	default:
+		http.Error(w, `channel must be "email", "telegram", or "both"`, http.StatusBadRequest)
+		return
+	}
+
+	user, err := p.UserRepo.Get(types.UserId(req.UserID))
+	if err != nil {
+		logger.Errorw("[podcast-trigger] User not found", "userId", req.UserID, "error", err)
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+
+	logger.Infow("[podcast-trigger] Manual trigger accepted", "userId", req.UserID, "channel", req.Channel)
+	go p.triggerAndDeliver(user.ID, user.Email, req.Channel)
+
+	w.WriteHeader(http.StatusAccepted)
+	_ = writeResponse(w, map[string]any{
+		"message": fmt.Sprintf("episode generation started for user %d via %s", req.UserID, req.Channel),
+		"user_id": req.UserID,
+		"channel": req.Channel,
+	})
+}
+
+// triggerAndDeliver is the backend of TriggerEpisode. It generates a fresh episode
+// and delivers it over the channels requested by the caller.
+func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel string) {
+	logger := logging.Logger
+
+	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(userID, PodcastDays, PodcastArticleLimit)
+	if err != nil {
+		logger.Errorw("[podcast-trigger] Failed to fetch bookmarks", "error", err, "userId", userID)
+		return
+	}
+	if len(bookmarks) == 0 {
+		logger.Infow("[podcast-trigger] No bookmarks found, aborting", "userId", userID)
+		return
+	}
+
+	text := formatPodcastText(bookmarks)
+
+	uploadDir := userPodcastDir(int64(userID))
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		logger.Errorw("[podcast-trigger] Failed to create upload dir", "error", err)
+		return
+	}
+
+	baseFilename := fmt.Sprintf("%d", time.Now().Unix())
+
+	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
+	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+		logger.Warnw("[podcast-trigger] Failed to write script file", "error", err, "path", scriptPath)
+	}
+
+	audioBytes, err := p.callGoogleTTS(context.Background(), text)
+	if err != nil {
+		logger.Errorw("[podcast-trigger] Google TTS failed", "error", err, "userId", userID)
+		return
+	}
+
+	audioFilename := fmt.Sprintf("%s.ogg", baseFilename)
+	audioPath := fmt.Sprintf("%s/%s", uploadDir, audioFilename)
+	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
+		logger.Errorw("[podcast-trigger] Failed to write audio file", "error", err, "path", audioPath)
+		return
+	}
+
+	logger.Infow("[podcast-trigger] Audio saved", "path", audioPath, "bytes", len(audioBytes))
+
+	sendEmail := channel == "email" || channel == "both"
+	sendTelegram := channel == "telegram" || channel == "both"
+
+	if sendTelegram {
+		p.sendTelegramAudio(int64(userID), audioPath, audioFilename)
+	}
+	if sendEmail {
+		p.sendPodcastEmail(userEmail, int64(userID), audioFilename)
+	}
+
+	logger.Infow("[podcast-trigger] Manual trigger complete", "userId", userID, "channel", channel)
+}
+
 // formatPodcastText creates article summaries formatted for TTS narration.
 func formatPodcastText(bookmarks []models.Bookmark) string {
 	var buf bytes.Buffer

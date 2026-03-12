@@ -336,6 +336,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	// Internal routes (no auth, network-isolated)
 	r.Route("/internal", func(r chi.Router) {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "internal"))
+		r.Post("/podcast/trigger", c.PodcastService.TriggerEpisode)
 	})
 
 	// API Routes
