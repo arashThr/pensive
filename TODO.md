@@ -86,10 +86,12 @@
 - [ ] YouTube: Save the title and description
 - [ ] **Generate podcasts**
     - [x] TTS
+    - [ ] Trigger it from admin endpoints
     - [ ] Send to Telegram
     - [ ] Scheduler
     - [ ] Update `formatPodcastText` to make it Podcast like
     - [ ] Endpoint to check the ongoing tasks/stop the scheduler
+    - [ ] Remove the "Trigger" in the preferences page
 - [x] Full text search with part words
 - [x] Landing page: Here's how it works demo:
     - Save the link, show the summary

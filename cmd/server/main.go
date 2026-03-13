@@ -324,6 +324,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	amw := auth.ApiMiddleware{
 		TokenModel: c.TokenRepo,
 	}
+	adminMw := auth.NewAdminMw(cfg.Admin.User, cfg.Admin.Pass)
 	csrfMw := csrf.Protect(
 		[]byte(cfg.CSRF.Key),
 		csrf.Secure(cfg.CSRF.Secure),
@@ -333,9 +334,10 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
 
-	// Internal routes (no auth, network-isolated)
-	r.Route("/internal", func(r chi.Router) {
+	// Admin routes - protected by basic auth
+	r.Route("/admin", func(r chi.Router) {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "internal"))
+		r.Use(adminMw.AuthAdmin)
 		r.Post("/podcast/trigger", c.PodcastService.TriggerEpisode)
 	})
 

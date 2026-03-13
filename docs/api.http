@@ -46,3 +46,13 @@ Authorization: Bearer {{token}}
 
 ### Check TTS health endpoint
 GET http://localhost:5000/health
+
+
+### Admin routes
+POST {{host}}/admin/podcast/trigger
+Authorization: Basic {{adminPass}}
+
+{
+    "user_id": 42,
+    "channel": "telegram"
+}

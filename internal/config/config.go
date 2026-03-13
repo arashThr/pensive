@@ -69,6 +69,10 @@ type AppConfig struct {
 	Server struct {
 		Address string
 	}
+	Admin struct {
+		User string
+		Pass string
+	}
 	Logging   LoggerConfig
 	Stripe    StripeConfig
 	Telegram  TelegramConfig
@@ -118,6 +122,10 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 			ChatID: os.Getenv("TELEGRAM_LOGGING_CHAT_ID"),
 		},
 	}
+
+	// Admin
+	cfg.Admin.User = GetEnvOrDie("ADMIN_USER")
+	cfg.Admin.Pass = GetEnvOrDie("ADMIN_PASS")
 
 	// Stripe
 	cfg.Stripe = StripeConfig{
