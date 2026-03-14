@@ -192,8 +192,8 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		BookmarkModel: bookmarkRepo,
 	}
 	homeService.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml", "home/recent-results.gohtml"))
-	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml"))
-	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml"))
+	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml", "tailwind.gohtml"))
+	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml", "tailwind.gohtml"))
 	homeService.Templates.ChatAnswer = views.Must(views.ParseTemplate("home/chat-answer.gohtml"))
 
 	importerService := service.Importer{
