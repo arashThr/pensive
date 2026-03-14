@@ -353,6 +353,89 @@ func (model *BookmarkRepo) GetRecentRandomByUserId(userId types.UserId, days int
 	return bookmarks, nil
 }
 
+// PodcastArticle holds the fields needed for podcast episode generation.
+// Articles with ai_markdown are preferred over those with only a summary or excerpt.
+type PodcastArticle struct {
+	Title      string
+	SiteName   string
+	AIMarkdown string // from library_contents; empty if not yet generated
+	AISummary  *string
+	AIExcerpt  *string
+}
+
+// GetRecentRandomForPodcast returns up to limit articles from the past days days, joining
+// library_contents to include the full ai_markdown where available. Articles that have
+// ai_markdown are returned first; within each group the order is random.
+func (model *BookmarkRepo) GetRecentRandomForPodcast(userId types.UserId, days int, limit int) ([]PodcastArticle, error) {
+	cutoffDate := time.Now().AddDate(0, 0, -days)
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT
+			li.title,
+			COALESCE(li.site_name, '')                    AS site_name,
+			COALESCE(lc.ai_markdown, '')                  AS ai_markdown,
+			li.ai_summary,
+			li.ai_excerpt
+		FROM library_items li
+		LEFT JOIN library_contents lc ON li.id = lc.id
+		WHERE li.user_id = $1 AND li.created_at >= $2
+		ORDER BY
+			(CASE WHEN lc.ai_markdown IS NOT NULL AND lc.ai_markdown != '' THEN 0 ELSE 1 END),
+			RANDOM()
+		LIMIT $3`,
+		userId, cutoffDate, limit)
+	if err != nil {
+		return nil, fmt.Errorf("query podcast articles: %w", err)
+	}
+	defer rows.Close()
+
+	var articles []PodcastArticle
+	for rows.Next() {
+		var a PodcastArticle
+		if err := rows.Scan(&a.Title, &a.SiteName, &a.AIMarkdown, &a.AISummary, &a.AIExcerpt); err != nil {
+			return nil, fmt.Errorf("scan podcast article: %w", err)
+		}
+		articles = append(articles, a)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate podcast articles: %w", err)
+	}
+	return articles, nil
+}
+
+// GetAllTitlesInPeriod returns the title and site name of every bookmark saved in the
+// past days days by userID. Used to build the opening overview section of the podcast script.
+func (model *BookmarkRepo) GetAllTitlesInPeriod(userId types.UserId, days int) ([]PodcastArticle, error) {
+	cutoffDate := time.Now().AddDate(0, 0, -days)
+	rows, err := model.Pool.Query(context.Background(), `
+		SELECT
+			title,
+			COALESCE(site_name, '')  AS site_name,
+			''                       AS ai_markdown,
+			NULL::text               AS ai_summary,
+			NULL::text               AS ai_excerpt
+		FROM library_items
+		WHERE user_id = $1 AND created_at >= $2
+		ORDER BY created_at DESC`,
+		userId, cutoffDate)
+	if err != nil {
+		return nil, fmt.Errorf("query all titles in period: %w", err)
+	}
+	defer rows.Close()
+
+	var articles []PodcastArticle
+	for rows.Next() {
+		var a PodcastArticle
+		if err := rows.Scan(&a.Title, &a.SiteName, &a.AIMarkdown, &a.AISummary, &a.AIExcerpt); err != nil {
+			return nil, fmt.Errorf("scan title in period: %w", err)
+		}
+		articles = append(articles, a)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate titles in period: %w", err)
+	}
+	return articles, nil
+}
+
 func (model *BookmarkRepo) GetByLink(userId types.UserId, link string) (*Bookmark, error) {
 	parsedURL, err := url.Parse(link)
 	if err != nil {

@@ -22,6 +22,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/genai"
 )
 
 const (
@@ -56,6 +57,7 @@ type Podcast struct {
 	PodcastScheduleRepo *models.PodcastScheduleRepo
 	UserRepo            *models.UserRepo
 	EmailService        *EmailService
+	GenAIClient         *genai.Client
 	GCPProjectID        string
 	ServiceAccountPath  string // path to service-account.json; used in prod
 	TelegramToken       string
@@ -86,7 +88,7 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(user.ID, PodcastDays, PodcastArticleLimit)
+	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(user.ID, PodcastDays, PodcastArticleLimit)
 	if err != nil {
 		logger.Errorw("[podcast] Failed to fetch bookmarks", "error", err)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
@@ -96,7 +98,7 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(bookmarks) == 0 {
+	if len(articles) == 0 {
 		logger.Infow("[podcast] No bookmarks found for user", "userId", user.ID)
 		writeErrorResponse(w, http.StatusNoContent, ErrorResponse{
 			Code:    "NO_BOOKMARKS",
@@ -105,16 +107,14 @@ func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Infow("[podcast] Found bookmarks", "count", len(bookmarks))
-
-	text := formatPodcastText(bookmarks)
+	logger.Infow("[podcast] Found bookmarks", "count", len(articles))
 
 	logger.Infow("[podcast] Dispatching generation goroutine", "userId", user.ID)
-	go p.generateAndSend(int64(user.ID), user.Email, text)
+	go p.generateAndSend(int64(user.ID), user.Email, articles)
 
 	response := PodcastResponse{
-		Message:  fmt.Sprintf("Podcast generation started for %d articles.", len(bookmarks)),
-		Articles: len(bookmarks),
+		Message:  fmt.Sprintf("Podcast generation started for %d articles.", len(articles)),
+		Articles: len(articles),
 	}
 	if err := writeResponse(w, response); err != nil {
 		logger.Errorw("[podcast] Failed to write response", "error", err)
@@ -231,13 +231,13 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 		return
 	}
 
-	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(s.UserID, PodcastDays, PodcastArticleLimit)
+	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(s.UserID, PodcastDays, PodcastArticleLimit)
 	if err != nil {
 		fail(fmt.Errorf("fetch bookmarks: %w", err))
 		return
 	}
 
-	if len(bookmarks) == 0 {
+	if len(articles) == 0 {
 		logger.Infow("[podcast-scheduler] No bookmarks, skipping and rescheduling", "userId", s.UserID)
 		next := NextPublishAt(prefs.Day, 7)
 		if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
@@ -246,7 +246,12 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 		return
 	}
 
-	text := formatPodcastText(bookmarks)
+	script, err := p.generatePodcastScript(ctx, s.UserID, articles)
+	if err != nil {
+		fail(fmt.Errorf("generate podcast script: %w", err))
+		return
+	}
+
 	ts := time.Now().Unix()
 	baseFilename := fmt.Sprintf("%d", ts) // shared timestamp stem for both files
 
@@ -258,12 +263,12 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 
 	// Save the podcast script alongside the audio for reference / debugging.
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
-	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
 		logger.Warnw("[podcast-scheduler] Failed to write script file", "error", err, "path", scriptPath)
 		// Non-fatal — continue with audio generation.
 	}
 
-	audioBytes, err := p.callGoogleTTS(ctx, text)
+	audioBytes, err := p.callGoogleTTS(ctx, script)
 	if err != nil {
 		fail(fmt.Errorf("google TTS: %w", err))
 		return
@@ -304,8 +309,14 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 // ---- Generation helpers ------------------------------------------------------
 
 // generateAndSend is used by the on-demand HTTP handler.
-func (p *Podcast) generateAndSend(userID int64, userEmail string, text string) {
+func (p *Podcast) generateAndSend(userID int64, userEmail string, articles []models.PodcastArticle) {
 	logger := logging.Logger
+
+	script, err := p.generatePodcastScript(context.Background(), types.UserId(userID), articles)
+	if err != nil {
+		logger.Errorw("[podcast] Failed to generate podcast script", "error", err, "userId", userID)
+		return
+	}
 
 	uploadDir := userPodcastDir(userID)
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
@@ -316,12 +327,12 @@ func (p *Podcast) generateAndSend(userID int64, userEmail string, text string) {
 	baseFilename := fmt.Sprintf("%d", time.Now().Unix())
 
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
-	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
 		logger.Warnw("[podcast] Failed to write script file", "error", err, "path", scriptPath)
 	}
 
 	logger.Infow("[podcast] Calling Google TTS", "userId", userID)
-	audioBytes, err := p.callGoogleTTS(context.Background(), text)
+	audioBytes, err := p.callGoogleTTS(context.Background(), script)
 	if err != nil {
 		logger.Errorw("[podcast] Google TTS failed", "error", err, "userId", userID)
 		return
@@ -374,9 +385,16 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		httpClient = oauth2.NewClient(ctx, creds.TokenSource)
 	}
 
+	const podcastHostPrompt = `Read this podcast script aloud as a warm, confident, and engaging host.
+	Let it be a bit messy, like someone going through series of notes and narrating their thoughts in a natural flow.
+	Speak naturally and conversationally — relaxed but sharp, with comfortable pacing. Do not add, remove, or change any content;
+	just deliver the written script as a natural podcast host would.
+	As for your tone, make it warm, witty, and direct. Like a smart friend catching you up over coffee.
+	Speak TO the listener personally`
+
 	reqBody := map[string]interface{}{
 		"input": map[string]string{
-			"prompt": "Say the following in a friendly and informative way. Put yourself in position of a podcast host.",
+			"prompt": podcastHostPrompt,
 			"text":   text,
 		},
 		"voice": map[string]interface{}{
@@ -554,17 +572,21 @@ func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
 func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel string) {
 	logger := logging.Logger
 
-	bookmarks, err := p.BookmarkModel.GetRecentRandomByUserId(userID, PodcastDays, PodcastArticleLimit)
+	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(userID, PodcastDays, PodcastArticleLimit)
 	if err != nil {
 		logger.Errorw("[podcast-trigger] Failed to fetch bookmarks", "error", err, "userId", userID)
 		return
 	}
-	if len(bookmarks) == 0 {
+	if len(articles) == 0 {
 		logger.Infow("[podcast-trigger] No bookmarks found, aborting", "userId", userID)
 		return
 	}
 
-	text := formatPodcastText(bookmarks)
+	script, err := p.generatePodcastScript(context.Background(), userID, articles)
+	if err != nil {
+		logger.Errorw("[podcast-trigger] Failed to generate podcast script", "error", err, "userId", userID)
+		return
+	}
 
 	uploadDir := userPodcastDir(int64(userID))
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
@@ -575,11 +597,11 @@ func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel stri
 	baseFilename := fmt.Sprintf("%d", time.Now().Unix())
 
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
-	if err := os.WriteFile(scriptPath, []byte(text), 0644); err != nil {
+	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
 		logger.Warnw("[podcast-trigger] Failed to write script file", "error", err, "path", scriptPath)
 	}
 
-	audioBytes, err := p.callGoogleTTS(context.Background(), text)
+	audioBytes, err := p.callGoogleTTS(context.Background(), script)
 	if err != nil {
 		logger.Errorw("[podcast-trigger] Google TTS failed", "error", err, "userId", userID)
 		return
@@ -607,19 +629,113 @@ func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel stri
 	logger.Infow("[podcast-trigger] Manual trigger complete", "userId", userID, "channel", channel)
 }
 
-// formatPodcastText creates article summaries formatted for TTS narration.
-func formatPodcastText(bookmarks []models.Bookmark) string {
-	var buf bytes.Buffer
+// maxMarkdownCharsPerArticle caps the content per article sent to Gemini for script generation.
+const maxMarkdownCharsPerArticle = 6000
 
-	buf.WriteString("Welcome to your weekly Pensive podcast. Here are your saved articles.\n\n")
-
-	for i, b := range bookmarks {
-		buf.WriteString(fmt.Sprintf("Article %d: %s.\n\n", i+1, *b.AIExcerpt))
+// generatePodcastScript calls Gemini to write a ready-to-read podcast script (~10 min / ~1400 words).
+// It also fetches all titles from the period to build the opening date + period overview.
+func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId, articles []models.PodcastArticle) (string, error) {
+	if p.GenAIClient == nil {
+		return "", fmt.Errorf("GenAI client not initialised")
 	}
 
-	buf.WriteString("That's all for this week. Happy reading!")
+	// Fetch every title from the period for the opening overview (non-fatal if it fails).
+	allTitles, _ := p.BookmarkModel.GetAllTitlesInPeriod(userID, PodcastDays)
 
-	return buf.String()
+	var prompt bytes.Buffer
+
+	epDate := time.Now().UTC().Format("Monday, January 2 2006")
+	fmt.Fprintf(&prompt, "You are writing the script for a personal weekly podcast episode dated %s.\n", epDate)
+	prompt.WriteString(`The listener uses Pensive to save articles they want to read later.
+This podcast is their personal reading companion — you have read everything they saved this week
+and you are walking them through the highlights.
+
+== TONE & STYLE ==
+- Warm, witty, and direct. Like a smart friend catching you up over coffee.
+- Speak TO the listener personally: "you saved this one", "this is the one about...", "here's where it gets interesting".
+- Highlight what's genuinely interesting or surprising; point out important sections by name.
+- Add a line of context or "why this matters" where it genuinely helps — one thought at a time.
+- Dry humour is welcome; forced jokes are not.
+- No filler openers: never "Certainly!", "Absolutely!", "Great!", "Sure thing!".
+- Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
+- Never read content verbatim. Narrate and synthesise.
+
+== LENGTH ==
+Target approximately 1 400 words — roughly 10 minutes of listening.
+Fill that space with substance. Stop naturally after the closing; do not pad.
+
+== STRUCTURE ==
+1. OPENING (~60 words)
+   Greet the listener, state today's date.
+   Give a one-sentence overview: how many articles they saved this week and the rough themes.
+   Use the full title list below for this overview, not just the featured articles.
+
+`)
+
+	// Full title list for the opening overview.
+	if len(allTitles) > 0 {
+		fmt.Fprintf(&prompt, "ALL %d ARTICLES SAVED THIS WEEK (titles only — for your opening overview):\n", len(allTitles))
+		for i, t := range allTitles {
+			if t.SiteName != "" {
+				fmt.Fprintf(&prompt, "%d. %s (%s)\n", i+1, t.Title, t.SiteName)
+			} else {
+				fmt.Fprintf(&prompt, "%d. %s\n", i+1, t.Title)
+			}
+		}
+		prompt.WriteString("\n")
+	}
+
+	// Featured articles with full content.
+	fmt.Fprintf(&prompt, "2. FEATURED ARTICLES (%d articles — cover each one in depth):\n\n", len(articles))
+	for i, a := range articles {
+		fmt.Fprintf(&prompt, "--- Article %d ---\n", i+1)
+		fmt.Fprintf(&prompt, "Title: %s\n", a.Title)
+		if a.SiteName != "" {
+			fmt.Fprintf(&prompt, "Source: %s\n", a.SiteName)
+		}
+		prompt.WriteString("\n")
+
+		content := a.AIMarkdown
+		if content == "" && a.AISummary != nil && *a.AISummary != "" {
+			content = *a.AISummary
+		}
+		if content == "" && a.AIExcerpt != nil && *a.AIExcerpt != "" {
+			content = *a.AIExcerpt
+		}
+		if content == "" {
+			content = "(No content available — narrate based on the title alone.)"
+		}
+		if len(content) > maxMarkdownCharsPerArticle {
+			content = content[:maxMarkdownCharsPerArticle] + "\n... [content truncated]"
+		}
+
+		prompt.WriteString(content)
+		prompt.WriteString("\n\n")
+	}
+
+	prompt.WriteString(`3. CLOSING (~40 words)
+   Sign off naturally and personally. Encourage the listener to keep saving good reads.
+   No cliché sign-offs like "That's all for this week" or "Thanks for listening".
+
+Output ONLY the finished spoken script — no stage directions, markdown headers, or meta-commentary.
+`)
+
+	start := time.Now()
+	result, err := p.GenAIClient.Models.GenerateContent(
+		ctx,
+		"gemini-3-flash-preview",
+		genai.Text(prompt.String()),
+		nil,
+	)
+	if err != nil {
+		return "", fmt.Errorf("gemini script generation: %w", err)
+	}
+	logging.Logger.Infow("[podcast] Gemini script generation complete",
+		"elapsed", time.Since(start).Round(time.Millisecond).String(),
+		"userId", userID,
+	)
+
+	return strings.TrimSpace(result.Text()), nil
 }
 
 // NextPublishAt returns the next occurrence of the given weekday name that is

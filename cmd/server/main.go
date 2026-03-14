@@ -245,6 +245,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		PodcastScheduleRepo: podcastScheduleRepo,
 		UserRepo:            userRepo,
 		EmailService:        emailService,
+		GenAIClient:         genAIClient,
 		GCPProjectID:        cfg.Podcast.GCPProjectID,
 		ServiceAccountPath:  cfg.Podcast.ServiceAccountPath,
 		TelegramToken:       cfg.Telegram.Token,
