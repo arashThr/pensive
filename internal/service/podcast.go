@@ -490,7 +490,7 @@ func (p *Podcast) sendPodcastEmail(userEmail string, userID int64, audioFilename
 		logging.Logger.Warnw("[podcast] Email service not configured, skipping email", "userId", userID)
 		return
 	}
-	downloadURL := fmt.Sprintf("%s/podcast/episodes/%s", p.Domain, audioFilename)
+	downloadURL := fmt.Sprintf("%s/users/podcast/episodes/%s", p.Domain, audioFilename)
 	if err := p.EmailService.SendPodcastReady(userEmail, downloadURL); err != nil {
 		logging.Logger.Errorw("[podcast] Failed to send podcast email", "error", err, "userId", userID, "email", userEmail)
 		return
