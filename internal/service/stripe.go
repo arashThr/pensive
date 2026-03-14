@@ -48,7 +48,7 @@ func (s Stripe) getStripeCustomerId(ctx context.Context, user *models.User) (cus
 	result := customer.List(params)
 	if result.Next() {
 		// Found customer
-		logger.Errorw("Found stripe customer for user %v", "error", err, user.ID)
+		logger.Errorw("Found stripe customer for user", "userId", user.ID, "error", err)
 		customer := result.Customer()
 		customerId = customer.ID
 	} else {
@@ -111,7 +111,7 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
 	// 	return
 	// }
-	logger.Errorw("checkout session", "error", err, "session_id", sess.ID)
+	logger.Infof("checkout session created", "session_id", sess.ID)
 	http.Redirect(w, r, sess.URL, http.StatusSeeOther)
 }
 
