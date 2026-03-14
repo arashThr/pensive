@@ -50,9 +50,9 @@ GET http://localhost:5000/health
 
 ### Admin routes
 POST {{host}}/admin/podcast/trigger
-Authorization: Basic {{adminPass}}
+Authorization: Basic admin:admin
 
 {
-    "user_id": 42,
+    "user_id": 1,
     "channel": "telegram"
 }
