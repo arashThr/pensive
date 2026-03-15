@@ -19,6 +19,9 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    volumes:
+      - ~/credentials/env.env:/app/.env:ro
+      - ~/credentials/service-account.json:${GCP_SERVICE_ACCOUNT_PATH}:ro
     deploy:
       resources:
         limits:
