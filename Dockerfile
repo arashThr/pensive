@@ -1,11 +1,11 @@
-FROM node:slim AS tailwind-builder
+FROM node:24-slim AS tailwind-builder
 WORKDIR /app
 RUN npm init -y && npm install tailwindcss @tailwindcss/cli
 COPY ./web/templates ./templates
 COPY ./tailwind/style.css ./style.css
 RUN npx @tailwindcss/cli -i ./style.css -o /style.css --minify
 
-FROM golang:1.24-alpine AS build
+FROM golang:1.26-alpine AS build
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
