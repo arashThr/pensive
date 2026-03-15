@@ -21,6 +21,12 @@ const (
 	PodcastScheduleStatusTimedOut   PodcastScheduleStatus = "timed_out"
 )
 
+// Schedule type constants — map to the schedule_type column in podcast_schedules.
+const (
+	PodcastScheduleTypeWeekly = "weekly"
+	PodcastScheduleTypeDaily  = "daily"
+)
+
 // PodcastScheduleMaxAttempts is the default maximum number of generation attempts before
 // a schedule is marked as failed.
 const PodcastScheduleMaxAttempts = 3
@@ -32,6 +38,7 @@ const PodcastProcessingTimeout = 2 * time.Hour
 type PodcastSchedule struct {
 	ID              int                   `db:"id"`
 	UserID          types.UserId          `db:"user_id"`
+	ScheduleType    string                `db:"schedule_type"`
 	NextPublishAt   time.Time             `db:"next_publish_at"`
 	Status          PodcastScheduleStatus `db:"status"`
 	Attempts        int                   `db:"attempts"`
@@ -45,49 +52,48 @@ type PodcastScheduleRepo struct {
 	Pool *pgxpool.Pool
 }
 
-// Upsert creates or updates the schedule for a user.
-// If the user disables their weekly podcast (enabled=false) it removes the schedule.
-func (r *PodcastScheduleRepo) Upsert(userID types.UserId, nextPublishAt time.Time) error {
+// Upsert creates or updates the schedule for a user and schedule type.
+func (r *PodcastScheduleRepo) Upsert(userID types.UserId, scheduleType string, nextPublishAt time.Time) error {
 	_, err := r.Pool.Exec(context.Background(), `
-		INSERT INTO podcast_schedules (user_id, next_publish_at, status, attempts, updated_at)
-		VALUES ($1, $2, 'pending', 0, NOW())
-		ON CONFLICT (user_id) DO UPDATE
+		INSERT INTO podcast_schedules (user_id, schedule_type, next_publish_at, status, attempts, updated_at)
+		VALUES ($1, $2, $3, 'pending', 0, NOW())
+		ON CONFLICT (user_id, schedule_type) DO UPDATE
 		    SET next_publish_at = EXCLUDED.next_publish_at,
 		        status          = 'pending',
 		        attempts        = 0,
 		        updated_at      = NOW()
 		    WHERE podcast_schedules.status NOT IN ('processing')
-	`, userID, nextPublishAt)
+	`, userID, scheduleType, nextPublishAt)
 	if err != nil {
 		return fmt.Errorf("upsert podcast schedule: %w", err)
 	}
 	return nil
 }
 
-// Delete removes the podcast schedule for a user (e.g. when they disable weekly podcasts).
-func (r *PodcastScheduleRepo) Delete(userID types.UserId) error {
+// Delete removes the schedule of the given type for a user.
+func (r *PodcastScheduleRepo) Delete(userID types.UserId, scheduleType string) error {
 	_, err := r.Pool.Exec(context.Background(), `
-		DELETE FROM podcast_schedules WHERE user_id = $1
-	`, userID)
+		DELETE FROM podcast_schedules WHERE user_id = $1 AND schedule_type = $2
+	`, userID, scheduleType)
 	if err != nil {
 		return fmt.Errorf("delete podcast schedule: %w", err)
 	}
 	return nil
 }
 
-// GetDue returns all schedules that are past their publish time, are in a
-// retriable state ('pending' or 'timed_out'), and have not yet exhausted
-// their attempt budget.
-func (r *PodcastScheduleRepo) GetDue() ([]PodcastSchedule, error) {
+// GetDue returns all schedules of the given type that are past their publish time,
+// are in a retriable state, and have not exhausted their attempt budget.
+func (r *PodcastScheduleRepo) GetDue(scheduleType string) ([]PodcastSchedule, error) {
 	rows, err := r.Pool.Query(context.Background(), `
-		SELECT id, user_id, next_publish_at, status, attempts, max_attempts,
+		SELECT id, user_id, schedule_type, next_publish_at, status, attempts, max_attempts,
 		       last_attempted_at, created_at, updated_at
 		FROM podcast_schedules
-		WHERE next_publish_at <= NOW()
+		WHERE schedule_type = $1
+		  AND next_publish_at <= NOW()
 		  AND status IN ('pending', 'timed_out')
 		  AND attempts < max_attempts
 		ORDER BY next_publish_at ASC
-	`)
+	`, scheduleType)
 	if err != nil {
 		return nil, fmt.Errorf("get due podcast schedules: %w", err)
 	}
@@ -97,7 +103,7 @@ func (r *PodcastScheduleRepo) GetDue() ([]PodcastSchedule, error) {
 	for rows.Next() {
 		var s PodcastSchedule
 		if err := rows.Scan(
-			&s.ID, &s.UserID, &s.NextPublishAt, &s.Status, &s.Attempts,
+			&s.ID, &s.UserID, &s.ScheduleType, &s.NextPublishAt, &s.Status, &s.Attempts,
 			&s.MaxAttempts, &s.LastAttemptedAt, &s.CreatedAt, &s.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan podcast schedule: %w", err)
@@ -164,9 +170,8 @@ func (r *PodcastScheduleRepo) MarkFailed(id int) error {
 	return nil
 }
 
-// ReapTimedOut scans for schedules that have been stuck in 'processing' for
-// longer than PodcastProcessingTimeout and marks them as 'timed_out' so they
-// can be retried (subject to their attempt budget).
+// ReapTimedOut scans for schedules (all types) that have been stuck in 'processing' for
+// longer than PodcastProcessingTimeout and marks them as 'timed_out'.
 func (r *PodcastScheduleRepo) ReapTimedOut() (int64, error) {
 	tag, err := r.Pool.Exec(context.Background(), `
 		UPDATE podcast_schedules
@@ -184,16 +189,16 @@ func (r *PodcastScheduleRepo) ReapTimedOut() (int64, error) {
 	return tag.RowsAffected(), nil
 }
 
-// GetByUserID returns the current schedule for a user, or ErrNotFound.
-func (r *PodcastScheduleRepo) GetByUserID(userID types.UserId) (*PodcastSchedule, error) {
+// GetByUserID returns the current schedule of the given type for a user, or ErrNotFound.
+func (r *PodcastScheduleRepo) GetByUserID(userID types.UserId, scheduleType string) (*PodcastSchedule, error) {
 	var s PodcastSchedule
 	err := r.Pool.QueryRow(context.Background(), `
-		SELECT id, user_id, next_publish_at, status, attempts, max_attempts,
+		SELECT id, user_id, schedule_type, next_publish_at, status, attempts, max_attempts,
 		       last_attempted_at, created_at, updated_at
 		FROM podcast_schedules
-		WHERE user_id = $1
-	`, userID).Scan(
-		&s.ID, &s.UserID, &s.NextPublishAt, &s.Status, &s.Attempts,
+		WHERE user_id = $1 AND schedule_type = $2
+	`, userID, scheduleType).Scan(
+		&s.ID, &s.UserID, &s.ScheduleType, &s.NextPublishAt, &s.Status, &s.Attempts,
 		&s.MaxAttempts, &s.LastAttemptedAt, &s.CreatedAt, &s.UpdatedAt,
 	)
 	if err != nil {

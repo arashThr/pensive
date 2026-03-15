@@ -261,27 +261,37 @@ func (us *UserRepo) MarkEmailVerified(userID types.UserId) error {
 
 // WeeklySummaryPreferences contains user preferences for weekly podcast summary
 type WeeklySummaryPreferences struct {
-	Enabled  bool   `json:"enabled"`
-	Day      string `json:"day"`
-	Email    bool   `json:"email"`
-	Telegram bool   `json:"telegram"`
+	Enabled       bool   `json:"enabled"`
+	Day           string `json:"day"`
+	Email         bool   `json:"email"`
+	Telegram      bool   `json:"telegram"`
+	DailyEnabled  bool   `json:"daily_enabled"`
+	DailyHour     int    `json:"daily_hour"`     // 0–23
+	DailyTimezone string `json:"daily_timezone"` // IANA timezone, e.g. "America/New_York"
 }
 
 // GetWeeklySummaryPreferences retrieves the user's weekly summary preferences
 func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySummaryPreferences, error) {
 	var prefs WeeklySummaryPreferences
 	err := us.Pool.QueryRow(context.Background(), `
-		SELECT enabled, day, email, telegram
+		SELECT enabled, day, email, telegram,
+		       daily_enabled, daily_hour, daily_timezone
 		FROM weekly_summaries WHERE user_id = $1
-	`, userID).Scan(&prefs.Enabled, &prefs.Day, &prefs.Email, &prefs.Telegram)
+	`, userID).Scan(
+		&prefs.Enabled, &prefs.Day, &prefs.Email, &prefs.Telegram,
+		&prefs.DailyEnabled, &prefs.DailyHour, &prefs.DailyTimezone,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Return defaults if no preferences exist yet
 			return &WeeklySummaryPreferences{
-				Enabled:  false,
-				Day:      "sunday",
-				Email:    true,
-				Telegram: false,
+				Enabled:       false,
+				Day:           "sunday",
+				Email:         true,
+				Telegram:      false,
+				DailyEnabled:  false,
+				DailyHour:     8,
+				DailyTimezone: "UTC",
 			}, nil
 		}
 		return nil, fmt.Errorf("get weekly summary preferences: %w", err)
@@ -292,15 +302,20 @@ func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySum
 // UpdateWeeklySummaryPreferences updates the user's weekly summary preferences
 func (us *UserRepo) UpdateWeeklySummaryPreferences(userID types.UserId, prefs WeeklySummaryPreferences) error {
 	_, err := us.Pool.Exec(context.Background(), `
-		INSERT INTO weekly_summaries (user_id, enabled, day, email, telegram, updated_at)
-		VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
-		ON CONFLICT (user_id) DO UPDATE 
-		SET enabled = EXCLUDED.enabled,
-		    day = EXCLUDED.day,
-		    email = EXCLUDED.email,
-		    telegram = EXCLUDED.telegram,
-		    updated_at = CURRENT_TIMESTAMP
-	`, userID, prefs.Enabled, prefs.Day, prefs.Email, prefs.Telegram)
+		INSERT INTO weekly_summaries
+		    (user_id, enabled, day, email, telegram, daily_enabled, daily_hour, daily_timezone, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
+		ON CONFLICT (user_id) DO UPDATE
+		SET enabled        = EXCLUDED.enabled,
+		    day            = EXCLUDED.day,
+		    email          = EXCLUDED.email,
+		    telegram       = EXCLUDED.telegram,
+		    daily_enabled  = EXCLUDED.daily_enabled,
+		    daily_hour     = EXCLUDED.daily_hour,
+		    daily_timezone = EXCLUDED.daily_timezone,
+		    updated_at     = CURRENT_TIMESTAMP
+	`, userID, prefs.Enabled, prefs.Day, prefs.Email, prefs.Telegram,
+		prefs.DailyEnabled, prefs.DailyHour, prefs.DailyTimezone)
 	if err != nil {
 		return fmt.Errorf("update weekly summary preferences: %w", err)
 	}

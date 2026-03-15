@@ -304,8 +304,9 @@ func run(cfg *config.AppConfig, pool *pgxpool.Pool) error {
 	// Start import processor in background
 	go container.ImportProcessor.Start(ctx)
 
-	// Start podcast scheduler in background
+	// Start podcast schedulers in background
 	go container.PodcastService.StartScheduler(ctx)
+	go container.PodcastService.StartDailyScheduler(ctx)
 
 	// Create routes with the service container
 	r := Routes(cfg, container)
@@ -464,8 +465,8 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			})
 
 			r.Group(func(r chi.Router) {
+				r.Use(umw.RequireUser)
 				r.Route("/podcast", func(r chi.Router) {
-					r.Post("/generate", c.PodcastService.GeneratePodcast)
 					r.Get("/episodes/{filename}", c.PodcastService.ServeEpisode)
 				})
 			})

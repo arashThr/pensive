@@ -14,6 +14,7 @@ RUN go build -v -o ./server ./cmd/server
 
 FROM alpine
 WORKDIR /app
+RUN apk add --no-cache ffmpeg
 COPY ./web/assets ./web/assets
 COPY --from=build /app/server ./server
 COPY --from=tailwind-builder /style.css ./web/assets/style.css

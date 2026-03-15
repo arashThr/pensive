@@ -123,6 +123,180 @@
     </form>
   </div>
 
+  <!-- Daily Podcast Section -->
+  <div class="border-t border-white/10 pt-8">
+    <h2 class="text-xl font-bold mb-2 text-white">Daily Podcast</h2>
+    <p class="text-sm text-slate-400 mb-6">Get a short daily audio briefing of articles you saved in the past 24 hours. Delivered via Telegram only.</p>
+
+    {{if not .TelegramLinked}}
+    <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-amber-300 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div>
+          <p class="text-sm text-amber-200">Daily podcast requires Telegram. Connect your account first.</p>
+          <a 
+            href="https://t.me/GetPensiveBot" 
+            target="_blank" 
+            rel="noopener"
+            class="inline-flex items-center gap-2 mt-2 text-sm font-medium text-violet-200 hover:text-white transition-colors"
+          >
+            Connect via @GetPensiveBot
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    {{end}}
+
+    <form 
+      hx-post="/users/preferences" 
+      hx-swap="none"
+      hx-on::after-request="if(event.detail.successful) { document.getElementById('daily-save-success').classList.remove('hidden'); setTimeout(() => document.getElementById('daily-save-success').classList.add('hidden'), 3000); }"
+      class="space-y-6"
+      {{if not .TelegramLinked}}aria-disabled="true"{{end}}
+    >
+      {{csrfField}}
+      <!-- Re-send the weekly prefs as hidden fields so SavePreferences doesn't overwrite them -->
+      <input type="hidden" name="enabled" value="{{if .Preferences.Enabled}}true{{end}}">
+      <input type="hidden" name="day" value="{{.Preferences.Day}}">
+      <input type="hidden" name="email" value="{{if .Preferences.Email}}true{{end}}">
+      <input type="hidden" name="telegram" value="{{if .Preferences.Telegram}}true{{end}}">
+
+      <!-- Enable Toggle -->
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-semibold text-white">Enable daily briefing</h3>
+            <p class="text-sm text-slate-400 mt-1">Receive a daily audio recap on Telegram</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" name="daily_enabled" value="true" class="sr-only peer" {{if .Preferences.DailyEnabled}}checked{{end}} {{if not .TelegramLinked}}disabled{{end}}>
+            <div class="w-11 h-6 bg-white/10 peer-focus:ring-2 peer-focus:ring-violet-500/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Time & Timezone -->
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
+        <h3 class="font-semibold text-white mb-3">Delivery time</h3>
+        <p class="text-sm text-slate-400 mb-4">Choose the hour and your timezone</p>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <select 
+            name="daily_hour"
+            class="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+            {{if not .TelegramLinked}}disabled{{end}}
+          >
+            <option value="0"  {{if eq .Preferences.DailyHour 0 }}selected{{end}}>12:00 AM</option>
+            <option value="1"  {{if eq .Preferences.DailyHour 1 }}selected{{end}}>1:00 AM</option>
+            <option value="2"  {{if eq .Preferences.DailyHour 2 }}selected{{end}}>2:00 AM</option>
+            <option value="3"  {{if eq .Preferences.DailyHour 3 }}selected{{end}}>3:00 AM</option>
+            <option value="4"  {{if eq .Preferences.DailyHour 4 }}selected{{end}}>4:00 AM</option>
+            <option value="5"  {{if eq .Preferences.DailyHour 5 }}selected{{end}}>5:00 AM</option>
+            <option value="6"  {{if eq .Preferences.DailyHour 6 }}selected{{end}}>6:00 AM</option>
+            <option value="7"  {{if eq .Preferences.DailyHour 7 }}selected{{end}}>7:00 AM</option>
+            <option value="8"  {{if eq .Preferences.DailyHour 8 }}selected{{end}}>8:00 AM</option>
+            <option value="9"  {{if eq .Preferences.DailyHour 9 }}selected{{end}}>9:00 AM</option>
+            <option value="10" {{if eq .Preferences.DailyHour 10}}selected{{end}}>10:00 AM</option>
+            <option value="11" {{if eq .Preferences.DailyHour 11}}selected{{end}}>11:00 AM</option>
+            <option value="12" {{if eq .Preferences.DailyHour 12}}selected{{end}}>12:00 PM</option>
+            <option value="13" {{if eq .Preferences.DailyHour 13}}selected{{end}}>1:00 PM</option>
+            <option value="14" {{if eq .Preferences.DailyHour 14}}selected{{end}}>2:00 PM</option>
+            <option value="15" {{if eq .Preferences.DailyHour 15}}selected{{end}}>3:00 PM</option>
+            <option value="16" {{if eq .Preferences.DailyHour 16}}selected{{end}}>4:00 PM</option>
+            <option value="17" {{if eq .Preferences.DailyHour 17}}selected{{end}}>5:00 PM</option>
+            <option value="18" {{if eq .Preferences.DailyHour 18}}selected{{end}}>6:00 PM</option>
+            <option value="19" {{if eq .Preferences.DailyHour 19}}selected{{end}}>7:00 PM</option>
+            <option value="20" {{if eq .Preferences.DailyHour 20}}selected{{end}}>8:00 PM</option>
+            <option value="21" {{if eq .Preferences.DailyHour 21}}selected{{end}}>9:00 PM</option>
+            <option value="22" {{if eq .Preferences.DailyHour 22}}selected{{end}}>10:00 PM</option>
+            <option value="23" {{if eq .Preferences.DailyHour 23}}selected{{end}}>11:00 PM</option>
+          </select>
+
+          <select 
+            id="daily-timezone"
+            name="daily_timezone"
+            class="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+            {{if not .TelegramLinked}}disabled{{end}}
+          >
+            <option value="UTC" {{if eq .Preferences.DailyTimezone "UTC"}}selected{{end}}>UTC</option>
+            <option value="America/New_York" {{if eq .Preferences.DailyTimezone "America/New_York"}}selected{{end}}>New York (ET)</option>
+            <option value="America/Chicago" {{if eq .Preferences.DailyTimezone "America/Chicago"}}selected{{end}}>Chicago (CT)</option>
+            <option value="America/Denver" {{if eq .Preferences.DailyTimezone "America/Denver"}}selected{{end}}>Denver (MT)</option>
+            <option value="America/Los_Angeles" {{if eq .Preferences.DailyTimezone "America/Los_Angeles"}}selected{{end}}>Los Angeles (PT)</option>
+            <option value="America/Anchorage" {{if eq .Preferences.DailyTimezone "America/Anchorage"}}selected{{end}}>Anchorage (AKT)</option>
+            <option value="America/Sao_Paulo" {{if eq .Preferences.DailyTimezone "America/Sao_Paulo"}}selected{{end}}>São Paulo (BRT)</option>
+            <option value="America/Toronto" {{if eq .Preferences.DailyTimezone "America/Toronto"}}selected{{end}}>Toronto (ET)</option>
+            <option value="America/Vancouver" {{if eq .Preferences.DailyTimezone "America/Vancouver"}}selected{{end}}>Vancouver (PT)</option>
+            <option value="Europe/London" {{if eq .Preferences.DailyTimezone "Europe/London"}}selected{{end}}>London (GMT/BST)</option>
+            <option value="Europe/Paris" {{if eq .Preferences.DailyTimezone "Europe/Paris"}}selected{{end}}>Paris (CET)</option>
+            <option value="Europe/Berlin" {{if eq .Preferences.DailyTimezone "Europe/Berlin"}}selected{{end}}>Berlin (CET)</option>
+            <option value="Europe/Madrid" {{if eq .Preferences.DailyTimezone "Europe/Madrid"}}selected{{end}}>Madrid (CET)</option>
+            <option value="Europe/Rome" {{if eq .Preferences.DailyTimezone "Europe/Rome"}}selected{{end}}>Rome (CET)</option>
+            <option value="Europe/Amsterdam" {{if eq .Preferences.DailyTimezone "Europe/Amsterdam"}}selected{{end}}>Amsterdam (CET)</option>
+            <option value="Europe/Stockholm" {{if eq .Preferences.DailyTimezone "Europe/Stockholm"}}selected{{end}}>Stockholm (CET)</option>
+            <option value="Europe/Warsaw" {{if eq .Preferences.DailyTimezone "Europe/Warsaw"}}selected{{end}}>Warsaw (CET)</option>
+            <option value="Europe/Istanbul" {{if eq .Preferences.DailyTimezone "Europe/Istanbul"}}selected{{end}}>Istanbul (TRT)</option>
+            <option value="Europe/Moscow" {{if eq .Preferences.DailyTimezone "Europe/Moscow"}}selected{{end}}>Moscow (MSK)</option>
+            <option value="Asia/Tehran" {{if eq .Preferences.DailyTimezone "Asia/Tehran"}}selected{{end}}>Tehran (IRST)</option>
+            <option value="Asia/Dubai" {{if eq .Preferences.DailyTimezone "Asia/Dubai"}}selected{{end}}>Dubai (GST)</option>
+            <option value="Asia/Karachi" {{if eq .Preferences.DailyTimezone "Asia/Karachi"}}selected{{end}}>Karachi (PKT)</option>
+            <option value="Asia/Kolkata" {{if eq .Preferences.DailyTimezone "Asia/Kolkata"}}selected{{end}}>Mumbai / Kolkata (IST)</option>
+            <option value="Asia/Dhaka" {{if eq .Preferences.DailyTimezone "Asia/Dhaka"}}selected{{end}}>Dhaka (BST)</option>
+            <option value="Asia/Bangkok" {{if eq .Preferences.DailyTimezone "Asia/Bangkok"}}selected{{end}}>Bangkok (ICT)</option>
+            <option value="Asia/Singapore" {{if eq .Preferences.DailyTimezone "Asia/Singapore"}}selected{{end}}>Singapore (SGT)</option>
+            <option value="Asia/Shanghai" {{if eq .Preferences.DailyTimezone "Asia/Shanghai"}}selected{{end}}>Beijing / Shanghai (CST)</option>
+            <option value="Asia/Seoul" {{if eq .Preferences.DailyTimezone "Asia/Seoul"}}selected{{end}}>Seoul (KST)</option>
+            <option value="Asia/Tokyo" {{if eq .Preferences.DailyTimezone "Asia/Tokyo"}}selected{{end}}>Tokyo (JST)</option>
+            <option value="Australia/Sydney" {{if eq .Preferences.DailyTimezone "Australia/Sydney"}}selected{{end}}>Sydney (AEST)</option>
+            <option value="Australia/Melbourne" {{if eq .Preferences.DailyTimezone "Australia/Melbourne"}}selected{{end}}>Melbourne (AEST)</option>
+            <option value="Pacific/Auckland" {{if eq .Preferences.DailyTimezone "Pacific/Auckland"}}selected{{end}}>Auckland (NZST)</option>
+            <option value="Africa/Cairo" {{if eq .Preferences.DailyTimezone "Africa/Cairo"}}selected{{end}}>Cairo (EET)</option>
+            <option value="Africa/Nairobi" {{if eq .Preferences.DailyTimezone "Africa/Nairobi"}}selected{{end}}>Nairobi (EAT)</option>
+            <option value="Africa/Lagos" {{if eq .Preferences.DailyTimezone "Africa/Lagos"}}selected{{end}}>Lagos (WAT)</option>
+          </select>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">Your timezone will be auto-detected when the page loads if not already saved.</p>
+      </div>
+
+      <!-- Save Button -->
+      <div class="flex items-center gap-4">
+        <button 
+          type="submit"
+          {{if not .TelegramLinked}}disabled{{end}}
+          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Save daily preferences
+        </button>
+        <span id="daily-save-success" class="hidden text-sm text-emerald-300">
+          ✓ Preferences saved
+        </span>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Auto-detect and pre-select the user's local timezone if the stored value is UTC (the default).
+  (function () {
+    const sel = document.getElementById('daily-timezone');
+    if (!sel) return;
+    const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    // Only override if the currently-selected value is UTC (i.e. not yet explicitly saved).
+    if (sel.value === 'UTC' && detected) {
+      for (const opt of sel.options) {
+        if (opt.value === detected) {
+          opt.selected = true;
+          break;
+        }
+      }
+    }
+  })();
+</script>
+
   <!-- Generate Now Section -->
   <div class="border-t border-white/10 pt-8">
     <h2 class="text-xl font-bold mb-2 text-white">Generate podcast now</h2>

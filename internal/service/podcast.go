@@ -10,6 +10,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -26,7 +28,8 @@ import (
 )
 
 const (
-	PodcastDays              = 7  // Look back 7 days for bookmarks
+	PodcastDays              = 7  // Look back 7 days for bookmarks (weekly)
+	DailyPodcastDays         = 1  // Look back 1 day for bookmarks (daily)
 	PodcastArticleLimit      = 10 // Max 10 articles per podcast
 	PodcastUploadDir         = "uploads/podcasts"
 	PodcastWeeklySummaryDir  = "uploads/podcasts/weekly_summary"
@@ -63,62 +66,6 @@ type Podcast struct {
 	TelegramToken       string
 	Environment         string // "prod" uses service account; anything else uses ADC
 	Domain              string
-}
-
-type PodcastResponse struct {
-	Message  string `json:"message"`
-	Articles int    `json:"articles"`
-}
-
-// GeneratePodcast fetches recent bookmarks and dispatches audio generation in a
-// background goroutine, returning immediately to the client.
-func (p *Podcast) GeneratePodcast(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	logger := loggercontext.Logger(ctx)
-	user := usercontext.User(ctx)
-
-	logger.Infow("[podcast] Starting on-demand podcast", "userId", user.ID)
-
-	if p.GCPProjectID == "" || p.ServiceAccountPath == "" {
-		logger.Warn("[podcast] Google TTS not configured properly")
-		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
-			Code:    "TTS_NOT_CONFIGURED",
-			Message: "Podcast generation is not configured properly. Please contact support.",
-		})
-		return
-	}
-
-	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(user.ID, PodcastDays, PodcastArticleLimit)
-	if err != nil {
-		logger.Errorw("[podcast] Failed to fetch bookmarks", "error", err)
-		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
-			Code:    "FETCH_BOOKMARKS_FAILED",
-			Message: "Failed to fetch recent bookmarks",
-		})
-		return
-	}
-
-	if len(articles) == 0 {
-		logger.Infow("[podcast] No bookmarks found for user", "userId", user.ID)
-		writeErrorResponse(w, http.StatusNoContent, ErrorResponse{
-			Code:    "NO_BOOKMARKS",
-			Message: fmt.Sprintf("No bookmarks found in the past %d days", PodcastDays),
-		})
-		return
-	}
-
-	logger.Infow("[podcast] Found bookmarks", "count", len(articles))
-
-	logger.Infow("[podcast] Dispatching generation goroutine", "userId", user.ID)
-	go p.generateAndSend(int64(user.ID), user.Email, articles)
-
-	response := PodcastResponse{
-		Message:  fmt.Sprintf("Podcast generation started for %d articles.", len(articles)),
-		Articles: len(articles),
-	}
-	if err := writeResponse(w, response); err != nil {
-		logger.Errorw("[podcast] Failed to write response", "error", err)
-	}
 }
 
 // ServeEpisode serves a podcast audio file to its authenticated owner.
@@ -186,7 +133,7 @@ func (p *Podcast) runSchedulerTick(ctx context.Context) {
 		logger.Infow("[podcast-scheduler] Reaped stale schedules", "count", reaped)
 	}
 
-	due, err := p.PodcastScheduleRepo.GetDue()
+	due, err := p.PodcastScheduleRepo.GetDue(models.PodcastScheduleTypeWeekly)
 	if err != nil {
 		logger.Errorw("[podcast-scheduler] GetDue failed", "error", err)
 		return
@@ -246,7 +193,7 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 		return
 	}
 
-	script, err := p.generatePodcastScript(ctx, s.UserID, articles)
+	script, err := p.generatePodcastScript(ctx, s.UserID, articles, PodcastDays)
 	if err != nil {
 		fail(fmt.Errorf("generate podcast script: %w", err))
 		return
@@ -306,67 +253,207 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 	logger.Infow("[podcast-scheduler] Episode complete, next scheduled", "userId", s.UserID, "nextAt", next)
 }
 
-// ---- Generation helpers ------------------------------------------------------
+// ---- Daily scheduler --------------------------------------------------------
 
-// generateAndSend is used by the on-demand HTTP handler.
-func (p *Podcast) generateAndSend(userID int64, userEmail string, articles []models.PodcastArticle) {
+// StartDailyScheduler runs the hourly tick that processes daily podcast schedules.
+func (p *Podcast) StartDailyScheduler(ctx context.Context) {
+	logging.Logger.Infow("[podcast-daily] Starting")
+	p.runDailySchedulerTick(ctx)
+
+	ticker := time.NewTicker(podcastSchedulerInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			logging.Logger.Infow("[podcast-daily] Stopping")
+			return
+		case <-ticker.C:
+			p.runDailySchedulerTick(ctx)
+		}
+	}
+}
+
+func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
 	logger := logging.Logger
 
-	script, err := p.generatePodcastScript(context.Background(), types.UserId(userID), articles)
+	// ReapTimedOut covers all schedule types in one pass; only run it here to
+	// avoid double-reaping when both scheduler ticks run close together.
+	due, err := p.PodcastScheduleRepo.GetDue(models.PodcastScheduleTypeDaily)
 	if err != nil {
-		logger.Errorw("[podcast] Failed to generate podcast script", "error", err, "userId", userID)
+		logger.Errorw("[podcast-daily] GetDue failed", "error", err)
+		return
+	}
+	for _, schedule := range due {
+		if err := p.PodcastScheduleRepo.MarkProcessing(schedule.ID); err != nil {
+			if errors.Is(err, errors.ErrNotFound) {
+				continue
+			}
+			logger.Errorw("[podcast-daily] MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
+			continue
+		}
+		s := schedule
+		go p.processDailySchedule(ctx, s)
+	}
+}
+
+func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSchedule) {
+	logger := logging.Logger
+	logger.Infow("[podcast-daily] Processing episode", "scheduleId", s.ID, "userId", s.UserID)
+
+	fail := func(err error) {
+		logger.Errorw("[podcast-daily] Episode failed", "error", err, "scheduleId", s.ID)
+		if dbErr := p.PodcastScheduleRepo.MarkFailed(s.ID); dbErr != nil {
+			logger.Errorw("[podcast-daily] MarkFailed error", "error", dbErr)
+		}
+	}
+
+	prefs, err := p.UserRepo.GetWeeklySummaryPreferences(s.UserID)
+	if err != nil {
+		fail(fmt.Errorf("get preferences: %w", err))
 		return
 	}
 
-	uploadDir := userPodcastDir(userID)
+	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(s.UserID, DailyPodcastDays, PodcastArticleLimit)
+	if err != nil {
+		fail(fmt.Errorf("fetch bookmarks: %w", err))
+		return
+	}
+
+	// Reschedule and skip silently if there are no bookmarks today.
+	if len(articles) == 0 {
+		logger.Infow("[podcast-daily] No bookmarks today, rescheduling", "userId", s.UserID)
+		next := NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
+		if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
+			logger.Errorw("[podcast-daily] MarkSent (no bookmarks) error", "error", dbErr)
+		}
+		return
+	}
+
+	script, err := p.generatePodcastScript(ctx, s.UserID, articles, DailyPodcastDays)
+	if err != nil {
+		fail(fmt.Errorf("generate podcast script: %w", err))
+		return
+	}
+
+	ts := time.Now().Unix()
+	baseFilename := fmt.Sprintf("%d", ts)
+	uploadDir := userPodcastDir(int64(s.UserID))
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		logger.Errorw("[podcast] Failed to create upload dir", "error", err)
+		fail(fmt.Errorf("create upload dir: %w", err))
 		return
 	}
-
-	baseFilename := fmt.Sprintf("%d", time.Now().Unix())
 
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
 	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
-		logger.Warnw("[podcast] Failed to write script file", "error", err, "path", scriptPath)
+		logger.Warnw("[podcast-daily] Failed to write script file", "error", err, "path", scriptPath)
 	}
 
-	logger.Infow("[podcast] Calling Google TTS", "userId", userID)
-	audioBytes, err := p.callGoogleTTS(context.Background(), script)
+	audioBytes, err := p.callGoogleTTS(ctx, script)
 	if err != nil {
-		logger.Errorw("[podcast] Google TTS failed", "error", err, "userId", userID)
+		fail(fmt.Errorf("google TTS: %w", err))
 		return
 	}
 
 	audioFilename := fmt.Sprintf("%s.ogg", baseFilename)
 	audioPath := fmt.Sprintf("%s/%s", uploadDir, audioFilename)
 	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
-		logger.Errorw("[podcast] Failed to write audio file", "error", err, "path", audioPath)
+		fail(fmt.Errorf("write audio file: %w", err))
 		return
 	}
 
-	logger.Infow("[podcast] Audio file saved", "path", audioPath, "bytes", len(audioBytes))
+	logger.Infow("[podcast-daily] Audio saved", "path", audioPath, "bytes", len(audioBytes))
 
-	sentViaTelegram := p.sendTelegramAudio(userID, audioPath, audioFilename)
-	if !sentViaTelegram {
-		p.sendPodcastEmail(userEmail, userID, audioFilename)
+	// Daily podcast is Telegram-only.
+	if !p.sendTelegramAudio(int64(s.UserID), audioPath, audioFilename) {
+		logger.Warnw("[podcast-daily] Telegram send failed or not linked", "userId", s.UserID)
 	}
+
+	next := NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
+	if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
+		logger.Errorw("[podcast-daily] MarkSent error", "error", dbErr, "scheduleId", s.ID)
+	}
+	logger.Infow("[podcast-daily] Episode complete, next scheduled", "userId", s.UserID, "nextAt", next)
 }
 
-// callGoogleTTS calls the Google Cloud Text-to-Speech API and returns raw OGG Opus bytes.
-// Uses Application Default Credentials locally and a service account JSON in prod.
-// A gcpTTSTimeout deadline is applied on top of the caller's context.
+// ---- Generation helpers -------------------------------------------------------
+
+// ttsChunkMaxBytes is the conservative byte limit per TTS request text field.
+// The API hard-limits at 4000; we use 3500 for a comfortable margin.
+const ttsChunkMaxBytes = 3500
+
+// callGoogleTTS splits the script into ≤3500-byte chunks, synthesises each one
+// sequentially, then concatenates the OGG Opus files via ffmpeg.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
 	defer cancel()
 
 	start := time.Now()
 	defer func() {
-		logging.Logger.Infow("[podcast] Google TTS call completed", "elapsed", time.Since(start).Round(time.Millisecond).String())
+		logging.Logger.Infow("[podcast] Google TTS completed",
+			"elapsed", time.Since(start).Round(time.Millisecond).String())
 	}()
 
-	var httpClient *http.Client
+	httpClient, err := p.buildGCPHTTPClient(ctx)
+	if err != nil {
+		return nil, err
+	}
 
+	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
+	logging.Logger.Infow("[podcast] TTS chunks", "count", len(chunks))
+
+	if len(chunks) == 1 {
+		return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
+	}
+
+	// Multi-chunk: synthesise each part, then stitch with ffmpeg.
+	tmpDir, err := os.MkdirTemp("", "podcast-tts-*")
+	if err != nil {
+		return nil, fmt.Errorf("create temp dir: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	var chunkPaths []string
+	for i, chunk := range chunks {
+		audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
+		if err != nil {
+			return nil, fmt.Errorf("TTS chunk %d: %w", i, err)
+		}
+		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.ogg", i))
+		if err := os.WriteFile(path, audio, 0644); err != nil {
+			return nil, fmt.Errorf("write TTS chunk %d: %w", i, err)
+		}
+		chunkPaths = append(chunkPaths, path)
+	}
+
+	// Build ffmpeg concat-list file.
+	var listBuf strings.Builder
+	for _, path := range chunkPaths {
+		fmt.Fprintf(&listBuf, "file '%s'\n", path)
+	}
+	listPath := filepath.Join(tmpDir, "list.txt")
+	if err := os.WriteFile(listPath, []byte(listBuf.String()), 0644); err != nil {
+		return nil, fmt.Errorf("write ffmpeg list: %w", err)
+	}
+
+	outputPath := filepath.Join(tmpDir, "output.ogg")
+	cmd := exec.CommandContext(ctx, "ffmpeg",
+		"-y",
+		"-f", "concat",
+		"-safe", "0",
+		"-i", listPath,
+		"-c", "copy",
+		outputPath,
+	)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return nil, fmt.Errorf("ffmpeg concat: %w\noutput: %s", err, out)
+	}
+
+	return os.ReadFile(outputPath)
+}
+
+// buildGCPHTTPClient returns an oauth2 HTTP client authenticated for Cloud TTS.
+func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) {
 	if p.Environment == "prod" && p.ServiceAccountPath != "" {
 		credsJSON, err := os.ReadFile(p.ServiceAccountPath)
 		if err != nil {
@@ -376,15 +463,17 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		if err != nil {
 			return nil, fmt.Errorf("parse service account credentials: %w", err)
 		}
-		httpClient = oauth2.NewClient(ctx, creds.TokenSource)
-	} else {
-		creds, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/cloud-platform")
-		if err != nil {
-			return nil, fmt.Errorf("find default credentials (ADC): %w", err)
-		}
-		httpClient = oauth2.NewClient(ctx, creds.TokenSource)
+		return oauth2.NewClient(ctx, creds.TokenSource), nil
 	}
+	creds, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/cloud-platform")
+	if err != nil {
+		return nil, fmt.Errorf("find default credentials (ADC): %w", err)
+	}
+	return oauth2.NewClient(ctx, creds.TokenSource), nil
+}
 
+// callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
+func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
 	const podcastHostPrompt = `Read this podcast script aloud as a warm, confident, and engaging host.
 	Let it be a bit messy, like someone going through series of notes and narrating their thoughts in a natural flow.
 	Speak naturally and conversationally — relaxed but sharp, with comfortable pacing. Do not add, remove, or change any content;
@@ -444,6 +533,92 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	}
 
 	return audioBytes, nil
+}
+
+// splitTextIntoChunks splits text at paragraph (\n\n) boundaries into chunks
+// whose byte length does not exceed maxBytes. Paragraphs that individually exceed
+// maxBytes are further split at sentence-ending punctuation ('. ', '! ', '? ').
+func splitTextIntoChunks(text string, maxBytes int) []string {
+	paragraphs := strings.Split(text, "\n\n")
+
+	var chunks []string
+	var cur strings.Builder
+
+	flush := func() {
+		if cur.Len() > 0 {
+			chunks = append(chunks, cur.String())
+			cur.Reset()
+		}
+	}
+
+	addUnit := func(unit string) {
+		sep := ""
+		if cur.Len() > 0 {
+			sep = " "
+		}
+		if cur.Len()+len(sep)+len(unit) > maxBytes {
+			flush()
+		}
+		cur.WriteString(sep)
+		cur.WriteString(unit)
+	}
+
+	for _, para := range paragraphs {
+		para = strings.TrimSpace(para)
+		if para == "" {
+			continue
+		}
+
+		if len(para) <= maxBytes {
+			// Paragraph fits; try to pack into current chunk.
+			sep := ""
+			if cur.Len() > 0 {
+				sep = "\n\n"
+			}
+			if cur.Len()+len(sep)+len(para) > maxBytes {
+				flush()
+			}
+			if cur.Len() > 0 {
+				cur.WriteString("\n\n")
+			}
+			cur.WriteString(para)
+		} else {
+			// Paragraph too long; flush current and split at sentence boundaries.
+			flush()
+			for _, sentence := range splitAtSentences(para) {
+				addUnit(sentence)
+			}
+		}
+	}
+	flush()
+
+	if len(chunks) == 0 {
+		return []string{text}
+	}
+	return chunks
+}
+
+// splitAtSentences splits text at '. ', '! ', '? ' boundaries.
+func splitAtSentences(text string) []string {
+	var sentences []string
+	remaining := text
+	for len(remaining) > 0 {
+		// Find the earliest sentence-ending boundary.
+		cut := -1
+		for _, delim := range []string{". ", "! ", "? "} {
+			if i := strings.Index(remaining, delim); i >= 0 && (cut < 0 || i < cut) {
+				cut = i + len(delim) - 1 // include the punctuation, exclude the trailing space
+			}
+		}
+		if cut < 0 {
+			// No more boundaries; treat remainder as one sentence.
+			sentences = append(sentences, strings.TrimSpace(remaining))
+			break
+		}
+		sentences = append(sentences, strings.TrimSpace(remaining[:cut+1]))
+		remaining = strings.TrimSpace(remaining[cut+1:])
+	}
+	return sentences
 }
 
 // sendTelegramAudio uploads the generated audio file to the user's Telegram chat.
@@ -582,7 +757,7 @@ func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel stri
 		return
 	}
 
-	script, err := p.generatePodcastScript(context.Background(), userID, articles)
+	script, err := p.generatePodcastScript(context.Background(), userID, articles, PodcastDays)
 	if err != nil {
 		logger.Errorw("[podcast-trigger] Failed to generate podcast script", "error", err, "userId", userID)
 		return
@@ -634,20 +809,31 @@ const maxMarkdownCharsPerArticle = 6000
 
 // generatePodcastScript calls Gemini to write a ready-to-read podcast script (~10 min / ~1400 words).
 // It also fetches all titles from the period to build the opening date + period overview.
-func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId, articles []models.PodcastArticle) (string, error) {
+func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId, articles []models.PodcastArticle, days int) (string, error) {
 	if p.GenAIClient == nil {
 		return "", fmt.Errorf("GenAI client not initialised")
 	}
 
 	// Fetch every title from the period for the opening overview (non-fatal if it fails).
-	allTitles, _ := p.BookmarkModel.GetAllTitlesInPeriod(userID, PodcastDays)
+	allTitles, _ := p.BookmarkModel.GetAllTitlesInPeriod(userID, days)
+
+	var periodLabel string
+	var targetWords int
+	if days == 1 {
+		periodLabel = "today"
+		targetWords = 700
+	} else {
+		periodLabel = fmt.Sprintf("the past %d days", days)
+		targetWords = 1400
+	}
+	targetMinutes := targetWords / 140 // ~140 wpm
 
 	var prompt bytes.Buffer
-
 	epDate := time.Now().UTC().Format("Monday, January 2 2006")
-	fmt.Fprintf(&prompt, "You are writing the script for a personal weekly podcast episode dated %s.\n", epDate)
+	fmt.Fprintf(&prompt, "You are writing the script for a personal podcast episode dated %s.\n", epDate)
+	fmt.Fprintf(&prompt, "This episode covers articles the listener saved %s.\n", periodLabel)
 	prompt.WriteString(`The listener uses Pensive to save articles they want to read later.
-This podcast is their personal reading companion — you have read everything they saved this week
+This podcast is their personal reading companion — you have read everything they saved
 and you are walking them through the highlights.
 
 == TONE & STYLE ==
@@ -660,21 +846,20 @@ and you are walking them through the highlights.
 - Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
 - Never read content verbatim. Narrate and synthesise.
 
-== LENGTH ==
-Target approximately 1 400 words — roughly 10 minutes of listening.
-Fill that space with substance. Stop naturally after the closing; do not pad.
-
-== STRUCTURE ==
+`)
+	fmt.Fprintf(&prompt, "== LENGTH ==\nTarget approximately %d words — roughly %d minutes of listening.\nFill that space with substance. Stop naturally after the closing; do not pad.\n\n", targetWords, targetMinutes)
+	prompt.WriteString(`== STRUCTURE ==
 1. OPENING (~60 words)
    Greet the listener, state today's date.
-   Give a one-sentence overview: how many articles they saved this week and the rough themes.
+   Give a one-sentence overview: how many articles they saved and the rough themes.
    Use the full title list below for this overview, not just the featured articles.
 
 `)
 
 	// Full title list for the opening overview.
 	if len(allTitles) > 0 {
-		fmt.Fprintf(&prompt, "ALL %d ARTICLES SAVED THIS WEEK (titles only — for your opening overview):\n", len(allTitles))
+		fmt.Fprintf(&prompt, "ALL %d ARTICLES SAVED %s (titles only — for your opening overview):\n",
+			len(allTitles), strings.ToUpper(periodLabel))
 		for i, t := range allTitles {
 			if t.SiteName != "" {
 				fmt.Fprintf(&prompt, "%d. %s (%s)\n", i+1, t.Title, t.SiteName)
@@ -736,6 +921,21 @@ Output ONLY the finished spoken script — no stage directions, markdown headers
 	)
 
 	return strings.TrimSpace(result.Text()), nil
+}
+
+// NextDailyFireAt returns the next UTC time when the given hour occurs in the
+// user's timezone. If the hour has already passed today it returns tomorrow's occurrence.
+func NextDailyFireAt(hour int, timezone string) time.Time {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
+	target := time.Date(now.Year(), now.Month(), now.Day(), hour, 0, 0, 0, loc)
+	if !now.Before(target) {
+		target = target.AddDate(0, 0, 1)
+	}
+	return target
 }
 
 // NextPublishAt returns the next occurrence of the given weekday name that is

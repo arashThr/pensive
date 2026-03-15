@@ -7,7 +7,9 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
@@ -436,6 +438,22 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		Telegram: r.FormValue("telegram") == "true",
 	}
 
+	// Daily podcast preferences
+	dailyHour := 8 // default
+	if h, err := strconv.Atoi(r.FormValue("daily_hour")); err == nil && h >= 0 && h <= 23 {
+		dailyHour = h
+	}
+	dailyTz := r.FormValue("daily_timezone")
+	if dailyTz == "" {
+		dailyTz = "UTC"
+	}
+	if _, err := time.LoadLocation(dailyTz); err != nil {
+		dailyTz = "UTC" // reject invalid IANA timezone
+	}
+	prefs.DailyEnabled = r.FormValue("daily_enabled") == "true"
+	prefs.DailyHour = dailyHour
+	prefs.DailyTimezone = dailyTz
+
 	// Validate day
 	validDays := map[string]bool{
 		"sunday": true, "monday": true, "tuesday": true, "wednesday": true,
@@ -452,18 +470,28 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Maintain the podcast schedule row in sync with the preferences.
-	if u.PodcastScheduleRepo != nil {
-		if prefs.Enabled {
-			nextAt := service.NextPublishAt(prefs.Day, 1)
-			if schedErr := u.PodcastScheduleRepo.Upsert(user.ID, nextAt); schedErr != nil {
-				// Non-fatal: log and continue.
-				logger.Errorw("upsert podcast schedule", "error", schedErr)
-			}
-		} else {
-			if schedErr := u.PodcastScheduleRepo.Delete(user.ID); schedErr != nil {
-				logger.Errorw("delete podcast schedule", "error", schedErr)
-			}
+	// Maintain the weekly podcast schedule row in sync with the preferences.
+	if prefs.Enabled {
+		nextAt := service.NextPublishAt(prefs.Day, 1)
+		if schedErr := u.PodcastScheduleRepo.Upsert(user.ID, models.PodcastScheduleTypeWeekly, nextAt); schedErr != nil {
+			// Non-fatal: log and continue.
+			logger.Errorw("upsert podcast schedule", "error", schedErr)
+		}
+	} else {
+		if schedErr := u.PodcastScheduleRepo.Delete(user.ID, models.PodcastScheduleTypeWeekly); schedErr != nil {
+			logger.Errorw("delete podcast schedule", "error", schedErr)
+		}
+	}
+
+	// Maintain the daily podcast schedule.
+	if prefs.DailyEnabled {
+		nextAt := service.NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
+		if schedErr := u.PodcastScheduleRepo.Upsert(user.ID, models.PodcastScheduleTypeDaily, nextAt); schedErr != nil {
+			logger.Errorw("upsert daily podcast schedule", "error", schedErr)
+		}
+	} else {
+		if schedErr := u.PodcastScheduleRepo.Delete(user.ID, models.PodcastScheduleTypeDaily); schedErr != nil {
+			logger.Errorw("delete daily podcast schedule", "error", schedErr)
 		}
 	}
 
