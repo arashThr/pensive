@@ -474,12 +474,12 @@ func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) 
 
 // callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
 func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
-	const podcastHostPrompt = `Read this podcast script aloud as a warm, confident, and engaging host.
-	Let it be a bit messy, like someone going through series of notes and narrating their thoughts in a natural flow.
-	Speak naturally and conversationally — relaxed but sharp, with comfortable pacing. Do not add, remove, or change any content;
-	just deliver the written script as a natural podcast host would.
-	As for your tone, make it warm, witty, and direct. Like a smart friend catching you up over coffee.
-	Speak TO the listener personally`
+	const podcastHostPrompt = "Read this podcast script aloud as a warm, confident, and engaging host. " +
+		"Let it be a bit messy, like someone going through series of notes and narrating their thoughts in a natural flow. " +
+		"Speak naturally and conversationally — relaxed but sharp, with comfortable pacing. " +
+		"Do not add, remove, or change any content; just deliver the written script as a natural podcast host would. " +
+		"As for your tone, make it warm, witty, and direct. Like a smart friend catching you up over coffee. " +
+		"Speak TO the listener personally"
 
 	reqBody := map[string]interface{}{
 		"input": map[string]string{
@@ -844,10 +844,13 @@ and you are walking them through the highlights.
 - Dry humour is welcome; forced jokes are not.
 - No filler openers: never "Certainly!", "Absolutely!", "Great!", "Sure thing!".
 - Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
-- Never read content verbatim. Narrate and synthesise.
+- Never read content verbatim. Narrate and synthesis.
 
 `)
-	fmt.Fprintf(&prompt, "== LENGTH ==\nTarget approximately %d words — roughly %d minutes of listening.\nFill that space with substance. Stop naturally after the closing; do not pad.\n\n", targetWords, targetMinutes)
+	fmt.Fprintf(&prompt, "== LENGTH ==\nTarget for 10 articles: approximately %d words — roughly %d minutes of listening.\n"+
+		"In other words, each article suppose to take a minute or so. It's not about filling the time, "+
+		"but about giving a concise and engaging narrative that respects the listener's time and attention.\n"+
+		"Stop naturally after the closing; do not pad.\n\n", targetWords, targetMinutes)
 	prompt.WriteString(`== STRUCTURE ==
 1. OPENING (~60 words)
    Greet the listener, state today's date.
