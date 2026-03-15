@@ -32,15 +32,15 @@ const (
 	DailyPodcastDays         = 1  // Look back 1 day for bookmarks (daily)
 	PodcastArticleLimit      = 10 // Max 10 articles per podcast
 	PodcastUploadDir         = "uploads/podcasts"
-	PodcastWeeklySummaryDir  = "uploads/podcasts/weekly_summary"
+	PodcastSummaryDir        = "uploads/podcasts/summary"
 	gcpTTSEndpoint           = "https://texttospeech.googleapis.com/v1/text:synthesize"
 	gcpTTSTimeout            = 10 * time.Minute // generous timeout; TTS can be slow for long texts
 	podcastSchedulerInterval = time.Hour
 )
 
-// userPodcastDir returns the upload directory for a specific user's weekly episodes.
+// userPodcastDir returns the upload directory for a specific user's podcast episodes.
 func userPodcastDir(userID int64) string {
-	return fmt.Sprintf("%s/%d", PodcastWeeklySummaryDir, userID)
+	return fmt.Sprintf("%s/%d", PodcastSummaryDir, userID)
 }
 
 // weekdayNumbers maps lowercase day names to time.Weekday values.
@@ -86,7 +86,7 @@ func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filePath := fmt.Sprintf("%s/%d/%s", PodcastWeeklySummaryDir, user.ID, filename)
+	filePath := fmt.Sprintf("%s/%d/%s", PodcastSummaryDir, user.ID, filename)
 	if _, err := os.Stat(filePath); err != nil {
 		logger.Infow("[podcast] Episode file not found", "userId", user.ID, "filename", filename)
 		http.NotFound(w, r)
@@ -172,9 +172,9 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 		}
 	}
 
-	prefs, err := p.UserRepo.GetWeeklySummaryPreferences(s.UserID)
+	prefs, err := p.UserRepo.GetSummaryPreferences(s.UserID)
 	if err != nil {
-		fail(fmt.Errorf("get weekly summary preferences: %w", err))
+		fail(fmt.Errorf("get podcast summary preferences: %w", err))
 		return
 	}
 
@@ -308,7 +308,7 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 		}
 	}
 
-	prefs, err := p.UserRepo.GetWeeklySummaryPreferences(s.UserID)
+	prefs, err := p.UserRepo.GetSummaryPreferences(s.UserID)
 	if err != nil {
 		fail(fmt.Errorf("get preferences: %w", err))
 		return

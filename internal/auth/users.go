@@ -358,7 +358,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 		Email          string
 		IsSubscribed   bool
 		Tokens         []models.ApiToken
-		Preferences    *models.WeeklySummaryPreferences
+		Preferences    *models.SummaryPreferences
 		TelegramLinked bool
 	}
 	data.Email = user.Email
@@ -382,11 +382,11 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 
 	// Get preferences for preferences tab
 	if tab == "preferences" {
-		prefs, err := u.UserService.GetWeeklySummaryPreferences(user.ID)
+		prefs, err := u.UserService.GetSummaryPreferences(user.ID)
 		if err != nil {
-			logger.Errorw("get weekly summary preferences", "error", err)
+			logger.Errorw("get summary preferences", "error", err)
 			// Use defaults if error
-			prefs = &models.WeeklySummaryPreferences{
+			prefs = &models.SummaryPreferences{
 				Enabled:  false,
 				Day:      "sunday",
 				Email:    true,
@@ -420,7 +420,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SavePreferences handles POST /users/preferences to save weekly summary preferences
+// SavePreferences handles POST /users/preferences to save summary preferences
 func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
@@ -431,7 +431,7 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prefs := models.WeeklySummaryPreferences{
+	prefs := models.SummaryPreferences{
 		Enabled:  r.FormValue("enabled") == "true",
 		Day:      r.FormValue("day"),
 		Email:    r.FormValue("email") == "true",
@@ -463,9 +463,9 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		prefs.Day = "sunday"
 	}
 
-	err := u.UserService.UpdateWeeklySummaryPreferences(user.ID, prefs)
+	err := u.UserService.UpdateSummaryPreferences(user.ID, prefs)
 	if err != nil {
-		logger.Errorw("update weekly summary preferences", "error", err)
+		logger.Errorw("update summary preferences", "error", err)
 		http.Error(w, "Failed to save preferences", http.StatusInternalServerError)
 		return
 	}
@@ -495,7 +495,7 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logger.Infow("saved weekly summary preferences", "userId", user.ID, "enabled", prefs.Enabled, "day", prefs.Day)
+	logger.Infow("saved summary preferences", "userId", user.ID, "enabled", prefs.Enabled, "day", prefs.Day)
 	w.WriteHeader(http.StatusOK)
 }
 

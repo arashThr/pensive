@@ -259,8 +259,8 @@ func (us *UserRepo) MarkEmailVerified(userID types.UserId) error {
 	return nil
 }
 
-// WeeklySummaryPreferences contains user preferences for weekly podcast summary
-type WeeklySummaryPreferences struct {
+// SummaryPreferences contains user preferences for podcast summary
+type SummaryPreferences struct {
 	Enabled       bool   `json:"enabled"`
 	Day           string `json:"day"`
 	Email         bool   `json:"email"`
@@ -270,13 +270,13 @@ type WeeklySummaryPreferences struct {
 	DailyTimezone string `json:"daily_timezone"` // IANA timezone, e.g. "America/New_York"
 }
 
-// GetWeeklySummaryPreferences retrieves the user's weekly summary preferences
-func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySummaryPreferences, error) {
-	var prefs WeeklySummaryPreferences
+// GetSummaryPreferences retrieves the user's podcast summary preferences
+func (us *UserRepo) GetSummaryPreferences(userID types.UserId) (*SummaryPreferences, error) {
+	var prefs SummaryPreferences
 	err := us.Pool.QueryRow(context.Background(), `
 		SELECT enabled, day, email, telegram,
 		       daily_enabled, daily_hour, daily_timezone
-		FROM weekly_summaries WHERE user_id = $1
+		FROM summaries_pref WHERE user_id = $1
 	`, userID).Scan(
 		&prefs.Enabled, &prefs.Day, &prefs.Email, &prefs.Telegram,
 		&prefs.DailyEnabled, &prefs.DailyHour, &prefs.DailyTimezone,
@@ -284,7 +284,7 @@ func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySum
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			// Return defaults if no preferences exist yet
-			return &WeeklySummaryPreferences{
+			return &SummaryPreferences{
 				Enabled:       false,
 				Day:           "sunday",
 				Email:         true,
@@ -294,15 +294,15 @@ func (us *UserRepo) GetWeeklySummaryPreferences(userID types.UserId) (*WeeklySum
 				DailyTimezone: "UTC",
 			}, nil
 		}
-		return nil, fmt.Errorf("get weekly summary preferences: %w", err)
+		return nil, fmt.Errorf("get podcast summary preferences: %w", err)
 	}
 	return &prefs, nil
 }
 
-// UpdateWeeklySummaryPreferences updates the user's weekly summary preferences
-func (us *UserRepo) UpdateWeeklySummaryPreferences(userID types.UserId, prefs WeeklySummaryPreferences) error {
+// UpdateSummaryPreferences updates the user's podcast summary preferences
+func (us *UserRepo) UpdateSummaryPreferences(userID types.UserId, prefs SummaryPreferences) error {
 	_, err := us.Pool.Exec(context.Background(), `
-		INSERT INTO weekly_summaries
+		INSERT INTO summaries_pref
 		    (user_id, enabled, day, email, telegram, daily_enabled, daily_hour, daily_timezone, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
 		ON CONFLICT (user_id) DO UPDATE
@@ -317,7 +317,7 @@ func (us *UserRepo) UpdateWeeklySummaryPreferences(userID types.UserId, prefs We
 	`, userID, prefs.Enabled, prefs.Day, prefs.Email, prefs.Telegram,
 		prefs.DailyEnabled, prefs.DailyHour, prefs.DailyTimezone)
 	if err != nil {
-		return fmt.Errorf("update weekly summary preferences: %w", err)
+		return fmt.Errorf("update summary preferences: %w", err)
 	}
 	return nil
 }
