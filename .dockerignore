@@ -9,3 +9,8 @@ docker-compose*.yml
 .git
 node_modules/*
 *.log
+
+# Local data directories
+data/
+uploads/
+credentials/
