@@ -156,7 +156,7 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 
 	cfg.Podcast = PodcastConfig{
 		GCPProjectID:       GetEnvWithDefault("GCP_PROJECT_ID", ""),
-		ServiceAccountPath: GetEnvWithDefault("GCP_SERVICE_ACCOUNT_PATH", ""),
+		ServiceAccountPath: GetEnvWithDefault("GCP_SERVICE_ACCOUNT_PATH", "/app/credentials/service-account.json"),
 	}
 
 	return &cfg, nil
