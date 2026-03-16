@@ -28,14 +28,16 @@ import (
 )
 
 const (
-	PodcastDays              = 7  // Look back 7 days for bookmarks (weekly)
-	DailyPodcastDays         = 1  // Look back 1 day for bookmarks (daily)
-	PodcastArticleLimit      = 10 // Max 10 articles per podcast
-	PodcastUploadDir         = "uploads/podcasts"
-	PodcastSummaryDir        = "uploads/podcasts/summary"
-	gcpTTSEndpoint           = "https://texttospeech.googleapis.com/v1/text:synthesize"
-	gcpTTSTimeout            = 10 * time.Minute // generous timeout; TTS can be slow for long texts
-	podcastSchedulerInterval = time.Hour
+	PodcastDays         = 7  // Look back 7 days for bookmarks (weekly)
+	DailyPodcastDays    = 1  // Look back 1 day for bookmarks (daily)
+	PodcastArticleLimit = 10 // Max 10 articles per podcast
+	PodcastUploadDir    = "uploads/podcasts"
+	PodcastSummaryDir   = "uploads/podcasts/summary"
+	gcpTTSEndpoint      = "https://texttospeech.googleapis.com/v1/text:synthesize"
+	gcpTTSTimeout       = 10 * time.Minute // generous timeout; TTS can be slow for long texts
+
+	// TODO: Increase it to an hour when testing it done
+	podcastSchedulerInterval = time.Minute
 )
 
 // userPodcastDir returns the upload directory for a specific user's podcast episodes.
