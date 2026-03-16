@@ -17,6 +17,7 @@ import (
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
+	"github.com/arashthr/pensive/internal/config"
 	"github.com/arashthr/pensive/internal/errors"
 	"github.com/arashthr/pensive/internal/logging"
 	"github.com/arashthr/pensive/internal/models"
@@ -66,7 +67,7 @@ type Podcast struct {
 	GCPProjectID        string
 	ServiceAccountPath  string // path to service-account.json; used in prod
 	TelegramToken       string
-	Environment         string // "prod" uses service account; anything else uses ADC
+	Environment         config.AppEnv // "production" uses service account; anything else uses ADC
 	Domain              string
 }
 
@@ -456,7 +457,7 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 
 // buildGCPHTTPClient returns an oauth2 HTTP client authenticated for Cloud TTS.
 func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) {
-	if p.Environment == "prod" && p.ServiceAccountPath != "" {
+	if p.Environment == config.EnvProduction && p.ServiceAccountPath != "" {
 		credsJSON, err := os.ReadFile(p.ServiceAccountPath)
 		if err != nil {
 			return nil, fmt.Errorf("read service account: %w", err)

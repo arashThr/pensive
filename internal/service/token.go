@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
+	"github.com/arashthr/pensive/internal/config"
 	"github.com/arashthr/pensive/internal/models"
 )
 
 type Token struct {
 	TokenModel  *models.TokenRepo
 	UserModel   *models.UserRepo
-	Environment string
+	Environment config.AppEnv
 }
 
 func (t *Token) AuthenticatedPing(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +38,7 @@ func (t *Token) AuthenticatedPing(w http.ResponseWriter, r *http.Request) {
 func (t *Token) IssueTokenWithPassword(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 
-	if strings.ToLower(t.Environment) == "production" {
+	if t.Environment == config.EnvProduction {
 		_ = writeErrorResponse(w, http.StatusForbidden, ErrorResponse{
 			Code:    "DISABLED",
 			Message: "Token issuance by password is disabled in production",

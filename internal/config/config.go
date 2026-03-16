@@ -4,8 +4,16 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
+)
+
+type AppEnv string
+
+const (
+	EnvDevelopment AppEnv = "development"
+	EnvProduction  AppEnv = "production"
 )
 
 type SMTPConfig struct {
@@ -58,7 +66,7 @@ type LoggerConfig struct {
 }
 
 type AppConfig struct {
-	Environment string
+	Environment AppEnv
 	Domain      string
 	PSQL        PostgresConfig
 	SMTP        SMTPConfig
@@ -90,7 +98,11 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	}
 
 	cfg.Domain = GetEnvOrDie("DOMAIN")
-	cfg.Environment = GetEnvOrDie("ENVIRONMENT")
+	if strings.EqualFold(GetEnvOrDie("ENVIRONMENT"), "production") {
+		cfg.Environment = EnvProduction
+	} else {
+		cfg.Environment = EnvDevelopment
+	}
 
 	// DB
 	cfg.PSQL = DefaultPostgresConfig()
