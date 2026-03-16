@@ -287,6 +287,7 @@ func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
 		logger.Errorw("[podcast-daily] GetDue failed", "error", err)
 		return
 	}
+	logger.Debugf("[podcast-daily] Found %d due schedules", len(due))
 	for _, schedule := range due {
 		if err := p.PodcastScheduleRepo.MarkProcessing(schedule.ID); err != nil {
 			if errors.Is(err, errors.ErrNotFound) {
