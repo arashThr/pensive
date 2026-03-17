@@ -32,7 +32,7 @@
         </ul>
         {{if not .IsSubscribed}}
         <div class="mt-8">
-          <a href="/signup" class="inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary">Get started free</a>
+          <a href="/signup" class="inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary">Get started free</a>
         </div>
         {{end}}
       </div>
@@ -52,19 +52,19 @@
         </ul>
         {{if .IsSubscribed}}
         <div class="mt-8">
-          <a href="/payments/portal-session" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage subscription</a>
+          <a href="/payments/portal-session" class="inline-flex w-full justify-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Manage subscription</a>
         </div>
         {{else}}
           {{if isSubscriptionEnabled}}
           <div class="mt-8">
             <form action="/payments/create-checkout-session" method="post">
               {{csrfField}}
-              <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Subscribe now</button>
+              <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Subscribe now</button>
             </form>
           </div>
           {{else}}
           <div class="mt-8">
-            <button type="button" class="inline-flex w-full cursor-not-allowed justify-center rounded-lg bg-secondary px-6 py-3 font-semibold text-slate-500 opacity-75" disabled>Subscribe (coming soon)</button>
+            <button type="button" class="inline-flex w-full cursor-not-allowed justify-center rounded-lg bg-secondary px-6 py-3 font-semibold text-secondary opacity-75" disabled>Subscribe (coming soon)</button>
           </div>
           {{end}}
         {{end}}
@@ -74,19 +74,19 @@
 
   <!-- Already Subscribed Notice -->
   {{if .IsSubscribed}}
-    <div class="mb-8 rounded-lg border border-emerald-400/20 bg-emerald-500/10 p-8 text-center">
+    <div class="mb-8 rounded-lg border border-main bg-secondary p-8 text-center">
       <h3 class="font-semibold mb-2 text-green-300">You're all set with premium!</h3>
       <p class="mb-6 text-green-200">Enjoy 100 bookmarks per day, 10 AI questions per day, and priority support.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/payments/portal-session" class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage billing</a>
-        <a href="/home" class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary">Start exploring</a>
+        <a href="/payments/portal-session" class="rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Manage billing</a>
+        <a href="/home" class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary">Start exploring</a>
       </div>
     </div>
   {{end}}
 
   <!-- Navigation -->
   <div class="mt-8 text-center">
-    <a href="/home" class="font-medium text-secondary transition-colors hover:text-violet-100">← Back to search</a>
+    <a href="/home" class="font-medium text-secondary transition-colors hover:text-main">← Back to search</a>
   </div>
 </div>
 

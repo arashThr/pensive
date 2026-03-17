@@ -15,7 +15,7 @@
       <select 
         id="mobile-tab-select"
         name="tab"
-        class="w-full rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+        class="w-full rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main"
         hx-get="/users/tab-content"
         hx-target="#tab-content"
         hx-swap="innerHTML"
@@ -101,7 +101,7 @@
         
         <!-- Loading State -->
         <div class="text-center py-16">
-          <div class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-white/20 border-t-violet-300"></div>
+          <div class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-main border-t-secondary"></div>
           <p class="mt-4 font-medium text-secondary">Loading...</p>
         </div>
         
@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabButtons = document.querySelectorAll('.tab-button');
   const mobileSelect = document.getElementById('mobile-tab-select');
 
-  const activeClasses = ['active', 'bg-violet-500/20', 'text-main', 'ring-1', 'ring-inset', 'ring-violet-400/30'];
-  const inactiveRemoveClasses = ['active', 'bg-violet-500/20', 'text-main', 'ring-1', 'ring-inset', 'ring-violet-400/30'];
+  const activeClasses = ['active', 'bg-main', 'text-main', 'ring-1'];
+  const inactiveRemoveClasses = ['active', 'bg-main', 'text-main', 'ring-1'];
   const inactiveAddClasses = ['hover:bg-secondary', 'text-secondary'];
   
   // Desktop tab switching

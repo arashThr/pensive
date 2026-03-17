@@ -38,7 +38,7 @@
                     {{if $token.LastUsedAt}}
                       {{$token.LastUsedAt.Format "Jan 2, 2006"}}
                     {{else}}
-                      <span class="text-slate-500">Never</span>
+                      <span class="text-secondary">Never</span>
                     {{end}}
                   </td>
                   <td class="px-6 py-4 text-right">
@@ -79,7 +79,7 @@
                   <div class="text-sm space-y-1 pl-11">
                     <div class="text-secondary">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
                     <div class="text-secondary">
-                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-slate-500">Never</span>{{end}}
+                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-secondary">Never</span>{{end}}
                     </div>
                   </div>
                 </div>
@@ -104,7 +104,7 @@
       </div>
       <div class="mt-4 rounded-lg border border-amber-400/20 bg-amber-500/10 p-4">
         <div class="flex items-start gap-3">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="mt-0.5 h-5 w-5 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
           <p class="text-sm text-amber-200">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
@@ -120,7 +120,7 @@
         </div>
         <h3 class="text-xl font-bold mb-3 text-main">No tokens connected</h3>
         <p class="mx-auto mb-8 max-w-sm text-secondary">Connect apps and services to save and access your bookmarks.</p>
-        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
+        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>

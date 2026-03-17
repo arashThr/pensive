@@ -34,15 +34,15 @@
 </div>
 
 <!-- Delete Content Modal -->
-<div id="delete-content-modal" class="fixed inset-0 bg-secondary/70 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-main bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
+<div id="delete-content-modal" class="fixed inset-0 bg-main/80 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-main bg-main/80 p-8 max-w-md mx-4">
     <h3 class="text-xl font-semibold text-main mb-4">Confirm content deletion</h3>
     <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
     <p class="text-sm mb-6 text-red-200 font-semibold">This action cannot be undone. Have you backed up your data?</p>
     
     <div class="flex gap-4">
       <button
-        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary"
+        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary"
         onclick="hideDeleteContentModal()"
       >
         Cancel
@@ -61,15 +61,15 @@
 </div>
 
 <!-- Delete Account Modal -->
-<div id="delete-account-modal" class="fixed inset-0 bg-secondary/70 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-main bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
+<div id="delete-account-modal" class="fixed inset-0 bg-main/80 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-main bg-main/80 p-8 max-w-md mx-4">
     <h3 class="text-xl font-semibold text-main mb-4">Confirm account deletion</h3>
     <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
     <p class="text-sm mb-6 text-red-200 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
     
     <div class="flex gap-4">
       <button
-        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary"
+        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary"
         onclick="hideDeleteAccountModal()"
       >
         Cancel

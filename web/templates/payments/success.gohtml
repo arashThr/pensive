@@ -8,11 +8,11 @@
       <p class="text-sm text-secondary mb-8">You'll receive an email confirmation shortly with all the details.</p>
 
       <!-- Success Actions -->
-      <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 mb-6 text-left">
+      <div class="bg-secondary border border-main rounded-lg p-6 mb-6 text-left">
         <div class="flex items-center gap-2 mb-3">
-          <span class="font-semibold text-emerald-200">Premium features now active</span>
+          <span class="font-semibold text-main">Premium features now active</span>
         </div>
-        <p class="text-sm text-emerald-100">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
+        <p class="text-sm text-main">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
       </div>
 
     <!-- Billing Management -->
@@ -20,7 +20,7 @@
         <form action="/payments/create-portal-session" method="POST">
           {{csrfField}}
           <input type="hidden" name="session_id" value="{{.SessionId}}" />
-          <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-main font-semibold py-3 px-6 rounded-lg transition-colors">
+          <button type="submit" class="w-full bg-main border border-main hover:bg-secondary text-main font-semibold py-3 px-6 rounded-lg transition-colors">
             Manage billing & subscription
           </button>
         </form>
