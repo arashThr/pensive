@@ -386,8 +386,15 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "web"))
 		r.Use(csrfMw)
 
-		r.Get("/", web.StaticHandler(
-			"Home",
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			if usercontext.User(r.Context()) != nil {
+				http.Redirect(w, r, "/home", http.StatusSeeOther)
+			} else {
+				http.Redirect(w, r, "/start", http.StatusSeeOther)
+			}
+		})
+		r.Get("/start", web.StaticHandler(
+			"Welcome to Pensive",
 			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/contact", web.StaticHandler(
