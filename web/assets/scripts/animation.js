@@ -46,8 +46,8 @@ function draw(ts) {
   ctx.clearRect(0, 0, W, H);
 
   const grd = ctx.createRadialGradient(CX, CY, 10, CX, CY, R);
-  grd.addColorStop(0, 'rgba(109,40,217,0.08)');
-  grd.addColorStop(0.6, 'rgba(109,40,217,0.04)');
+  grd.addColorStop(0, 'rgba(120,120,120,0.08)');
+  grd.addColorStop(0.6, 'rgba(100,100,100,0.04)');
   grd.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = grd;
   ctx.beginPath();
@@ -83,16 +83,16 @@ function draw(ts) {
   ctx.closePath();
 
   const waveGrd = ctx.createLinearGradient(CX-R, CY, CX+R, CY);
-  waveGrd.addColorStop(0, 'rgba(167,139,250,0.55)');
-  waveGrd.addColorStop(0.5, 'rgba(139,92,246,0.85)');
-  waveGrd.addColorStop(1, 'rgba(167,139,250,0.55)');
+  waveGrd.addColorStop(0, 'rgba(180,180,180,0.55)');
+  waveGrd.addColorStop(0.5, 'rgba(120,120,120,0.85)');
+  waveGrd.addColorStop(1, 'rgba(180,180,180,0.55)');
   ctx.strokeStyle = waveGrd;
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   const fillGrd = ctx.createRadialGradient(CX, CY, 0, CX, CY, R);
-  fillGrd.addColorStop(0, 'rgba(109,40,217,0.06)');
-  fillGrd.addColorStop(1, 'rgba(0,0,0,0)');
+  fillGrd.addColorStop(0, 'rgba(120,120,120,0.06)');
+  fillGrd.addColorStop(1, 'rgba(40,40,40,0)');
   ctx.fillStyle = fillGrd;
   ctx.fill();
 

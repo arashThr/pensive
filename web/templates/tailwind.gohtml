@@ -8,35 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  {{if isProduction}}
-    <link rel="stylesheet" href="/assets/style.css" />
-    {{if shouldUseAnalytics}}
-      <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
-    {{end}}
-  {{else}}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              'sans': ['IBM Plex Sans', 'system-ui', 'sans-serif'],
-            }
-          }
-        }
-      }
-    </script>
+  <link rel="stylesheet" href="/assets/style.css" />
+  {{if shouldUseAnalytics}}
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{end}}
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 flex flex-col font-sans relative overflow-x-hidden">
-  <!-- Subtle background blobs (kept minimal on purpose) -->
-  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div class="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-violet-500/10 blur-3xl"></div>
-    <div class="absolute -bottom-32 right-1/4 h-96 w-96 rounded-full bg-violet-400/5 blur-3xl"></div>
-  </div>
-  
+<body class="min-h-screen bg-main flex flex-col font-sans relative overflow-x-hidden">
+
   <!-- Header -->
-  <header class="bg-slate-950/80 backdrop-blur border-b border-white/10 sticky top-0 z-50">
+  <header class="bg-main border-b border-main sticky top-0 z-50">
     <div class="px-4 sm:px-6 max-w-6xl mx-auto">
       <div class="flex items-center justify-between h-16">
         
@@ -44,8 +24,8 @@
         <div class="flex items-center gap-3 relative z-10">
           <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/assets/title-logo.png" class="h-6" />
-            <div class="font-bold text-lg text-white">
-              Pensive <span class="text-xs font-medium text-violet-200 bg-violet-500/10 px-2 py-1 rounded-full border border-violet-500/20">Beta</span>
+            <div class="font-bold text-lg text-main">
+              Pensive <span class="text-xs font-medium accent bg-secondary px-2 py-1 rounded-full border border-main">Beta</span>
             </div>
           </a>
         </div>
@@ -53,24 +33,24 @@
         {{if currentUser}}
           <!-- Desktop Navigation -->
           <div class="hidden md:flex items-center gap-6 relative z-10">
-            <a href="/home" class="text-slate-300 hover:text-white font-medium transition-colors">Home</a>
-            <a href="/integrations" class="text-slate-300 hover:text-white font-medium transition-colors">Extensions</a>
+            <a href="/home" class="text-secondary hover:text-main font-medium transition-colors">Home</a>
+            <a href="/integrations" class="text-secondary hover:text-main font-medium transition-colors">Extensions</a>
             
             <!-- Account Menu -->
             <div class="relative">
-              <button id="account-menu" class="flex items-center gap-1 text-slate-300 hover:text-white font-medium transition-colors">
+              <button id="account-menu" class="flex items-center gap-1 border border-main text-main px-4 py-2 font-semibold rounded-lg hover:bg-secondary transition-colors text-sm">
                 Account
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
 
-              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-slate-900/95 backdrop-blur border border-white/10 rounded-lg shadow-lg z-50">
-                <a href="/users/me" class="block px-4 py-3 text-slate-200 hover:bg-white/5 transition-colors rounded-t-lg">Settings</a>
-                <hr class="border-white/10">
+              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-main border border-main rounded-lg shadow-lg z-50">
+                <a href="/users/me" class="block px-4 py-3 text-main hover:bg-secondary transition-colors rounded-t-lg">Settings</a>
+                <hr class="border-main">
                 <form action="/signout" method="post" class="block">
                   {{csrfField}}
-                  <button type="submit" class="w-full text-left px-4 py-3 text-slate-200 hover:bg-white/5 transition-colors rounded-b-lg">
+                  <button type="submit" class="w-full text-left px-4 py-3 text-main hover:bg-secondary transition-colors rounded-b-lg">
                     Sign out
                   </button>
                 </form>
@@ -79,7 +59,7 @@
           </div>
 
           <!-- Mobile Menu Button -->
-          <button id="mobile-menu-button" class="md:hidden p-2 text-slate-300 hover:text-white transition-colors">
+          <button id="mobile-menu-button" class="md:hidden p-2 text-secondary hover:text-main transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
@@ -87,24 +67,24 @@
 
         {{else}}
           <!-- Logged Out Navigation -->
-          <div class="flex items-center gap-3 sm:gap-4 relative z-10">
-            <a href="/signin" class="text-slate-300 hover:text-white font-medium transition-colors text-sm sm:text-base">Sign in</a>
-            <a href="/signup" class="bg-violet-600 text-white px-3 py-2 sm:px-4 font-semibold rounded-lg hover:bg-violet-500 transition-colors text-sm sm:text-base">Sign up</a>
+          <div class="flex items-center gap-4">
+            <a href="/signin" class="text-secondary hover:text-main font-medium transition-colors text-sm">Sign in</a>
+            <a href="/signup" class="border border-main text-main px-4 py-2 font-semibold rounded-lg hover:bg-secondary transition-colors text-sm">Sign up</a>
           </div>
         {{end}}
       </div>
 
       {{if currentUser}}
         <!-- Mobile Navigation Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-white/10 bg-slate-900/95 backdrop-blur">
+        <div id="mobile-menu" class="hidden md:hidden border-t border-main bg-main">
           <div class="py-2 space-y-1 px-4 sm:px-6">
-            <a href="/home" class="block py-3 px-4 text-slate-200 hover:bg-white/5 transition-colors rounded-lg">Home</a>
-            <a href="/integrations" class="block py-3 px-4 text-slate-200 hover:bg-white/5 transition-colors rounded-lg">Extensions</a>
-            <a href="/users/me" class="block py-3 px-4 text-slate-200 hover:bg-white/5 transition-colors rounded-lg">Settings</a>
-            <hr class="border-white/10 my-2">
+            <a href="/home" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Home</a>
+            <a href="/integrations" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Extensions</a>
+            <a href="/users/me" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Settings</a>
+            <hr class="border-main my-2">
             <form action="/signout" method="post">
               {{csrfField}}
-              <button type="submit" class="block py-3 px-4 text-slate-200 hover:bg-white/5 transition-colors w-full text-left rounded-lg">
+              <button type="submit" class="block py-3 px-4 text-main hover:bg-secondary transition-colors w-full text-left rounded-lg">
                 Sign out
               </button>
             </form>
@@ -118,20 +98,20 @@
   {{if messages}}
     <div class="px-6 py-4 max-w-4xl mx-auto">
       {{range messages}}
-        <div class="{{if .IsError}}bg-red-500/10 border border-red-500/30 text-red-200{{else}}bg-sky-500/10 border border-sky-500/30 text-sky-200{{end}} p-4 mb-4 rounded-lg flex items-start justify-between">
+        <div class="bg-secondary border border-main text-main p-4 mb-4 rounded-lg flex items-start justify-between">
           <div class="flex items-start gap-3">
             {{if .IsError}}
-              <svg class="w-5 h-5 text-red-300 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-secondary mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
               </svg>
             {{else}}
-              <svg class="w-5 h-5 text-sky-300 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-5 h-5 text-secondary mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
               </svg>
             {{end}}
             <span class="font-medium">{{.Message}}</span>
           </div>
-          <button onclick="closeAlert(event)" class="text-slate-300 hover:text-white transition-colors">
+          <button onclick="closeAlert(event)" class="text-secondary hover:text-main transition-colors">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -147,51 +127,51 @@
 {{define "footer"}}
   </main>
 
-  <footer class="border-t border-white/10 bg-slate-950/60 backdrop-blur py-8 sm:py-12 mt-20 relative z-10">
+  <footer class="border-t border-main bg-main py-8 sm:py-12 mt-20 relative z-10">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
       <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
         <!-- Brand -->
         <div class="flex items-center gap-3">
           <img src="/assets/title-logo.png" class="h-6" />
           <div>
-            <div class="font-bold text-lg text-white">Pensive</div>
-            <div class="text-sm text-slate-400">Your searchable memory of the web</div>
+            <div class="font-bold text-lg text-main">Pensive</div>
+            <div class="text-sm text-secondary">Your searchable memory of the web</div>
           </div>
         </div>
         
         <!-- Links -->
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 text-sm w-full lg:w-auto">
           <div>
-            <h4 class="font-semibold text-white mb-3">Resources</h4>
+            <h4 class="font-semibold text-main mb-3">Resources</h4>
             <div class="space-y-2">
-              <a href="/faq" class="block text-slate-400 hover:text-white transition-colors">FAQ</a>
-              <a href="/contact" class="block text-slate-400 hover:text-white transition-colors">Contact</a>
-              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">Blog</a>
+              <a href="/faq" class="block text-secondary hover:text-main transition-colors">FAQ</a>
+              <a href="/contact" class="block text-secondary hover:text-main transition-colors">Contact</a>
+              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Blog</a>
             </div>
           </div>
 
           <div>
-            <h4 class="font-semibold text-white mb-3">Extensions</h4>
+            <h4 class="font-semibold text-main mb-3">Extensions</h4>
             <div class="space-y-2">
-              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">Chrome</a>
-              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">Firefox</a>
-              <a href="https://t.me/GetPensiveBot" class="block text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
+              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Chrome</a>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Firefox</a>
+              <a href="https://t.me/GetPensiveBot" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
             </div>
           </div>
 
           <div>
-            <h4 class="font-semibold text-white mb-3">Project</h4>
+            <h4 class="font-semibold text-main mb-3">Project</h4>
             <div class="space-y-2">
-              <a href="https://github.com/arashThr/pensive" class="block text-slate-400 hover:text-white transition-colors" target="_blank" rel="noopener">GitHub</a>
-              <a href="/privacy" class="block text-slate-400 hover:text-white transition-colors">Privacy</a>
+              <a href="https://github.com/arashThr/pensive" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">GitHub</a>
+              <a href="/privacy" class="block text-secondary hover:text-main transition-colors">Privacy</a>
             </div>
           </div>
         </div>
       </div>
       
-      <hr class="border-white/10 my-6 sm:my-8">
+      <hr class="border-main my-6 sm:my-8">
 
-      <div class="text-sm text-slate-400 text-center sm:text-left">
+      <div class="text-sm text-secondary text-center sm:text-left">
         © 2026 Pensive. Built with care for developers and researchers.
       </div>
     </div>
@@ -240,7 +220,7 @@
   <div class="mt-12 flex justify-between items-center">
     {{if gt .Pages.Current 1}}
       <a href="?page={{.Pages.Previous}}"
-       class="inline-flex items-center gap-2 py-2 px-4 border border-white/10 bg-white/5 rounded-lg text-sm font-medium text-slate-200 hover:bg-white/10 hover:border-white/20 hover:text-white transition-colors">
+       class="inline-flex items-center gap-2 py-2 px-4 border border-main bg-main rounded-lg text-sm font-medium text-secondary hover:bg-secondary hover:text-main transition-colors">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
       </svg>
@@ -250,11 +230,11 @@
       <span class="invisible py-2 px-4"></span>
     {{end}}
 
-    <span class="text-sm font-medium text-slate-400">Page {{.Pages.Current}}</span>
+    <span class="text-sm font-medium text-secondary">Page {{.Pages.Current}}</span>
 
     {{if .MorePages}}
       <a href="?page={{.Pages.Next}}"
-       class="inline-flex items-center gap-2 py-2 px-4 border border-white/10 bg-white/5 rounded-lg text-sm font-medium text-slate-200 hover:bg-white/10 hover:border-white/20 hover:text-white transition-colors">
+       class="inline-flex items-center gap-2 py-2 px-4 border border-main bg-main rounded-lg text-sm font-medium text-secondary hover:bg-secondary hover:text-main transition-colors">
       Next
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>

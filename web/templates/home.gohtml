@@ -1,61 +1,37 @@
 {{template "header" .}}
 
-<div class="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 max-w-6xl mx-auto">
+<div class="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 max-w-6xl mx-auto bg-main text-main">
 
   <!-- Hero -->
   <section class="grid lg:grid-cols-2 gap-12 lg:gap-14 items-center">
     <div>
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-white">
-        Your searchable <span class="text-violet-200">memory</span> of the web
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-main">
+        Your searchable <span class="accent">memory</span> of the web
       </h1>
-      <p class="mt-4 text-lg text-slate-300 max-w-prose">
+      <p class="mt-4 text-lg text-secondary max-w-prose">
         Smart bookmarking with full-content capture and fast search.
       </p>
 
       <div class="mt-8 flex flex-col sm:flex-row gap-3">
-        <a href="/signup" class="inline-flex justify-center items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors shadow-lg shadow-violet-600/25">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+        <a href="/signup" class="inline-flex justify-center items-center gap-2 rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
           Start saving for free
         </a>
-        <a href="/signin" class="inline-flex justify-center items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-white hover:bg-white/10 transition-colors">
-          Sign in
+        <a href="/signin" class="inline-flex justify-center items-center gap-2 rounded-lg px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
+          Sign in →
         </a>
       </div>
 
-      <div class="mt-8 space-y-3">
-        <div class="flex items-center gap-3 text-sm text-slate-300">
-          <div class="flex-shrink-0 w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center">
-            <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          Full content capture (not just titles)
-        </div>
-        <div class="flex items-center gap-3 text-sm text-slate-300">
-          <div class="flex-shrink-0 w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center">
-            <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          Search across everything you saved
-        </div>
-        <div class="flex items-center gap-3 text-sm text-slate-300">
-          <div class="flex-shrink-0 w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center">
-            <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          Save from browser + Telegram
-        </div>
-      </div>
+      <ul class="mt-8 space-y-2 text-sm text-secondary">
+        <li>— Full content capture (not just titles)</li>
+        <li>— Search across everything you saved</li>
+        <li>— Save from browser + Telegram</li>
+      </ul>
     </div>
 
     <div class="relative">
       <!-- Subtle glow effect -->
-      <div class="absolute -inset-1 bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-xl blur-xl"></div>
-      <div class="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
+      <div class="absolute -inset-1 bg-secondary rounded-xl blur-xl"></div>
+      <div class="relative rounded-xl overflow-hidden border border-main bg-main">
         <div class="aspect-video">
           <iframe
             class="w-full h-full"
@@ -73,71 +49,50 @@
   <!-- Save from anywhere (Integrations) -->
   <section id="integrations" class="mt-16 sm:mt-20">
     <div class="text-center max-w-2xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white">Save from anywhere</h2>
-      <p class="mt-3 text-slate-400">One-click saving on desktop browsers, or forward links from your phone via Telegram.</p>
+      <h2 class="text-2xl sm:text-3xl font-bold text-main">Save from anywhere</h2>
+      <p class="mt-3 text-secondary">One-click saving on desktop browsers, or forward links from your phone via Telegram.</p>
     </div>
 
-    <div class="mt-10 grid sm:grid-cols-3 gap-6">
+    <div class="mt-10 grid sm:grid-cols-3 gap-4">
       <!-- Chrome -->
       <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" 
-         target="_blank" rel="noopener"
-         class="group relative flex flex-col items-center p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all">
-        <div class="w-16 h-16 rounded-2xl p-[2px] mb-4">
-          <div class="w-full h-full rounded-2xl flex items-center justify-center">
-            <img src="/assets/icons/chrome.svg"/>
-          </div>
+        target="_blank" rel="noopener"
+        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
+        <div class="w-14 h-14 mb-4 flex items-center justify-center">
+          <img src="/assets/icons/chrome.svg" class="w-full h-full"/>
         </div>
-        <h3 class="text-lg font-semibold text-white">Chrome</h3>
-        <p class="mt-1 text-sm text-slate-400 text-center">Save with one click from Chrome</p>
-        <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-violet-300 group-hover:text-violet-200">
-          Install extension
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
+        <h3 class="text-base font-semibold text-main">Chrome</h3>
+        <p class="mt-1 text-sm text-secondary text-center">Save with one click</p>
+        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Install →</span>
       </a>
 
       <!-- Firefox -->
       <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" 
-         target="_blank" rel="noopener"
-         class="group relative flex flex-col items-center p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all">
-        <div class="w-16 h-16 rounded-2xl p-[2px] mb-4">
-          <div class="w-full h-full rounded-2xl flex items-center justify-center">
-            <img src="/assets/icons/firefox.svg"/>
-          </div>
+        target="_blank" rel="noopener"
+        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
+        <div class="w-14 h-14 mb-4 flex items-center justify-center">
+          <img src="/assets/icons/firefox.svg" class="w-full h-full"/>
         </div>
-        <h3 class="text-lg font-semibold text-white">Firefox</h3>
-        <p class="mt-1 text-sm text-slate-400 text-center">Works seamlessly with Firefox</p>
-        <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-violet-300 group-hover:text-violet-200">
-          Get add-on
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
+        <h3 class="text-base font-semibold text-main">Firefox</h3>
+        <p class="mt-1 text-sm text-secondary text-center">Works seamlessly</p>
+        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Get add-on →</span>
       </a>
 
       <!-- Telegram -->
       <a href="https://t.me/GetPensiveBot" 
-         target="_blank" rel="noopener"
-         class="group relative flex flex-col items-center p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/20 transition-all">
-        <div class="w-16 h-16 rounded-2xl p-[4px] mb-4">
-          <div class="w-full h-full rounded-2xl flex items-center justify-center">
-            <img src="/assets/icons/telegram.svg"/>
-          </div>
+        target="_blank" rel="noopener"
+        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
+        <div class="w-14 h-14 mb-4 flex items-center justify-center">
+          <img src="/assets/icons/telegram.svg" class="w-full h-full"/>
         </div>
-        <h3 class="text-lg font-semibold text-white">Telegram</h3>
-        <p class="mt-1 text-sm text-slate-400 text-center">Forward links from mobile</p>
-        <span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-violet-300 group-hover:text-violet-200">
-          Open @GetPensiveBot
-          <svg class="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </span>
+        <h3 class="text-base font-semibold text-main">Telegram</h3>
+        <p class="mt-1 text-sm text-secondary text-center">Forward links from mobile</p>
+        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Open bot →</span>
       </a>
     </div>
 
     <div class="mt-6 text-center">
-      <a href="/integrations" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
+      <a href="/integrations" class="inline-flex items-center gap-2 text-sm text-secondary hover:text-main transition-colors">
         Learn more about integrations
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -148,45 +103,41 @@
 
   <!-- Weekly Podcast -->
   <section class="mt-16 sm:mt-20">
-    <div class="rounded-xl border border-violet-500/30 bg-violet-500/5 p-6 sm:p-8">
+    <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
       <div class="grid md:grid-cols-2 gap-8 items-center">
         <div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-violet-500/10 border border-violet-500/30 px-3 py-1 text-sm font-medium text-violet-200 mb-4">
+          <div class="inline-flex items-center gap-2 rounded-full bg-secondary border border-main px-3 py-1 text-sm font-medium accent mb-4">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
             </svg>
             New feature
           </div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-white">Your bookmarks, as a podcast</h2>
-          <p class="mt-3 text-slate-300">
+          <h2 class="text-2xl sm:text-3xl font-bold text-main">Your bookmarks, as a podcast</h2>
+          <p class="mt-3 text-secondary">
             Get a weekly audio summary of your saved articles. AI reads through your bookmarks and creates a podcast you can listen to anywhere.
           </p>
-          <ul class="mt-4 space-y-2 text-sm text-slate-300">
+          <ul class="mt-4 space-y-2 text-sm text-secondary">
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-violet-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               AI-generated summaries of your saved content
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-violet-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-main shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               Delivered via email or Telegram
             </li>
             <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-violet-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 text-main shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
               Choose your delivery day
             </li>
           </ul>
           <div class="mt-6">
-            <a href="/signup" class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-500 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <a href="/signup" class="inline-flex items-center gap-2 rounded-lg border border-main bg-main px-5 py-3 font-semibold text-main hover:bg-secondary transition-colors">
               Try it free
             </a>
           </div>
@@ -198,9 +149,9 @@
             <div class="wrap relative w-full h-full">
               <canvas id="audio-viz" width="320" height="320" class="absolute inset-0"></canvas>
               <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-20 h-20 rounded-full border border-violet-400/25 flex items-center justify-center backdrop-blur-sm">
+                <div class="w-20 h-20 rounded-full border border-main flex items-center justify-center">
                   <!-- Podcast icon: mic with radiating arcs -->
-                  <svg width="44" height="44" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary">
                     <!-- mic capsule -->
                     <rect x="9" y="2" width="6" height="11" rx="3"/>
                     <!-- mic stand + base -->
@@ -221,12 +172,12 @@
   <section class="mt-16 sm:mt-20">
     <div class="flex items-end justify-center gap-6">
       <div>
-        <h2 class="text-xl font-semibold text-white">Save and search with the help of AI</h2>
+        <h2 class="text-xl font-semibold text-main">Save and search with the help of AI</h2>
       </div>
     </div>
 
     <div id="slider" class="relative mt-8 max-w-2xl mx-auto">
-      <div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+      <div class="overflow-hidden rounded-xl border border-main bg-main">
         <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
           <div class="w-full shrink-0"><img src="/assets/promo/screenshots/library.jpg" alt="Library view" class="w-full h-auto"></div>
           <div class="w-full shrink-0"><img src="/assets/promo/screenshots/search.jpg" alt="Search" class="w-full h-auto"></div>
@@ -236,15 +187,15 @@
         </div>
       </div>
 
-      <button id="prev-btn" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-slate-950/70 border border-white/10 p-2 text-white hover:bg-slate-950 transition-colors" aria-label="Previous slide">
+      <button id="prev-btn" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-secondary border border-main p-2 text-main hover:bg-main hover:text-secondary transition-colors" aria-label="Previous slide">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button id="next-btn" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-slate-950/70 border border-white/10 p-2 text-white hover:bg-slate-950 transition-colors" aria-label="Next slide">
+      <button id="next-btn" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-secondary border border-main p-2 text-main hover:bg-main hover:text-secondary transition-colors" aria-label="Next slide">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       </button>
 
       <div class="mt-4 flex items-center justify-between gap-4">
-        <div id="slide-caption" class="text-sm text-slate-300">
+        <div id="slide-caption" class="text-sm text-secondary">
           <span data-slide="0">Library</span>
           <span data-slide="1" class="hidden">Search</span>
           <span data-slide="2" class="hidden">Recent</span>
@@ -253,11 +204,11 @@
         </div>
 
         <div class="flex gap-2">
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="0" aria-label="Go to slide 1"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="1" aria-label="Go to slide 2"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="2" aria-label="Go to slide 3"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="3" aria-label="Go to slide 4"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-white/20 hover:bg-white/30" data-slide="4" aria-label="Go to slide 5"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="0" aria-label="Go to slide 1"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="1" aria-label="Go to slide 2"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="2" aria-label="Go to slide 3"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="3" aria-label="Go to slide 4"></button>
+          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="4" aria-label="Go to slide 5"></button>
         </div>
       </div>
     </div>
@@ -266,78 +217,48 @@
   <!-- Everything you need -->
   <section class="mt-16 sm:mt-20">
     <div class="max-w-3xl">
-      <h2 class="text-xl font-semibold text-white">Everything you need to build your knowledge base</h2>
-      <p class="mt-2 text-sm text-slate-400">
-        Capture what you read, keep it searchable, and own it long-term.
-      </p>
+      <h2 class="text-xl font-semibold text-main">Everything you need to build your knowledge base</h2>
+      <p class="mt-2 text-sm text-secondary">Capture what you read, keep it searchable, and own it long-term.</p>
     </div>
 
-    <div class="mt-8 grid md:grid-cols-2 gap-6">
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-            </svg>
-          </div>
-          <h3 class="text-base font-semibold text-white">Designed for search</h3>
-        </div>
-        <p class="mt-2 text-sm text-slate-300">Full content capture so you can search inside what you saved, not just titles.</p>
-        <ul class="mt-4 space-y-1 text-sm text-slate-300">
-          <li>• Full-text indexing</li>
-          <li>• Tags, domains, and dates</li>
-          <li>• Ask questions with AI (hosted)</li>
+    <div class="mt-8 grid md:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-main bg-secondary p-6">
+        <h3 class="text-base font-semibold text-main">Designed for search</h3>
+        <p class="mt-2 text-sm text-secondary">Full content capture so you can search inside what you saved, not just titles.</p>
+        <ul class="mt-4 space-y-1 text-sm text-secondary">
+          <li>— Full-text indexing</li>
+          <li>— Tags, domains, and dates</li>
+          <li>— Ask questions with AI</li>
         </ul>
       </div>
 
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-          </div>
-          <h3 class="text-base font-semibold text-white">Save from anywhere</h3>
-        </div>
-        <p class="mt-2 text-sm text-slate-300">Browser extensions and Telegram make saving fast on desktop and mobile.</p>
-        <ul class="mt-4 space-y-1 text-sm text-slate-300">
-          <li>• Chrome + Firefox extensions</li>
-          <li>• Telegram bot forwarding</li>
-          <li>• One-click capture</li>
+      <div class="rounded-xl border border-main bg-secondary p-6">
+        <h3 class="text-base font-semibold text-main">Save from anywhere</h3>
+        <p class="mt-2 text-sm text-secondary">Browser extensions and Telegram make saving fast on desktop and mobile.</p>
+        <ul class="mt-4 space-y-1 text-sm text-secondary">
+          <li>— Chrome + Firefox extensions</li>
+          <li>— Telegram bot forwarding</li>
+          <li>— One-click capture</li>
         </ul>
       </div>
 
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
-          </div>
-          <h3 class="text-base font-semibold text-white">AI summaries and tags</h3>
-        </div>
-        <p class="mt-2 text-sm text-slate-300">Optional AI helps you skim, organize, and revisit later.</p>
-        <ul class="mt-4 space-y-1 text-sm text-slate-300">
-          <li>• Automatic summaries</li>
-          <li>• Smart topic tags</li>
-          <li>• Clean text extraction</li>
+      <div class="rounded-xl border border-main bg-secondary p-6">
+        <h3 class="text-base font-semibold text-main">AI summaries and tags</h3>
+        <p class="mt-2 text-sm text-secondary">Optional AI helps you skim, organize, and revisit later.</p>
+        <ul class="mt-4 space-y-1 text-sm text-secondary">
+          <li>— Automatic summaries</li>
+          <li>— Smart topic tags</li>
+          <li>— Clean text extraction</li>
         </ul>
       </div>
 
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 10-8 0v4" />
-            </svg>
-          </div>
-          <h3 class="text-base font-semibold text-white">Data ownership and privacy</h3>
-        </div>
-        <p class="mt-2 text-sm text-slate-300">Your bookmarks are yours. Export anytime, no lock-in.</p>
-        <ul class="mt-4 space-y-1 text-sm text-slate-300">
-          <li>• Secure cloud storage</li>
-          <li>• Import and export anytime</li>
-          <li>• Your content, your control</li>
+      <div class="rounded-xl border border-main bg-secondary p-6">
+        <h3 class="text-base font-semibold text-main">Data ownership and privacy</h3>
+        <p class="mt-2 text-sm text-secondary">Your bookmarks are yours. Export anytime, no lock-in.</p>
+        <ul class="mt-4 space-y-1 text-sm text-secondary">
+          <li>— Secure cloud storage</li>
+          <li>— Import and export anytime</li>
+          <li>— Your content, your control</li>
         </ul>
       </div>
     </div>
@@ -346,10 +267,10 @@
   <!-- Why I built this -->
   <section class="mt-16 sm:mt-20">
     <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-xl font-semibold text-white">Why I built this</h2>
-      <div class="mt-3 space-y-4 text-sm text-slate-300">
+      <h2 class="text-xl font-semibold text-main">Why I built this</h2>
+      <div class="mt-3 space-y-4 text-sm text-secondary">
         <p>
-          Years ago I found Gordon Bell’s <a class="text-violet-200 hover:text-white transition-colors" href="https://en.wikipedia.org/wiki/MyLifeBits" target="_blank" rel="noopener">MyLifeBits</a> research project.
+          Years ago I found Gordon Bell's <a class="text-main underline hover:no-underline transition-all" href="https://en.wikipedia.org/wiki/MyLifeBits" target="_blank" rel="noopener">MyLifeBits</a> research project.
           The idea stuck: can we preserve what we read and make it searchable?
         </p>
         <p>
@@ -358,7 +279,7 @@
         </p>
         <p>
           So I built Pensive to solve this problem. Your bookmarks shouldn't depend on a service that can change direction.
-          Read the longer story <a class="text-violet-200 hover:text-white transition-colors" href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a class="text-violet-200 hover:text-white transition-colors" href="/contact">tell me</a> what you think.
+          Read the longer story <a class="text-main underline hover:no-underline transition-all" href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a class="text-main underline hover:no-underline transition-all" href="/contact">tell me</a> what you think.
         </p>
       </div>
     </div>
@@ -366,50 +287,43 @@
 
   <!-- Pricing -->
   <section class="mt-16 sm:mt-20">
-    <h2 class="text-xl font-semibold text-white text-center">Simple, transparent pricing</h2>
-    <p class="mt-2 text-sm text-slate-400 text-center">Start free, upgrade when you need more.</p>
+    <h2 class="text-xl font-semibold text-main text-center">Simple, transparent pricing</h2>
+    <p class="mt-2 text-sm text-secondary text-center">Start free, upgrade when you need more.</p>
 
-    <div class="mt-8 grid lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+    <div class="mt-8 grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto">
       <!-- Free -->
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 sm:p-8">
-        <div class="flex items-baseline justify-between gap-4">
-          <div class="text-lg font-semibold text-white">Hosted</div>
-          <div class="text-sm text-slate-400">Free</div>
-        </div>
-        <div class="mt-2 text-4xl font-bold text-white">$0</div>
-        <div class="mt-2 text-sm text-slate-300">Try it out with generous daily limits.</div>
+      <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
+        <div class="text-sm text-secondary uppercase tracking-wider">Free</div>
+        <div class="mt-2 text-4xl font-bold text-main">$0</div>
+        <div class="mt-1 text-sm text-secondary">Try it out with generous daily limits.</div>
 
-        <ul class="mt-5 space-y-2 text-sm text-slate-300">
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>All core features (capture, search, tags)</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Browser extension saving</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Telegram bot saving</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-slate-400">•</span><span>10 bookmarks/day</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-slate-400">•</span><span>1 AI question/day</span></li>
+        <ul class="mt-5 space-y-2 text-sm text-secondary">
+          <li>✓ All core features (capture, search, tags)</li>
+          <li>✓ Browser extension + Telegram saving</li>
+          <li class="text-secondary">· 10 bookmarks/day</li>
+          <li class="text-secondary">· 1 AI question/day</li>
         </ul>
 
-        <a href="/signup" class="mt-6 inline-flex w-full justify-center rounded-lg bg-white/10 px-4 py-2 font-semibold text-white hover:bg-white/15 transition-colors">
+        <a href="/signup" class="mt-6 inline-flex w-full justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-semibold text-main hover:bg-secondary transition-colors">
           Get started
         </a>
       </div>
 
       <!-- Hosted Premium -->
-      <div class="rounded-xl border border-violet-500/30 bg-violet-500/10 p-6 sm:p-8">
-        <div class="flex items-baseline justify-between gap-4">
-          <div class="text-lg font-semibold text-white">Hosted</div>
-          <div class="text-sm text-violet-200">Premium</div>
-        </div>
-        <div class="mt-2 text-4xl font-bold text-white">$5</div>
-        <div class="mt-2 text-sm text-slate-200">More headroom for daily saving and AI.</div>
+      <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
+        <div class="text-sm text-secondary uppercase tracking-wider">Premium</div>
+        <div class="mt-2 text-4xl font-bold text-main">$5 <span class="text-base font-normal text-secondary">/month</span></div>
+        <div class="mt-1 text-sm text-secondary">More headroom for daily saving and AI.</div>
 
-        <ul class="mt-5 space-y-2 text-sm text-slate-200">
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Everything in Hosted Free</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>100 bookmarks/day</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>10 AI questions/day</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>AI summaries and smart tags</span></li>
-          <li class="flex gap-2"><span class="mt-0.5 text-emerald-300">✓</span><span>Support ongoing development</span></li>
+        <ul class="mt-5 space-y-2 text-sm text-secondary">
+          <li>✓ Everything in Free</li>
+          <li>✓ 100 bookmarks/day</li>
+          <li>✓ 10 AI questions/day</li>
+          <li>✓ AI summaries and smart tags</li>
+          <li>✓ Support ongoing development</li>
         </ul>
 
-        <a href="/users/subscribe" class="mt-6 inline-flex w-full justify-center rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white hover:bg-violet-500 transition-colors">
+        <a href="/users/subscribe" class="mt-6 inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-4 py-2.5 font-semibold text-main hover:bg-main transition-colors">
           Upgrade
         </a>
       </div>
@@ -418,14 +332,14 @@
 
   <!-- Final CTA -->
   <section class="mt-16 sm:mt-20">
-    <div class="rounded-xl border border-white/10 bg-white/5 p-8 sm:p-10 text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold text-white">Ready to build your searchable memory of the web?</h2>
-      <p class="mt-3 text-sm text-slate-300">Get started in minutes with a free account.</p>
+    <div class="rounded-xl border border-main bg-secondary p-8 sm:p-10 text-center">
+      <h2 class="text-2xl sm:text-3xl font-bold text-main">Ready to build your searchable memory of the web?</h2>
+      <p class="mt-3 text-sm text-secondary">Get started in minutes with a free account.</p>
       <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/signup" class="inline-flex justify-center rounded-lg bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-500 transition-colors">
+        <a href="/signup" class="inline-flex justify-center rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
           Sign up for free
         </a>
-        <a href="/signin" class="inline-flex justify-center rounded-lg border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white hover:bg-white/10 transition-colors">
+        <a href="/signin" class="inline-flex justify-center rounded-lg px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
           Sign in
         </a>
       </div>
