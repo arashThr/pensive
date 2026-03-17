@@ -2,7 +2,7 @@
   <div class="bg-gray-800/50 backdrop-blur-sm border border-gray-600/30 rounded-xl shadow-xl">
     <div class="p-6 border-b border-gray-600/50">
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white">Search Results</h2>
+        <h2 class="text-xl font-bold text-main">Search Results</h2>
         <span class="text-sm font-semibold text-gray-300">
           {{len .Bookmarks}} result{{if ne (len .Bookmarks) 1}}s{{end}} for "{{.Query}}"
         </span>
@@ -30,14 +30,14 @@
             
             <!-- Content -->
             <div class="flex-1 min-w-0">
-              <h3 class="font-semibold mb-1 text-white hover:text-orange-400 transition-colors line-clamp-2 break-words">
+              <h3 class="font-semibold mb-1 text-main hover:text-orange-400 transition-colors line-clamp-2 break-words">
                 {{.Title}}
               </h3>
-              <p class="text-xs mb-2 text-gray-400">{{.Hostname}}</p>
+              <p class="text-xs mb-2 text-secondary">{{.Hostname}}</p>
               {{if .Headline}}
                 <p class="text-sm leading-relaxed mb-2 text-gray-300 line-clamp-2">{{.Headline | safe}}</p>
               {{end}}
-              <span class="text-xs text-gray-400">{{.CreatedAt.Format "Jan 02, 2006"}}</span>
+              <span class="text-xs text-secondary">{{.CreatedAt.Format "Jan 02, 2006"}}</span>
             </div>
           </div>
         </a>
@@ -52,13 +52,13 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
     </div>
-    <h3 class="text-xl font-bold mb-3 text-white">No results for "{{.Query}}"</h3>
+    <h3 class="text-xl font-bold mb-3 text-main">No results for "{{.Query}}"</h3>
     <p class="mb-8 max-w-sm mx-auto text-gray-300 leading-relaxed">
       Try different keywords or check your spelling. Your search will improve as you add more bookmarks.
     </p>
     <div class="space-y-3">
       <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
-        <a href="/bookmarks/new" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg">
+        <a href="/bookmarks/new" class="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-main font-semibold py-3 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg">
           Add new bookmark
         </a>
         <a href="/bookmarks" class="border border-gray-500 bg-gray-700/50 text-gray-200 font-semibold py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors">

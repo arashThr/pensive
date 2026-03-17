@@ -4,27 +4,27 @@
   <!-- Header Section -->
   <div class="text-center mb-16">
     {{if .IsSubscribed}}
-      <h1 class="text-3xl font-semibold tracking-tight text-white">Your premium plan</h1>
-      <p class="mt-2 text-slate-300">You have full access to all premium features.</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-main">Your premium plan</h1>
+      <p class="mt-2 text-secondary">You have full access to all premium features.</p>
     {{else}}
-      <h1 class="text-3xl font-semibold tracking-tight text-white">Choose your plan</h1>
-      <p class="mt-2 text-slate-300">Build your searchable memory of the web. Everything you read should be indexed and findable.</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-main">Choose your plan</h1>
+      <p class="mt-2 text-secondary">Build your searchable memory of the web. Everything you read should be indexed and findable.</p>
     {{end}}
   </div>
 
   <!-- Comparison Table -->
-  <div class="mb-16 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+  <div class="mb-16 overflow-hidden rounded-xl border border-main bg-secondary">
     <div class="grid grid-cols-1 md:grid-cols-2">
       <!-- Free Plan -->
-      <div class="p-8 md:border-r border-white/10 {{if .IsSubscribed}}opacity-75{{end}}">
+      <div class="p-8 md:border-r border-main {{if .IsSubscribed}}opacity-75{{end}}">
         <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-white mb-2">Free</h2>
-          <div class="text-3xl font-bold text-white mb-1">$0</div>
-          <p class="text-sm text-slate-300">Forever free</p>
+          <h2 class="text-2xl font-bold text-main mb-2">Free</h2>
+          <div class="text-3xl font-bold text-main mb-1">$0</div>
+          <p class="text-sm text-secondary">Forever free</p>
         </div>
-        <ul class="space-y-3 text-slate-300">
-          <li class="font-semibold text-white">• 10 bookmarks/day</li>
-          <li class="font-semibold text-white">• 1 AI question/day</li>
+        <ul class="space-y-3 text-secondary">
+          <li class="font-semibold text-main">• 10 bookmarks/day</li>
+          <li class="font-semibold text-main">• 1 AI question/day</li>
           <li>• Full-text search</li>
           <li>• Browser extension</li>
           <li>• AI summaries & tags</li>
@@ -32,39 +32,39 @@
         </ul>
         {{if not .IsSubscribed}}
         <div class="mt-8">
-          <a href="/signup" class="inline-flex w-full justify-center rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10">Get started free</a>
+          <a href="/signup" class="inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary">Get started free</a>
         </div>
         {{end}}
       </div>
       <!-- Premium Plan -->
       <div class="p-8 {{if .IsSubscribed}}bg-violet-500/5{{end}}">
         <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-white mb-2">Premium</h2>
-          <div class="text-3xl font-bold text-white mb-1">$5</div>
-          <p class="text-sm text-slate-300">Per month</p>
+          <h2 class="text-2xl font-bold text-main mb-2">Premium</h2>
+          <div class="text-3xl font-bold text-main mb-1">$5</div>
+          <p class="text-sm text-secondary">Per month</p>
         </div>
-        <ul class="space-y-3 text-slate-300">
-          <li class="font-semibold text-white">• 100 bookmarks/day</li>
-          <li class="font-semibold text-white">• 10 AI questions/day</li>
+        <ul class="space-y-3 text-secondary">
+          <li class="font-semibold text-main">• 100 bookmarks/day</li>
+          <li class="font-semibold text-main">• 10 AI questions/day</li>
           <li>• All free features</li>
           <li>• Priority support</li>
           <li>• Early access to new features</li>
         </ul>
         {{if .IsSubscribed}}
         <div class="mt-8">
-          <a href="/payments/portal-session" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage subscription</a>
+          <a href="/payments/portal-session" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage subscription</a>
         </div>
         {{else}}
           {{if isSubscriptionEnabled}}
           <div class="mt-8">
             <form action="/payments/create-checkout-session" method="post">
               {{csrfField}}
-              <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Subscribe now</button>
+              <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Subscribe now</button>
             </form>
           </div>
           {{else}}
           <div class="mt-8">
-            <button type="button" class="inline-flex w-full cursor-not-allowed justify-center rounded-lg bg-white/5 px-6 py-3 font-semibold text-slate-500 opacity-75" disabled>Subscribe (coming soon)</button>
+            <button type="button" class="inline-flex w-full cursor-not-allowed justify-center rounded-lg bg-secondary px-6 py-3 font-semibold text-slate-500 opacity-75" disabled>Subscribe (coming soon)</button>
           </div>
           {{end}}
         {{end}}
@@ -78,15 +78,15 @@
       <h3 class="font-semibold mb-2 text-green-300">You're all set with premium!</h3>
       <p class="mb-6 text-green-200">Enjoy 100 bookmarks per day, 10 AI questions per day, and priority support.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/payments/portal-session" class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage billing</a>
-        <a href="/home" class="rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10">Start exploring</a>
+        <a href="/payments/portal-session" class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">Manage billing</a>
+        <a href="/home" class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary">Start exploring</a>
       </div>
     </div>
   {{end}}
 
   <!-- Navigation -->
   <div class="mt-8 text-center">
-    <a href="/home" class="font-medium text-violet-200 transition-colors hover:text-violet-100">← Back to search</a>
+    <a href="/home" class="font-medium text-secondary transition-colors hover:text-violet-100">← Back to search</a>
   </div>
 </div>
 

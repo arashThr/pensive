@@ -1,40 +1,40 @@
 <div class="space-y-8">
   <!-- Header Section -->
   <div class="mb-8">
-    <h2 class="text-xl font-bold mb-4 text-white">API tokens</h2>
-    <p class="text-slate-300">Apps and services connected to your account.</p>
+    <h2 class="text-xl font-bold mb-4 text-main">API tokens</h2>
+    <p class="text-secondary">Apps and services connected to your account.</p>
   </div>
 
   <!-- Integrations List -->
   <div id="token-container">
     {{if .Tokens}}
-      <div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+      <div class="overflow-hidden rounded-xl border border-main bg-secondary">
         <!-- Desktop Table -->
         <div class="hidden md:block">
           <table class="w-full">
-            <thead class="border-b border-white/10 bg-white/5">
+            <thead class="border-b border-main bg-secondary">
               <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Integration</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Connected</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-white">Last used</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Integration</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Connected</th>
+                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Last used</th>
                 <th class="w-16 px-6 py-4"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-white/10">
               {{range $index, $token := .Tokens}}
-                <tr id="token-{{$index}}" class="transition-colors hover:bg-white/5">
+                <tr id="token-{{$index}}" class="transition-colors hover:bg-secondary">
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-                        <svg class="h-4 w-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                         </svg>
                       </div>
-                      <div class="font-semibold text-white">{{$token.TokenSource}}</div>
+                      <div class="font-semibold text-main">{{$token.TokenSource}}</div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm text-slate-300">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
-                  <td class="px-6 py-4 text-sm text-slate-300">
+                  <td class="px-6 py-4 text-sm text-secondary">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
+                  <td class="px-6 py-4 text-sm text-secondary">
                     {{if $token.LastUsedAt}}
                       {{$token.LastUsedAt.Format "Jan 2, 2006"}}
                     {{else}}
@@ -47,7 +47,7 @@
                       <input type="hidden" name="token_id" value="{{$token.ID}}">
                       <button 
                         type="button"
-                        class="px-3 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                        class="px-3 py-2 bg-red-600 text-main font-medium rounded-lg hover:bg-red-700 transition-colors"
                         hx-post="/users/delete-token" 
                         hx-confirm="Are you sure?" 
                         hx-target="#token-{{$index}}" 
@@ -70,15 +70,15 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-3 mb-2">
                     <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-                      <svg class="h-4 w-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </div>
-                    <p class="font-semibold text-white">{{$token.TokenSource}}</p>
+                    <p class="font-semibold text-main">{{$token.TokenSource}}</p>
                   </div>
                   <div class="text-sm space-y-1 pl-11">
-                    <div class="text-slate-300">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
-                    <div class="text-slate-300">
+                    <div class="text-secondary">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
+                    <div class="text-secondary">
                       Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-slate-500">Never</span>{{end}}
                     </div>
                   </div>
@@ -88,7 +88,7 @@
                   <input type="hidden" name="token_id" value="{{$token.ID}}">
                   <button 
                     type="button"
-                    class="px-3 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors"
+                    class="px-3 py-2 bg-red-600 text-main font-medium rounded-lg hover:bg-red-700 transition-colors"
                     hx-post="/users/delete-token" 
                     hx-confirm="Are you sure?" 
                     hx-target="#token-{{$index}}" 
@@ -112,15 +112,15 @@
       </div>
     {{else}}
       <!-- Empty State -->
-      <div class="rounded-xl border border-white/10 bg-white/5 p-12 text-center">
-        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5">
-          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="rounded-xl border border-main bg-secondary p-12 text-center">
+        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary">
+          <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
         </div>
-        <h3 class="text-xl font-bold mb-3 text-white">No tokens connected</h3>
-        <p class="mx-auto mb-8 max-w-sm text-slate-300">Connect apps and services to save and access your bookmarks.</p>
-        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
+        <h3 class="text-xl font-bold mb-3 text-main">No tokens connected</h3>
+        <p class="mx-auto mb-8 max-w-sm text-secondary">Connect apps and services to save and access your bookmarks.</p>
+        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>

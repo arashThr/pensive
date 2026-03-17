@@ -2,10 +2,10 @@
 
 <div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
   <div class="max-w-2xl mx-auto">
-    <div class="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 text-center">
-      <h1 class="text-2xl font-bold text-white mb-4">Welcome to premium!</h1>
-      <p class="text-slate-300 leading-relaxed mb-2">Your subscription to the Starter plan has been successfully activated.</p>
-      <p class="text-sm text-slate-400 mb-8">You'll receive an email confirmation shortly with all the details.</p>
+    <div class="bg-secondary border border-main rounded-xl p-6 sm:p-8 text-center">
+      <h1 class="text-2xl font-bold text-main mb-4">Welcome to premium!</h1>
+      <p class="text-secondary leading-relaxed mb-2">Your subscription to the Starter plan has been successfully activated.</p>
+      <p class="text-sm text-secondary mb-8">You'll receive an email confirmation shortly with all the details.</p>
 
       <!-- Success Actions -->
       <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 mb-6 text-left">
@@ -20,20 +20,20 @@
         <form action="/payments/create-portal-session" method="POST">
           {{csrfField}}
           <input type="hidden" name="session_id" value="{{.SessionId}}" />
-          <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+          <button type="submit" class="w-full bg-violet-600 hover:bg-violet-500 text-main font-semibold py-3 px-6 rounded-lg transition-colors">
             Manage billing & subscription
           </button>
         </form>
         
-        <a href="/home" class="inline-block text-violet-200 hover:text-white font-medium transition-colors">
+        <a href="/home" class="inline-block text-secondary hover:text-main font-medium transition-colors">
           Start exploring premium features →
         </a>
       </div>
 
       <!-- Support -->
-      <div class="mt-8 pt-6 border-t border-white/10">
-        <p class="text-sm text-slate-300">
-          Need help? <a href="/contact" class="text-violet-200 hover:text-white font-medium transition-colors underline">Contact our support team</a>
+      <div class="mt-8 pt-6 border-t border-main">
+        <p class="text-sm text-secondary">
+          Need help? <a href="/contact" class="text-secondary hover:text-main font-medium transition-colors underline">Contact our support team</a>
         </p>
       </div>
     </div>

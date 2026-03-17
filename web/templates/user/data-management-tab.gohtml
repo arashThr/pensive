@@ -1,7 +1,7 @@
 <div class="space-y-8">
   <div>
-    <h2 class="text-xl font-bold mb-6 text-white">Data management</h2>
-    <p class="text-slate-300 leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
+    <h2 class="text-xl font-bold mb-6 text-main">Data management</h2>
+    <p class="text-secondary leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
   </div>
 
   <!-- Delete All Content -->
@@ -11,7 +11,7 @@
     <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Consider exporting your data first from the Import/Export tab.</p>
     <button 
       id="delete-content-btn"
-      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
       onclick="showDeleteContentModal()"
     >
       Delete all content
@@ -25,7 +25,7 @@
     <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
     <button 
       id="delete-account-btn"
-      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
       onclick="showDeleteAccountModal()"
     >
       Delete account
@@ -34,15 +34,15 @@
 </div>
 
 <!-- Delete Content Modal -->
-<div id="delete-content-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-white/10 bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
-    <h3 class="text-xl font-semibold text-white mb-4">Confirm content deletion</h3>
-    <p class="text-slate-300 leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
+<div id="delete-content-modal" class="fixed inset-0 bg-secondary/70 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-main bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
+    <h3 class="text-xl font-semibold text-main mb-4">Confirm content deletion</h3>
+    <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
     <p class="text-sm mb-6 text-red-200 font-semibold">This action cannot be undone. Have you backed up your data?</p>
     
     <div class="flex gap-4">
       <button
-        class="rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10"
+        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary"
         onclick="hideDeleteContentModal()"
       >
         Cancel
@@ -51,7 +51,7 @@
         {{csrfField}}
         <button 
           type="submit"
-          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
         >
           Yes, delete all content
         </button>
@@ -61,15 +61,15 @@
 </div>
 
 <!-- Delete Account Modal -->
-<div id="delete-account-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-white/10 bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
-    <h3 class="text-xl font-semibold text-white mb-4">Confirm account deletion</h3>
-    <p class="text-slate-300 leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
+<div id="delete-account-modal" class="fixed inset-0 bg-secondary/70 hidden items-center justify-center z-50">
+  <div class="rounded-xl border border-main bg-slate-950/80 shadow-xl p-8 max-w-md mx-4 backdrop-blur-sm">
+    <h3 class="text-xl font-semibold text-main mb-4">Confirm account deletion</h3>
+    <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
     <p class="text-sm mb-6 text-red-200 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
     
     <div class="flex gap-4">
       <button
-        class="rounded-lg border border-white/10 bg-white/5 px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-white/10"
+        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-slate-200 transition-colors hover:bg-secondary"
         onclick="hideDeleteAccountModal()"
       >
         Cancel
@@ -78,7 +78,7 @@
         {{csrfField}}
         <button 
           type="submit"
-          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
+          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
         >
           Yes, delete my account
         </button>

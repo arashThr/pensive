@@ -1,25 +1,25 @@
 {{template "header" .}}
 
 <div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16 flex justify-center">
-  <div class="w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 text-center">
-    <h1 class="text-4xl font-bold text-white mb-4">Check your email</h1>
-    <p class="text-slate-300 leading-relaxed mb-8">
-      We've sent a password reset link to <span class="font-medium text-white">{{.Email}}</span>
+  <div class="w-full max-w-md bg-secondary border border-main rounded-2xl p-6 sm:p-8 text-center">
+    <h1 class="text-4xl font-bold text-main mb-4">Check your email</h1>
+    <p class="text-secondary leading-relaxed mb-8">
+      We've sent a password reset link to <span class="font-medium text-main">{{.Email}}</span>
     </p>
-    <div class="bg-white/5 border border-white/10 rounded-lg p-6 mb-6 text-left">
-      <p class="text-sm font-semibold text-white mb-1">Next steps:</p>
-      <p class="text-sm text-slate-300">Check your inbox and click the reset link to create a new password.</p>
+    <div class="bg-secondary border border-main rounded-lg p-6 mb-6 text-left">
+      <p class="text-sm font-semibold text-main mb-1">Next steps:</p>
+      <p class="text-sm text-secondary">Check your inbox and click the reset link to create a new password.</p>
     </div>
-    <div class="text-sm text-slate-300 mb-6">
+    <div class="text-sm text-secondary mb-6">
       <p class="mb-2">Didn't receive an email?</p>
       <ul class="list-disc list-inside space-y-1 text-left">
         <li>Check your spam folder</li>
         <li>Make sure you entered the correct email</li>
-        <li><a href="/forgot-pw" class="text-violet-200 hover:text-white underline font-medium transition-colors">Try again</a> or <a href="/contact" class="text-violet-200 hover:text-white underline font-medium transition-colors">contact support</a></li>
+        <li><a href="/forgot-pw" class="text-secondary hover:text-main underline font-medium transition-colors">Try again</a> or <a href="/contact" class="text-secondary hover:text-main underline font-medium transition-colors">contact support</a></li>
       </ul>
     </div>
-    <div class="pt-6 border-t border-white/10">
-      <a href="/signin" class="text-sm text-violet-200 hover:text-white font-medium underline transition-colors">← Back to sign in</a>
+    <div class="pt-6 border-t border-main">
+      <a href="/signin" class="text-sm text-secondary hover:text-main font-medium underline transition-colors">← Back to sign in</a>
     </div>
   </div>
 </div>

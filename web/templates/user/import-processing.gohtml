@@ -4,36 +4,36 @@
   <div class="text-center">
     <!-- Processing Spinner -->
     <div class="mb-8">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/5">
-        <svg class="h-8 w-8 animate-spin text-violet-300" fill="none" viewBox="0 0 24 24">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary">
+        <svg class="h-8 w-8 animate-spin text-secondary" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       </div>
     </div>
 
-    <h1 class="text-3xl font-bold text-white mb-4">Processing Your Import</h1>
-    <p class="mb-8 text-slate-300">We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.</p>
-    <div class="mb-8 rounded-lg border border-white/10 bg-white/5 p-6">
-      <p class="text-lg font-semibold text-white mb-4">Import Progress</p>
-      <ul class="space-y-2 text-sm text-slate-300">
+    <h1 class="text-3xl font-bold text-main mb-4">Processing Your Import</h1>
+    <p class="mb-8 text-secondary">We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.</p>
+    <div class="mb-8 rounded-lg border border-main bg-secondary p-6">
+      <p class="text-lg font-semibold text-main mb-4">Import Progress</p>
+      <ul class="space-y-2 text-sm text-secondary">
         <li>
-          <span class="font-medium text-violet-300">•</span> File uploaded and validated
+          <span class="font-medium text-secondary">•</span> File uploaded and validated
         </li>
         <li>
-          <span class="font-medium text-violet-300">•</span> Processing bookmarks and metadata
+          <span class="font-medium text-secondary">•</span> Processing bookmarks and metadata
         </li>
         <li>
-          <span class="font-medium text-violet-300">•</span> Adding to your library
+          <span class="font-medium text-secondary">•</span> Adding to your library
         </li>
       </ul>
     </div>
-    <div class="rounded-lg border border-white/10 bg-white/5 p-6">
-      <p class="mb-4 text-slate-300">You'll be automatically redirected when the import is complete.</p>
-      <p class="font-mono text-sm text-slate-400">Or check back in a few minutes.</p>
-      <a href="/users/import-status?job_id={{.JobID}}" class="font-medium text-violet-200 underline transition-colors hover:text-violet-100">View Import Status</a>
+    <div class="rounded-lg border border-main bg-secondary p-6">
+      <p class="mb-4 text-secondary">You'll be automatically redirected when the import is complete.</p>
+      <p class="font-mono text-sm text-secondary">Or check back in a few minutes.</p>
+      <a href="/users/import-status?job_id={{.JobID}}" class="font-medium text-secondary underline transition-colors hover:text-violet-100">View Import Status</a>
       <span class="hidden sm:inline text-slate-500"> | </span>
-      <a href="/bookmarks" class="font-medium text-violet-200 underline transition-colors hover:text-violet-100">View Your Library</a>
+      <a href="/bookmarks" class="font-medium text-secondary underline transition-colors hover:text-violet-100">View Your Library</a>
     </div>
     <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
   </div>

@@ -1,7 +1,7 @@
 <div class="space-y-8">
   <div>
-    <h2 class="text-xl font-bold mb-2 text-white">Weekly Podcast Summary</h2>
-    <p class="text-sm text-slate-400 mb-6">Get an AI-generated audio summary of your bookmarks delivered weekly.</p>
+    <h2 class="text-xl font-bold mb-2 text-main">Weekly Podcast Summary</h2>
+    <p class="text-sm text-secondary mb-6">Get an AI-generated audio summary of your bookmarks delivered weekly.</p>
     
     <form 
       hx-post="/users/preferences" 
@@ -11,11 +11,11 @@
     >
       {{csrfField}}
       <!-- Enable/Disable Toggle -->
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
+      <div class="rounded-lg border border-main bg-secondary p-6">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-semibold text-white">Enable weekly summary</h3>
-            <p class="text-sm text-slate-400 mt-1">Receive an audio podcast of your saved articles</p>
+            <h3 class="font-semibold text-main">Enable weekly summary</h3>
+            <p class="text-sm text-secondary mt-1">Receive an audio podcast of your saved articles</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" name="enabled" value="true" class="sr-only peer" {{if .Preferences.Enabled}}checked{{end}}>
@@ -25,12 +25,12 @@
       </div>
 
       <!-- Day of Week Selector -->
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
-        <h3 class="font-semibold text-white mb-3">Delivery day</h3>
-        <p class="text-sm text-slate-400 mb-4">Choose which day to receive your weekly summary</p>
+      <div class="rounded-lg border border-main bg-secondary p-6">
+        <h3 class="font-semibold text-main mb-3">Delivery day</h3>
+        <p class="text-sm text-secondary mb-4">Choose which day to receive your weekly summary</p>
         <select 
           name="day" 
-          class="w-full sm:w-auto rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+          class="w-full sm:w-auto rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
         >
           <option value="sunday" {{if eq .Preferences.Day "sunday"}}selected{{end}}>Sunday</option>
           <option value="monday" {{if eq .Preferences.Day "monday"}}selected{{end}}>Monday</option>
@@ -43,9 +43,9 @@
       </div>
 
       <!-- Delivery Method -->
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6">
-        <h3 class="font-semibold text-white mb-3">Delivery method</h3>
-        <p class="text-sm text-slate-400 mb-4">Choose how you want to receive your podcast</p>
+      <div class="rounded-lg border border-main bg-secondary p-6">
+        <h3 class="font-semibold text-main mb-3">Delivery method</h3>
+        <p class="text-sm text-secondary mb-4">Choose how you want to receive your podcast</p>
         
         <div class="space-y-4">
           <!-- Email Option -->
@@ -54,15 +54,15 @@
               type="checkbox" 
               name="email" 
               value="true"
-              class="h-5 w-5 rounded border-white/20 bg-white/5 text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
+              class="h-5 w-5 rounded border-white/20 bg-secondary text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
               {{if .Preferences.Email}}checked{{end}}
             >
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-              <span class="text-white">Email</span>
-              <span class="text-sm text-slate-400">({{.Email}})</span>
+              <span class="text-main">Email</span>
+              <span class="text-sm text-secondary">({{.Email}})</span>
             </div>
           </label>
 
@@ -72,12 +72,12 @@
               type="checkbox" 
               name="telegram" 
               value="true"
-              class="h-5 w-5 rounded border-white/20 bg-white/5 text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
+              class="h-5 w-5 rounded border-white/20 bg-secondary text-violet-600 focus:ring-violet-500/20 focus:ring-offset-0"
               {{if .Preferences.Telegram}}checked{{end}}
             >
             <div class="flex items-center gap-2">
               <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-5 w-5">
-              <span class="text-white">Telegram</span>
+              <span class="text-main">Telegram</span>
               {{if not .TelegramLinked}}<span class="text-xs text-amber-300">(not connected — see below)</span>{{end}}
             </div>
           </label>
@@ -88,11 +88,11 @@
       <div class="flex items-center gap-4">
         <button 
           type="submit" 
-          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20"
         >
           Save preferences
         </button>
-        <span id="save-success" class="hidden text-sm text-emerald-300">
+        <span id="save-success" class="hidden text-sm text-secondary">
           ✓ Preferences saved
         </span>
       </div>
@@ -100,9 +100,9 @@
   </div>
 
   <!-- Daily Podcast Section -->
-  <div class="border-t border-white/10">
-    <h2 class="text-xl font-bold mb-2 text-white">Daily Podcast</h2>
-    <p class="text-sm text-slate-400 mb-6">Get a short daily audio briefing of articles you saved in the past 24 hours. Delivered via Telegram only.</p>
+  <div class="border-t border-main">
+    <h2 class="text-xl font-bold mb-2 text-main">Daily Podcast</h2>
+    <p class="text-sm text-secondary mb-6">Get a short daily audio briefing of articles you saved in the past 24 hours. Delivered via Telegram only.</p>
 
     {{if not .TelegramLinked}}
     <div class="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 mb-6">
@@ -114,7 +114,7 @@
           <p class="text-sm text-amber-200">Telegram is required for both delivery options above and the daily briefing below. Connect your account to enable them.</p>
           <a 
             href="/telegram/auth"
-            class="inline-flex items-center gap-2 mt-2 text-sm font-medium text-violet-200 hover:text-white transition-colors"
+            class="inline-flex items-center gap-2 mt-2 text-sm font-medium text-secondary hover:text-main transition-colors"
           >
             Connect Telegram
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,11 +141,11 @@
       <input type="hidden" name="telegram" value="{{if .Preferences.Telegram}}true{{end}}">
 
       <!-- Enable Toggle -->
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
+      <div class="rounded-lg border border-main bg-secondary p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="font-semibold text-white">Enable daily briefing</h3>
-            <p class="text-sm text-slate-400 mt-1">Receive a daily audio recap on Telegram</p>
+            <h3 class="font-semibold text-main">Enable daily briefing</h3>
+            <p class="text-sm text-secondary mt-1">Receive a daily audio recap on Telegram</p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" name="daily_enabled" value="true" class="sr-only peer" {{if .Preferences.DailyEnabled}}checked{{end}} {{if not .TelegramLinked}}disabled{{end}}>
@@ -155,13 +155,13 @@
       </div>
 
       <!-- Time & Timezone -->
-      <div class="rounded-lg border border-white/10 bg-white/5 p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
-        <h3 class="font-semibold text-white mb-3">Delivery time</h3>
-        <p class="text-sm text-slate-400 mb-4">Choose the hour and your timezone</p>
+      <div class="rounded-lg border border-main bg-secondary p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">
+        <h3 class="font-semibold text-main mb-3">Delivery time</h3>
+        <p class="text-sm text-secondary mb-4">Choose the hour and your timezone</p>
         <div class="flex flex-col sm:flex-row gap-4">
           <select 
             name="daily_hour"
-            class="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+            class="rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
             {{if not .TelegramLinked}}disabled{{end}}
           >
             <option value="0"  {{if eq .Preferences.DailyHour 0 }}selected{{end}}>12:00 AM</option>
@@ -193,7 +193,7 @@
           <select 
             id="daily-timezone"
             name="daily_timezone"
-            class="rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
+            class="rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-violet-400/40 focus:ring-2 focus:ring-violet-500/20"
             {{if not .TelegramLinked}}disabled{{end}}
           >
             <option value="UTC" {{if eq .Preferences.DailyTimezone "UTC"}}selected{{end}}>UTC</option>
@@ -241,11 +241,11 @@
         <button 
           type="submit"
           {{if not .TelegramLinked}}disabled{{end}}
-          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-white hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="rounded-lg bg-violet-600 px-6 py-3 font-semibold text-main hover:bg-violet-500 transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Save daily preferences
         </button>
-        <span id="daily-save-success" class="hidden text-sm text-emerald-300">
+        <span id="daily-save-success" class="hidden text-sm text-secondary">
           ✓ Preferences saved
         </span>
       </div>
