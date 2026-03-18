@@ -169,6 +169,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	usersService.Templates.CheckYourEmail = views.Must(views.ParseTemplate("check-your-email.gohtml", "tailwind.gohtml"))
 	usersService.Templates.ResetPassword = views.Must(views.ParseTemplate("reset-password.gohtml", "tailwind.gohtml"))
 	usersService.Templates.UserPage = views.Must(views.ParseTemplate("user/user-page.gohtml", "tailwind.gohtml"))
+	usersService.Templates.Integrations = views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml"))
 	usersService.Templates.Token = views.Must(views.ParseTemplate("user/token.gohtml"))
 	usersService.Templates.ProfileTab = views.Must(views.ParseTemplate("user/profile-tab.gohtml"))
 	usersService.Templates.TokensTab = views.Must(views.ParseTemplate("user/tokens-tab.gohtml"))
@@ -408,10 +409,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			"Privacy",
 			views.Must(views.ParseTemplate("privacy.gohtml", "tailwind.gohtml")),
 		))
-		r.Get("/integrations", web.StaticHandler(
-			"Extensions",
-			views.Must(views.ParseTemplate("integrations.gohtml", "tailwind.gohtml")),
-		))
+		r.Get("/integrations", c.UsersService.Integrations)
 		r.Get("/pocket", web.StaticHandler(
 			"Pocket import",
 			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),

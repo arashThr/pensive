@@ -33,6 +33,7 @@ type Users struct {
 		CheckYourEmail         web.Template
 		ResetPassword          web.Template
 		UserPage               web.Template
+		Integrations           web.Template
 		Subscribe              web.Template
 		Token                  web.Template
 		ProfileTab             web.Template
@@ -247,6 +248,59 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	u.Templates.UserPage.Execute(w, r, data)
 }
 
+func (u Users) Integrations(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
+
+	var data struct {
+		Title          string
+		LoggedIn       bool
+		Email          string
+		TokensCount    int
+		TelegramLinked bool
+		Preferences    *models.SummaryPreferences
+	}
+
+	data.Title = "Integrations"
+	data.Preferences = &models.SummaryPreferences{
+		DailyEnabled:  false,
+		DailyHour:     8,
+		DailyTimezone: "UTC",
+	}
+
+	if user != nil {
+		data.LoggedIn = true
+		data.Email = user.Email
+
+		if u.UserService != nil {
+			prefs, err := u.UserService.GetSummaryPreferences(user.ID)
+			if err != nil {
+				logger.Errorw("get summary preferences for integrations", "error", err, "userId", user.ID)
+			} else {
+				data.Preferences = prefs
+			}
+		}
+
+		if u.TelegramModel != nil {
+			_, err := u.TelegramModel.GetChatIdByUserId(user.ID)
+			data.TelegramLinked = err == nil
+		}
+
+		if u.TokenModel != nil {
+			tokens, err := u.TokenModel.Get(user.ID)
+			if err != nil {
+				if !errors.Is(err, pgx.ErrNoRows) {
+					logger.Errorw("get api tokens for integrations", "error", err, "userId", user.ID)
+				}
+			} else {
+				data.TokensCount = len(tokens)
+			}
+		}
+	}
+
+	u.Templates.Integrations.Execute(w, r, data)
+}
+
 func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Title string
@@ -387,10 +441,9 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 			logger.Errorw("get summary preferences", "error", err)
 			// Use defaults if error
 			prefs = &models.SummaryPreferences{
-				Enabled:  false,
-				Day:      "sunday",
-				Email:    true,
-				Telegram: false,
+				DailyEnabled:  false,
+				DailyHour:     8,
+				DailyTimezone: "UTC",
 			}
 		}
 		data.Preferences = prefs
@@ -420,7 +473,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SavePreferences handles POST /users/preferences to save summary preferences
+// SavePreferences handles POST /users/preferences to save weekly and daily podcast preferences.
 func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
@@ -431,55 +484,87 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prefs := models.SummaryPreferences{
-		Enabled:  r.FormValue("enabled") == "true",
-		Day:      r.FormValue("day"),
-		Email:    r.FormValue("email") == "true",
-		Telegram: r.FormValue("telegram") == "true",
+	currentPrefs, err := u.UserService.GetSummaryPreferences(user.ID)
+	if err != nil {
+		logger.Errorw("get current summary preferences", "error", err)
+		currentPrefs = &models.SummaryPreferences{
+			Enabled:       false,
+			Day:           "sunday",
+			Email:         true,
+			Telegram:      false,
+			DailyEnabled:  false,
+			DailyHour:     8,
+			DailyTimezone: "UTC",
+		}
 	}
 
-	// Daily podcast preferences
-	dailyHour := 8 // default
-	if h, err := strconv.Atoi(r.FormValue("daily_hour")); err == nil && h >= 0 && h <= 23 {
-		dailyHour = h
-	}
-	dailyTz := r.FormValue("daily_timezone")
-	if dailyTz == "" {
-		dailyTz = "UTC"
-	}
-	if _, err := time.LoadLocation(dailyTz); err != nil {
-		dailyTz = "UTC" // reject invalid IANA timezone
-	}
-	prefs.DailyEnabled = r.FormValue("daily_enabled") == "true"
-	prefs.DailyHour = dailyHour
-	prefs.DailyTimezone = dailyTz
+	prefs := *currentPrefs
 
-	// Validate day
+	// Weekly podcast preferences
+	prefs.Enabled = r.FormValue("enabled") == "true"
+	prefs.Email = r.FormValue("email") == "true"
+
+	day := r.FormValue("day")
 	validDays := map[string]bool{
 		"sunday": true, "monday": true, "tuesday": true, "wednesday": true,
 		"thursday": true, "friday": true, "saturday": true,
 	}
-	if !validDays[prefs.Day] {
-		prefs.Day = "sunday"
+	if validDays[day] {
+		prefs.Day = day
 	}
 
-	err := u.UserService.UpdateSummaryPreferences(user.ID, prefs)
+	telegramLinked := false
+	if u.TelegramModel != nil {
+		_, tgErr := u.TelegramModel.GetChatIdByUserId(user.ID)
+		telegramLinked = tgErr == nil
+	}
+
+	// Telegram delivery is user-editable only when Telegram is linked.
+	if telegramLinked {
+		prefs.Telegram = r.FormValue("telegram") == "true"
+	} else {
+		prefs.Telegram = false
+	}
+
+	// Daily podcast preferences
+	if telegramLinked {
+		prefs.DailyEnabled = r.FormValue("daily_enabled") == "true"
+
+		if h, convErr := strconv.Atoi(r.FormValue("daily_hour")); convErr == nil && h >= 0 && h <= 23 {
+			prefs.DailyHour = h
+		}
+
+		dailyTz := r.FormValue("daily_timezone")
+		if dailyTz != "" {
+			if _, tzErr := time.LoadLocation(dailyTz); tzErr == nil {
+				prefs.DailyTimezone = dailyTz
+			}
+		}
+	}
+
+	if prefs.DailyTimezone == "" {
+		prefs.DailyTimezone = "UTC"
+	}
+	if _, tzErr := time.LoadLocation(prefs.DailyTimezone); tzErr != nil {
+		prefs.DailyTimezone = "UTC"
+	}
+
+	err = u.UserService.UpdateSummaryPreferences(user.ID, prefs)
 	if err != nil {
 		logger.Errorw("update summary preferences", "error", err)
 		http.Error(w, "Failed to save preferences", http.StatusInternalServerError)
 		return
 	}
 
-	// Maintain the weekly podcast schedule row in sync with the preferences.
+	// Maintain the weekly podcast schedule.
 	if prefs.Enabled {
 		nextAt := service.NextPublishAt(prefs.Day, 1)
 		if schedErr := u.PodcastScheduleRepo.Upsert(user.ID, models.PodcastScheduleTypeWeekly, nextAt); schedErr != nil {
-			// Non-fatal: log and continue.
-			logger.Errorw("upsert podcast schedule", "error", schedErr)
+			logger.Errorw("upsert weekly podcast schedule", "error", schedErr)
 		}
 	} else {
 		if schedErr := u.PodcastScheduleRepo.Delete(user.ID, models.PodcastScheduleTypeWeekly); schedErr != nil {
-			logger.Errorw("delete podcast schedule", "error", schedErr)
+			logger.Errorw("delete weekly podcast schedule", "error", schedErr)
 		}
 	}
 
@@ -495,7 +580,17 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	logger.Infow("saved summary preferences", "userId", user.ID, "enabled", prefs.Enabled, "day", prefs.Day)
+	logger.Infow(
+		"saved podcast preferences",
+		"userId", user.ID,
+		"enabled", prefs.Enabled,
+		"day", prefs.Day,
+		"email", prefs.Email,
+		"telegram", prefs.Telegram,
+		"dailyEnabled", prefs.DailyEnabled,
+		"dailyHour", prefs.DailyHour,
+		"dailyTimezone", prefs.DailyTimezone,
+	)
 	w.WriteHeader(http.StatusOK)
 }
 

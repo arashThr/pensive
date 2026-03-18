@@ -1,106 +1,5 @@
-<div class="space-y-8">
-  <div>
-    <h2 class="text-xl font-bold mb-2 text-main">Weekly Podcast Summary</h2>
-    <p class="text-sm text-secondary mb-6">Get an AI-generated audio summary of your bookmarks delivered weekly.</p>
-    
-    <form 
-      hx-post="/users/preferences" 
-      hx-swap="none"
-      hx-on::after-request="if(event.detail.successful) { document.getElementById('save-success').classList.remove('hidden'); setTimeout(() => document.getElementById('save-success').classList.add('hidden'), 3000); }"
-      class="space-y-6"
-    >
-      {{csrfField}}
-      <!-- Enable/Disable Toggle -->
-      <div class="rounded-lg border border-main bg-secondary p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="font-semibold text-main">Enable weekly summary</h3>
-            <p class="text-sm text-secondary mt-1">Receive an audio podcast of your saved articles</p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" name="enabled" value="true" class="sr-only peer" {{if .Preferences.Enabled}}checked{{end}}>
-            <div class="w-11 h-6 bg-secondary rounded-full peer border border-main peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-main after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-main"></div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Day of Week Selector -->
-      <div class="rounded-lg border border-main bg-secondary p-6">
-        <h3 class="font-semibold text-main mb-3">Delivery day</h3>
-        <p class="text-sm text-secondary mb-4">Choose which day to receive your weekly summary</p>
-        <select 
-          name="day" 
-          class="w-full sm:w-auto rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main"
-        >
-          <option value="sunday" {{if eq .Preferences.Day "sunday"}}selected{{end}}>Sunday</option>
-          <option value="monday" {{if eq .Preferences.Day "monday"}}selected{{end}}>Monday</option>
-          <option value="tuesday" {{if eq .Preferences.Day "tuesday"}}selected{{end}}>Tuesday</option>
-          <option value="wednesday" {{if eq .Preferences.Day "wednesday"}}selected{{end}}>Wednesday</option>
-          <option value="thursday" {{if eq .Preferences.Day "thursday"}}selected{{end}}>Thursday</option>
-          <option value="friday" {{if eq .Preferences.Day "friday"}}selected{{end}}>Friday</option>
-          <option value="saturday" {{if eq .Preferences.Day "saturday"}}selected{{end}}>Saturday</option>
-        </select>
-      </div>
-
-      <!-- Delivery Method -->
-      <div class="rounded-lg border border-main bg-secondary p-6">
-        <h3 class="font-semibold text-main mb-3">Delivery method</h3>
-        <p class="text-sm text-secondary mb-4">Choose how you want to receive your podcast</p>
-        
-        <div class="space-y-4">
-          <!-- Email Option -->
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input 
-              type="checkbox" 
-              name="email" 
-              value="true"
-              class="h-5 w-5 rounded border-main bg-secondary focus:border-main"
-              {{if .Preferences.Email}}checked{{end}}
-            >
-            <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              <span class="text-main">Email</span>
-              <span class="text-sm text-secondary">({{.Email}})</span>
-            </div>
-          </label>
-
-          <!-- Telegram Option -->
-          <label class="flex items-center gap-3 cursor-pointer">
-            <input 
-              type="checkbox" 
-              name="telegram" 
-              value="true"
-              class="h-5 w-5 rounded border-main bg-secondary focus:border-main"
-              {{if .Preferences.Telegram}}checked{{end}}
-            >
-            <div class="flex items-center gap-2">
-              <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-5 w-5">
-              <span class="text-main">Telegram</span>
-              {{if not .TelegramLinked}}<span class="text-xs text-secondary">(not connected — see below)</span>{{end}}
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Save Button -->
-      <div class="flex items-center gap-4">
-        <button 
-          type="submit" 
-          class="rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors focus:outline-none"
-        >
-          Save preferences
-        </button>
-        <span id="save-success" class="hidden text-sm text-secondary">
-          ✓ Preferences saved
-        </span>
-      </div>
-    </form>
-  </div>
-
+<div>
   <!-- Daily Podcast Section -->
-  <div class="border-t border-main">
     <h2 class="text-xl font-bold mb-2 text-main">Daily Podcast</h2>
     <p class="text-sm text-secondary mb-6">Get a short daily audio briefing of articles you saved in the past 24 hours. Delivered via Telegram only.</p>
 
@@ -111,7 +10,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <div>
-          <p class="text-sm text-secondary">Telegram is required for both delivery options above and the daily briefing below. Connect your account to enable them.</p>
+          <p class="text-sm text-secondary">Telegram is required for the daily briefing. Connect your account to enable it.</p>
           <a 
             href="/telegram/auth"
             class="inline-flex items-center gap-2 mt-2 text-sm font-medium text-secondary hover:text-main transition-colors"
@@ -134,11 +33,6 @@
       {{if not .TelegramLinked}}aria-disabled="true"{{end}}
     >
       {{csrfField}}
-      <!-- Re-send the weekly prefs as hidden fields so SavePreferences doesn't overwrite them -->
-      <input type="hidden" name="enabled" value="{{if .Preferences.Enabled}}true{{end}}">
-      <input type="hidden" name="day" value="{{.Preferences.Day}}">
-      <input type="hidden" name="email" value="{{if .Preferences.Email}}true{{end}}">
-      <input type="hidden" name="telegram" value="{{if .Preferences.Telegram}}true{{end}}">
 
       <!-- Enable Toggle -->
       <div class="rounded-lg border border-main bg-secondary p-6 {{if not .TelegramLinked}}opacity-50 pointer-events-none{{end}}">

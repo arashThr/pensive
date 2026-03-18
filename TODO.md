@@ -168,6 +168,7 @@
     - `gemini-embedding-001`
     - `EmbedContent`
 - [ ] Build Firefox addon from Chrome
+- [ ] Remove PreferencesTab template and references in users.go
 - [x] Update logging in API to use context logger
 - [x] Add passwordless login for production
 - [x] Remove password - Use email validation

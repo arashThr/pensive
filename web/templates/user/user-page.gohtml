@@ -22,7 +22,6 @@
         hx-trigger="change"
       >
         <option value="profile">Profile</option>
-        <option value="preferences">Preferences</option>
         <option value="tokens">API Tokens</option>
         <option value="import-export">Import / Export</option>
         <option value="data-management">Data Management</option>
@@ -42,17 +41,6 @@
               hx-swap="innerHTML"
             >
               Profile
-            </button>
-          </li>
-          <li>
-            <button 
-              class="tab-button w-full rounded-lg px-4 py-3 text-left font-medium text-secondary transition-colors hover:bg-secondary"
-              data-tab="preferences"
-              hx-get="/users/tab-content?tab=preferences"
-              hx-target="#tab-content"
-              hx-swap="innerHTML"
-            >
-              Preferences
             </button>
           </li>
           <li>
