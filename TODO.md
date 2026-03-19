@@ -17,6 +17,7 @@
 - [ ] Getting non-existant bookmark: Something went wrong
 - [ ] `telegram_user_id` is empty in telegram auth table
 - [ ] Remove the old scheduled podcasts. We get stuck if there's one from the past.
+- [ ] Search for tags
 - [ ] Fix delete in library page
 - [x] Wait for Turnstile verified
 - [x] Fix Telegram bot link parsing issue

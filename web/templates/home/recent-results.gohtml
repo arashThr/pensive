@@ -7,9 +7,9 @@
       <h2 class="text-lg font-semibold text-main">Your bookmarks ({{.Count}} total)</h2>
     </div>
     
-    <div class="divide-y divide-secondary/50">
+    <div class="divide-y divide-secondary/50 border-main">
       {{range .Bookmarks}}
-        <a href="/bookmarks/{{.Id}}" class="block hover:bg-secondary transition-colors">
+        <a href="/bookmarks/{{.Id}}" class="block hover:bg-secondary transition-colors border-main">
           <div class="flex items-start gap-4 p-6">
             <!-- Favicon -->
             <div class="w-6 h-6 shrink-0 mt-1">
