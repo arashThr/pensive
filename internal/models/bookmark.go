@@ -233,15 +233,15 @@ func (model *BookmarkRepo) CreateWithContent(
 	}
 
 	// Generate AI content for all users except for imports (like Pocket)
-	if source != Pocket && model.GenAIClient != nil {
-		// TODO: Should I also put content in db?
-		contentForMarkdown := article.TextContent
-		if article.Content != "" {
-			contentForMarkdown = article.Content
-		}
-		// Generate the markdown content using Gemini
-		go model.generateAIData(ctx, article.Title, contentForMarkdown, link, bookmarkId)
-	}
+	// if source != Pocket && model.GenAIClient != nil {
+	// 	// TODO: Should I also put content in db?
+	// 	contentForMarkdown := article.TextContent
+	// 	if article.Content != "" {
+	// 		contentForMarkdown = article.Content
+	// 	}
+	// 	// Generate the markdown content using Gemini
+	// 	go model.generateAIData(ctx, article.Title, contentForMarkdown, link, bookmarkId)
+	// }
 
 	return &inputBookmark, nil
 }
