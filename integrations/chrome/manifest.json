@@ -47,7 +47,8 @@
       "resources": [
         "options.js",
         "Readability.js",
-        "Readability-readerable.js"
+        "Readability-readerable.js",
+        "platform-extractors.js"
       ],
       "matches": [
         "http://localhost:8000/*",

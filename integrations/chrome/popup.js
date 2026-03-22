@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Get current tab information
   try {
-    const tabs = await browserAPI.tabs.query({ active: true, currentWindow: true });
-    currentTab = tabs[0];
+    [currentTab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+    console.log('[Pensive] Current tab:', currentTab);
 
     // Update page info
     pageTitleElement.textContent = currentTab.title;
@@ -153,7 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     saveBtn.disabled = true;
     updateStatus('loading', 'Extracting page content...');
 
-    const { endpoint, apiToken, fullPageCapture } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
+    let { endpoint, apiToken, fullPageCapture } = await browserAPI.storage.local.get(['endpoint', 'apiToken', 'fullPageCapture']);
+    // If undefined, use the default, which is true
+    fullPageCapture = fullPageCapture !== undefined ? fullPageCapture : true;
 
     if (!endpoint || !apiToken) {
       updateStatus('not-configured', 'Account not connected');
@@ -180,11 +182,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       try {
         updateStatus('loading', 'Extracting page content...');
 
+        // First, try platform-specific extraction (Twitter, Reddit, YouTube, etc.)
+        try {
+          await browserAPI.scripting.executeScript({
+            target: { tabId: currentTab.id },
+            files: ['platform-extractors.js']
+          });
+
+          // If the function only exists in the tab (from an injected file),
+          // we need to use a wrapper arrow function so the name is looked up in the tab's scope at call time.
+          const extractionResults = await browserAPI.scripting.executeScript({
+            target: { tabId: currentTab.id },
+            func: () => performPlatformExtraction()
+          });
+
+          const result = extractionResults?.[0]?.result;
+
+          // If platform extraction succeeded, use those results
+          if (result && result.success) {
+            pageContent.title = result.title;
+            pageContent.excerpt = result.excerpt;
+            pageContent.textContent = result.textContent;
+            pageContent.extractionMethod = result.extractionMethod;
+            if (result.timestamp) pageContent.publishedTime = result.timestamp;
+          }
+        } catch (platformError) {
+          console.log('[Pensive] Platform extraction skipped or failed:', platformError);
+        }
+        
         await browserAPI.scripting.executeScript({
           target: { tabId: currentTab.id },
           files: ['Readability-readerable.js', 'Readability.js'],
         });
         
+        // if the function is defined in popup.js, we can pass the func directly
         const readabilityResults = await browserAPI.scripting.executeScript({
           target: { tabId: currentTab.id },
           func: parseWithReadability
@@ -197,12 +228,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (isNaN(publishedDate)) {
             publishedDate = Date.now()
           }
-          pageContent.title = result.content.title || currentTab.title;
-          pageContent.excerpt = result.content.excerpt || document.querySelector('meta[name="description"]')?.content || '';
+          pageContent.title ||= result.content.title || currentTab.title;
+          pageContent.excerpt ||= result.content.excerpt || document.querySelector('meta[name="description"]')?.content || '';
           pageContent.lang = result.content.lang || document.documentElement.lang;
           pageContent.siteName = result.content.siteName || document.querySelector('meta[property="og:site_name"]')?.content || document.title;
           pageContent.publishedTime = new Date(publishedDate).toISOString()
-          pageContent.textContent = result.content.textContent || document.body.textContent;
+          pageContent.textContent ||= result.content.textContent || document.body.textContent;
           pageContent.extractionMethod = 'client-readability';
         }
 

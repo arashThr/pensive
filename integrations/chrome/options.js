@@ -33,7 +33,12 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   // Set default values for content capture settings (default to true for full page capture)
-  const fullPageCapture = result.fullPageCapture !== undefined ? result.fullPageCapture : true;
+  let fullPageCapture = true
+  if (result.fullPageCapture === undefined) {
+    await browserAPI.storage.local.set({ fullPageCapture: true });
+  } else {
+    fullPageCapture = result.fullPageCapture
+  }
 
   // Set toggle state based on stored preferences
   fullPageCaptureToggle.checked = fullPageCapture;
