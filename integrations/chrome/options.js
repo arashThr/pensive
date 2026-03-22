@@ -5,9 +5,7 @@ const browserAPI = isChrome ? chrome : browser;
 // Auto-detect dev mode based on manifest permissions
 const manifest = browserAPI.runtime.getManifest();
 const permissions = isChrome ? manifest.optional_host_permissions : manifest.permissions;
-const devMode = permissions.some(permission => 
-  permission.includes('localhost')
-);
+const devMode = !('update_url' in browserAPI.runtime.getManifest());
 
 document.addEventListener('DOMContentLoaded', async function () {
 
