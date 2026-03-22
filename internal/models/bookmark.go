@@ -151,19 +151,24 @@ func (model *BookmarkRepo) CreateWithContent(
 	// Input coming from the extension get higher priority than the fetched page
 	htmlContent := ""
 	if bookmarkRequest != nil {
-		switch {
-		case bookmarkRequest.Title != "":
+		if bookmarkRequest.Title != "" {
 			article.Title = bookmarkRequest.Title
-		case bookmarkRequest.Excerpt != "":
+		}
+		if bookmarkRequest.Excerpt != "" {
 			article.Excerpt = bookmarkRequest.Excerpt
-		case bookmarkRequest.Lang != "":
+		}
+		if bookmarkRequest.Lang != "" {
 			article.Language = bookmarkRequest.Lang
-		case bookmarkRequest.SiteName != "":
+		}
+		if bookmarkRequest.SiteName != "" {
 			article.SiteName = bookmarkRequest.SiteName
-		case bookmarkRequest.PublishedTime != nil:
+		}
+		if bookmarkRequest.PublishedTime != nil {
 			article.PublishedTime = bookmarkRequest.PublishedTime
 		}
-		htmlContent = bookmarkRequest.HtmlContent
+		if bookmarkRequest.HtmlContent != "" {
+			htmlContent = bookmarkRequest.HtmlContent
+		}
 	}
 
 	// If HTML content is provided, use it instead of what Readability fetched
@@ -228,7 +233,7 @@ func (model *BookmarkRepo) CreateWithContent(
 	}
 
 	// Generate AI content for all users except for imports (like Pocket)
-	if source != Pocket {
+	if source != Pocket && model.GenAIClient != nil {
 		// TODO: Should I also put content in db?
 		contentForMarkdown := article.TextContent
 		if article.Content != "" {
