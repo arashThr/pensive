@@ -48,6 +48,9 @@
         color: #ffffff;
       }
 
+      .status.connected    { color: #16a34a; border-color: #16a34a; }
+      .status.disconnected  { color: #b3b3b3; }
+
       .status-icon { width: 18px; height: 18px; margin-right: 10px; flex-shrink: 0; }
 
       /* Buttons */
@@ -77,6 +80,13 @@
       }
 
       .btn-ghost:hover:not(:disabled) { background: transparent; color: #ffffff; }
+
+      .btn-primary {
+        background: #cf0a0a;
+        color: #ffffff;
+        border-color: #cf0a0a;
+      }
+      .btn-primary:hover:not(:disabled) { background: #a80808; border-color: #a80808; }
 
       .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 

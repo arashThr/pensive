@@ -8,6 +8,8 @@
   --color-text: #ffffff;
   --color-text-secondary: #b3b3b3;
   --color-accent: #ffffff;
+  --color-brand-red: #cf0a0a;
+  --color-brand-green: #16a34a;
 }
 
 @theme {
