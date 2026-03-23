@@ -19,6 +19,7 @@
 - [ ] Remove the old scheduled podcasts. We get stuck if there's one from the past.
 - [ ] Search for tags
 - [ ] Fix delete in library page
+- [ ] Make the podcast length proportional to the size of the article
 - [x] Wait for Turnstile verified
 - [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket
@@ -170,6 +171,8 @@
     - `EmbedContent`
 - [ ] Build Firefox addon from Chrome
 - [ ] Remove PreferencesTab template and references in users.go
+- [ ] Add script to check the extractions manually
+- [ ] Send error messages to Telegram
 - [x] Update logging in API to use context logger
 - [x] Add passwordless login for production
 - [x] Remove password - Use email validation
