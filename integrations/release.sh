@@ -27,6 +27,7 @@ if [ "$1" == "chrome" ]; then
     cp -r chrome/* dist/chrome/
     sed -i -e '/localhost/d' dist/chrome/manifest.json
     sed -i -e "s/\"version\":.*/\"version\": \"$version\",/g" dist/chrome/manifest.json
+    sed -i -e 's/const devMode = true;/const devMode = false;/' dist/chrome/options.js
     zip -r dist/chrome.zip dist/chrome  -x "*/.DS_Store"
     rm -rf dist/chrome
 fi
@@ -38,6 +39,7 @@ if [ "$1" == "firefox" ]; then
     cp firefox/manifest.json dist/firefox/
     sed -i -e '/localhost/d' dist/firefox/manifest.json
     sed -i -e "s/\"version\":.*/\"version\": \"$version\",/g" dist/firefox/manifest.json
+    sed -i -e 's/const devMode = true;/const devMode = false;/' dist/firefox/options.js
     # Zip the content of the dist/firefox directory, and not the dist/firefox directory itself
     cd dist/firefox
     zip -r ../firefox.zip * -x "*/.DS_Store"

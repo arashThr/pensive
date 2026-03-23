@@ -2,10 +2,11 @@
 const isChrome = !(window.browser && browser.runtime)
 const browserAPI = isChrome ? chrome : browser;
 
-// Auto-detect dev mode based on manifest permissions
 const manifest = browserAPI.runtime.getManifest();
 const permissions = isChrome ? manifest.optional_host_permissions : manifest.permissions;
-const devMode = !('update_url' in browserAPI.runtime.getManifest());
+
+// Default: true (development). The release script replaces this with `false` before packaging.
+const devMode = true; // __PENSIVE_DEV_MODE__
 
 document.addEventListener('DOMContentLoaded', async function () {
 
