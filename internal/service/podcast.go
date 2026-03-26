@@ -91,7 +91,7 @@ func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
 
 	filePath := fmt.Sprintf("%s/%d/%s", PodcastSummaryDir, user.ID, filename)
 	if _, err := os.Stat(filePath); err != nil {
-		logger.Infow("[podcast] Episode file not found", "userId", user.ID, "filename", filename)
+		logger.Infow("[podcast] Episode file not found", "user_id", user.ID, "filename", filename)
 		http.NotFound(w, r)
 		return
 	}
@@ -106,7 +106,7 @@ func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
 // StartScheduler launches the hourly background job that processes due podcast
 // schedules. It blocks until ctx is cancelled – call it in a goroutine.
 func (p *Podcast) StartScheduler(ctx context.Context) {
-	logging.Logger.Infow("[podcast-scheduler] Starting")
+	logging.Logger.With("flow", "podcast-scheduler").Infow("Starting")
 
 	// Run once immediately on startup to catch anything that was missed.
 	p.runSchedulerTick(ctx)
@@ -117,7 +117,7 @@ func (p *Podcast) StartScheduler(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			logging.Logger.Infow("[podcast-scheduler] Stopping")
+			logging.Logger.With("flow", "podcast-scheduler").Infow("Stopping")
 			return
 		case <-ticker.C:
 			p.runSchedulerTick(ctx)
@@ -126,19 +126,19 @@ func (p *Podcast) StartScheduler(ctx context.Context) {
 }
 
 func (p *Podcast) runSchedulerTick(ctx context.Context) {
-	logger := logging.Logger
+	logger := logging.Logger.With("flow", "podcast-scheduler")
 
 	// Reap any schedules stuck in 'processing' for too long.
 	reaped, err := p.PodcastScheduleRepo.ReapTimedOut()
 	if err != nil {
-		logger.Errorw("[podcast-scheduler] ReapTimedOut failed", "error", err)
+		logger.Errorw("ReapTimedOut failed", "error", err)
 	} else if reaped > 0 {
-		logger.Infow("[podcast-scheduler] Reaped stale schedules", "count", reaped)
+		logger.Infow("Reaped stale schedules", "count", reaped)
 	}
 
 	due, err := p.PodcastScheduleRepo.GetDue(models.PodcastScheduleTypeWeekly)
 	if err != nil {
-		logger.Errorw("[podcast-scheduler] GetDue failed", "error", err)
+		logger.Errorw("GetDue failed", "error", err)
 		return
 	}
 
@@ -146,7 +146,7 @@ func (p *Podcast) runSchedulerTick(ctx context.Context) {
 		return
 	}
 
-	logger.Infow("[podcast-scheduler] Dispatching due episodes", "count", len(due))
+	logger.Infow("Dispatching due episodes", "count", len(due))
 
 	for _, schedule := range due {
 		// Atomically claim the row before spawning the goroutine to avoid
@@ -155,7 +155,7 @@ func (p *Podcast) runSchedulerTick(ctx context.Context) {
 			if errors.Is(err, errors.ErrNotFound) {
 				continue // already claimed
 			}
-			logger.Errorw("[podcast-scheduler] MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
+			logger.Errorw("MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
 			continue
 		}
 		s := schedule // capture loop variable - We're go 1.22+, so just to be sure :)
@@ -165,13 +165,13 @@ func (p *Podcast) runSchedulerTick(ctx context.Context) {
 
 // processSchedule generates and delivers one scheduled episode, then updates the DB.
 func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule) {
-	logger := logging.Logger
-	logger.Infow("[podcast-scheduler] Processing episode", "scheduleId", s.ID, "userId", s.UserID)
+	logger := logging.Logger.With("flow", "podcast-scheduler", "scheduleId", s.ID, "user_id", s.UserID)
+	logger.Infow("Processing episode")
 
 	fail := func(err error) {
-		logger.Errorw("[podcast-scheduler] Episode failed", "error", err, "scheduleId", s.ID)
+		logger.Errorw("Episode failed", "error", err)
 		if dbErr := p.PodcastScheduleRepo.MarkFailed(s.ID); dbErr != nil {
-			logger.Errorw("[podcast-scheduler] MarkFailed error", "error", dbErr)
+			logger.Errorw("MarkFailed error", "error", dbErr)
 		}
 	}
 
@@ -188,10 +188,10 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 	}
 
 	if len(articles) == 0 {
-		logger.Infow("[podcast-scheduler] No bookmarks, skipping and rescheduling", "userId", s.UserID)
+		logger.Infow("No bookmarks, skipping and rescheduling")
 		next := NextPublishAt(prefs.Day, 7)
 		if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
-			logger.Errorw("[podcast-scheduler] MarkSent (no bookmarks) error", "error", dbErr)
+			logger.Errorw("MarkSent (no bookmarks) error", "error", dbErr)
 		}
 		return
 	}
@@ -214,7 +214,7 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 	// Save the podcast script alongside the audio for reference / debugging.
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
 	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
-		logger.Warnw("[podcast-scheduler] Failed to write script file", "error", err, "path", scriptPath)
+		logger.Warnw("Failed to write script file", "error", err, "path", scriptPath)
 		// Non-fatal — continue with audio generation.
 	}
 
@@ -231,7 +231,7 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 		return
 	}
 
-	logger.Infow("[podcast-scheduler] Audio saved", "path", audioPath, "bytes", len(audioBytes))
+	logger.Infow("Audio saved", "path", audioPath, "bytes", len(audioBytes))
 
 	sentViaTelegram := false
 	if prefs.Telegram {
@@ -242,7 +242,7 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 	if !sentViaTelegram {
 		user, err := p.UserRepo.Get(s.UserID)
 		if err != nil {
-			logger.Errorw("[podcast-scheduler] Could not look up user email for podcast notification", "error", err, "userId", s.UserID)
+			logger.Errorw("Could not look up user email for podcast notification", "error", err)
 		} else {
 			p.sendPodcastEmail(user.Email, int64(s.UserID), audioFilename)
 		}
@@ -250,17 +250,17 @@ func (p *Podcast) processSchedule(ctx context.Context, s models.PodcastSchedule)
 
 	next := NextPublishAt(prefs.Day, 7)
 	if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
-		logger.Errorw("[podcast-scheduler] MarkSent error", "error", dbErr, "scheduleId", s.ID)
+		logger.Errorw("MarkSent error", "error", dbErr)
 	}
 
-	logger.Infow("[podcast-scheduler] Episode complete, next scheduled", "userId", s.UserID, "nextAt", next)
+	logger.Infow("Episode complete, next scheduled", "nextAt", next)
 }
 
 // ---- Daily scheduler --------------------------------------------------------
 
 // StartDailyScheduler runs the hourly tick that processes daily podcast schedules.
 func (p *Podcast) StartDailyScheduler(ctx context.Context) {
-	logging.Logger.Infow("[podcast-daily] Starting")
+	logging.Logger.With("flow", "podcast-daily").Infow("Starting")
 	p.runDailySchedulerTick(ctx)
 
 	ticker := time.NewTicker(podcastSchedulerInterval)
@@ -269,7 +269,7 @@ func (p *Podcast) StartDailyScheduler(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			logging.Logger.Infow("[podcast-daily] Stopping")
+			logging.Logger.With("flow", "podcast-daily").Infow("Stopping")
 			return
 		case <-ticker.C:
 			p.runDailySchedulerTick(ctx)
@@ -278,22 +278,22 @@ func (p *Podcast) StartDailyScheduler(ctx context.Context) {
 }
 
 func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
-	logger := logging.Logger
+	logger := logging.Logger.With("flow", "podcast-daily")
 
 	// ReapTimedOut covers all schedule types in one pass; only run it here to
 	// avoid double-reaping when both scheduler ticks run close together.
 	due, err := p.PodcastScheduleRepo.GetDue(models.PodcastScheduleTypeDaily)
 	if err != nil {
-		logger.Errorw("[podcast-daily] GetDue failed", "error", err)
+		logger.Errorw("GetDue failed", "error", err)
 		return
 	}
-	logger.Debugf("[podcast-daily] Found %d due schedules", len(due))
+	logger.Debugw("Found due schedules", "count", len(due))
 	for _, schedule := range due {
 		if err := p.PodcastScheduleRepo.MarkProcessing(schedule.ID); err != nil {
 			if errors.Is(err, errors.ErrNotFound) {
 				continue
 			}
-			logger.Errorw("[podcast-daily] MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
+			logger.Errorw("MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
 			continue
 		}
 		s := schedule
@@ -302,13 +302,13 @@ func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
 }
 
 func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSchedule) {
-	logger := logging.Logger
-	logger.Infow("[podcast-daily] Processing episode", "scheduleId", s.ID, "userId", s.UserID)
+	logger := logging.Logger.With("flow", "podcast-daily", "scheduleId", s.ID, "user_id", s.UserID)
+	logger.Infow("Processing episode")
 
 	fail := func(err error) {
-		logger.Errorw("[podcast-daily] Episode failed", "error", err, "scheduleId", s.ID)
+		logger.Errorw("Episode failed", "error", err)
 		if dbErr := p.PodcastScheduleRepo.MarkFailed(s.ID); dbErr != nil {
-			logger.Errorw("[podcast-daily] MarkFailed error", "error", dbErr)
+			logger.Errorw("MarkFailed error", "error", dbErr)
 		}
 	}
 
@@ -326,10 +326,10 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 
 	// Reschedule and skip silently if there are no bookmarks today.
 	if len(articles) == 0 {
-		logger.Infow("[podcast-daily] No bookmarks today, rescheduling", "userId", s.UserID)
+		logger.Infow("No bookmarks today, rescheduling")
 		next := NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
 		if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
-			logger.Errorw("[podcast-daily] MarkSent (no bookmarks) error", "error", dbErr)
+			logger.Errorw("MarkSent (no bookmarks) error", "error", dbErr)
 		}
 		return
 	}
@@ -350,7 +350,7 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
 	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
-		logger.Warnw("[podcast-daily] Failed to write script file", "error", err, "path", scriptPath)
+		logger.Warnw("Failed to write script file", "error", err, "path", scriptPath)
 	}
 
 	audioBytes, err := p.callGoogleTTS(ctx, script)
@@ -366,18 +366,18 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 		return
 	}
 
-	logger.Infow("[podcast-daily] Audio saved", "path", audioPath, "bytes", len(audioBytes))
+	logger.Infow("Audio saved", "path", audioPath, "bytes", len(audioBytes))
 
 	// Daily podcast is Telegram-only.
 	if !p.sendTelegramAudio(int64(s.UserID), audioPath, audioFilename) {
-		logger.Warnw("[podcast-daily] Telegram send failed or not linked", "userId", s.UserID)
+		logger.Warnw("Telegram send failed or not linked")
 	}
 
 	next := NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
 	if dbErr := p.PodcastScheduleRepo.MarkSent(s.ID, next); dbErr != nil {
-		logger.Errorw("[podcast-daily] MarkSent error", "error", dbErr, "scheduleId", s.ID)
+		logger.Errorw("MarkSent error", "error", dbErr)
 	}
-	logger.Infow("[podcast-daily] Episode complete, next scheduled", "userId", s.UserID, "nextAt", next)
+	logger.Infow("Episode complete, next scheduled", "nextAt", next)
 }
 
 // ---- Generation helpers -------------------------------------------------------
@@ -628,22 +628,22 @@ func splitAtSentences(text string) []string {
 // sendTelegramAudio uploads the generated audio file to the user's Telegram chat.
 // Returns true if the audio was successfully sent.
 func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) bool {
-	logger := logging.Logger
+	logger := logging.Logger.With("flow", "podcast", "user_id", userID)
 
 	if p.TelegramRepo == nil || p.TelegramToken == "" {
-		logger.Infow("[podcast] Telegram not configured, skipping", "userId", userID)
+		logger.Infow("Telegram not configured, skipping")
 		return false
 	}
 
 	chatID, err := p.TelegramRepo.GetChatIdByUserId(types.UserId(userID))
 	if err != nil {
-		logger.Infow("[podcast] User has no Telegram linked", "userId", userID)
+		logger.Infow("User has no Telegram linked")
 		return false
 	}
 
 	f, err := os.Open(filePath)
 	if err != nil {
-		logger.Errorw("[podcast] Failed to open audio file", "error", err, "path", filePath)
+		logger.Errorw("Failed to open audio file", "error", err, "path", filePath)
 		return false
 	}
 	defer f.Close()
@@ -654,11 +654,11 @@ func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) boo
 	_ = mw.WriteField("caption", "🎧 Your Pensive podcast is ready!")
 	part, err := mw.CreateFormFile("audio", filename)
 	if err != nil {
-		logger.Errorw("[podcast] Failed to create multipart form file", "error", err)
+		logger.Errorw("Failed to create multipart form file", "error", err)
 		return false
 	}
 	if _, err := io.Copy(part, f); err != nil {
-		logger.Errorw("[podcast] Failed to copy audio into form", "error", err)
+		logger.Errorw("Failed to copy audio into form", "error", err)
 		return false
 	}
 	mw.Close()
@@ -666,33 +666,34 @@ func (p *Podcast) sendTelegramAudio(userID int64, filePath, filename string) boo
 	endpoint := fmt.Sprintf("https://api.telegram.org/bot%s/sendAudio", p.TelegramToken)
 	resp, err := http.Post(endpoint, mw.FormDataContentType(), &buf)
 	if err != nil {
-		logger.Errorw("[podcast] Failed to send Telegram audio", "error", err, "userId", userID)
+		logger.Errorw("Failed to send Telegram audio", "error", err)
 		return false
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		logger.Errorw("[podcast] Telegram API returned error", "status", resp.StatusCode, "body", string(body), "userId", userID)
+		logger.Errorw("Telegram API returned error", "status", resp.StatusCode, "body", string(body))
 		return false
 	}
 
-	logger.Infow("[podcast] Sent Telegram audio", "userId", userID, "chatId", chatID)
+	logger.Infow("Sent Telegram audio", "chatId", chatID)
 	return true
 }
 
 // sendPodcastEmail sends the authenticated download link to the user's email address.
 func (p *Podcast) sendPodcastEmail(userEmail string, userID int64, audioFilename string) {
+	logger := logging.Logger.With("flow", "podcast", "user_id", userID)
 	if p.EmailService == nil || p.Domain == "" {
-		logging.Logger.Warnw("[podcast] Email service not configured, skipping email", "userId", userID)
+		logger.Warnw("Email service not configured, skipping email")
 		return
 	}
 	downloadURL := fmt.Sprintf("%s/users/podcast/episodes/%s", p.Domain, audioFilename)
 	if err := p.EmailService.SendPodcastReady(userEmail, downloadURL); err != nil {
-		logging.Logger.Errorw("[podcast] Failed to send podcast email", "error", err, "userId", userID, "email", userEmail)
+		logger.Errorw("Failed to send podcast email", "error", err, "email", userEmail)
 		return
 	}
-	logging.Logger.Infow("[podcast] Sent podcast email", "userId", userID, "email", userEmail)
+	logger.Infow("Sent podcast email", "email", userEmail)
 }
 
 // TriggerEpisode is an internal admin endpoint that generates a fresh podcast episode
@@ -730,12 +731,12 @@ func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
 
 	user, err := p.UserRepo.Get(types.UserId(req.UserID))
 	if err != nil {
-		logger.Errorw("[podcast-trigger] User not found", "userId", req.UserID, "error", err)
+		logger.Errorw("[podcast-trigger] User not found", "user_id", req.UserID, "error", err)
 		http.Error(w, "user not found", http.StatusNotFound)
 		return
 	}
 
-	logger.Infow("[podcast-trigger] Manual trigger accepted", "userId", req.UserID, "channel", req.Channel)
+	logger.Infow("[podcast-trigger] Manual trigger accepted", "user_id", req.UserID, "channel", req.Channel)
 	go p.triggerAndDeliver(user.ID, user.Email, req.Channel)
 
 	w.WriteHeader(http.StatusAccepted)
@@ -749,27 +750,27 @@ func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
 // triggerAndDeliver is the backend of TriggerEpisode. It generates a fresh episode
 // and delivers it over the channels requested by the caller.
 func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel string) {
-	logger := logging.Logger
+	logger := logging.Logger.With("flow", "podcast-trigger", "user_id", userID)
 
 	articles, err := p.BookmarkModel.GetRecentRandomForPodcast(userID, PodcastDays, PodcastArticleLimit)
 	if err != nil {
-		logger.Errorw("[podcast-trigger] Failed to fetch bookmarks", "error", err, "userId", userID)
+		logger.Errorw("Failed to fetch bookmarks", "error", err)
 		return
 	}
 	if len(articles) == 0 {
-		logger.Infow("[podcast-trigger] No bookmarks found, aborting", "userId", userID)
+		logger.Infow("No bookmarks found, aborting")
 		return
 	}
 
 	script, err := p.generatePodcastScript(context.Background(), userID, articles, PodcastDays)
 	if err != nil {
-		logger.Errorw("[podcast-trigger] Failed to generate podcast script", "error", err, "userId", userID)
+		logger.Errorw("Failed to generate podcast script", "error", err)
 		return
 	}
 
 	uploadDir := userPodcastDir(int64(userID))
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		logger.Errorw("[podcast-trigger] Failed to create upload dir", "error", err)
+		logger.Errorw("Failed to create upload dir", "error", err)
 		return
 	}
 
@@ -777,23 +778,23 @@ func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel stri
 
 	scriptPath := fmt.Sprintf("%s/%s_script.txt", uploadDir, baseFilename)
 	if err := os.WriteFile(scriptPath, []byte(script), 0644); err != nil {
-		logger.Warnw("[podcast-trigger] Failed to write script file", "error", err, "path", scriptPath)
+		logger.Warnw("Failed to write script file", "error", err, "path", scriptPath)
 	}
 
 	audioBytes, err := p.callGoogleTTS(context.Background(), script)
 	if err != nil {
-		logger.Errorw("[podcast-trigger] Google TTS failed", "error", err, "userId", userID)
+		logger.Errorw("Google TTS failed", "error", err)
 		return
 	}
 
 	audioFilename := fmt.Sprintf("%s.ogg", baseFilename)
 	audioPath := fmt.Sprintf("%s/%s", uploadDir, audioFilename)
 	if err := os.WriteFile(audioPath, audioBytes, 0644); err != nil {
-		logger.Errorw("[podcast-trigger] Failed to write audio file", "error", err, "path", audioPath)
+		logger.Errorw("Failed to write audio file", "error", err, "path", audioPath)
 		return
 	}
 
-	logger.Infow("[podcast-trigger] Audio saved", "path", audioPath, "bytes", len(audioBytes))
+	logger.Infow("Audio saved", "path", audioPath, "bytes", len(audioBytes))
 
 	sendEmail := channel == "email" || channel == "both"
 	sendTelegram := channel == "telegram" || channel == "both"
@@ -805,7 +806,7 @@ func (p *Podcast) triggerAndDeliver(userID types.UserId, userEmail, channel stri
 		p.sendPodcastEmail(userEmail, int64(userID), audioFilename)
 	}
 
-	logger.Infow("[podcast-trigger] Manual trigger complete", "userId", userID, "channel", channel)
+	logger.Infow("Manual trigger complete", "channel", channel)
 }
 
 // maxMarkdownCharsPerArticle caps the content per article sent to Gemini for script generation.
@@ -922,9 +923,9 @@ Output ONLY the finished spoken script — no stage directions, markdown headers
 	if err != nil {
 		return "", fmt.Errorf("gemini script generation: %w", err)
 	}
-	logging.Logger.Infow("[podcast] Gemini script generation complete",
+	logging.Logger.With("flow", "podcast").Infow("Gemini script generation complete",
 		"elapsed", time.Since(start).Round(time.Millisecond).String(),
-		"userId", userID,
+		"user_id", userID,
 	)
 
 	return strings.TrimSpace(result.Text()), nil

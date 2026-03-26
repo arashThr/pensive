@@ -50,7 +50,7 @@ func (as *TokenRepo) Create(userId types.UserId, source string) (*GeneratedApiTo
 		return nil, fmt.Errorf("api token count: %w", err)
 	}
 	if count >= MaxTokens {
-		logging.Logger.Warnw("api token limit reached. deleting old ones", "count", count, "userId", userId)
+		logging.Logger.Warnw("api token limit reached. deleting old ones", "count", count, "user_id", userId)
 		// Delete the oldest token if the limit is reached
 		_, err = as.Pool.Exec(context.Background(), `
 			DELETE FROM api_tokens
@@ -63,7 +63,7 @@ func (as *TokenRepo) Create(userId types.UserId, source string) (*GeneratedApiTo
 		if err != nil {
 			return nil, fmt.Errorf("api token delete old: %w", err)
 		}
-		logging.Logger.Infow("old api token deleted", "userId", userId)
+		logging.Logger.Infow("old api token deleted", "user_id", userId)
 	}
 
 	apiToken := GeneratedApiToken{

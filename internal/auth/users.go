@@ -176,7 +176,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 
 	user, err := u.UserService.Authenticate(email, password)
 	if err != nil {
-		logger.Infow("sign in failed", "error", err)
+		logger.Errorw("sign in failed", "error", err)
 		u.Templates.SignIn.Execute(w, r, data, web.NavbarMessage{
 			Message: "Email address or password is incorrect",
 			IsError: true,
@@ -202,7 +202,7 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	err = u.SessionService.Delete(token)
 	if err != nil {
-		logger.Infow("sign out failed", "error", err)
+		logger.Errorw("sign out failed", "error", err)
 		http.Error(w, "Sign out failed", http.StatusInternalServerError)
 		return
 	}
@@ -237,7 +237,7 @@ func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logger.Infow("api token not found for current user")
 		} else {
-			logger.Infow("get api token for current user", "error", err)
+			logger.Errorw("get api token for current user", "error", err)
 			http.Error(w, "Failed to get API token", http.StatusInternalServerError)
 			return
 		}
@@ -275,7 +275,7 @@ func (u Users) Integrations(w http.ResponseWriter, r *http.Request) {
 		if u.UserService != nil {
 			prefs, err := u.UserService.GetSummaryPreferences(user.ID)
 			if err != nil {
-				logger.Errorw("get summary preferences for integrations", "error", err, "userId", user.ID)
+				logger.Errorw("get summary preferences for integrations", "error", err, "user_id", user.ID)
 			} else {
 				data.Preferences = prefs
 			}
@@ -290,7 +290,7 @@ func (u Users) Integrations(w http.ResponseWriter, r *http.Request) {
 			tokens, err := u.TokenModel.Get(user.ID)
 			if err != nil {
 				if !errors.Is(err, pgx.ErrNoRows) {
-					logger.Errorw("get api tokens for integrations", "error", err, "userId", user.ID)
+					logger.Errorw("get api tokens for integrations", "error", err, "user_id", user.ID)
 				}
 			} else {
 				data.TokensCount = len(tokens)
@@ -361,7 +361,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 	user, err := u.PasswordResetService.Consume(data.Token)
 	if err != nil {
 		// TODO: Better message if failed duo to bad token
-		logger.Infow("consume token for reset password", "error", err)
+		logger.Errorw("consume token for reset password", "error", err)
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
@@ -375,7 +375,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 
 	session, err := u.SessionService.Create(user.ID, r.RemoteAddr)
 	if err != nil {
-		logger.Infow("create session for password reset", "error", err)
+		logger.Errorw("create session for password reset", "error", err)
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
@@ -425,7 +425,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 			if errors.Is(err, pgx.ErrNoRows) {
 				logger.Infow("api token not found for current user")
 			} else {
-				logger.Infow("get api token for current user", "error", err)
+				logger.Errorw("get api token for current user", "error", err)
 				http.Error(w, "Failed to get API token", http.StatusInternalServerError)
 				return
 			}
@@ -582,7 +582,7 @@ func (u Users) SavePreferences(w http.ResponseWriter, r *http.Request) {
 
 	logger.Infow(
 		"saved podcast preferences",
-		"userId", user.ID,
+		"user_id", user.ID,
 		"enabled", prefs.Enabled,
 		"day", prefs.Day,
 		"email", prefs.Email,

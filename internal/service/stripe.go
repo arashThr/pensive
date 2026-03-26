@@ -48,7 +48,7 @@ func (s Stripe) getStripeCustomerId(ctx context.Context, user *models.User) (cus
 	result := customer.List(params)
 	if result.Next() {
 		// Found customer
-		logger.Errorw("Found stripe customer for user", "userId", user.ID, "error", err)
+		logger.Errorw("Found stripe customer for user", "user_id", user.ID, "error", err)
 		customer := result.Customer()
 		customerId = customer.ID
 	} else {

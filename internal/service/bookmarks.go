@@ -45,14 +45,15 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		Link   string
 	}
 	ctx := r.Context()
+	logger := loggercontext.Logger(ctx)
 	user := usercontext.User(ctx)
 	data.Title = "New Bookmark"
 	data.UserId = user.ID
 	data.Link = r.FormValue("link")
-	logging.Logger.Debugw("creating bookmark", "link", data.Link, "userId", data.UserId)
+	logger.Debugw("creating bookmark", "link", data.Link, "user_id", data.UserId)
 
 	if !validations.IsURLValid(data.Link) {
-		logging.Logger.Errorw("Invalid URL", "url", data.Link)
+		logger.Errorw("Invalid URL", "url", data.Link, "user_id", data.UserId)
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
@@ -104,7 +105,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 		IsPremium bool
 	}
 	host := validations.ExtractHostname(bookmark.Link)
-	logger.Infow("editing bookmark", "url", host)
+	logger.Infow("editing bookmark", "url", host, "user_id", user.ID)
 	data.Link = bookmark.Link
 	data.Host = host
 	data.Title = bookmark.Title
@@ -117,7 +118,7 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 	data.Thumbnail = bookmark.ImageUrl
 	data.IsPremium = user.IsSubscriptionPremium()
 
-	logger.Infow("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user", user.ID)
+	logger.Infow("Subscription status", "status", user.SubscriptionStatus, "is_premium", data.IsPremium, "user_id", user.ID)
 
 	// AI-generated content is now available for all users
 	if bookmark.AISummary != nil {

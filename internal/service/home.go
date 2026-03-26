@@ -29,7 +29,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	page := validations.GetPageOffset(r.FormValue("page"))
 	paginatedData, err := h.getPaginatedBookmarksData(user, page)
 	if err != nil {
-		logger.Errorw("failed to get paginated bookmarks", "error", err)
+		logger.Errorw("failed to get paginated bookmarks", "error", err, "user_id", user.ID)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +59,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	// Get remaining bookmarks for unverified users
 	remaining, err := h.BookmarkModel.GetRemainingBookmarks(user)
 	if err != nil {
-		logger.Warnw("failed to get remaining bookmarks", "error", err)
+		logger.Warnw("failed to get remaining bookmarks", "error", err, "user_id", user.ID)
 		data.RemainingBookmarks = 0
 	} else {
 		data.RemainingBookmarks = remaining
@@ -68,7 +68,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	// Get remaining AI questions for this month
 	remainingAI, err := h.BookmarkModel.GetRemainingAIQuestions(user)
 	if err != nil {
-		logger.Warnw("failed to get remaining AI questions", "error", err)
+		logger.Warnw("failed to get remaining AI questions", "error", err, "user_id", user.ID)
 		data.RemainingAIQuestions = 0
 	} else {
 		data.RemainingAIQuestions = remainingAI
@@ -88,7 +88,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		// Return paginated bookmarks when no query
 		data, err := h.getPaginatedBookmarksData(user, page)
 		if err != nil {
-			logger.Errorw("failed to get paginated bookmarks", "error", err)
+			logger.Errorw("failed to get paginated bookmarks", "error", err, "user_id", user.ID)
 			http.Error(w, "Something went wrong", http.StatusInternalServerError)
 			return
 		}
@@ -99,7 +99,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 
 	results, err := h.BookmarkModel.Search(user, query)
 	if err != nil {
-		logger.Errorw("failed to search bookmarks", "error", err)
+		logger.Errorw("failed to search bookmarks", "error", err, "user_id", user.ID)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}

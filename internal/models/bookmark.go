@@ -143,7 +143,7 @@ func (model *BookmarkRepo) CreateWithContent(
 		// Neither Readability nor the extension provided content
 		// So we can't create a bookmark
 		if bookmarkRequest == nil {
-			logger.Warnw("Page content inaccessible", "link", link, "userId", user.ID)
+			logger.Warnw("Page content inaccessible", "link", link, "user_id", user.ID)
 			return nil, fmt.Errorf("page content inaccessible")
 		}
 	}

@@ -336,6 +336,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RequestID)
 
 	// Admin routes - protected by basic auth
 	r.Route("/admin", func(r chi.Router) {
@@ -545,13 +546,14 @@ func LoggerMiddleware(isProduction bool, flow string) func(next http.Handler) ht
 			t1 := time.Now()
 			ctx := r.Context()
 			reqLogger := logging.Logger.With(
+				"request_id", middleware.GetReqID(ctx),
 				"req_path", r.URL.Path,
 				"req_method", r.Method,
 				"flow", flow,
 			)
 
 			if user := usercontext.User(ctx); user != nil {
-				reqLogger = reqLogger.With("user", user.ID)
+				reqLogger = reqLogger.With("user_id", user.ID)
 			}
 			ctx = loggercontext.WithLogger(ctx, reqLogger)
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)

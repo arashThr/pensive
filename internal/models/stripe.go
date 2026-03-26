@@ -84,7 +84,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing invoice", "userId", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("Processing invoice", "user_id", userId, "invoiceID", invoice.ID)
 
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		newInvoice.StripeInvoiceId, newInvoice.SubscriptionID, newInvoice.Status,
 		newInvoice.Amount, newInvoice.PaidAt)
 	if err != nil {
-		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
+		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "user_id", userId)
 		return
 	}
 
@@ -138,7 +138,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		return
 	}
 
-	logging.Logger.Infow("Invoice processed", "invoiceID", invoice.ID, "userId", userId)
+	logging.Logger.Infow("Invoice processed", "invoiceID", invoice.ID, "user_id", userId)
 }
 
 func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
@@ -153,7 +153,7 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing invoice failed", "userId", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("Processing invoice failed", "user_id", userId, "invoiceID", invoice.ID)
 
 	newInvoice := &StripeInvoice{
 		StripeInvoiceId: invoice.ID,
@@ -180,7 +180,7 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		VALUES ($1, $2, $3, $4, $5, $6);`, newInvoice.StripeInvoiceId, newInvoice.SubscriptionID,
 		newInvoice.Status, newInvoice.Amount, newInvoice.PaidAt, newInvoice.CreatedAt)
 	if err != nil {
-		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "userId", userId)
+		logging.Logger.Errorw("Error saving invoice", "error", err, "invoiceID", invoice.ID, "user_id", userId)
 		return
 	}
 
@@ -199,7 +199,7 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		return
 	}
 
-	logging.Logger.Infow("Invoice failed processed", "invoiceID", invoice.ID, "userId", userId)
+	logging.Logger.Infow("Invoice failed processed", "invoiceID", invoice.ID, "user_id", userId)
 }
 
 func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
@@ -210,7 +210,7 @@ func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription
 		logging.Logger.Errorw("Error getting user id for record subscription", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing subscription", "userId", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Processing subscription", "user_id", userId, "subscriptionID", subscription.ID)
 
 	// Insert subscription into subscriptions table
 	sub := Subscription{
@@ -242,7 +242,7 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing subscription deletion", "userId", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("Processing subscription deletion", "user_id", userId, "subscriptionID", subscription.ID)
 
 	// Start tx
 	tx, err := s.Pool.Begin(context.Background())

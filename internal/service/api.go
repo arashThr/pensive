@@ -58,7 +58,7 @@ func (a *Api) CheckBookmarkByLinkAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !validations.IsURLValid(link) {
-		logger.Errorw("[api] invalid URL", "link", link)
+		logger.Errorw("[api] invalid URL", "link", link, "user_id", user.ID)
 		err := writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_URL",
 			Message: fmt.Sprintf("Invalid URL: %v", link),
@@ -163,7 +163,7 @@ func (a *Api) CreateAPI(w http.ResponseWriter, r *http.Request) {
 		data.PublishedTime = &publishedTime
 	}
 
-	logger.Infow("[api] creating bookmark", "link", data.Link, "userId", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
+	logger.Infow("[api] creating bookmark", "link", data.Link, "user_id", user.ID, "hasHtmlContent", data.HtmlContent != "", "hasTitle", data.Title != "")
 	bookmark, err := a.BookmarkModel.CreateWithContent(ctx, data.Link, user, models.Api, &data)
 	if err != nil {
 		// Handle rate limit errors specifically

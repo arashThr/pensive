@@ -368,7 +368,7 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 
 func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
-	logging.Logger.Debugw("Deleting bookmark", "id", bookmarkID, "userId", userId)
+	logging.Logger.Debugw("Deleting bookmark", "id", bookmarkID, "user_id", userId)
 	req, _ := http.NewRequest("DELETE", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
@@ -398,7 +398,7 @@ func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, book
 
 func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
-	logging.Logger.Debugw("Getting bookmark summary", "id", bookmarkID, "userId", userId)
+	logging.Logger.Debugw("Getting bookmark summary", "id", bookmarkID, "user_id", userId)
 	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
 
