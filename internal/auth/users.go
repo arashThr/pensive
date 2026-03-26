@@ -78,6 +78,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
+	logger.Debugw("sign up attempt", "email", email)
 
 	var signupTemplateData = struct {
 		Title            string
@@ -100,7 +101,10 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Create(email, password)
 	if err != nil {
 		if errors.Is(err, errors.ErrEmailTaken) {
+			logger.Warnw("sign up failed: email taken", "email", email)
 			err = errors.Public(err, "That email address is already taken")
+		} else {
+			logger.Errorw("sign up failed: user creation error", "error", err, "email", email)
 		}
 		u.Templates.New.Execute(w, r, signupTemplateData, web.NavbarMessage{
 			Message: err.Error(),
@@ -156,6 +160,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	token := r.FormValue("cf-turnstile-response")
+	logger.Debugw("sign in attempt", "email", email)
 
 	var data struct {
 		Title            string
@@ -190,11 +195,14 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
+	logger.Infow("sign in success", "user_id", user.ID)
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger.Debugw("sign out attempt", "user_id", user.ID)
 	token, err := readCookie(r, CookieSession)
 	if err != nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
@@ -206,6 +214,7 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Sign out failed", http.StatusInternalServerError)
 		return
 	}
+	logger.Infow("sign out success", "user_id", user.ID)
 	deleteCookie(w, CookieSession)
 	http.Redirect(w, r, "/signin", http.StatusFound)
 }
@@ -319,6 +328,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Title = "Check Your Email"
 	data.Email = r.FormValue("email")
+	logger.Debugw("forgot password request", "email", data.Email)
 	pwReset, err := u.PasswordResetService.Create(data.Email)
 	if err != nil {
 		// TODO: Handle other cases, like when the user does not exist
@@ -336,6 +346,7 @@ func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Password reset failed", http.StatusInternalServerError)
 		return
 	}
+	logger.Infow("password reset email sent", "email", data.Email)
 	u.Templates.CheckYourEmail.Execute(w, r, data)
 }
 
@@ -380,6 +391,7 @@ func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
+	logger.Infow("password reset success", "user_id", user.ID)
 	http.Redirect(w, r, "/signin", http.StatusFound)
 }
 
@@ -387,12 +399,14 @@ func (u Users) DeleteToken(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 	tokenId := r.FormValue("token_id")
 	user := usercontext.User(r.Context())
+	logger.Debugw("delete API token", "user_id", user.ID, "token_id", tokenId)
 	err := u.TokenModel.Delete(user.ID, tokenId)
 	if err != nil {
 		logger.Errorw("delete token", "error", err)
 		http.Error(w, "Failed to delete token", http.StatusInternalServerError)
 		return
 	}
+	logger.Infow("API token deleted", "user_id", user.ID, "token_id", tokenId)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -407,6 +421,7 @@ func (u Users) TabContent(w http.ResponseWriter, r *http.Request) {
 	if tab == "" {
 		tab = "profile"
 	}
+	logger.Debugw("tab content", "user_id", user.ID, "tab", tab)
 
 	var data struct {
 		Email          string
@@ -744,6 +759,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
+	logger.Debugw("passwordless signup attempt", "email", email)
 
 	var signupTemplateData = struct {
 		Title            string
@@ -807,6 +823,7 @@ func (u Users) ProcessPasswordlessSignup(w http.ResponseWriter, r *http.Request)
 		Email string
 		Type  string
 	}
+	logger.Infow("passwordless signup email sent", "email", email)
 	data.Title = "Check Your Email"
 	data.Email = email
 	data.Type = "signup"
@@ -835,6 +852,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 	logger := loggercontext.Logger(r.Context())
 	email := r.FormValue("email")
 	token := r.FormValue("cf-turnstile-response")
+	logger.Debugw("passwordless sign in attempt", "email", email)
 
 	var signinTemplateData = struct {
 		Title            string
@@ -879,6 +897,7 @@ func (u Users) ProcessPasswordlessSignIn(w http.ResponseWriter, r *http.Request)
 		Email string
 		Type  string
 	}
+	logger.Infow("passwordless sign in email sent", "email", email)
 	data.Title = "Check Your Email"
 	data.Email = email
 	data.Type = "signin"
@@ -958,6 +977,7 @@ func (u Users) sendPasswordlessSigninEmail(email string, logger *zap.SugaredLogg
 }
 
 func (u Users) createPasswordlessUser(ctx gocontext.Context, email string) (*models.User, error) {
+	logging.Logger.Debugw("creating passwordless user", "email", email)
 	// Create user without password, marking email as verified since they used magic link
 	row := u.UserService.Pool.QueryRow(ctx, `
 		INSERT INTO users (email, email_verified, email_verified_at) 
@@ -972,9 +992,11 @@ func (u Users) createPasswordlessUser(ctx gocontext.Context, email string) (*mod
 
 	err := row.Scan(&user.ID, &user.SubscriptionStatus, &user.StripeInvoiceId)
 	if err != nil {
+		logging.Logger.Errorw("failed to create passwordless user", "error", err, "email", email)
 		return nil, fmt.Errorf("create passwordless user: %w", err)
 	}
 
+	logging.Logger.Infow("passwordless user created", "user_id", user.ID, "email", email)
 	return &user, nil
 }
 
@@ -1031,6 +1053,7 @@ func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(ctx)
 
 	if user == nil {
+		logger.Warnw("resend verification email: unauthenticated request")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}

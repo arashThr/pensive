@@ -66,6 +66,7 @@ func NewGoogleOAuth(
 
 func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
+	logger.Debugw("redirecting to Google OAuth")
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
@@ -169,6 +170,7 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 // getGoogleUser fetches user information from Google API
 func (g *GoogleAuth) getGoogleUser(accessToken string) (*GoogleUser, error) {
+	logging.Logger.Debugw("fetching Google user info")
 	req, err := http.NewRequest("GET", "https://www.googleapis.com/oauth2/v2/userinfo", nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -192,25 +194,28 @@ func (g *GoogleAuth) getGoogleUser(accessToken string) (*GoogleUser, error) {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 
+	logging.Logger.Debugw("Google user info fetched", "google_id", user.ID, "email", user.Email)
 	return &user, nil
 }
 
 // authenticateOrCreateUser handles user authentication or creation
 func (g *GoogleAuth) authenticateOrCreateUser(googleUser *GoogleUser) (*models.User, error) {
+	logging.Logger.Debugw("authenticating Google user", "google_id", googleUser.ID, "email", googleUser.Email)
+
 	// Try to find existing user by Google OAuth ID
 	user, err := g.UserService.GetByOAuth("google", googleUser.ID)
 	if err == nil {
 		// User exists, return them
+		logging.Logger.Infow("Google OAuth: existing user logged in", "user_id", user.ID, "google_id", googleUser.ID)
 		return user, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
-		// Unexpected error
+		logging.Logger.Errorw("Google OAuth: GetByOAuth failed", "error", err, "google_id", googleUser.ID)
 		return nil, fmt.Errorf("error for get by oauth: %w", err)
 	}
 
 	// User doesn't exist, try to find by email
-	// First, try to get user by email
 	existingUser, err := g.UserService.GetByEmail(googleUser.Email)
 	if err == nil {
 		// User exists with this email, link Google OAuth to existing account
@@ -221,13 +226,15 @@ func (g *GoogleAuth) authenticateOrCreateUser(googleUser *GoogleUser) (*models.U
 			googleUser.Email,
 		)
 		if err != nil {
+			logging.Logger.Errorw("Google OAuth: failed to link to existing user", "error", err, "user_id", existingUser.ID)
 			return nil, fmt.Errorf("link oauth to existing user: %w", err)
 		}
+		logging.Logger.Infow("Google OAuth: linked to existing account", "user_id", existingUser.ID, "google_id", googleUser.ID)
 		return existingUser, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
-		// Unexpected error
+		logging.Logger.Errorw("Google OAuth: GetByEmail failed", "error", err, "email", googleUser.Email)
 		return nil, err
 	}
 
@@ -239,8 +246,10 @@ func (g *GoogleAuth) authenticateOrCreateUser(googleUser *GoogleUser) (*models.U
 		googleUser.Email,
 	)
 	if err != nil {
+		logging.Logger.Errorw("Google OAuth: failed to create user", "error", err, "email", googleUser.Email)
 		return nil, fmt.Errorf("create oauth user: %w", err)
 	}
 
+	logging.Logger.Infow("Google OAuth: new user created", "user_id", user.ID, "email", googleUser.Email)
 	return user, nil
 }

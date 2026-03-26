@@ -22,6 +22,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 	user := usercontext.User(r.Context())
 	if user == nil {
+		logger.Warnw("extension token generation: unauthenticated request")
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusUnauthorized)
 		html := `
@@ -40,9 +41,10 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Debugw("generating extension token", "user_id", user.ID)
 	token, err := e.TokenModel.Create(user.ID, "extension")
 	if err != nil {
-		logger.Errorw("failed to create extension token", "error", err, "user", user.ID)
+		logger.Errorw("failed to create extension token", "error", err, "user_id", user.ID)
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusInternalServerError)
 		html := `
@@ -61,6 +63,7 @@ func (e *Extension) GenerateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Infow("extension token generated", "user_id", user.ID)
 	w.Header().Set("Content-Type", "text/html")
 	html := fmt.Sprintf(`
 	<!DOCTYPE html>

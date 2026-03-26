@@ -25,6 +25,7 @@ type Home struct {
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
+	logger.Debugw("home index", "user_id", user.ID)
 
 	page := validations.GetPageOffset(r.FormValue("page"))
 	paginatedData, err := h.getPaginatedBookmarksData(user, page)
@@ -74,6 +75,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		data.RemainingAIQuestions = remainingAI
 	}
 
+	logger.Debugw("home index loaded", "user_id", user.ID, "count", data.Count)
 	h.Templates.Home.Execute(w, r, data)
 }
 
@@ -82,6 +84,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 
 	query := r.FormValue("query")
+	logger.Debugw("search", "user_id", user.ID, "query", query)
 	page := validations.GetPageOffset(r.FormValue("page"))
 
 	if query == "" {
@@ -124,6 +127,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.HasResults = len(data.Bookmarks) > 0
+	logger.Debugw("search results", "user_id", user.ID, "query", query, "count", len(data.Bookmarks))
 
 	h.Templates.SearchResults.Execute(w, r, data)
 }
@@ -134,6 +138,7 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 
 	question := r.FormValue("question")
+	logger.Debugw("ask question", "user_id", user.ID, "question", question)
 	if question == "" {
 		http.Error(w, "Question is required", http.StatusBadRequest)
 		return
@@ -221,6 +226,7 @@ func (h Home) AskQuestion(w http.ResponseWriter, r *http.Request) {
 		IsError: false,
 	}
 
+	logger.Infow("AI question answered", "user_id", user.ID, "source_count", len(sources))
 	h.Templates.ChatAnswer.Execute(w, r, data)
 }
 

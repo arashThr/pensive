@@ -62,6 +62,7 @@ func NewGitHubOAuth(
 // RedirectToGitHub initiates the OAuth flow by redirecting to GitHub
 func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
+	logger.Debugw("redirecting to GitHub OAuth")
 	// Generate a random state parameter to prevent CSRF attacks
 	state, err := rand.String(32)
 	if err != nil {
@@ -168,6 +169,7 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 // getGitHubUser fetches user information from GitHub API
 func (g *GitHub) getGitHubUser(accessToken string) (*GitHubUser, error) {
+	logging.Logger.Debugw("fetching GitHub user info")
 	req, err := http.NewRequest("GET", "https://api.github.com/user", nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
@@ -200,6 +202,7 @@ func (g *GitHub) getGitHubUser(accessToken string) (*GitHubUser, error) {
 		}
 	}
 
+	logging.Logger.Debugw("GitHub user info fetched", "github_id", user.ID, "email", user.Email)
 	return &user, nil
 }
 
@@ -253,20 +256,23 @@ func (g *GitHub) getGitHubEmail(accessToken string) (string, error) {
 
 // authenticateOrCreateUser handles user authentication or creation
 func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User, error) {
+	logging.Logger.Debugw("authenticating GitHub user", "github_id", githubUser.ID, "email", githubUser.Email)
+
 	// Try to find existing user by GitHub OAuth ID
 	user, err := g.UserService.GetByOAuth("github", fmt.Sprintf("%d", githubUser.ID))
 	if err == nil {
 		// User exists, return them
+		logging.Logger.Infow("GitHub OAuth: existing user logged in", "user_id", user.ID, "github_id", githubUser.ID)
 		return user, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
 		// Unexpected error
+		logging.Logger.Errorw("GitHub OAuth: GetByOAuth failed", "error", err, "github_id", githubUser.ID)
 		return nil, fmt.Errorf("error for get by oauth: %w", err)
 	}
 
 	// User doesn't exist, try to find by email
-	// First, try to get user by email
 	existingUser, err := g.UserService.GetByEmail(githubUser.Email)
 	if err == nil {
 		// User exists with this email, link GitHub OAuth to existing account
@@ -277,13 +283,15 @@ func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User,
 			githubUser.Email,
 		)
 		if err != nil {
+			logging.Logger.Errorw("GitHub OAuth: failed to link to existing user", "error", err, "user_id", existingUser.ID)
 			return nil, fmt.Errorf("link github oauth to existing user: %w", err)
 		}
+		logging.Logger.Infow("GitHub OAuth: linked to existing account", "user_id", existingUser.ID, "github_id", githubUser.ID)
 		return existingUser, nil
 	}
 
 	if !errors.Is(err, errors.ErrNotFound) {
-		// Unexpected error
+		logging.Logger.Errorw("GitHub OAuth: GetByEmail failed", "error", err, "email", githubUser.Email)
 		return nil, err
 	}
 
@@ -295,8 +303,10 @@ func (g *GitHub) authenticateOrCreateUser(githubUser *GitHubUser) (*models.User,
 		githubUser.Email,
 	)
 	if err != nil {
+		logging.Logger.Errorw("GitHub OAuth: failed to create user", "error", err, "email", githubUser.Email)
 		return nil, fmt.Errorf("authenticate or create user with github oauth: %w", err)
 	}
 
+	logging.Logger.Infow("GitHub OAuth: new user created", "user_id", user.ID, "email", githubUser.Email)
 	return user, nil
 }

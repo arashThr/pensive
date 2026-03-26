@@ -78,6 +78,7 @@ func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
 	logger := loggercontext.Logger(r.Context())
 
 	filename := chi.URLParam(r, "filename")
+	logger.Debugw("serve podcast episode", "user_id", user.ID, "filename", filename)
 	if filename == "" {
 		http.NotFound(w, r)
 		return
@@ -85,17 +86,19 @@ func (p *Podcast) ServeEpisode(w http.ResponseWriter, r *http.Request) {
 
 	// Restrict to safe filenames (no path traversal).
 	if strings.ContainsAny(filename, "/\\") {
+		logger.Warnw("invalid podcast filename rejected", "user_id", user.ID, "filename", filename)
 		http.Error(w, "invalid filename", http.StatusBadRequest)
 		return
 	}
 
 	filePath := fmt.Sprintf("%s/%d/%s", PodcastSummaryDir, user.ID, filename)
 	if _, err := os.Stat(filePath); err != nil {
-		logger.Infow("[podcast] Episode file not found", "user_id", user.ID, "filename", filename)
+		logger.Infow("podcast episode file not found", "user_id", user.ID, "filename", filename)
 		http.NotFound(w, r)
 		return
 	}
 
+	logger.Debugw("serving podcast episode file", "user_id", user.ID, "filename", filename)
 	w.Header().Set("Content-Type", "audio/ogg")
 	w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	http.ServeFile(w, r, filePath)
@@ -393,8 +396,10 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	defer cancel()
 
 	start := time.Now()
+	ttsLogger := logging.Logger.With("flow", "podcast")
+	ttsLogger.Debugw("calling Google TTS", "script_len", len(text))
 	defer func() {
-		logging.Logger.Infow("[podcast] Google TTS completed",
+		ttsLogger.Infow("Google TTS completed",
 			"elapsed", time.Since(start).Round(time.Millisecond).String())
 	}()
 
@@ -404,7 +409,7 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	}
 
 	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
-	logging.Logger.Infow("[podcast] TTS chunks", "count", len(chunks))
+	ttsLogger.Infow("TTS chunks", "count", len(chunks))
 
 	if len(chunks) == 1 {
 		return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
@@ -705,17 +710,20 @@ func (p *Podcast) sendPodcastEmail(userEmail string, userID int64, audioFilename
 //
 // Returns 202 immediately; generation runs in a background goroutine.
 func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
-	logger := logging.Logger
+	logger := loggercontext.Logger(r.Context())
 
 	var req struct {
 		UserID  int64  `json:"user_id"`
 		Channel string `json:"channel"` // "email", "telegram", "both"
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		logger.Errorw("failed to decode trigger episode request", "error", err)
 		http.Error(w, "invalid JSON body", http.StatusBadRequest)
 		return
 	}
+	logger.Debugw("trigger episode request", "user_id", req.UserID, "channel", req.Channel)
 	if req.UserID == 0 {
+		logger.Warnw("trigger episode: missing user_id")
 		http.Error(w, "user_id is required", http.StatusBadRequest)
 		return
 	}
@@ -725,6 +733,7 @@ func (p *Podcast) TriggerEpisode(w http.ResponseWriter, r *http.Request) {
 	switch req.Channel {
 	case "email", "telegram", "both":
 	default:
+		logger.Warnw("trigger episode: invalid channel", "channel", req.Channel)
 		http.Error(w, `channel must be "email", "telegram", or "both"`, http.StatusBadRequest)
 		return
 	}
@@ -815,6 +824,7 @@ const maxMarkdownCharsPerArticle = 6000
 // generatePodcastScript calls Gemini to write a ready-to-read podcast script (~10 min / ~1400 words).
 // It also fetches all titles from the period to build the opening date + period overview.
 func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId, articles []models.PodcastArticle, days int) (string, error) {
+	logging.Logger.With("flow", "podcast", "user_id", userID).Debugw("generating podcast script", "article_count", len(articles), "days", days)
 	if p.GenAIClient == nil {
 		return "", fmt.Errorf("GenAI client not initialised")
 	}

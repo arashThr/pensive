@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
@@ -42,31 +41,27 @@ func (s Stripe) getStripeCustomerId(ctx context.Context, user *models.User) (cus
 	if !errors.Is(err, errors.ErrNoStripeCustomer) {
 		return "", fmt.Errorf("get stripe customer id: %w", err)
 	}
-	logger.Errorw("No stripe customer found for user %v", "error", err, user.ID)
+	logger.Debugw("no existing stripe customer, looking up by email", "user_id", user.ID)
 	params := &stripeclient.CustomerListParams{Email: stripeclient.String(user.Email)}
 	params.Filters.AddFilter("limit", "", "1")
 	result := customer.List(params)
 	if result.Next() {
 		// Found customer
-		logger.Errorw("Found stripe customer for user", "user_id", user.ID, "error", err)
-		customer := result.Customer()
-		customerId = customer.ID
+		c := result.Customer()
+		logger.Infow("found existing stripe customer by email", "user_id", user.ID, "customer_id", c.ID)
+		customerId = c.ID
 	} else {
 		// Create a new customer
 		params := &stripeclient.CustomerParams{Email: stripeclient.String(user.Email)}
 		params.AddMetadata("user_id", strconv.Itoa(int(user.ID)))
 		// TODO: params.SetIdempotencyKey()
-		customer, err := customer.New(params)
+		newCustomer, err := customer.New(params)
 		if err != nil {
-			if stripeErr, ok := err.(*stripeclient.Error); ok {
-				logger.Errorw("Stripe error: %v", "error", err, stripeErr.Error())
-			} else {
-				logger.Errorw("Create stripe customer error: %v", "error", err, err)
-			}
+			logger.Errorw("failed to create stripe customer", "error", err, "user_id", user.ID)
 			return "", err
 		}
-		logger.Errorw("Created stripe customer for user %v with customer id %v", "error", err, user.ID, customer.ID)
-		customerId = customer.ID
+		logger.Infow("created stripe customer", "user_id", user.ID, "customer_id", newCustomer.ID)
+		customerId = newCustomer.ID
 	}
 	s.StripeModel.InsertCustomerId(user.ID, customerId)
 	return customerId, nil
@@ -111,7 +106,7 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, "Internal server error", http.StatusInternalServerError)
 	// 	return
 	// }
-	logger.Infof("checkout session created", "session_id", sess.ID)
+	logger.Infow("checkout session created, redirecting", "session_id", sess.ID, "user_id", user.ID)
 	http.Redirect(w, r, sess.URL, http.StatusSeeOther)
 }
 
@@ -139,17 +134,19 @@ func (s Stripe) CreatePortalSession(w http.ResponseWriter, r *http.Request) {
 	ps, err := portalsession.New(params)
 
 	if err != nil {
+		logger.Errorw("create portal session", "error", err, "user_id", user.ID)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		logger.Errorw("create portal session", "error", err)
 		return
 	}
 
+	logger.Infow("portal session created, redirecting", "user_id", user.ID)
 	http.Redirect(w, r, ps.URL, http.StatusSeeOther)
 }
 
 func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
+	logger.Debugw("go to billing portal", "user_id", user.ID)
 	customerId, err := s.StripeModel.GetCustomerIdByUserId(user.ID)
 	if err != nil {
 		logger.Errorw("get stripe customer id", "error", err, "user_id", user.ID)
@@ -174,6 +171,7 @@ func (s Stripe) GoToBillingPortal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Infow("billing portal session created, redirecting", "user_id", user.ID)
 	http.Redirect(w, r, ps.URL, http.StatusSeeOther)
 }
 
@@ -192,6 +190,9 @@ func (s Stripe) Success(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Stripe) Cancel(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
+	logger.Infow("payment cancelled", "user_id", user.ID)
 	// TODO: Keep track of payment statuses?
 	var data struct {
 		Title string
@@ -207,20 +208,16 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 	bodyReader := http.MaxBytesReader(w, r.Body, MaxBodyBytes)
 	payload, err := io.ReadAll(bodyReader)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading request body: %v\n", err)
+		logger.Errorw("failed to read webhook body", "error", err)
 		w.WriteHeader(http.StatusServiceUnavailable)
 		return
 	}
-	// Replace this endpoint secret with your endpoint's unique secret
-	// If you are testing with the CLI, find the secret by running 'stripe listen'
-	// If you are using an endpoint defined with the API or dashboard, look in your webhook settings
-	// at https://dashboard.stripe.com/webhooks
 	endpointSecret := s.StripeWebhookSecret
 	signatureHeader := r.Header.Get("Stripe-Signature")
 	event, err := webhook.ConstructEvent(payload, signatureHeader, endpointSecret)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "⚠️  Webhook signature verification failed. %v\n", err)
-		w.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		logger.Errorw("webhook signature verification failed", "error", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -233,6 +230,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		logger.Infow("dispatching subscription deleted handler", "subscription_id", subscription.ID)
 		go s.StripeModel.HandleSubscriptionDeleted(subscription)
 	case "customer.subscription.updated":
 		sub, err := handleSubscriptionUpdated(ctx, &event)
@@ -240,9 +238,7 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		// 1: record transition updates
-		// 2: update prevAtt="map[cancel_at:<nil> cancel_at_period_end:false canceled_at:<nil> cancellation_details:map[reason:<nil>]]"
-		// 3: feedback prevAtt=map[cancellation_details:map[feedback:<nil>]]
+		logger.Infow("dispatching subscription updated handler", "subscription_id", sub.ID)
 		go s.StripeModel.RecordSubscription(sub, event.Data.PreviousAttributes)
 	case "customer.subscription.created":
 		subscription, err := getSubscriptionCreated(ctx, &event)
@@ -250,44 +246,36 @@ func (s Stripe) Webhook(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		logger.Infow("dispatching subscription created handler", "subscription_id", subscription.ID)
 		go s.StripeModel.RecordSubscription(subscription, nil)
 	case "customer.subscription.trial_will_end":
-		// handleSubscriptionTrialWillEnd(subscription)
+		logger.Infow("subscription trial will end (unhandled)", "event_id", event.ID)
 	case "entitlements.active_entitlement_summary.updated":
-		logger.Infow("Active entitlement summary updated", "event_id", event.ID)
-		// Then define and call a func to handle active entitlement summary updated.
-		// handleEntitlementUpdated(subscription)
+		logger.Infow("active entitlement summary updated (unhandled)", "event_id", event.ID)
 	case "checkout.session.completed":
-		// Payment is successful and the subscription is created.
-		// You should provision the subscription and save the customer ID to your database.
 		err := handleCheckoutSessionCompleted(ctx, &event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 	case "invoice.paid":
-		// Continue to provision the subscription as payments continue to be made.
-		// Store the status in your database and check when a user accesses your service.
-		// This approach helps you avoid hitting rate limits.
-		// Parse the event data to get the subscription details
 		invoice, err := getInvoicePaid(ctx, &event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		logger.Infow("dispatching invoice paid handler", "invoice_id", invoice.ID)
 		go s.StripeModel.HandleInvoicePaid(invoice)
 	case "invoice.payment_failed":
-		// The payment failed or the customer does not have a valid payment method.
-		// The subscription becomes past_due. Notify your customer and send them to the
-		// customer portal to update their payment information.
 		invoice, err := getInvoiceFailed(ctx, &event)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		logger.Infow("dispatching invoice payment failed handler", "invoice_id", invoice.ID)
 		go s.StripeModel.HandleInvoiceFailed(invoice)
 	default:
-		logger.Warnw("Unhandled event type", "event_type", event.Type)
+		logger.Warnw("unhandled webhook event type", "event_type", event.Type)
 	}
 	w.WriteHeader(http.StatusOK)
 }

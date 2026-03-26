@@ -214,13 +214,16 @@ func (a *Api) GetAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
 		return
 	}
+	logger.Debugw("[api] updating bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	var b Bookmark
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		logger.Errorw("[api] decoding request body", "error", err)
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: fmt.Sprintf("Invalid request body: %v", err),
@@ -230,12 +233,14 @@ func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
 	bookmark.Title = b.Title
 	err := a.BookmarkModel.Update(bookmark)
 	if err != nil {
+		logger.Errorw("[api] failed to update bookmark", "error", err, "bookmark_id", bookmark.Id, "user_id", user.ID)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "UPDATE_BOOKMARK",
 			Message: fmt.Sprintf("Failed to update bookmark: %v", err),
 		})
 		return
 	}
+	logger.Infow("[api] updated bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	err = writeResponse(w, mapModelToBookmark(bookmark))
 	if err != nil {
 		logger.Errorw("write response", "error", err)
@@ -243,41 +248,48 @@ func (a *Api) UpdateAPI(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Api) DeleteByLinkAPI(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmarkByLink(w, r)
 	if bookmark == nil {
 		return
 	}
+	logger.Debugw("[api] deleting bookmark by link", "bookmark_id", bookmark.Id, "link", bookmark.Link, "user_id", user.ID)
 
 	err := a.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
+		logger.Errorw("[api] failed to delete bookmark by link", "error", err, "bookmark_id", bookmark.Id, "user_id", user.ID)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
 			Message: fmt.Sprintf("Failed to delete bookmark: %v", err),
 		})
 		return
 	}
+	logger.Infow("[api] deleted bookmark by link", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	err = writeResponse(w, mapModelToBookmark(bookmark))
 	if err != nil {
 		logger.Errorw("write response", "error", err)
 	}
-	logger.Infow("[api] deleted bookmark", "bookmarkId", bookmark.Id)
 }
 
 func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	bookmark := a.getBookmark(w, r, userMustOwnBookmark)
 	if bookmark == nil {
 		return
 	}
+	logger.Debugw("[api] deleting bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	err := a.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
+		logger.Errorw("[api] failed to delete bookmark", "error", err, "bookmark_id", bookmark.Id, "user_id", user.ID)
 		writeErrorResponse(w, http.StatusInternalServerError, ErrorResponse{
 			Code:    "DELETE_BOOKMARK",
 			Message: fmt.Sprintf("Failed to delete bookmark: %v", err),
 		})
 		return
 	}
+	logger.Infow("[api] deleted bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	var data struct {
 		Id types.BookmarkId `json:"id"`
 	}
@@ -296,13 +308,14 @@ func (a *Api) DeleteAPI(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {object} ErrorResponse "Something went wrong"
 // @Router /v1/api/bookmarks/search [get]
 func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
+	user := usercontext.User(r.Context())
 	logger := loggercontext.Logger(r.Context())
 	query := r.FormValue("query")
+	logger.Debugw("[api] search", "query", query, "user_id", user.ID)
 	if query == "" {
 		http.Error(w, "Query is required", http.StatusBadRequest)
 		return
 	}
-	user := usercontext.User(r.Context())
 
 	results, err := a.BookmarkModel.Search(user, query)
 	if err != nil {
@@ -324,6 +337,7 @@ func (a *Api) SearchAPI(w http.ResponseWriter, r *http.Request) {
 			Thumbnail: r.ImageUrl,
 		})
 	}
+	logger.Debugw("[api] search results", "query", query, "user_id", user.ID, "count", len(data.Bookmarks))
 	err = writeResponse(w, data)
 	if err != nil {
 		logger.Errorw("write response", "error", err)
@@ -334,6 +348,7 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 	id := chi.URLParam(r, "id")
 	logger := loggercontext.Logger(r.Context())
 	if strings.TrimSpace(id) == "" {
+		logger.Debugw("[api] bookmark ID missing")
 		writeErrorResponse(w, http.StatusBadRequest, ErrorResponse{
 			Code:    "INVALID_REQUEST",
 			Message: "Bookmark ID is required",
@@ -343,6 +358,7 @@ func (a *Api) getBookmark(w http.ResponseWriter, r *http.Request, opts ...bookma
 	bookmark, err := a.BookmarkModel.GetById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
+			logger.Debugw("[api] bookmark not found", "bookmark_id", id)
 			writeErrorResponse(w, http.StatusNotFound, ErrorResponse{
 				Code:    "NOT_FOUND",
 				Message: fmt.Sprintf("Bookmark not found: %s", id),

@@ -63,10 +63,13 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		var message string
 		if errors.Is(err, errors.ErrUnverifiedUserLimitExceeded) {
 			message = "Unverified account limit reached (10 bookmarks). Please verify your email to unlock unlimited bookmarks."
+			logger.Warnw("bookmark creation blocked: unverified limit", "user_id", data.UserId)
 		} else if errors.Is(err, errors.ErrDailyLimitExceeded) {
 			message = "Daily bookmark limit exceeded. Upgrade to premium for 100 bookmarks/day."
+			logger.Warnw("bookmark creation blocked: daily limit", "user_id", data.UserId)
 		} else {
 			message = err.Error()
+			logger.Errorw("bookmark creation failed", "error", err, "user_id", data.UserId)
 		}
 
 		b.Templates.New.Execute(w, r, data, web.NavbarMessage{
@@ -76,6 +79,7 @@ func (b Bookmarks) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	logger.Infow("bookmark created", "bookmark_id", bookmark.Id, "link", data.Link, "user_id", data.UserId)
 	// TODO: Load the same page with the message: Bookmark added
 	editPath := fmt.Sprintf("/bookmarks/%s", bookmark.Id)
 	http.Redirect(w, r, editPath, http.StatusFound)
@@ -135,17 +139,22 @@ func (b Bookmarks) Edit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
 	}
+	logger.Debugw("updating bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 
 	bookmark.Title = r.FormValue("title")
 	err = b.BookmarkModel.Update(bookmark)
 	if err != nil {
+		logger.Errorw("bookmark update failed", "error", err, "bookmark_id", bookmark.Id, "user_id", user.ID)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
+	logger.Infow("bookmark updated", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	data := struct {
 		Link      string
 		Title     string
@@ -166,15 +175,21 @@ func (b Bookmarks) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (b Bookmarks) Delete(w http.ResponseWriter, r *http.Request) {
+	logger := loggercontext.Logger(r.Context())
+	user := usercontext.User(r.Context())
 	bookmark, err := b.getBookmark(w, r, userMustOwnBookmark)
 	if err != nil {
 		return
 	}
+	logger.Debugw("deleting bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
+
 	err = b.BookmarkModel.Delete(bookmark.Id)
 	if err != nil {
+		logger.Errorw("bookmark deletion failed", "error", err, "bookmark_id", bookmark.Id, "user_id", user.ID)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
+	logger.Infow("bookmark deleted", "bookmark_id", bookmark.Id, "user_id", user.ID)
 	http.Redirect(w, r, "/home", http.StatusFound)
 }
 
@@ -185,9 +200,11 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	logger.Debugw("get full bookmark", "bookmark_id", bookmark.Id)
 	fullContent, err := b.BookmarkModel.GetBookmarkContent(bookmark.Id)
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
+			logger.Debugw("bookmark content not found", "bookmark_id", bookmark.Id)
 			http.Error(w, fmt.Sprintf("Bookmark content not found for ID: %s", bookmark.Id), http.StatusNotFound)
 			return
 		}
@@ -225,7 +242,9 @@ func (b Bookmarks) GetFullBookmark(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		logger.Errorw("encoding response", "error", err)
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
 	}
+	logger.Debugw("full bookmark served", "bookmark_id", bookmark.Id)
 }
 
 // GetBookmarkMarkdown handles GET /bookmarks/{id}/markdown and returns the AI-generated markdown content
@@ -235,10 +254,12 @@ func (b Bookmarks) GetBookmarkMarkdown(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	logger.Debugw("get bookmark markdown", "bookmark_id", bookmark.Id)
 
 	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.Id)
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
+			logger.Debugw("bookmark markdown not available", "bookmark_id", bookmark.Id)
 			// If no markdown content is found, show a user-friendly message
 			var data struct {
 				Title string
@@ -276,6 +297,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		return
 	}
+	logger.Debugw("get bookmark markdown (htmx)", "bookmark_id", bookmark.Id)
 
 	markdownContent, err := b.BookmarkModel.GetBookmarkMarkdown(bookmark.Id)
 	if err != nil {
@@ -305,6 +327,7 @@ func (b Bookmarks) ReportBookmark(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := usercontext.User(r.Context())
+	logger.Debugw("reporting bookmark", "bookmark_id", bookmark.Id, "user_id", user.ID)
 
 	// Send report via Telegram
 	message := fmt.Sprintf("🚨 Content Capture Issue Report\n\nURL: %s\nTitle: %s\nUser: %s\nBookmark ID: %s",
@@ -327,6 +350,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 	bookmark, err := b.BookmarkModel.GetById(types.BookmarkId(id))
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
+			logger.Debugw("bookmark not found", "bookmark_id", id)
 			http.Error(w, "Bookmark not found", http.StatusNotFound)
 			return nil, err
 		}
@@ -337,6 +361,7 @@ func (b Bookmarks) getBookmark(w http.ResponseWriter, r *http.Request, opts ...b
 
 	for _, opt := range opts {
 		if err := opt(w, r, bookmark); err != nil {
+			logger.Debugw("bookmark access denied", "bookmark_id", id)
 			return nil, err
 		}
 	}

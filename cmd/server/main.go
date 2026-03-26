@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/arashthr/pensive/internal/auth"
@@ -312,7 +313,7 @@ func run(cfg *config.AppConfig, pool *pgxpool.Pool) error {
 	// Create routes with the service container
 	r := Routes(cfg, container)
 
-	fmt.Printf("Starting server on %s...", cfg.Server.Address)
+	logging.Logger.Infow("server starting", "addr", cfg.Server.Address)
 	return http.ListenAndServe(cfg.Server.Address, r)
 }
 
@@ -335,7 +336,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	)
 
 	r := chi.NewRouter()
-	r.Use(middleware.Recoverer)
+	r.Use(PanicRecoveryMiddleware)
 	r.Use(middleware.RequestID)
 
 	// Admin routes - protected by basic auth
@@ -531,6 +532,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		loggercontext.Logger(r.Context()).Debugw("not found", "path", r.URL.Path)
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
 	return r
@@ -538,6 +540,21 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("pong"))
+}
+
+func PanicRecoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if rec := recover(); rec != nil {
+				loggercontext.Logger(r.Context()).Errorw("panic recovered",
+					"error", fmt.Sprintf("%v", rec),
+					"stack", string(debug.Stack()),
+				)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }
 
 func LoggerMiddleware(isProduction bool, flow string) func(next http.Handler) http.Handler {
