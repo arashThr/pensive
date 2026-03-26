@@ -550,6 +550,10 @@ func PanicRecoveryMiddleware(next http.Handler) http.Handler {
 					"error", fmt.Sprintf("%v", rec),
 					"stack", string(debug.Stack()),
 				)
+				go logging.Telegram.SendMessage(fmt.Sprintf(
+					"🚨 Panic recovered\nPath: %s\nError: %v",
+					r.URL.Path, rec,
+				))
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			}
 		}()
