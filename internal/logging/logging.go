@@ -25,8 +25,8 @@ func getLevel(level string) zapcore.Level {
 }
 
 func Init(cfg *config.AppConfig) {
+	initTelegram(cfg) // must run before initLogger so the core can be tee'd in
 	initLogger(cfg)
-	initTelegram(cfg)
 }
 
 func initLogger(cfg *config.AppConfig) error {
@@ -61,11 +61,16 @@ func initLogger(cfg *config.AppConfig) error {
 	}
 
 	// Build logger
-	logger, err := zapCfg.Build(opts...)
+	baseLogger, err := zapCfg.Build(opts...)
 
 	if err != nil {
 		return fmt.Errorf("creating logger: %w", err)
 	}
+
+	// Tee error-level entries to Telegram
+	logger := baseLogger.WithOptions(zap.WrapCore(func(core zapcore.Core) zapcore.Core {
+		return zapcore.NewTee(core, &telegramCore{tg: &Telegram})
+	}))
 
 	// Use SugaredLogger for simpler API
 	Logger = logger.Sugar()
