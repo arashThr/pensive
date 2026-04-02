@@ -1,0 +1,102 @@
+{{define "header"}}
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{if .Title}}{{.Title}} - {{end}}Pensive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css" />
+  {{if shouldUseAnalytics}}
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
+  {{end}}
+</head>
+<body class="min-h-screen bg-main flex flex-col font-sans relative overflow-x-hidden">
+
+  <!-- Header -->
+  <header class="bg-main border-b border-main sticky top-0 z-50">
+    <div class="px-4 sm:px-6 max-w-6xl mx-auto">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-3 relative z-10">
+          <a href="/start" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <img src="/assets/title-logo.png" class="h-6" />
+            <div class="font-bold text-lg text-main">
+              Pensive <span class="text-xs font-medium accent bg-secondary px-2 py-1 rounded-full border border-main">Beta</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex items-center gap-4">
+          <a href="/signin" class="text-secondary hover:text-main font-medium transition-colors text-sm">Sign in</a>
+          <a href="/signup" class="border border-main text-main px-4 py-2 font-semibold rounded-lg hover:bg-secondary transition-colors text-sm">Sign up</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 relative z-10">
+{{end}}
+
+{{define "footer"}}
+  </main>
+
+  <footer class="border-t border-main bg-main py-8 sm:py-12 mt-20 relative z-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+          <img src="/assets/title-logo.png" class="h-6" />
+          <div>
+            <div class="font-bold text-lg text-main">Pensive</div>
+            <div class="text-sm text-secondary">Your searchable memory of the web</div>
+          </div>
+        </div>
+
+        <!-- Links -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 text-sm w-full lg:w-auto">
+          <div>
+            <h4 class="font-semibold text-main mb-3">Resources</h4>
+            <div class="space-y-2">
+              <a href="/faq" class="block text-secondary hover:text-main transition-colors">FAQ</a>
+              <a href="/contact" class="block text-secondary hover:text-main transition-colors">Contact</a>
+              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Blog</a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-semibold text-main mb-3">Extensions</h4>
+            <div class="space-y-2">
+              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Chrome</a>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Firefox</a>
+              <a href="https://t.me/GetPensiveBot" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-semibold text-main mb-3">Project</h4>
+            <div class="space-y-2">
+              <a href="https://github.com/arashThr/pensive" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">GitHub</a>
+              <a href="/privacy" class="block text-secondary hover:text-main transition-colors">Privacy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-main my-6 sm:my-8">
+
+      <div class="text-sm text-secondary text-center sm:text-left">
+        © 2026 Pensive. Built with care for developers and researchers.
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="/assets/htmx.min.js"></script>
+</body>
+</html>
+{{end}}

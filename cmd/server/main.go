@@ -34,8 +34,8 @@ import (
 	"github.com/arashthr/pensive/internal/models"
 	"github.com/arashthr/pensive/internal/service"
 	"github.com/arashthr/pensive/internal/service/importer"
-	"github.com/arashthr/pensive/web"
 	"github.com/arashthr/pensive/web/views"
+	"github.com/arashthr/pensive/web/website"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
@@ -389,6 +389,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "web"))
 		r.Use(csrfMw)
 
+		// Entry point: redirect to app or landing page depending on auth state.
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			if usercontext.User(r.Context()) != nil {
 				http.Redirect(w, r, "/home", http.StatusSeeOther)
@@ -396,26 +397,13 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 				http.Redirect(w, r, "/start", http.StatusSeeOther)
 			}
 		})
-		r.Get("/start", web.StaticHandler(
-			"Welcome to Pensive",
-			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/contact", web.StaticHandler(
-			"Contact",
-			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/faq", web.FAQ(
-			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/privacy", web.StaticHandler(
-			"Privacy",
-			views.Must(views.ParseTemplate("privacy.gohtml", "tailwind.gohtml")),
-		))
+
+		// ── Website (marketing) routes ────────────────────────────────────────
+		// These pages are self-contained and have no dependency on app state.
+		// They use web/templates/website/ and can be extracted to a static site.
+		websiteRoutes(r)
+
 		r.Get("/integrations", c.UsersService.Integrations)
-		r.Get("/pocket", web.StaticHandler(
-			"Pocket import",
-			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),
-		))
 		r.Get("/signup", c.UsersService.New)
 		r.Get("/signin", c.UsersService.SignIn)
 		r.Post("/signin", c.UsersService.ProcessSignIn)
@@ -536,6 +524,32 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
 	return r
+}
+
+// websiteRoutes registers the public marketing pages.
+// These routes have no dependency on the service container or authenticated state.
+// Templates live in web/templates/website/ and use a standalone layout without
+// any app-specific template functions (currentUser, csrfField, messages).
+func websiteRoutes(r chi.Router) {
+	r.Get("/start", website.StaticHandler(
+		"Welcome to Pensive",
+		views.Must(views.ParseTemplate("website/home.gohtml", "website/layout.gohtml")),
+	))
+	r.Get("/contact", website.StaticHandler(
+		"Contact",
+		views.Must(views.ParseTemplate("website/contact.gohtml", "website/layout.gohtml")),
+	))
+	r.Get("/faq", website.FAQ(
+		views.Must(views.ParseTemplate("website/faq.gohtml", "website/layout.gohtml")),
+	))
+	r.Get("/privacy", website.StaticHandler(
+		"Privacy",
+		views.Must(views.ParseTemplate("website/privacy.gohtml", "website/layout.gohtml")),
+	))
+	r.Get("/pocket", website.StaticHandler(
+		"Pocket import",
+		views.Must(views.ParseTemplate("website/pocket-intro.gohtml", "website/layout.gohtml")),
+	))
 }
 
 func healthCheck(w http.ResponseWriter, r *http.Request) {

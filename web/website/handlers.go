@@ -1,11 +1,21 @@
-package web
+// Package website contains HTTP handlers for the public-facing marketing pages
+// (landing page, FAQ, privacy policy, contact, etc.).
+//
+// These pages are intentionally separated from the core app so they can
+// eventually be extracted into a standalone static site. They use their own
+// layout (web/templates/website/layout.gohtml) which has no dependency on
+// app-specific template functions (currentUser, csrfField, messages).
+package website
 
 import (
 	"html/template"
 	"net/http"
+
+	"github.com/arashthr/pensive/web"
 )
 
-func StaticHandler(title string, tpl Template) http.HandlerFunc {
+// StaticHandler returns a handler that renders a template with only a Title field.
+func StaticHandler(title string, tpl web.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var data struct {
 			Title string
@@ -15,7 +25,8 @@ func StaticHandler(title string, tpl Template) http.HandlerFunc {
 	}
 }
 
-func FAQ(tpl Template) http.HandlerFunc {
+// FAQ returns a handler that renders the FAQ page with the hardcoded Q&A list.
+func FAQ(tpl web.Template) http.HandlerFunc {
 	questions := []struct {
 		Question string
 		Answer   template.HTML
