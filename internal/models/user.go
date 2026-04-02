@@ -34,6 +34,7 @@ type User struct {
 	OAuthEmail         *string
 	EmailVerified      bool
 	EmailVerifiedAt    *time.Time
+	CreatedAt          time.Time
 }
 
 type UserRepo struct {
@@ -84,6 +85,7 @@ func (us *UserRepo) Create(email, password string) (*User, error) {
 	user := User{
 		Email:        email,
 		PasswordHash: &passwordHash,
+		CreatedAt:    time.Now(),
 	}
 	err = row.Scan(&user.ID)
 
