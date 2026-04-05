@@ -17,6 +17,5 @@ WORKDIR /app
 RUN apk add --no-cache ffmpeg
 COPY ./web/assets ./web/assets
 COPY --from=build /app/server ./server
-COPY .env ./
 COPY --from=tailwind-builder /style.css ./web/assets/style.css
 CMD [ "./server" ]
