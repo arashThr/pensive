@@ -7,6 +7,7 @@
 # Add that to you remotes:
 # git remote add fedora fedora-server:/home/arash/repos/pensive.git
 
+
 while read oldrev newrev ref
     do
     if [[ $ref =~ .*/main$ ]];
