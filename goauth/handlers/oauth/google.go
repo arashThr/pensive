@@ -1,4 +1,4 @@
-package handlers
+package oauth
 
 import (
 	"encoding/json"
@@ -9,9 +9,8 @@ import (
 	"github.com/arashthr/goauth/cookie"
 	"github.com/arashthr/goauth/errors"
 	"github.com/arashthr/goauth/models"
-	"github.com/arashthr/goauth/rand"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+	gendpoint "golang.org/x/oauth2/google"
 )
 
 // GoogleConfig configures the Google OAuth handler.
@@ -48,7 +47,7 @@ func NewGoogleOAuth(cfg GoogleConfig, users UserStore, sessions SessionStore) *G
 				"https://www.googleapis.com/auth/userinfo.email",
 				"https://www.googleapis.com/auth/userinfo.profile",
 			},
-			Endpoint: google.Endpoint,
+			Endpoint: gendpoint.Endpoint,
 		},
 	}
 }
@@ -56,7 +55,7 @@ func NewGoogleOAuth(cfg GoogleConfig, users UserStore, sessions SessionStore) *G
 // Redirect starts the Google OAuth flow (GET /oauth/google).
 func (h *GoogleOAuth) Redirect(w http.ResponseWriter, r *http.Request) {
 	l := log(r)
-	state, err := rand.String(32)
+	state, err := generateState()
 	if err != nil {
 		l.Errorw("google oauth – generate state failed", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

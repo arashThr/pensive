@@ -20,6 +20,7 @@ package goauth
 import (
 	"github.com/arashthr/goauth/email"
 	"github.com/arashthr/goauth/handlers"
+	oauthpkg "github.com/arashthr/goauth/handlers/oauth"
 	"github.com/arashthr/goauth/middleware"
 	"github.com/arashthr/goauth/models"
 	"github.com/go-chi/chi/v5"
@@ -51,8 +52,12 @@ type Config struct {
 	// Used for building email links and OAuth callback URLs.
 	Domain string
 
-	// Email (SMTP) configuration.
+	// Email (SMTP) configuration used when EmailSender is nil.
 	Email email.Config
+
+	// EmailSender overrides SMTP with a custom sender (e.g. email.LogSender
+	// for local development). When nil, an SMTP service is created from Email.
+	EmailSender handlers.EmailSender
 
 	// Optional auth methods – leave zero values to disable.
 	GitHub    OAuthConfig
@@ -95,12 +100,20 @@ type Auth struct {
 	PwResets   *models.PasswordResetRepo
 	ApiTokens  *models.TokenRepo
 	Telegram   *models.TelegramRepo
-	Email      *email.Service
+	Email      handlers.EmailSender
 	Config     Config
 }
 
 // New initialises the Auth object from a database pool and configuration.
+// If cfg.EmailSender is set it is used as-is; otherwise an SMTP service is
+// created from cfg.Email.
 func New(pool *pgxpool.Pool, cfg Config) *Auth {
+	var sender handlers.EmailSender
+	if cfg.EmailSender != nil {
+		sender = cfg.EmailSender
+	} else {
+		sender = email.NewService(cfg.Email)
+	}
 	return &Auth{
 		Users:      &models.UserRepo{Pool: pool},
 		Sessions:   &models.SessionRepo{Pool: pool},
@@ -108,7 +121,7 @@ func New(pool *pgxpool.Pool, cfg Config) *Auth {
 		PwResets:   models.NewPasswordResetRepo(pool),
 		ApiTokens:  &models.TokenRepo{Pool: pool},
 		Telegram:   &models.TelegramRepo{Pool: pool},
-		Email:      email.NewService(cfg.Email),
+		Email:      sender,
 		Config:     cfg,
 	}
 }
@@ -174,7 +187,7 @@ func (a *Auth) Register(r chi.Router) {
 
 	// GitHub OAuth (optional)
 	if a.Config.GitHub.ClientID != "" {
-		gh := handlers.NewGitHubOAuth(handlers.GitHubConfig{
+		gh := oauthpkg.NewGitHubOAuth(oauthpkg.GitHubConfig{
 			ClientID:        a.Config.GitHub.ClientID,
 			ClientSecret:    a.Config.GitHub.ClientSecret,
 			Domain:          a.Config.Domain,
@@ -186,7 +199,7 @@ func (a *Auth) Register(r chi.Router) {
 
 	// Google OAuth (optional)
 	if a.Config.Google.ClientID != "" {
-		goog := handlers.NewGoogleOAuth(handlers.GoogleConfig{
+		goog := oauthpkg.NewGoogleOAuth(oauthpkg.GoogleConfig{
 			ClientID:        a.Config.Google.ClientID,
 			ClientSecret:    a.Config.Google.ClientSecret,
 			Domain:          a.Config.Domain,
@@ -262,13 +275,13 @@ func (a *Auth) passwordlessHandlers() *handlers.PasswordlessHandlers {
 		AuthTokens: a.AuthTokens,
 		Email:      a.Email,
 		Config: handlers.PasswordlessConfig{
-			Domain:               a.Config.Domain,
-			TurnstileSecret:      a.Config.Turnstile.Secret,
-			TurnstileSiteKey:     a.Config.Turnstile.SiteKey,
-			SuccessRedirect:      a.Config.Redirects.Success,
-			RenderSignUpForm:     a.Config.Renders.PasswordlessSignUpForm,
-			RenderSignInForm:     a.Config.Renders.PasswordlessSignInForm,
-			RenderCheckEmail:     a.Config.Renders.PasswordlessCheckEmail,
+			Domain:           a.Config.Domain,
+			TurnstileSecret:  a.Config.Turnstile.Secret,
+			TurnstileSiteKey: a.Config.Turnstile.SiteKey,
+			SuccessRedirect:  a.Config.Redirects.Success,
+			RenderSignUpForm: a.Config.Renders.PasswordlessSignUpForm,
+			RenderSignInForm: a.Config.Renders.PasswordlessSignInForm,
+			RenderCheckEmail: a.Config.Renders.PasswordlessCheckEmail,
 		},
 	}
 }

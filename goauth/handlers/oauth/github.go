@@ -1,4 +1,4 @@
-package handlers
+package oauth
 
 import (
 	"encoding/json"
@@ -9,9 +9,8 @@ import (
 	"github.com/arashthr/goauth/cookie"
 	"github.com/arashthr/goauth/errors"
 	"github.com/arashthr/goauth/models"
-	"github.com/arashthr/goauth/rand"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/github"
+	ghendpoint "golang.org/x/oauth2/github"
 )
 
 // GitHubConfig configures the GitHub OAuth handler.
@@ -45,7 +44,7 @@ func NewGitHubOAuth(cfg GitHubConfig, users UserStore, sessions SessionStore) *G
 			ClientSecret: cfg.ClientSecret,
 			RedirectURL:  callbackURL,
 			Scopes:       []string{"read:user", "user:email"},
-			Endpoint:     github.Endpoint,
+			Endpoint:     ghendpoint.Endpoint,
 		},
 	}
 }
@@ -53,7 +52,7 @@ func NewGitHubOAuth(cfg GitHubConfig, users UserStore, sessions SessionStore) *G
 // Redirect starts the GitHub OAuth flow (GET /oauth/github).
 func (h *GitHubOAuth) Redirect(w http.ResponseWriter, r *http.Request) {
 	l := log(r)
-	state, err := rand.String(32)
+	state, err := generateState()
 	if err != nil {
 		l.Errorw("github oauth – generate state failed", "error", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)

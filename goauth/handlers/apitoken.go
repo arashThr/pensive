@@ -42,7 +42,7 @@ func (h *APITokenHandlers) GenerateToken(w http.ResponseWriter, r *http.Request)
 <head><title>Authentication</title></head>
 <body>
   <h2>Authentication succeeded</h2>
-  <p>Your extension is now authenticated.</p>
+  <p>Your token has been generated. Copy it before closing this page.</p>
   <form id="tokenForm">
     <input type="hidden" id="token" name="token" value="%s">
   </form>
