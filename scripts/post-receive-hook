@@ -1,11 +1,19 @@
 #!/bin/bash
+
+# On the server we don't do any development, so we setup a bare repo
+# mkdir pensive.git; cd pensive.git; git init --bare;
+# Then create post-receive in hooks
+# cd hooks; chmod +x post-receive
+# Add that to you remotes:
+# git remote add fedora fedora-server:/home/arash/repos/pensive.git
+
 while read oldrev newrev ref
     do
     if [[ $ref =~ .*/main$ ]];
     then
         echo "Deploying main branch to production..."
-        cd ~/Documents/repos/go-web
-        git --work-tree=$HOME/Documents/repos/go-web --git-dir=$HOME/Documents/repos/go-web.git checkout -f main
+        cd ~/repos/pensive
+        git --work-tree=$HOME/repos/pensive --git-dir=$HOME/repos/pensive.git checkout -f main
         echo "Restarting service..."
         docker compose -f compose.yml -f compose.production.yml up --build --force-recreate -d
         echo "Service restarted"
