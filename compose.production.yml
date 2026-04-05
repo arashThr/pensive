@@ -9,11 +9,9 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    ports:
-      - "127.0.0.1:8000:8000"
     volumes:
-      - ~/credentials/env.env:/app/.env:ro,z
-      - ~/credentials/service-account.json:/app/credentials/service-account.json:ro,z
+      - ~/credentials/env.env:/app/.env:ro
+      - ~/credentials/service-account.json:/app/credentials/service-account.json:ro
     deploy:
       resources:
         limits:
@@ -36,6 +34,24 @@ services:
           cpus: '0.25'
           memory: 256M
 
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - $PWD/caddy:/etc/caddy
+      - ~/caddy/caddy_data:/data
+      - ~/caddy/caddy_config:/config
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
 
   # Make sure to run init-db.sh before starting the db
   db:
@@ -46,11 +62,11 @@ services:
           memory: 2048M
     volumes:
       - ~/data/getpensive.com/psql:/var/lib/postgresql/
-  
+
   dozzle:
     container_name: dozzle
     image: amir20/dozzle:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "127.0.0.1:8000:8000"
+      - 8080:8080
