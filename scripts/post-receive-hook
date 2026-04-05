@@ -12,7 +12,7 @@ while read oldrev newrev ref
     if [[ $ref =~ .*/main$ ]];
     then
         echo "Deploying main branch to production..."
-        cd ~/repos/pensive.git
+        cd ~/repos/pensive
         git --work-tree=$HOME/repos/pensive --git-dir=$HOME/repos/pensive.git checkout -f main
         echo "Restarting service..."
         docker compose -f compose.yml -f compose.production.yml up --build --force-recreate -d
