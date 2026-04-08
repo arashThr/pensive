@@ -22,8 +22,8 @@ for var in "${REQUIRED_VARS[@]}"; do
 done
 
 # Configuration
-BACKUP_DIR="$HOME/postgres-backups"
-POSTGRES_CONTAINER=go-web-db-1
+BACKUP_DIR="$HOME/backups/postgres-backups"
+POSTGRES_CONTAINER=pensive-db-1
 KEEP_DAYS=14  # Keep backups for 14 days
 
 # Database credentials (adjust these)
@@ -35,7 +35,7 @@ mkdir -p "$BACKUP_DIR"
 
 # Generate timestamp
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="postgres_backup_${TIMESTAMP}.sql.gz"
+BACKUP_FILE="db_${TIMESTAMP}.sql.gz"
 BACKUP_PATH="$BACKUP_DIR/$BACKUP_FILE"
 
 # Create a function to send a message to telegram
@@ -67,14 +67,13 @@ fi
 
 # Clean up old backups
 echo "🧹 Cleaning up old backups (older than $KEEP_DAYS days)..."
-find "$BACKUP_DIR" -name "postgres_backup_*.sql.gz" -mtime +$KEEP_DAYS -delete
+find "$BACKUP_DIR" -type f -name 'db_*.sql.gz' -mtime +"$KEEP_DAYS" -delete
 
 # Count remaining backups
-BACKUP_COUNT=$(ls -1 "$BACKUP_DIR"/postgres_backup_*.sql.gz 2>/dev/null | wc -l)
+BACKUP_COUNT=$(ls -1 "$BACKUP_DIR"/db_*.sql.gz 2>/dev/null | wc -l)
 echo "📊 Total backups stored: $BACKUP_COUNT"
 
-echo "🎉 Backup completed successfully at $(date)"
-echo "📁 Backup location: $BACKUP_PATH"
+echo "🎉 Backup completed successfully at $(date) - Backup location: $BACKUP_PATH"
 
 rclone copy "$BACKUP_PATH" "r2_backup_server:pensive"
 
