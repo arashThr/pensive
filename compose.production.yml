@@ -62,11 +62,3 @@ services:
           memory: 2048M
     volumes:
       - ~/data/getpensive.com/psql:/var/lib/postgresql/
-
-  dozzle:
-    container_name: dozzle
-    image: amir20/dozzle:latest
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - 8080:8080
