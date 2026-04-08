@@ -3,6 +3,7 @@ package views
 import (
 	"bytes"
 	"fmt"
+	"html"
 	"html/template"
 	"io"
 	"net/http"
@@ -51,6 +52,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		},
 		"safeHTML": func(_ any) (template.HTML, error) {
 			return "", fmt.Errorf("safeHTML not implemented")
+		},
+		"unescapeHTML": func(v any) string {
+			return ""
 		},
 		"isProduction": func() (template.HTML, error) {
 			return "", fmt.Errorf("isProduction not implemented")
@@ -119,6 +123,10 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 				raw := validations.GetString(v)
 				safe := validations.CleanUpText(raw)
 				return template.HTML(safe)
+			},
+			"unescapeHTML": func(v any) string {
+				raw := validations.GetString(v)
+				return html.UnescapeString(raw)
 			},
 		},
 	)

@@ -7,7 +7,7 @@
     <div class="border-b border-main p-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex-1 min-w-0">
-          <h1 class="text-4xl font-bold text-main mb-2 line-clamp-2">{{.Title}}</h1>
+          <h1 class="text-4xl font-bold text-main mb-2 line-clamp-2">{{unescapeHTML .Title}}</h1>
           <a href="{{.Link}}" target="_blank"
              class="break-all text-sm font-medium text-secondary underline transition-colors hover:text-main">
             {{.Link}}
