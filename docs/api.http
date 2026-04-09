@@ -54,5 +54,9 @@ Authorization: Basic admin:admin
 
 {
     "user_id": 1,
-    "channel": "telegram"
+    "channel": "both"
 }
+
+### Get token
+GET {{host}}/api/v1/ping
+Authorization: Bearer {{token}}
