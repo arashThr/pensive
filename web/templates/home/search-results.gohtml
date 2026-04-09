@@ -17,7 +17,7 @@
             <div class="w-5 h-5 flex-shrink-0 mt-0.5">
               <img 
                 src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" 
-                alt="{{.Title}}" 
+                alt="{{unescapeHTML .Title}}" 
                 class="w-full h-full" 
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" 
               />

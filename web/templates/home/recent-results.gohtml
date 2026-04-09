@@ -29,7 +29,7 @@
             <!-- Content -->
             <div class="flex-1 min-w-0">
               <h3 class="font-semibold mb-2 text-main hover:text-main transition-colors line-clamp-2 wrap-break-word">
-                {{.Title}}
+                {{unescapeHTML .Title}}
               </h3>
               {{if .Excerpt}}
                 <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Excerpt}}</p>
