@@ -38,7 +38,7 @@ const (
 	gcpTTSTimeout       = 10 * time.Minute // generous timeout; TTS can be slow for long texts
 
 	// TODO: Increase it to an hour when testing it done
-	podcastSchedulerInterval = time.Minute
+	podcastSchedulerInterval = 10 * time.Minute
 )
 
 // userPodcastDir returns the upload directory for a specific user's podcast episodes.
@@ -290,7 +290,6 @@ func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
 		logger.Errorw("GetDue failed", "error", err)
 		return
 	}
-	logger.Debugw("Found due schedules", "count", len(due))
 	for _, schedule := range due {
 		if err := p.PodcastScheduleRepo.MarkProcessing(schedule.ID); err != nil {
 			if errors.Is(err, errors.ErrNotFound) {
