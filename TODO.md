@@ -20,6 +20,8 @@
 - [ ] Search for tags
 - [ ] Fix delete in library page
 - [ ] Make the podcast length proportional to the size of the article
+- [ ] Check if the integration is in place before creating the audio file
+- [x] Revert back to email for daily audio file when Telegram fails
 - [x] Wait for Turnstile verified
 - [x] Fix Telegram bot link parsing issue
 - [x] Does not check for duplicates when importing links from pocket

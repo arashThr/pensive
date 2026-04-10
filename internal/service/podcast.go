@@ -372,7 +372,13 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 
 	// Daily podcast is Telegram-only.
 	if !p.sendTelegramAudio(int64(s.UserID), audioPath, audioFilename) {
-		logger.Warnw("Telegram send failed or not linked")
+		logger.Warnw("Telegram send failed or not linked. Trying email")
+		user, err := p.UserRepo.Get(s.UserID)
+		if err != nil {
+			logger.Errorw("Could not look up user email for podcast notification", "error", err)
+		} else {
+			p.sendPodcastEmail(user.Email, int64(s.UserID), audioFilename)
+		}
 	}
 
 	next := NextDailyFireAt(prefs.DailyHour, prefs.DailyTimezone)
@@ -482,12 +488,9 @@ func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) 
 
 // callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
 func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
-	const podcastHostPrompt = "Read this podcast script aloud as a warm, confident, and engaging host. " +
-		"Let it be a bit messy, like someone going through series of notes and narrating their thoughts in a natural flow. " +
-		"Speak naturally and conversationally — relaxed but sharp, with comfortable pacing. " +
-		"Do not add, remove, or change any content; just deliver the written script as a natural podcast host would. " +
-		"As for your tone, make it warm, witty, and direct. Like a smart friend catching you up over coffee. " +
-		"Speak TO the listener personally"
+	const podcastHostPrompt = "Read this podcast script aloud as a warm, confident, and calm host. " +
+		"Read it as someone who's going through series of notes and narrating their thoughts in a natural flow. " +
+		"Speak naturally and conversationally — relaxed with comfortable pacing"
 
 	reqBody := map[string]interface{}{
 		"input": map[string]string{
@@ -496,7 +499,7 @@ func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Clien
 		},
 		"voice": map[string]interface{}{
 			"languageCode": "en-us",
-			"name":         "Achird",
+			"name":         "Iapetus",
 			"model_name":   "gemini-2.5-flash-tts",
 		},
 		"audioConfig": map[string]interface{}{
