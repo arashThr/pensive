@@ -76,79 +76,86 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	if userAPITokens[chatId] != "" {
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID: update.Message.Chat.ID,
-			Text:   "✅ Your account is already connected!\n\nYou can now:\n• Send links to save them instantly\n• Search your bookmarks by typing keywords\n• Get AI summaries of saved content",
+			ChatID:    update.Message.Chat.ID,
+			Text:      "✅ <b>Already connected!</b>\n\nYour Pensive account is linked. You can:\n• Send any link to save it instantly\n• Type keywords to search your library\n• Receive your weekly and daily audio digests here",
+			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
 
 	parts := strings.Split(update.Message.Text, " ")
-	if len(parts) != 2 {
+
+	// /start with a web-flow token (old flow kept for compatibility)
+	if len(parts) == 2 {
+		authToken := parts[1]
+		userId, err := telegramService.GetUserFromAuthToken(authToken)
+		if err != nil {
+			logging.Logger.Errorw("failed to find auth token", "error", err)
+			sendConnectLink(ctx, b, update.Message.Chat.ID, chatId)
+			return
+		}
+		token, err := TokenModel.Create(userId, "telegram")
+		if err != nil {
+			logging.Logger.Errorw("failed to create API token", "error", err)
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:    update.Message.Chat.ID,
+				Text:      "⚠️ <b>Setup error</b>\n\nFailed to create API token. Please try again.",
+				ParseMode: models.ParseModeHTML,
+			})
+			return
+		}
+		if err = telegramService.SetTokenForChatId(userId, update.Message.Chat.ID, token); err != nil {
+			logging.Logger.Errorw("failed to store chat ID", "error", err)
+			b.SendMessage(ctx, &bot.SendMessageParams{
+				ChatID:    update.Message.Chat.ID,
+				Text:      "⚠️ <b>Connection error</b>\n\nFailed to complete the connection. Please try again.",
+				ParseMode: models.ParseModeHTML,
+			})
+			return
+		}
+		userAPITokens[chatId] = token.Token
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    update.Message.Chat.ID,
-			Text:      "🔗 <b>Connect your Pensive account</b>\n\nPlease use the authentication link from your Pensive integrations page to connect your account.",
+			Text:      "🎉 <b>Connected!</b>\n\nYour account is linked. Send any link to save it, or type keywords to search.",
 			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
-	authToken := parts[1]
 
-	userId, err := telegramService.GetUserFromAuthToken(authToken)
+	// /start with no token — send the web connect link
+	sendConnectLink(ctx, b, update.Message.Chat.ID, chatId)
+}
+
+// sendConnectLink creates a short-lived web token and sends the connect URL to the chat.
+func sendConnectLink(ctx context.Context, b *bot.Bot, chatID int64, fromID int64) {
+	token, err := telegramService.CreateConnectToken(fromID)
 	if err != nil {
-		logging.Logger.Errorw("failed to find auth token", "error", err)
+		logging.Logger.Errorw("failed to create connect token", "error", err, "chat_id", fromID)
 		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      "❌ <b>Authentication failed</b>\n\nYour link is invalid or expired. Please generate a new link from the Pensive integrations page.",
+			ChatID:    chatID,
+			Text:      "⚠️ Something went wrong. Please try again later.",
 			ParseMode: models.ParseModeHTML,
 		})
 		return
 	}
 
-	token, err := TokenModel.Create(userId, "telegram")
-	if err != nil {
-		logging.Logger.Errorw("failed to create API token", "error", err)
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      "⚠️ <b>Setup error</b>\n\nFailed to create API token. Please try connecting again.",
-			ParseMode: models.ParseModeHTML,
-		})
-		return
-	}
-
-	err = telegramService.SetTokenForChatId(userId, update.Message.Chat.ID, token)
-	if err != nil {
-		logging.Logger.Errorw("failed to store chat ID", "error", err)
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      "⚠️ <b>Connection error</b>\n\nFailed to complete the connection. Please try again.",
-			ParseMode: models.ParseModeHTML,
-		})
-		return
-	}
-
-	userAPITokens[chatId] = token.Token
+	connectURL, _ := url.JoinPath(apiEndpoint, "telegram/connect")
+	connectURL += "?token=" + token
 
 	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:    update.Message.Chat.ID,
-		Text:      "🎉 <b>Successfully connected!</b>\n\nYour Pensive account is now linked to Telegram.\n\n<b>What you can do:</b>\n• Send any link to save it to your library\n• Type keywords to search your bookmarks\n• Get AI summaries and manage your content\n\nStart by sending a link or searching for something!",
+		ChatID:    chatID,
+		Text:      fmt.Sprintf("👋 <b>Connect your Pensive account</b>\n\nTap the link below to link your account — it only takes one click:\n\n%s\n\n<i>The link expires in 15 minutes.</i>", connectURL),
 		ParseMode: models.ParseModeHTML,
+		LinkPreviewOptions: &models.LinkPreviewOptions{
+			IsDisabled: bot.True(),
+		},
 	})
 }
 
 func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	userId := update.Message.From.ID
 	if !isUserAuthenticated(userId) {
-		integrationsPath, err := url.JoinPath(apiEndpoint, "integrations")
-		if err != nil {
-			logging.Logger.Errorw("failed to create integrations path", "error", err)
-			return
-		}
-		fmt.Println(integrationsPath)
-		b.SendMessage(ctx, &bot.SendMessageParams{
-			ChatID:    update.Message.Chat.ID,
-			Text:      fmt.Sprintf("🔐 <b>Account not connected</b>\n\nPlease connect your Pensive account first:\n%s\n\nClick the link above, then follow the connection instructions.", integrationsPath),
-			ParseMode: models.ParseModeHTML,
-		})
+		sendConnectLink(ctx, b, update.Message.Chat.ID, userId)
 		return
 	}
 

@@ -77,3 +77,67 @@ func (t *TelegramRepo) GetChatIdByUserId(userId types.UserId) (int64, error) {
 	}
 	return chatId, nil
 }
+
+// CreateConnectToken creates (or replaces) a short-lived token for a Telegram
+// chat that has not yet been linked to a Pensive account. The token is used
+// by the web flow initiated from the bot.
+func (t *TelegramRepo) CreateConnectToken(chatId int64) (string, error) {
+	token := uuid.New().String()
+	_, err := t.Pool.Exec(context.Background(), `
+		INSERT INTO telegram_connect_tokens (chat_id, token, created_at)
+		VALUES ($1, $2, NOW())
+		ON CONFLICT (chat_id) DO UPDATE SET token = $2, created_at = NOW()
+	`, chatId, token)
+	if err != nil {
+		return "", fmt.Errorf("create connect token: %w", err)
+	}
+	return token, nil
+}
+
+// GetChatIdFromConnectToken looks up the chat_id for a given connect token.
+// Tokens expire after 15 minutes.
+func (t *TelegramRepo) GetChatIdFromConnectToken(token string) (int64, error) {
+	var chatId int64
+	err := t.Pool.QueryRow(context.Background(), `
+		SELECT chat_id FROM telegram_connect_tokens
+		WHERE token = $1 AND created_at > NOW() - INTERVAL '15 minutes'
+	`, token).Scan(&chatId)
+	if err != nil {
+		return 0, fmt.Errorf("get chat id from connect token: %w", err)
+	}
+	return chatId, nil
+}
+
+// DeleteConnectToken removes a used (or stale) connect token.
+func (t *TelegramRepo) DeleteConnectToken(token string) error {
+	_, err := t.Pool.Exec(context.Background(), `
+		DELETE FROM telegram_connect_tokens WHERE token = $1
+	`, token)
+	return err
+}
+
+// UpsertConnection links a Telegram chat to a Pensive user and stores the API
+// token. Any previous link for the same chat_id on a different user is cleared
+// first to respect the UNIQUE constraint.
+func (t *TelegramRepo) UpsertConnection(userId types.UserId, chatId int64, apiToken string) error {
+	ctx := context.Background()
+	// Clear a previous chat_id association on a different user
+	_, err := t.Pool.Exec(ctx, `
+		UPDATE telegram_auth SET telegram_user_id = NULL
+		WHERE telegram_user_id = $1 AND user_id != $2
+	`, chatId, userId)
+	if err != nil {
+		return fmt.Errorf("clear stale chat id: %w", err)
+	}
+
+	_, err = t.Pool.Exec(ctx, `
+		INSERT INTO telegram_auth (user_id, auth_token, telegram_user_id, token, updated_at)
+		VALUES ($1, gen_random_uuid(), $2, $3, NOW())
+		ON CONFLICT (user_id) DO UPDATE
+		SET telegram_user_id = $2, token = $3, updated_at = NOW()
+	`, userId, chatId, apiToken)
+	if err != nil {
+		return fmt.Errorf("upsert telegram connection: %w", err)
+	}
+	return nil
+}

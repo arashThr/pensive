@@ -1,0 +1,81 @@
+{{template "header" .}}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md">
+
+    {{if .Expired}}
+    {{/* ── Token expired / invalid ── */}}
+    <div class="rounded-2xl border border-main bg-main p-8 text-center">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary text-3xl">⚠</div>
+      <h1 class="mt-5 text-2xl font-bold text-main">Link expired</h1>
+      <p class="mt-3 text-secondary">This connection link has expired or already been used. Go back to the Pensive bot in Telegram and send any message — we'll generate a fresh link for you.</p>
+      <a href="https://t.me/{{.BotName}}" class="mt-6 inline-flex items-center justify-center gap-2 rounded-xl border border-main bg-secondary px-6 py-3 font-semibold text-main hover:bg-main transition-colors">
+        <img src="/assets/icons/telegram.svg" alt="" class="h-5 w-5">
+        Open Telegram bot
+      </a>
+    </div>
+
+    {{else if .Connected}}
+    {{/* ── Success ── */}}
+    <div class="rounded-2xl border border-main bg-main p-8 text-center">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary text-3xl">✓</div>
+      <h1 class="mt-5 text-2xl font-bold text-main">You're connected!</h1>
+      <p class="mt-3 text-secondary">Your Pensive account is now linked to Telegram. Here's what you can do:</p>
+
+      <ul class="mt-5 space-y-3 text-left">
+        <li class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-main bg-secondary text-sm font-semibold text-main">1</span>
+          <div>
+            <p class="font-medium text-main">Save links instantly</p>
+            <p class="text-sm text-secondary">Forward any URL to the bot and it will be saved to your library.</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-main bg-secondary text-sm font-semibold text-main">2</span>
+          <div>
+            <p class="font-medium text-main">Search your library</p>
+            <p class="text-sm text-secondary">Type any keywords and the bot will search your bookmarks.</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-main bg-secondary text-sm font-semibold text-main">3</span>
+          <div>
+            <p class="font-medium text-main">Receive audio digests</p>
+            <p class="text-sm text-secondary">Get your weekly summary and daily briefing delivered here.</p>
+          </div>
+        </li>
+      </ul>
+
+      <a href="https://t.me/{{.BotName}}" class="mt-8 inline-flex items-center justify-center gap-2 rounded-xl border border-main bg-secondary px-6 py-4 text-lg font-semibold text-main hover:bg-main transition-colors w-full">
+        <img src="/assets/icons/telegram.svg" alt="" class="h-6 w-6">
+        Go back to Telegram
+      </a>
+    </div>
+
+    {{else}}
+    {{/* ── CTA ── */}}
+    <div class="rounded-2xl border border-main bg-main p-8 text-center">
+      <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-16 w-16 mx-auto">
+      <h1 class="mt-5 text-2xl font-bold text-main">Connect Telegram</h1>
+      <p class="mt-3 text-secondary">One click to link your Pensive account with this Telegram chat.</p>
+
+      <form action="/telegram/connect" method="post" class="mt-6">
+        {{csrfField}}
+        <input type="hidden" name="token" value="{{.Token}}">
+        <button
+          type="submit"
+          class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-main bg-secondary px-6 py-4 text-lg font-semibold text-main hover:bg-main transition-colors"
+        >
+          <img src="/assets/icons/telegram.svg" alt="" class="h-6 w-6">
+          Connect my account
+        </button>
+      </form>
+
+      <p class="mt-4 text-sm text-secondary">Once connected you can save links, search, and receive audio digests directly in Telegram.</p>
+    </div>
+    {{end}}
+
+  </div>
+</div>
+
+{{template "footer" .}}

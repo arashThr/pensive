@@ -24,8 +24,9 @@ import (
 )
 
 type Users struct {
-	Domain          string
-	TurnstileConfig config.TurnstileConfig
+	Domain            string
+	TelegramBotName   string
+	TurnstileConfig   config.TurnstileConfig
 	Templates       struct {
 		New                    web.Template
 		SignIn                 web.Template
@@ -264,15 +265,17 @@ func (u Users) Integrations(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
 
 	var data struct {
-		Title          string
-		LoggedIn       bool
-		Email          string
-		TokensCount    int
-		TelegramLinked bool
-		Preferences    *models.SummaryPreferences
+		Title           string
+		LoggedIn        bool
+		Email           string
+		TokensCount     int
+		TelegramLinked  bool
+		TelegramBotName string
+		Preferences     *models.SummaryPreferences
 	}
 
 	data.Title = "Integrations"
+	data.TelegramBotName = u.TelegramBotName
 	data.Preferences = &models.SummaryPreferences{
 		DailyEnabled:  false,
 		DailyHour:     8,

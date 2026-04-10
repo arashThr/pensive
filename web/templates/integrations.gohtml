@@ -34,11 +34,16 @@
             </p>
           </div>
         </div>
-        <a href="/telegram/auth" class="shrink-0 inline-flex items-center justify-center rounded-lg border border-main bg-secondary px-4 py-2 font-medium text-main hover:bg-secondary transition-colors text-sm">
-          {{if .TelegramLinked}}Reconnect{{else}}Connect{{end}}
+        {{if .TelegramLinked}}
+        <a href="/telegram/auth" class="shrink-0 inline-flex items-center justify-center rounded-lg border border-main bg-secondary px-4 py-2 font-medium text-main hover:bg-main transition-colors text-sm">Reconnect</a>
+        {{else}}
+        <a href="https://t.me/{{.TelegramBotName}}" class="shrink-0 inline-flex items-center gap-1.5 justify-center rounded-lg border border-main bg-secondary px-4 py-2 font-medium text-main hover:bg-main transition-colors text-sm">
+          <img src="/assets/icons/telegram.svg" alt="" class="h-4 w-4">
+          Open bot
         </a>
+        {{end}}
       </div>
-      <p class="mt-4 text-sm text-secondary">Save links from mobile, search your library in chat, and receive weekly and daily podcast delivery.</p>
+      <p class="mt-4 text-sm text-secondary">Open the Pensive bot in Telegram — it will send you a link to connect your account in one click.</p>
     </div>
 
     {{/* ── Podcast delivery ── */}}

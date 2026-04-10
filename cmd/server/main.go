@@ -152,6 +152,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 
 	usersService := auth.Users{
 		Domain:               cfg.Domain,
+		TelegramBotName:      cfg.Telegram.BotName,
 		TurnstileConfig:      cfg.Turnstile,
 		UserService:          userRepo,
 		SessionService:       sessionRepo,
@@ -238,9 +239,11 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 
 	telegramService := auth.Telegram{
 		TelegramModel: telegramRepo,
+		TokenModel:    tokenRepo,
 		BotName:       cfg.Telegram.BotName,
 	}
 	telegramService.Templates.Connect = views.Must(views.ParseTemplate("telegram-connect.gohtml", "tailwind.gohtml"))
+	telegramService.Templates.BotConnect = views.Must(views.ParseTemplate("telegram-bot-connect.gohtml", "tailwind.gohtml"))
 
 	podcastService := service.Podcast{
 		BookmarkModel:       bookmarkRepo,
@@ -496,6 +499,8 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		r.Route("/telegram", func(r chi.Router) {
 			r.Use(umw.RequireUser)
 			r.Get("/auth", c.TelegramService.RedirectWithAuthToken)
+			r.Get("/connect", c.TelegramService.ConnectPage)
+			r.Post("/connect", c.TelegramService.ProcessConnect)
 		})
 
 		assetHandler := http.FileServer(http.Dir("./web/assets"))
