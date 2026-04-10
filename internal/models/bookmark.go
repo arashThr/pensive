@@ -527,7 +527,6 @@ func (model *BookmarkRepo) generateAIData(ctx context.Context, title string, con
 	start := time.Now()
 	logger.Infow("calling Gemini for AI data extraction",
 		"link", link,
-		"model", "gemini-3-flash-preview",
 		"content_size", len(htmlContent))
 	aiDataResponse, err := model.promptToGetAIData(htmlContent)
 	if err != nil {
