@@ -834,13 +834,7 @@ func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId
 	podcastLogger.Infow("generating podcast script",
 		"article_count", len(articles),
 		"days", days,
-		"model", "gemini-3-flash-preview",
-		"target_words", func() int {
-			if days == 1 {
-				return 700
-			}
-			return 1400
-		}())
+		)
 	if p.GenAIClient == nil {
 		return "", fmt.Errorf("GenAI client not initialised")
 	}
