@@ -240,6 +240,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		TelegramModel: telegramRepo,
 		BotName:       cfg.Telegram.BotName,
 	}
+	telegramService.Templates.Connect = views.Must(views.ParseTemplate("telegram-connect.gohtml", "tailwind.gohtml"))
 
 	podcastService := service.Podcast{
 		BookmarkModel:       bookmarkRepo,

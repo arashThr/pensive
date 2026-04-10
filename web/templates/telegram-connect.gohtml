@@ -1,0 +1,25 @@
+{{template "header" .}}
+
+<div class="min-h-screen flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md">
+    <div class="rounded-2xl border border-main bg-main p-8 text-center">
+      <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-16 w-16 mx-auto">
+      <h1 class="mt-5 text-2xl font-bold text-main">Connect your Telegram account</h1>
+      <p class="mt-3 text-secondary">Open Telegram and press <strong class="text-main">Start</strong> to link your account. The connection is instant.</p>
+
+      <a
+        href="{{.TelegramURL}}"
+        class="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-xl border border-main bg-secondary px-6 py-4 text-lg font-semibold text-main hover:bg-main transition-colors"
+      >
+        <img src="/assets/icons/telegram.svg" alt="" class="h-6 w-6">
+        Open Telegram
+      </a>
+
+      <p class="mt-4 text-sm text-secondary">Once connected you can save links from mobile, search your library in chat, and receive podcast delivery.</p>
+
+      <a href="/integrations" class="mt-6 inline-block text-sm text-secondary hover:text-main transition-colors">← Back to integrations</a>
+    </div>
+  </div>
+</div>
+
+{{template "footer" .}}

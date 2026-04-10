@@ -1,150 +1,109 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-  <div class="mx-auto max-w-6xl space-y-8">
-    <section class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 class="text-3xl font-bold text-main">Integrations Portal</h1>
-          <p class="mt-2 text-secondary">Connect tools, manage delivery channels, and control integration settings from one place.</p>
-        </div>
-        {{if .LoggedIn}}
-        <div class="rounded-lg border border-main bg-main px-4 py-2 text-sm text-secondary">
-          Signed in as <span class="text-main">{{.Email}}</span>
-        </div>
-        {{end}}
-      </div>
+<div class="min-h-screen px-4 sm:px-6 py-12">
+  <div class="mx-auto max-w-2xl space-y-6">
 
+    <div class="flex items-center justify-between">
+      <h1 class="text-3xl font-bold text-main">Integrations</h1>
       {{if .LoggedIn}}
-      <div class="mt-6 grid gap-4 sm:grid-cols-3">
-        <div class="rounded-lg border border-main bg-main p-4">
-          <p class="text-xs uppercase tracking-wide text-secondary">Browser Extension</p>
-          <p class="mt-2 text-xl font-semibold text-main">{{.TokensCount}} active token{{if ne .TokensCount 1}}s{{end}}</p>
-          <p class="mt-1 text-sm text-secondary">Required for Chrome/Firefox quick-save.</p>
-        </div>
-        <div class="rounded-lg border border-main bg-main p-4">
-          <p class="text-xs uppercase tracking-wide text-secondary">Telegram</p>
-          <p class="mt-2 text-xl font-semibold text-main">{{if .TelegramLinked}}Connected{{else}}Not connected{{end}}</p>
-          <p class="mt-1 text-sm text-secondary">Needed for Telegram delivery and daily briefing.</p>
-        </div>
-        <div class="rounded-lg border border-main bg-main p-4">
-          <p class="text-xs uppercase tracking-wide text-secondary">Podcast Delivery</p>
-          <p class="mt-2 text-xl font-semibold text-main">{{if .Preferences.Enabled}}Weekly on{{else}}Weekly off{{end}} {{if .Preferences.Enabled}}{{.Preferences.Day}}{{end}}</p>
-          <p class="mt-1 text-sm text-secondary">Daily briefing: {{if .Preferences.DailyEnabled}}enabled{{else}}off{{end}}</p>
-        </div>
-      </div>
-      {{else}}
-      <div class="mt-6 rounded-lg border border-main bg-main p-5">
-        <h2 class="text-lg font-semibold text-main">Sign in to manage integrations</h2>
-        <p class="mt-2 text-sm text-secondary">You can still view setup steps below, but management controls are available only after sign in.</p>
-        <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-          <a href="/signin" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-semibold text-main hover:bg-secondary transition-colors">Sign in</a>
-          <a href="/signup" class="inline-flex items-center justify-center rounded-lg px-5 py-2.5 font-medium text-secondary hover:text-main transition-colors">Create account</a>
-        </div>
-      </div>
+      <span class="text-sm text-secondary">{{.Email}}</span>
       {{end}}
-    </section>
+    </div>
 
-    {{if .LoggedIn}}
-    <section class="rounded-xl border border-main bg-main p-6 sm:p-8">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-main">Podcast Delivery Settings</h2>
-        <p class="mt-2 text-secondary">Configure weekly summary and daily Telegram briefing here.</p>
+    {{if not .LoggedIn}}
+    <div class="rounded-xl border border-main bg-main p-6">
+      <h2 class="text-lg font-semibold text-main">Sign in to manage integrations</h2>
+      <p class="mt-2 text-sm text-secondary">Connect tools, configure podcast delivery, and manage tokens.</p>
+      <div class="mt-4 flex gap-3">
+        <a href="/signin?next=/integrations" class="inline-flex items-center justify-center rounded-lg border border-main bg-secondary px-5 py-2.5 font-semibold text-main hover:bg-main transition-colors">Sign in</a>
+        <a href="/signup" class="inline-flex items-center justify-center px-5 py-2.5 font-medium text-secondary hover:text-main transition-colors">Create account</a>
       </div>
+    </div>
 
-      {{if not .TelegramLinked}}
-      <div class="mb-6 rounded-lg border border-main bg-secondary p-4">
-        <p class="text-sm text-secondary">Telegram is not connected. Telegram delivery and daily briefing are unavailable until you connect your account.</p>
-        <a href="/telegram/auth" class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-secondary hover:text-main transition-colors">
-          Connect Telegram
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
+    {{else}}
+
+    {{/* ── Telegram ── */}}
+    <div class="rounded-xl border border-main bg-main p-6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-8 w-8 shrink-0">
+          <div>
+            <h2 class="text-xl font-semibold text-main">Telegram</h2>
+            <p class="text-sm {{if .TelegramLinked}}text-green-500{{else}}text-secondary{{end}}">
+              {{if .TelegramLinked}}Connected{{else}}Not connected{{end}}
+            </p>
+          </div>
+        </div>
+        <a href="/telegram/auth" class="shrink-0 inline-flex items-center justify-center rounded-lg border border-main bg-secondary px-4 py-2 font-medium text-main hover:bg-secondary transition-colors text-sm">
+          {{if .TelegramLinked}}Reconnect{{else}}Connect{{end}}
         </a>
       </div>
-      {{end}}
+      <p class="mt-4 text-sm text-secondary">Save links from mobile, search your library in chat, and receive weekly and daily podcast delivery.</p>
+    </div>
+
+    {{/* ── Podcast delivery ── */}}
+    <div class="rounded-xl border border-main bg-main p-6">
+      <h2 class="text-xl font-semibold text-main">Podcast delivery</h2>
+      <p class="mt-1 text-sm text-secondary">AI-generated audio summaries of your saved articles.</p>
 
       <form
         hx-post="/users/preferences"
         hx-swap="none"
         hx-trigger="change from:input, change from:select"
         hx-sync="this:replace"
-        hx-on::before-request="document.getElementById('integration-save-success').classList.add('hidden');document.getElementById('integration-save-pending').classList.remove('hidden');"
-        hx-on::after-request="document.getElementById('integration-save-pending').classList.add('hidden');if(event.detail.successful){document.getElementById('integration-save-success').classList.remove('hidden');setTimeout(function(){document.getElementById('integration-save-success').classList.add('hidden');},1500);}"
-        class="space-y-6"
+        hx-on::before-request="document.getElementById('pref-saving').classList.remove('hidden')"
+        hx-on::after-request="document.getElementById('pref-saving').classList.add('hidden');if(event.detail.successful){document.getElementById('pref-saved').classList.remove('hidden');setTimeout(function(){document.getElementById('pref-saved').classList.add('hidden');},1500);}"
+        class="mt-5 space-y-5"
       >
         {{csrfField}}
 
-        <div class="rounded-lg border border-main bg-secondary p-5">
+        {{/* Weekly summary */}}
+        <div class="rounded-lg border border-main bg-secondary p-4">
           <div class="flex items-center justify-between gap-4">
             <div>
-              <h3 class="font-semibold text-main">Weekly summary</h3>
-              <p class="mt-1 text-sm text-secondary">Receive an AI-generated audio summary of your saved articles.</p>
+              <h3 class="font-medium text-main">Weekly summary</h3>
+              <p class="text-sm text-secondary mt-0.5">Audio recap of your bookmarks, delivered once a week.</p>
             </div>
-            <label class="inline-flex items-center gap-2 text-sm text-secondary">
-              <input
-                type="checkbox"
-                name="enabled"
-                value="true"
-                class="h-5 w-5 rounded border-main bg-main focus:border-main"
-                {{if .Preferences.Enabled}}checked{{end}}
-              >
-            </label>
+            <input type="checkbox" name="enabled" value="true" class="h-5 w-5 rounded border-main bg-main" {{if .Preferences.Enabled}}checked{{end}}>
+          </div>
+
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <select name="day" class="rounded-lg border border-main bg-main px-3 py-2 text-sm text-main outline-none focus:border-main">
+              <option value="sunday"    {{if eq .Preferences.Day "sunday"   }}selected{{end}}>Sunday</option>
+              <option value="monday"    {{if eq .Preferences.Day "monday"   }}selected{{end}}>Monday</option>
+              <option value="tuesday"   {{if eq .Preferences.Day "tuesday"  }}selected{{end}}>Tuesday</option>
+              <option value="wednesday" {{if eq .Preferences.Day "wednesday"}}selected{{end}}>Wednesday</option>
+              <option value="thursday"  {{if eq .Preferences.Day "thursday" }}selected{{end}}>Thursday</option>
+              <option value="friday"    {{if eq .Preferences.Day "friday"   }}selected{{end}}>Friday</option>
+              <option value="saturday"  {{if eq .Preferences.Day "saturday" }}selected{{end}}>Saturday</option>
+            </select>
+
+            <div class="flex items-center gap-4">
+              <label class="flex items-center gap-2 text-sm text-main cursor-pointer">
+                <input type="checkbox" name="email" value="true" class="h-4 w-4 rounded border-main bg-main" {{if .Preferences.Email}}checked{{end}}>
+                Email
+              </label>
+              <label class="flex items-center gap-2 text-sm {{if not .TelegramLinked}}opacity-40{{end}} cursor-pointer">
+                <input type="checkbox" name="telegram" value="true" class="h-4 w-4 rounded border-main bg-main" {{if .Preferences.Telegram}}checked{{end}} {{if not .TelegramLinked}}disabled{{end}}>
+                <img src="/assets/icons/telegram.svg" alt="" class="h-4 w-4">
+                Telegram
+              </label>
+            </div>
           </div>
         </div>
 
-        <div class="rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">Weekly delivery day</h3>
-          <p class="mt-1 text-sm text-secondary">Choose when your weekly episode should be generated.</p>
-          <select name="day" class="mt-4 w-full sm:w-auto rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main">
-            <option value="sunday" {{if eq .Preferences.Day "sunday"}}selected{{end}}>Sunday</option>
-            <option value="monday" {{if eq .Preferences.Day "monday"}}selected{{end}}>Monday</option>
-            <option value="tuesday" {{if eq .Preferences.Day "tuesday"}}selected{{end}}>Tuesday</option>
-            <option value="wednesday" {{if eq .Preferences.Day "wednesday"}}selected{{end}}>Wednesday</option>
-            <option value="thursday" {{if eq .Preferences.Day "thursday"}}selected{{end}}>Thursday</option>
-            <option value="friday" {{if eq .Preferences.Day "friday"}}selected{{end}}>Friday</option>
-            <option value="saturday" {{if eq .Preferences.Day "saturday"}}selected{{end}}>Saturday</option>
-          </select>
-        </div>
-
-        <div class="rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">Delivery channels</h3>
-          <p class="mt-1 text-sm text-secondary">Choose where your weekly summary should be sent.</p>
-          <div class="mt-4 space-y-3">
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" name="email" value="true" class="h-5 w-5 rounded border-main bg-secondary focus:border-main" {{if .Preferences.Email}}checked{{end}}>
-              <span class="text-main">Email</span>
-              <span class="text-sm text-secondary">({{.Email}})</span>
-            </label>
-            <label class="flex items-center gap-3 cursor-pointer {{if not .TelegramLinked}}opacity-50{{end}}">
-              <input type="checkbox" name="telegram" value="true" class="h-5 w-5 rounded border-main bg-secondary focus:border-main" {{if .Preferences.Telegram}}checked{{end}} {{if not .TelegramLinked}}disabled{{end}}>
-              <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-5 w-5">
-              <span class="text-main">Telegram</span>
-              {{if not .TelegramLinked}}<span class="text-xs text-secondary">(connect first)</span>{{end}}
-            </label>
-          </div>
-        </div>
-
-        <div class="rounded-lg border border-main bg-secondary p-5 {{if not .TelegramLinked}}opacity-50{{end}}">
+        {{/* Daily briefing */}}
+        <div class="rounded-lg border border-main bg-secondary p-4 {{if not .TelegramLinked}}opacity-50{{end}}">
           <div class="flex items-center justify-between gap-4">
             <div>
-              <h3 class="font-semibold text-main">Daily briefing</h3>
-              <p class="mt-1 text-sm text-secondary">Short daily audio recap of bookmarks from the last 24 hours (Telegram only).</p>
+              <h3 class="font-medium text-main">Daily briefing <span class="text-xs font-normal text-secondary ml-1">Telegram only</span></h3>
+              <p class="text-sm text-secondary mt-0.5">Short daily recap from the last 24 hours.</p>
             </div>
-            <label class="inline-flex items-center gap-2 text-sm text-secondary">
-              <input
-                type="checkbox"
-                name="daily_enabled"
-                value="true"
-                class="h-5 w-5 rounded border-main bg-main focus:border-main"
-                {{if .Preferences.DailyEnabled}}checked{{end}}
-                {{if not .TelegramLinked}}disabled{{end}}
-              >
-            </label>
+            <input type="checkbox" name="daily_enabled" value="true" class="h-5 w-5 rounded border-main bg-main" {{if .Preferences.DailyEnabled}}checked{{end}} {{if not .TelegramLinked}}disabled{{end}}>
           </div>
 
-          <div class="mt-4 flex flex-col gap-4 sm:flex-row">
-            <select name="daily_hour" class="rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main" {{if not .TelegramLinked}}disabled{{end}}>
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <select name="daily_hour" class="rounded-lg border border-main bg-main px-3 py-2 text-sm text-main outline-none focus:border-main" {{if not .TelegramLinked}}disabled{{end}}>
               <option value="0"  {{if eq .Preferences.DailyHour 0 }}selected{{end}}>12:00 AM</option>
               <option value="1"  {{if eq .Preferences.DailyHour 1 }}selected{{end}}>1:00 AM</option>
               <option value="2"  {{if eq .Preferences.DailyHour 2 }}selected{{end}}>2:00 AM</option>
@@ -171,157 +130,84 @@
               <option value="23" {{if eq .Preferences.DailyHour 23}}selected{{end}}>11:00 PM</option>
             </select>
 
-            <select id="daily-timezone" name="daily_timezone" class="rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main" {{if not .TelegramLinked}}disabled{{end}}>
-              <option value="UTC" {{if eq .Preferences.DailyTimezone "UTC"}}selected{{end}}>UTC</option>
-              <option value="America/New_York" {{if eq .Preferences.DailyTimezone "America/New_York"}}selected{{end}}>New York (ET)</option>
-              <option value="America/Chicago" {{if eq .Preferences.DailyTimezone "America/Chicago"}}selected{{end}}>Chicago (CT)</option>
-              <option value="America/Denver" {{if eq .Preferences.DailyTimezone "America/Denver"}}selected{{end}}>Denver (MT)</option>
-              <option value="America/Los_Angeles" {{if eq .Preferences.DailyTimezone "America/Los_Angeles"}}selected{{end}}>Los Angeles (PT)</option>
-              <option value="America/Anchorage" {{if eq .Preferences.DailyTimezone "America/Anchorage"}}selected{{end}}>Anchorage (AKT)</option>
-              <option value="America/Sao_Paulo" {{if eq .Preferences.DailyTimezone "America/Sao_Paulo"}}selected{{end}}>Sao Paulo (BRT)</option>
-              <option value="America/Toronto" {{if eq .Preferences.DailyTimezone "America/Toronto"}}selected{{end}}>Toronto (ET)</option>
-              <option value="America/Vancouver" {{if eq .Preferences.DailyTimezone "America/Vancouver"}}selected{{end}}>Vancouver (PT)</option>
-              <option value="Europe/London" {{if eq .Preferences.DailyTimezone "Europe/London"}}selected{{end}}>London (GMT/BST)</option>
-              <option value="Europe/Paris" {{if eq .Preferences.DailyTimezone "Europe/Paris"}}selected{{end}}>Paris (CET)</option>
-              <option value="Europe/Berlin" {{if eq .Preferences.DailyTimezone "Europe/Berlin"}}selected{{end}}>Berlin (CET)</option>
-              <option value="Europe/Madrid" {{if eq .Preferences.DailyTimezone "Europe/Madrid"}}selected{{end}}>Madrid (CET)</option>
-              <option value="Europe/Rome" {{if eq .Preferences.DailyTimezone "Europe/Rome"}}selected{{end}}>Rome (CET)</option>
-              <option value="Europe/Amsterdam" {{if eq .Preferences.DailyTimezone "Europe/Amsterdam"}}selected{{end}}>Amsterdam (CET)</option>
-              <option value="Europe/Stockholm" {{if eq .Preferences.DailyTimezone "Europe/Stockholm"}}selected{{end}}>Stockholm (CET)</option>
-              <option value="Europe/Warsaw" {{if eq .Preferences.DailyTimezone "Europe/Warsaw"}}selected{{end}}>Warsaw (CET)</option>
-              <option value="Europe/Istanbul" {{if eq .Preferences.DailyTimezone "Europe/Istanbul"}}selected{{end}}>Istanbul (TRT)</option>
-              <option value="Europe/Moscow" {{if eq .Preferences.DailyTimezone "Europe/Moscow"}}selected{{end}}>Moscow (MSK)</option>
-              <option value="Asia/Tehran" {{if eq .Preferences.DailyTimezone "Asia/Tehran"}}selected{{end}}>Tehran (IRST)</option>
-              <option value="Asia/Dubai" {{if eq .Preferences.DailyTimezone "Asia/Dubai"}}selected{{end}}>Dubai (GST)</option>
-              <option value="Asia/Karachi" {{if eq .Preferences.DailyTimezone "Asia/Karachi"}}selected{{end}}>Karachi (PKT)</option>
-              <option value="Asia/Kolkata" {{if eq .Preferences.DailyTimezone "Asia/Kolkata"}}selected{{end}}>Mumbai / Kolkata (IST)</option>
-              <option value="Asia/Dhaka" {{if eq .Preferences.DailyTimezone "Asia/Dhaka"}}selected{{end}}>Dhaka (BST)</option>
-              <option value="Asia/Bangkok" {{if eq .Preferences.DailyTimezone "Asia/Bangkok"}}selected{{end}}>Bangkok (ICT)</option>
-              <option value="Asia/Singapore" {{if eq .Preferences.DailyTimezone "Asia/Singapore"}}selected{{end}}>Singapore (SGT)</option>
-              <option value="Asia/Shanghai" {{if eq .Preferences.DailyTimezone "Asia/Shanghai"}}selected{{end}}>Beijing / Shanghai (CST)</option>
-              <option value="Asia/Seoul" {{if eq .Preferences.DailyTimezone "Asia/Seoul"}}selected{{end}}>Seoul (KST)</option>
-              <option value="Asia/Tokyo" {{if eq .Preferences.DailyTimezone "Asia/Tokyo"}}selected{{end}}>Tokyo (JST)</option>
-              <option value="Australia/Sydney" {{if eq .Preferences.DailyTimezone "Australia/Sydney"}}selected{{end}}>Sydney (AEST)</option>
-              <option value="Australia/Melbourne" {{if eq .Preferences.DailyTimezone "Australia/Melbourne"}}selected{{end}}>Melbourne (AEST)</option>
-              <option value="Pacific/Auckland" {{if eq .Preferences.DailyTimezone "Pacific/Auckland"}}selected{{end}}>Auckland (NZST)</option>
-              <option value="Africa/Cairo" {{if eq .Preferences.DailyTimezone "Africa/Cairo"}}selected{{end}}>Cairo (EET)</option>
-              <option value="Africa/Nairobi" {{if eq .Preferences.DailyTimezone "Africa/Nairobi"}}selected{{end}}>Nairobi (EAT)</option>
-              <option value="Africa/Lagos" {{if eq .Preferences.DailyTimezone "Africa/Lagos"}}selected{{end}}>Lagos (WAT)</option>
+            <select id="daily-timezone" name="daily_timezone" class="rounded-lg border border-main bg-main px-3 py-2 text-sm text-main outline-none focus:border-main" {{if not .TelegramLinked}}disabled{{end}}>
+              <option value="UTC"                   {{if eq .Preferences.DailyTimezone "UTC"                  }}selected{{end}}>UTC</option>
+              <option value="America/New_York"       {{if eq .Preferences.DailyTimezone "America/New_York"     }}selected{{end}}>New York (ET)</option>
+              <option value="America/Chicago"        {{if eq .Preferences.DailyTimezone "America/Chicago"      }}selected{{end}}>Chicago (CT)</option>
+              <option value="America/Denver"         {{if eq .Preferences.DailyTimezone "America/Denver"       }}selected{{end}}>Denver (MT)</option>
+              <option value="America/Los_Angeles"    {{if eq .Preferences.DailyTimezone "America/Los_Angeles"  }}selected{{end}}>Los Angeles (PT)</option>
+              <option value="America/Anchorage"      {{if eq .Preferences.DailyTimezone "America/Anchorage"    }}selected{{end}}>Anchorage (AKT)</option>
+              <option value="America/Sao_Paulo"      {{if eq .Preferences.DailyTimezone "America/Sao_Paulo"    }}selected{{end}}>Sao Paulo (BRT)</option>
+              <option value="America/Toronto"        {{if eq .Preferences.DailyTimezone "America/Toronto"      }}selected{{end}}>Toronto (ET)</option>
+              <option value="America/Vancouver"      {{if eq .Preferences.DailyTimezone "America/Vancouver"    }}selected{{end}}>Vancouver (PT)</option>
+              <option value="Europe/London"          {{if eq .Preferences.DailyTimezone "Europe/London"        }}selected{{end}}>London (GMT/BST)</option>
+              <option value="Europe/Paris"           {{if eq .Preferences.DailyTimezone "Europe/Paris"         }}selected{{end}}>Paris (CET)</option>
+              <option value="Europe/Berlin"          {{if eq .Preferences.DailyTimezone "Europe/Berlin"        }}selected{{end}}>Berlin (CET)</option>
+              <option value="Europe/Madrid"          {{if eq .Preferences.DailyTimezone "Europe/Madrid"        }}selected{{end}}>Madrid (CET)</option>
+              <option value="Europe/Rome"            {{if eq .Preferences.DailyTimezone "Europe/Rome"          }}selected{{end}}>Rome (CET)</option>
+              <option value="Europe/Amsterdam"       {{if eq .Preferences.DailyTimezone "Europe/Amsterdam"     }}selected{{end}}>Amsterdam (CET)</option>
+              <option value="Europe/Stockholm"       {{if eq .Preferences.DailyTimezone "Europe/Stockholm"     }}selected{{end}}>Stockholm (CET)</option>
+              <option value="Europe/Warsaw"          {{if eq .Preferences.DailyTimezone "Europe/Warsaw"        }}selected{{end}}>Warsaw (CET)</option>
+              <option value="Europe/Istanbul"        {{if eq .Preferences.DailyTimezone "Europe/Istanbul"      }}selected{{end}}>Istanbul (TRT)</option>
+              <option value="Europe/Moscow"          {{if eq .Preferences.DailyTimezone "Europe/Moscow"        }}selected{{end}}>Moscow (MSK)</option>
+              <option value="Asia/Tehran"            {{if eq .Preferences.DailyTimezone "Asia/Tehran"          }}selected{{end}}>Tehran (IRST)</option>
+              <option value="Asia/Dubai"             {{if eq .Preferences.DailyTimezone "Asia/Dubai"           }}selected{{end}}>Dubai (GST)</option>
+              <option value="Asia/Karachi"           {{if eq .Preferences.DailyTimezone "Asia/Karachi"         }}selected{{end}}>Karachi (PKT)</option>
+              <option value="Asia/Kolkata"           {{if eq .Preferences.DailyTimezone "Asia/Kolkata"         }}selected{{end}}>Mumbai / Kolkata (IST)</option>
+              <option value="Asia/Dhaka"             {{if eq .Preferences.DailyTimezone "Asia/Dhaka"           }}selected{{end}}>Dhaka (BST)</option>
+              <option value="Asia/Bangkok"           {{if eq .Preferences.DailyTimezone "Asia/Bangkok"         }}selected{{end}}>Bangkok (ICT)</option>
+              <option value="Asia/Singapore"         {{if eq .Preferences.DailyTimezone "Asia/Singapore"       }}selected{{end}}>Singapore (SGT)</option>
+              <option value="Asia/Shanghai"          {{if eq .Preferences.DailyTimezone "Asia/Shanghai"        }}selected{{end}}>Beijing / Shanghai (CST)</option>
+              <option value="Asia/Seoul"             {{if eq .Preferences.DailyTimezone "Asia/Seoul"           }}selected{{end}}>Seoul (KST)</option>
+              <option value="Asia/Tokyo"             {{if eq .Preferences.DailyTimezone "Asia/Tokyo"           }}selected{{end}}>Tokyo (JST)</option>
+              <option value="Australia/Sydney"       {{if eq .Preferences.DailyTimezone "Australia/Sydney"     }}selected{{end}}>Sydney (AEST)</option>
+              <option value="Australia/Melbourne"    {{if eq .Preferences.DailyTimezone "Australia/Melbourne"  }}selected{{end}}>Melbourne (AEST)</option>
+              <option value="Pacific/Auckland"       {{if eq .Preferences.DailyTimezone "Pacific/Auckland"     }}selected{{end}}>Auckland (NZST)</option>
+              <option value="Africa/Cairo"           {{if eq .Preferences.DailyTimezone "Africa/Cairo"         }}selected{{end}}>Cairo (EET)</option>
+              <option value="Africa/Nairobi"         {{if eq .Preferences.DailyTimezone "Africa/Nairobi"       }}selected{{end}}>Nairobi (EAT)</option>
+              <option value="Africa/Lagos"           {{if eq .Preferences.DailyTimezone "Africa/Lagos"         }}selected{{end}}>Lagos (WAT)</option>
             </select>
           </div>
-          <p class="mt-3 text-xs text-secondary">Timezone is auto-detected on first load if UTC is still selected.</p>
         </div>
 
-        <div class="flex items-center justify-end gap-4">
-          <span id="integration-save-pending" class="hidden text-sm text-secondary">Saving...</span>
-          <span id="integration-save-success" class="hidden text-sm text-secondary">✓ Saved</span>
+        <div class="flex items-center justify-end gap-3 text-sm text-secondary">
+          <span id="pref-saving" class="hidden">Saving…</span>
+          <span id="pref-saved"  class="hidden">Saved</span>
         </div>
       </form>
-    </section>
+    </div>
+
+    {{/* ── Other tools ── */}}
+    <div class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-xl border border-main bg-main p-4">
+        <h3 class="font-medium text-main">Browser extension</h3>
+        <p class="mt-1 text-sm text-secondary">One-click save for Chrome and Firefox.</p>
+        <div class="mt-3 flex flex-col gap-2">
+          <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="transition-transform hover:scale-105 w-fit">
+            <img src="/assets/promo/google-store.png" alt="Install for Chrome" class="h-9 w-auto">
+          </a>
+          <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" target="_blank" rel="noopener" class="transition-transform hover:scale-105 w-fit">
+            <img src="/assets/promo/get-the-addon.png" alt="Install for Firefox" class="h-9 w-auto">
+          </a>
+        </div>
+        <a href="/users/me?tab=tokens" class="mt-3 inline-block text-sm text-secondary hover:text-main transition-colors">Manage tokens →</a>
+      </div>
+
+      <div class="rounded-xl border border-main bg-main p-4">
+        <h3 class="font-medium text-main">API access</h3>
+        <p class="mt-1 text-sm text-secondary">Token-based REST API for bookmarks.</p>
+        <p class="mt-3 text-sm text-secondary">Active tokens: <span class="text-main font-medium">{{.TokensCount}}</span></p>
+        <a href="/users/me?tab=tokens" class="mt-2 inline-block text-sm text-secondary hover:text-main transition-colors">Manage tokens →</a>
+      </div>
+
+      <div class="rounded-xl border border-main bg-main p-4">
+        <h3 class="font-medium text-main">Pocket import</h3>
+        <p class="mt-1 text-sm text-secondary">Migrate bookmarks from Pocket with tags.</p>
+        <a href="/pocket" class="mt-3 inline-block text-sm text-secondary hover:text-main transition-colors">Start import →</a>
+      </div>
+    </div>
+
     {{end}}
-
-    <section class="grid gap-6 lg:grid-cols-2">
-      <div class="rounded-xl border border-main bg-main p-6">
-        <h2 class="text-2xl font-bold text-main">Browser extension</h2>
-        <p class="mt-2 text-secondary">One click to save any webpage. Works on Chrome and Firefox.</p>
-
-        <div class="mt-5 rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">Setup</h3>
-          <div class="mt-3 space-y-2 text-secondary text-sm">
-            <div>1. Install extension from store</div>
-            <div>2. Create API token in account settings</div>
-            <div>3. Save from any webpage</div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div class="flex flex-col sm:flex-row gap-4 items-center">
-            <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="transition-transform hover:scale-105">
-              <img src="/assets/promo/google-store.png" alt="Install for Chrome" class="h-12 w-auto">
-            </a>
-            <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" target="_blank" rel="noopener" class="transition-transform hover:scale-105">
-              <img src="/assets/promo/get-the-addon.png" alt="Install for Firefox" class="h-12 w-auto">
-            </a>
-          </div>
-          {{if .LoggedIn}}
-          <a href="/users/me?tab=tokens" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Manage tokens</a>
-          {{else}}
-          <a href="/signin" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Sign in to manage</a>
-          {{end}}
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-main bg-main p-6">
-        <div class="flex items-center gap-3">
-          <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-10 w-10">
-          <h2 class="text-2xl font-bold text-main">Telegram bot</h2>
-        </div>
-        <p class="mt-2 text-secondary">Save links from mobile and search your library directly in chat.</p>
-
-        <div class="mt-5 rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">What it does</h3>
-          <div class="mt-3 space-y-2 text-secondary text-sm">
-            <div>Forward any link and it is saved instantly</div>
-            <div>Search your complete library via Telegram</div>
-            <div>Receive weekly and daily podcast delivery</div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex items-center justify-between gap-3">
-          <p class="text-sm text-secondary">Status: <span class="text-main">{{if .TelegramLinked}}Connected{{else}}Not connected{{end}}</span></p>
-          <a href="/telegram/auth" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">{{if .TelegramLinked}}Reconnect Telegram{{else}}Connect Telegram{{end}}</a>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-main bg-main p-6">
-        <div class="flex items-center gap-3">
-          <img src="/assets/icons/pocket.png" alt="Pocket" class="h-10 w-10">
-          <h2 class="text-2xl font-bold text-main">Pocket import</h2>
-        </div>
-        <p class="mt-2 text-secondary">Migrate your Pocket bookmarks with tags and dates preserved.</p>
-
-        <div class="mt-5 rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">Import flow</h3>
-          <div class="mt-3 space-y-2 text-secondary text-sm">
-            <div>1. Export your archive from Pocket</div>
-            <div>2. Upload the ZIP file in the import page</div>
-            <div>3. Processing runs in the background</div>
-          </div>
-        </div>
-
-        <div class="mt-5 text-right">
-          <a href="/pocket" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Start Pocket import</a>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-main bg-main p-6">
-        <h2 class="text-2xl font-bold text-main">API access</h2>
-        <p class="mt-2 text-secondary">Build custom workflows and connect external tools.</p>
-
-        <div class="mt-5 rounded-lg border border-main bg-secondary p-5">
-          <h3 class="font-semibold text-main">Developer notes</h3>
-          <div class="mt-3 space-y-2 text-secondary text-sm">
-            <div>REST API for saving and searching bookmarks</div>
-            <div>Token-based auth for browser extensions and scripts</div>
-            <div>Webhook support planned</div>
-          </div>
-        </div>
-
-        <div class="mt-5 flex items-center justify-between gap-3">
-          <p class="text-sm text-secondary">Active tokens: <span class="text-main">{{if .LoggedIn}}{{.TokensCount}}{{else}}-{{end}}</span></p>
-          {{if .LoggedIn}}
-          <a href="/users/me?tab=tokens" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Manage API tokens</a>
-          {{else}}
-          <a href="/signin" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Sign in for API access</a>
-          {{end}}
-        </div>
-      </div>
-    </section>
-
-    <section class="rounded-lg border border-main bg-secondary p-6 text-center">
-      <h3 class="text-xl font-semibold text-main">More integrations coming</h3>
-      <p class="mt-2 text-secondary">IFTTT, Zapier, RSS feeds, and more. <a href="/contact" class="underline hover:no-underline">Suggest an integration</a>.</p>
-    </section>
   </div>
 </div>
 
@@ -329,14 +215,10 @@
   (function () {
     const sel = document.getElementById('daily-timezone');
     if (!sel) return;
-
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (sel.value === 'UTC' && detected) {
       for (const opt of sel.options) {
-        if (opt.value === detected) {
-          opt.selected = true;
-          break;
-        }
+        if (opt.value === detected) { opt.selected = true; break; }
       }
     }
   })();

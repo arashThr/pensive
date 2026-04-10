@@ -86,6 +86,19 @@ func (g *GoogleAuth) RedirectToGoogle(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
+	// Preserve post-login destination
+	if next := r.URL.Query().Get("next"); next != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oauth_next",
+			Value:    next,
+			Path:     "/",
+			MaxAge:   300,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
+
 	// Redirect to Google OAuth
 	authURL := g.OAuthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
 	http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
@@ -164,8 +177,13 @@ func (g *GoogleAuth) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, CookieSession, session.Token)
 	logger.Infow("Google OAuth login successful", "user_id", user.ID, "google_id", googleUser.ID)
 
-	// Redirect to home page
-	http.Redirect(w, r, "/home", http.StatusFound)
+	// Redirect to the intended page if one was stored
+	redirectTo := "/home"
+	if c, err := r.Cookie("oauth_next"); err == nil {
+		redirectTo = safeNext(c.Value)
+		http.SetCookie(w, &http.Cookie{Name: "oauth_next", Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
+	}
+	http.Redirect(w, r, redirectTo, http.StatusFound)
 }
 
 // getGoogleUser fetches user information from Google API

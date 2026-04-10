@@ -71,8 +71,7 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store state in session or cookie for verification
-	// For simplicity, we'll use a cookie with a short expiration
+	// Store state in cookie for CSRF verification
 	http.SetCookie(w, &http.Cookie{
 		Name:     "oauth_state",
 		Value:    state,
@@ -82,6 +81,19 @@ func (g *GitHub) RedirectToGitHub(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 		SameSite: http.SameSiteLaxMode,
 	})
+
+	// Preserve post-login destination
+	if next := r.URL.Query().Get("next"); next != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oauth_next",
+			Value:    next,
+			Path:     "/",
+			MaxAge:   300,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteLaxMode,
+		})
+	}
 
 	// Redirect to GitHub OAuth
 	authURL := g.OAuthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
@@ -163,8 +175,13 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	setCookie(w, CookieSession, session.Token)
 	logger.Infow("GitHub OAuth login successful", "user_id", user.ID, "github_id", githubUser.ID)
 
-	// Redirect to home page
-	http.Redirect(w, r, "/home", http.StatusFound)
+	// Redirect to the intended page if one was stored
+	redirectTo := "/home"
+	if c, err := r.Cookie("oauth_next"); err == nil {
+		redirectTo = safeNext(c.Value)
+		http.SetCookie(w, &http.Cookie{Name: "oauth_next", Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: true, SameSite: http.SameSiteLaxMode})
+	}
+	http.Redirect(w, r, redirectTo, http.StatusFound)
 }
 
 // getGitHubUser fetches user information from GitHub API

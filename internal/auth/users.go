@@ -149,9 +149,11 @@ func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		Title            string
 		TurnstileSiteKey string
+		Next             string
 	}
 	data.Title = "Sign In"
 	data.TurnstileSiteKey = u.TurnstileConfig.SiteKey
+	data.Next = r.URL.Query().Get("next")
 	u.Templates.SignIn.Execute(w, r, data)
 }
 
@@ -196,7 +198,7 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	}
 	setCookie(w, CookieSession, session.Token)
 	logger.Infow("sign in success", "user_id", user.ID)
-	http.Redirect(w, r, "/home", http.StatusFound)
+	http.Redirect(w, r, safeNext(r.FormValue("next")), http.StatusFound)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
@@ -640,7 +642,8 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := usercontext.User(r.Context())
 		if user == nil {
-			http.Redirect(w, r, "/signin", http.StatusFound)
+			target := r.URL.RequestURI()
+			http.Redirect(w, r, "/signin?next="+url.QueryEscape(target), http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -687,6 +690,15 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+// safeNext returns next if it is a safe relative path, otherwise "/home".
+// This prevents open redirect attacks.
+func safeNext(next string) string {
+	if next != "" && strings.HasPrefix(next, "/") && !strings.HasPrefix(next, "//") {
+		return next
+	}
+	return "/home"
 }
 
 // DeleteAllContent deletes all user content but keeps the account active
