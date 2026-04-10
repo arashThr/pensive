@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/arashthr/pensive/internal/auth/context/loggercontext"
 	"github.com/arashthr/pensive/internal/auth/context/usercontext"
@@ -71,7 +72,7 @@ func (s Stripe) CreateCheckoutSession(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := loggercontext.Logger(ctx)
 	user := usercontext.User(r.Context())
-	logger.Infow("create checkout session for user", "user_id", user.ID)
+	logger.Infow("create checkout session for user", "user_id", user.ID, "price_id", s.PriceId)
 	customerId, err := s.getStripeCustomerId(ctx, user)
 	if err != nil {
 		logger.Errorw("get stripe customer id", "error", err, err)
@@ -307,9 +308,16 @@ func handleSubscriptionUpdated(ctx context.Context, event *stripeclient.Event) (
 	if err != nil {
 		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
 	}
-	logger.Infow("Subscription updated", "subscription_id", subscription.ID, "prev_att", event.Data.PreviousAttributes)
+	logger.Infow("subscription updated",
+		"subscription_id", subscription.ID,
+		"status", subscription.Status,
+		"cancel_at_period_end", subscription.CancelAtPeriodEnd,
+		"current_period_end", time.Unix(subscription.CurrentPeriodEnd, 0).UTC().Format(time.RFC3339))
 	if event.Data.PreviousAttributes["status"] != nil {
-		logger.Infow("Subscription status changed", "prev_status", event.Data.PreviousAttributes["status"], "new_status", subscription.Status)
+		logger.Infow("subscription status changed",
+			"subscription_id", subscription.ID,
+			"prev_status", event.Data.PreviousAttributes["status"],
+			"new_status", subscription.Status)
 	}
 	return &subscription, nil
 }
@@ -335,7 +343,10 @@ func getSubscriptionCreated(ctx context.Context, event *stripeclient.Event) (*st
 	if err != nil {
 		return nil, fmt.Errorf("parsing webhook JSON: %w", err)
 	}
-	logger.Infow("Subscription created", "subscription_id", subscription.ID)
+	logger.Infow("subscription created",
+		"subscription_id", subscription.ID,
+		"status", subscription.Status,
+		"current_period_end", time.Unix(subscription.CurrentPeriodEnd, 0).UTC().Format(time.RFC3339))
 	return &subscription, nil
 }
 
@@ -346,7 +357,11 @@ func getSubscriptionDeleted(ctx context.Context, event *stripeclient.Event) (*st
 	if err != nil {
 		return nil, fmt.Errorf("parsing customer.subscription.deleted webhook JSON: %w", err)
 	}
-	logger.Infow("Subscription deleted", "subscription_id", subscription.ID)
+	logger.Infow("subscription deleted",
+		"subscription_id", subscription.ID,
+		"status", subscription.Status,
+		"canceled_at", time.Unix(subscription.CanceledAt, 0).UTC().Format(time.RFC3339),
+		"period_end", time.Unix(subscription.CurrentPeriodEnd, 0).UTC().Format(time.RFC3339))
 	return &subscription, nil
 }
 
@@ -357,7 +372,10 @@ func getInvoicePaid(ctx context.Context, event *stripeclient.Event) (*stripeclie
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.paid webhook JSON: %w", err)
 	}
-	logger.Infow("Invoice paid", "invoice_id", invoice.ID)
+	logger.Infow("invoice paid",
+		"invoice_id", invoice.ID,
+		"amount_usd", fmt.Sprintf("%.2f", float64(invoice.AmountPaid)/100),
+		"subscription_id", invoice.Subscription.ID)
 	return &invoice, nil
 }
 
@@ -368,6 +386,10 @@ func getInvoiceFailed(ctx context.Context, event *stripeclient.Event) (*stripecl
 	if err != nil {
 		return nil, fmt.Errorf("parsing invoice.failed webhook JSON: %w", err)
 	}
-	logger.Infow("Invoice failed", "invoice_id", invoice.ID)
+	logger.Infow("invoice payment failed",
+		"invoice_id", invoice.ID,
+		"amount_due_usd", fmt.Sprintf("%.2f", float64(invoice.AmountDue)/100),
+		"attempt_count", invoice.AttemptCount,
+		"subscription_id", invoice.Subscription.ID)
 	return &invoice, nil
 }

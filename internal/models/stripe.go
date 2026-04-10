@@ -84,7 +84,11 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing invoice", "user_id", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("processing invoice paid",
+		"user_id", userId,
+		"invoice_id", invoice.ID,
+		"amount_usd", fmt.Sprintf("%.2f", float64(invoice.AmountPaid)/100),
+		"subscription_id", invoice.Subscription.ID)
 
 	tx, err := s.Pool.Begin(context.Background())
 	if err != nil {
@@ -99,7 +103,7 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		SELECT * FROM invoices
 		WHERE stripe_invoice_id = $1;`, invoice.ID).Scan(&prevInvoice)
 	if prevInvoice != "" {
-		logging.Logger.Infow("Invoice already processed", "invoiceID", invoice.ID)
+		logging.Logger.Infow("invoice already processed (idempotent skip)", "invoice_id", invoice.ID)
 		return
 	}
 
@@ -138,7 +142,10 @@ func (s *StripeModel) HandleInvoicePaid(invoice *stripeclient.Invoice) {
 		return
 	}
 
-	logging.Logger.Infow("Invoice processed", "invoiceID", invoice.ID, "user_id", userId)
+	logging.Logger.Infow("invoice paid — user upgraded to premium",
+		"invoice_id", invoice.ID,
+		"user_id", userId,
+		"amount_usd", fmt.Sprintf("%.2f", float64(invoice.AmountPaid)/100))
 }
 
 func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
@@ -153,7 +160,12 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing invoice failed", "user_id", userId, "invoiceID", invoice.ID)
+	logging.Logger.Infow("processing invoice payment failure",
+		"user_id", userId,
+		"invoice_id", invoice.ID,
+		"amount_due_usd", fmt.Sprintf("%.2f", float64(invoice.AmountDue)/100),
+		"attempt_count", invoice.AttemptCount,
+		"subscription_id", invoice.Subscription.ID)
 
 	newInvoice := &StripeInvoice{
 		StripeInvoiceId: invoice.ID,
@@ -199,7 +211,10 @@ func (s *StripeModel) HandleInvoiceFailed(invoice *stripeclient.Invoice) {
 		return
 	}
 
-	logging.Logger.Infow("Invoice failed processed", "invoiceID", invoice.ID, "user_id", userId)
+	logging.Logger.Infow("invoice payment failure recorded",
+		"invoice_id", invoice.ID,
+		"user_id", userId,
+		"amount_due_usd", fmt.Sprintf("%.2f", float64(invoice.AmountDue)/100))
 }
 
 func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription, prevAttr map[string]any) {
@@ -210,7 +225,12 @@ func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription
 		logging.Logger.Errorw("Error getting user id for record subscription", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing subscription", "user_id", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("recording subscription event",
+		"user_id", userId,
+		"subscription_id", subscription.ID,
+		"status", subscription.Status,
+		"period_start", time.Unix(subscription.CurrentPeriodStart, 0).UTC().Format(time.RFC3339),
+		"period_end", time.Unix(subscription.CurrentPeriodEnd, 0).UTC().Format(time.RFC3339))
 
 	// Insert subscription into subscriptions table
 	sub := Subscription{
@@ -231,7 +251,7 @@ func (s *StripeModel) RecordSubscription(subscription *stripeclient.Subscription
 		return
 	}
 
-	logging.Logger.Infow("Subscription inserted", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("subscription recorded", "subscription_id", subscription.ID, "status", subscription.Status)
 }
 
 func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subscription) {
@@ -242,7 +262,11 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 		logging.Logger.Errorw("Error getting user id", "customerId", customerId, "error", err)
 		return
 	}
-	logging.Logger.Infow("Processing subscription deletion", "user_id", userId, "subscriptionID", subscription.ID)
+	logging.Logger.Infow("processing subscription deletion",
+		"user_id", userId,
+		"subscription_id", subscription.ID,
+		"canceled_at", time.Unix(subscription.CanceledAt, 0).UTC().Format(time.RFC3339),
+		"period_end", time.Unix(subscription.CurrentPeriodEnd, 0).UTC().Format(time.RFC3339))
 
 	// Start tx
 	tx, err := s.Pool.Begin(context.Background())
@@ -286,7 +310,7 @@ func (s *StripeModel) HandleSubscriptionDeleted(subscription *stripeclient.Subsc
 		return
 	}
 
-	logging.Logger.Infow("Subscription deleted", "subscriptionID", subscription.ID)
+	logging.Logger.Infow("subscription deleted — user downgraded to free", "subscription_id", subscription.ID, "user_id", userId)
 }
 
 func (s *StripeModel) GetCustomerIdByUserId(userId types.UserId) (customerId string, err error) {
