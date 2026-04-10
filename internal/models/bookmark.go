@@ -518,19 +518,28 @@ func cleanHTMLForLLM(htmlContent string) string {
 
 func (model *BookmarkRepo) generateAIData(ctx context.Context, title string, content string, link string, bookmarkId string) {
 	logger := loggercontext.Logger(ctx)
-	// Use context.Background() since this runs in a goroutine and the request context may be canceled
-	genCtx := context.Background()
+	// Use context.Background() since this runs in a goroutine and the request context may be canceled.
+	// Propagate the logger so nested calls (e.g. generateEmbedding) can retrieve it from context.
+	genCtx := loggercontext.WithLogger(context.Background(), logger)
 	// Clean up HTML content to reduce LLM costs
 	htmlContent := cleanHTMLForLLM(content)
 	// Log the duration of the function and size of the content
 	start := time.Now()
-	logger.Infow("starting to convert HTML to markdown", "link", link, "size", len(htmlContent))
+	logger.Infow("calling Gemini for AI data extraction",
+		"link", link,
+		"content_size", len(htmlContent))
 	aiDataResponse, err := model.promptToGetAIData(htmlContent)
 	if err != nil {
-		logger.Warnw("Failed to convert HTML to markdown, using text content", "error", err)
+		logger.Warnw("Gemini AI data extraction failed", "error", err, "link", link)
 		return
 	}
-	logger.Infow("converted HTML to markdown", "link", link, "duration", time.Since(start), "markdown_size", len(aiDataResponse.Markdown))
+	logger.Infow("Gemini AI data extraction complete",
+		"link", link,
+		"elapsed", time.Since(start).Round(time.Millisecond),
+		"markdown_size", len(aiDataResponse.Markdown),
+		"summary_size", len(aiDataResponse.Summary),
+		"excerpt_size", len(aiDataResponse.Excerpt),
+		"tags", aiDataResponse.Tags)
 	// Update the bookmark with all AI-generated content in library_items table
 	_, err = model.Pool.Exec(genCtx, `
 		UPDATE library_items SET ai_summary = $1, ai_excerpt = $2, ai_tags = $3 WHERE id = $4`,
@@ -709,6 +718,11 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, title, text st
 		TaskType:             "RETRIEVAL_DOCUMENT",
 		Title:                title,
 	}
+	embedStart := time.Now()
+	logger.Debugw("calling Gemini embedding API",
+		"model", "gemini-embedding-001",
+		"title", title,
+		"text_size", len(text))
 	result, err := model.GenAIClient.Models.EmbedContent(
 		ctx,
 		"gemini-embedding-001",
@@ -717,7 +731,7 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, title, text st
 	)
 	if err != nil {
 		logging.Telegram.SendMessage(fmt.Sprintf("Failed to generate embedding with Gemini: %v", err))
-		logger.Warnw("Failed to generate embedding", "error", err)
+		logger.Warnw("Failed to generate embedding", "error", err, "title", title)
 		return nil, fmt.Errorf("generate embedding: %w", err)
 	}
 
@@ -731,6 +745,10 @@ func (model *BookmarkRepo) generateEmbedding(ctx context.Context, title, text st
 		return nil, fmt.Errorf("embedding has no values")
 	}
 
+	logger.Debugw("embedding generated",
+		"title", title,
+		"elapsed", time.Since(embedStart).Round(time.Millisecond),
+		"dimensions", len(result.Embeddings[0].Values))
 	return result.Embeddings[0].Values, nil
 }
 
@@ -1105,9 +1123,14 @@ Instructions:
 
 Answer:`, question, strings.Join(contexts, "\n---\n"))
 
-	logger.Infow("generating RAG answer", "question", question, "numSources", len(contexts))
+	logger.Infow("calling Gemini for RAG answer",
+		"question", question,
+		"model", "gemini-3-flash-preview",
+		"num_sources", len(contexts),
+		"prompt_size", len(prompt))
 
 	// Generate answer using Gemini
+	ragStart := time.Now()
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
 		"gemini-3-flash-preview",
@@ -1120,6 +1143,9 @@ Answer:`, question, strings.Join(contexts, "\n---\n"))
 	}
 
 	answer := result.Text()
+	logger.Infow("RAG answer generated",
+		"elapsed", time.Since(ragStart).Round(time.Millisecond),
+		"answer_length", len(answer))
 
 	return &RAGResponse{
 		Answer:          answer,

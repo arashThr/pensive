@@ -429,10 +429,17 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 
 	var chunkPaths []string
 	for i, chunk := range chunks {
+		chunkStart := time.Now()
 		audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
 		if err != nil {
 			return nil, fmt.Errorf("TTS chunk %d: %w", i, err)
 		}
+		ttsLogger.Debugw("TTS chunk synthesized",
+			"chunk", i+1,
+			"total_chunks", len(chunks),
+			"text_bytes", len(chunk),
+			"audio_bytes", len(audio),
+			"elapsed", time.Since(chunkStart).Round(time.Millisecond))
 		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.ogg", i))
 		if err := os.WriteFile(path, audio, 0644); err != nil {
 			return nil, fmt.Errorf("write TTS chunk %d: %w", i, err)
@@ -826,7 +833,11 @@ const maxMarkdownCharsPerArticle = 6000
 // generatePodcastScript calls Gemini to write a ready-to-read podcast script (~10 min / ~1400 words).
 // It also fetches all titles from the period to build the opening date + period overview.
 func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId, articles []models.PodcastArticle, days int) (string, error) {
-	logging.Logger.With("flow", "podcast", "user_id", userID).Debugw("generating podcast script", "article_count", len(articles), "days", days)
+	podcastLogger := logging.Logger.With("flow", "podcast", "user_id", userID)
+	podcastLogger.Infow("generating podcast script",
+		"article_count", len(articles),
+		"days", days,
+		)
 	if p.GenAIClient == nil {
 		return "", fmt.Errorf("GenAI client not initialised")
 	}
@@ -925,6 +936,7 @@ and you are walking them through the highlights.
 Output ONLY the finished spoken script — no stage directions, markdown headers, or meta-commentary.
 `)
 
+	podcastLogger.Infow("sending prompt to Gemini", "prompt_size", prompt.Len())
 	start := time.Now()
 	result, err := p.GenAIClient.Models.GenerateContent(
 		ctx,
@@ -935,12 +947,14 @@ Output ONLY the finished spoken script — no stage directions, markdown headers
 	if err != nil {
 		return "", fmt.Errorf("gemini script generation: %w", err)
 	}
-	logging.Logger.With("flow", "podcast").Infow("Gemini script generation complete",
+	script := strings.TrimSpace(result.Text())
+	podcastLogger.Infow("Gemini script generation complete",
 		"elapsed", time.Since(start).Round(time.Millisecond).String(),
-		"user_id", userID,
+		"script_length", len(script),
+		"approx_words", len(strings.Fields(script)),
 	)
 
-	return strings.TrimSpace(result.Text()), nil
+	return script, nil
 }
 
 // NextDailyFireAt returns the next UTC time when the given hour occurs in the
