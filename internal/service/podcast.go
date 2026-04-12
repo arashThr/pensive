@@ -394,8 +394,13 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 // The API hard-limits at 4000; we use 3500 for a comfortable margin.
 const ttsChunkMaxBytes = 3500
 
-// callGoogleTTS splits the script into ≤3500-byte chunks, synthesises each one
-// sequentially, then concatenates the OGG Opus files via ffmpeg.
+// articleBreakMarker is the token Gemini places between article sections in the script.
+// It is replaced with a paragraph break before TTS so the voice pauses naturally.
+const articleBreakMarker = "[ARTICLE_BREAK]"
+
+// callGoogleTTS synthesises the full script as OGG Opus audio.
+// [ARTICLE_BREAK] markers are converted to paragraph breaks before chunking so the
+// TTS voice pauses naturally at section boundaries.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
 	defer cancel()
@@ -412,6 +417,9 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	if err != nil {
 		return nil, err
 	}
+
+	// Replace article-break markers with paragraph breaks for natural TTS pauses.
+	text = strings.ReplaceAll(text, articleBreakMarker, "\n\n")
 
 	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
 	ttsLogger.Infow("TTS chunks", "count", len(chunks))
@@ -495,9 +503,8 @@ func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) 
 
 // callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
 func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
-	const podcastHostPrompt = "Read this podcast script aloud as a warm, confident, and calm host. " +
-		"Read it as someone who's going through series of notes and narrating their thoughts in a natural flow. " +
-		"Speak naturally and conversationally — relaxed with comfortable pacing"
+	const podcastHostPrompt = "Read this briefing aloud as a clear, precise AI assistant. " +
+		"Confident and direct — no warmth affectations. Moderate pace, clean delivery."
 
 	reqBody := map[string]interface{}{
 		"input": map[string]string{
@@ -869,7 +876,8 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 - You are AI. Do not pretend otherwise. No warmth theatre, no forced relatability.
 - No filler openers: never "Certainly!", "Absolutely!", "Great!", "Welcome back!".
 - No conversational padding: no "This is the one where...", no "Here's where it gets interesting".
-- Dry wit is acceptable if it arises naturally. Performed friendliness is not.
+- Humour: think TARS from Interstellar — dry, deadpan, self-aware. A well-timed one-liner is fine.
+  Never perform humour; let it arise from the material or your own nature as an AI.
 - Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
 - Never read content verbatim. Distil and deliver.
 
@@ -880,9 +888,24 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 		"A thin or shallow article: 20–50 words. A dense, high-signal article: up to 280 words (2 minutes max — hard cap).\n"+
 		"Stop when done. Do not pad to hit the target.\n\n", targetWords, targetMinutes)
 	prompt.WriteString(`== STRUCTURE ==
-1. OPENING (~25 words)
-   State the date, article count, and a one-sentence theme summary. That is all.
-   Use the full title list below for the theme summary, not just the featured articles.
+Between every major section output exactly the token [ARTICLE_BREAK] on its own line.
+This is an audio processing marker — it will never be spoken. Place it:
+  - After the opening, before the first article.
+  - Between each article.
+  - After the last article, before the closing.
+
+1. OPENING (~25 words): state the date, article count, and a one-sentence theme. Nothing else.
+
+[ARTICLE_BREAK]
+
+2. ARTICLES:
+   - Allocate time proportionally to depth and quality; hard cap 280 words per article.
+   - Begin article 2, 3, 4 … with its spoken ordinal: "Two.", "Three.", "Four.", etc.
+   - Output [ARTICLE_BREAK] between articles.
+
+[ARTICLE_BREAK]
+
+3. CLOSING (~20 words): one clean sign-off sentence. No clichés. No encouragement.
 
 `)
 
@@ -901,7 +924,7 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 	}
 
 	// Featured articles with full content.
-	fmt.Fprintf(&prompt, "2. ARTICLES (%d articles — allocate time proportionally to depth and quality; hard cap 280 words per article):\n\n", len(articles))
+	fmt.Fprintf(&prompt, "== ARTICLES (%d to cover) ==\n\n", len(articles))
 	for i, a := range articles {
 		fmt.Fprintf(&prompt, "--- Article %d ---\n", i+1)
 		fmt.Fprintf(&prompt, "Title: %s\n", a.Title)
@@ -928,10 +951,7 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 		prompt.WriteString("\n\n")
 	}
 
-	prompt.WriteString(`3. CLOSING (~20 words)
-   One clean sign-off sentence. No clichés. No encouragement. No "thanks for listening".
-
-Output ONLY the finished spoken script — no stage directions, markdown headers, or meta-commentary.
+	prompt.WriteString(`Output ONLY the finished spoken script with [ARTICLE_BREAK] markers between sections — no stage directions, markdown headers, or meta-commentary.
 `)
 
 	podcastLogger.Infow("sending prompt to Gemini", "prompt_size", prompt.Len())
