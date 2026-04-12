@@ -398,22 +398,21 @@ const ttsChunkMaxBytes = 3500
 // It is stripped before TTS and replaced with a short beep tone in the audio output.
 const articleBreakMarker = "[ARTICLE_BREAK]"
 
-// generateBeepOGG creates a short 880 Hz sine-tone OGG Opus file in tmpDir using ffmpeg.
+// generateSilenceOGG creates a short OGG Opus silence file in tmpDir using ffmpeg.
 // Returns the file path on success, or empty string if ffmpeg fails (non-fatal).
-func generateBeepOGG(ctx context.Context, tmpDir string) string {
-	path := filepath.Join(tmpDir, "beep.ogg")
+func generateSilenceOGG(ctx context.Context, tmpDir string) string {
+	path := filepath.Join(tmpDir, "silence.ogg")
 	cmd := exec.CommandContext(ctx, "ffmpeg",
 		"-y",
 		"-f", "lavfi",
-		"-i", "sine=frequency=880:duration=0.25",
-		"-ar", "48000",
-		"-ac", "1",
+		"-i", "anullsrc=r=48000:cl=mono",
+		"-t", "0.8",
 		"-c:a", "libopus",
 		"-b:a", "48k",
 		path,
 	)
 	if out, err := cmd.CombinedOutput(); err != nil {
-		logging.Logger.With("flow", "podcast").Warnw("beep generation failed — skipping",
+		logging.Logger.With("flow", "podcast").Warnw("silence generation failed — skipping",
 			"error", err, "ffmpeg_output", string(out))
 		return ""
 	}
@@ -422,7 +421,7 @@ func generateBeepOGG(ctx context.Context, tmpDir string) string {
 
 // callGoogleTTS synthesises the full script as OGG Opus audio.
 // [ARTICLE_BREAK] markers in the text are stripped before sending to TTS and replaced
-// by a short beep tone in the concatenated output.
+// by a short silence gap in the concatenated output.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
 	defer cancel()
@@ -469,8 +468,8 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	}
 	defer os.RemoveAll(tmpDir)
 
-	beepPath := generateBeepOGG(ctx, tmpDir)
-	ttsLogger.Infow("TTS segments", "count", len(segments), "beep_available", beepPath != "")
+	silencePath := generateSilenceOGG(ctx, tmpDir)
+	ttsLogger.Infow("TTS segments", "count", len(segments), "silence_available", silencePath != "")
 
 	var allPaths []string
 	fileIdx := 0
@@ -496,9 +495,9 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 			allPaths = append(allPaths, path)
 			fileIdx++
 		}
-		// Insert beep between sections (not after the last one).
-		if beepPath != "" && segIdx < len(segments)-1 {
-			allPaths = append(allPaths, beepPath)
+		// Insert a brief silence between sections (not after the last one).
+		if silencePath != "" && segIdx < len(segments)-1 {
+			allPaths = append(allPaths, silencePath)
 		}
 	}
 
@@ -927,7 +926,8 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 - You are AI. Do not pretend otherwise. No warmth theatre, no forced relatability.
 - No filler openers: never "Certainly!", "Absolutely!", "Great!", "Welcome back!".
 - No conversational padding: no "This is the one where...", no "Here's where it gets interesting".
-- Dry wit is acceptable if it arises naturally. Performed friendliness is not.
+- Humour: think TARS from Interstellar — dry, deadpan, self-aware. A well-timed one-liner is fine.
+  Never perform humour; let it arise from the material or your own nature as an AI.
 - Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
 - Never read content verbatim. Distil and deliver.
 
