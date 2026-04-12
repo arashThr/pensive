@@ -394,8 +394,35 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 // The API hard-limits at 4000; we use 3500 for a comfortable margin.
 const ttsChunkMaxBytes = 3500
 
-// callGoogleTTS splits the script into ≤3500-byte chunks, synthesises each one
-// sequentially, then concatenates the OGG Opus files via ffmpeg.
+// articleBreakMarker is the token Gemini places between article sections in the script.
+// It is stripped before TTS and replaced with a short beep tone in the audio output.
+const articleBreakMarker = "[ARTICLE_BREAK]"
+
+// generateBeepOGG creates a short 880 Hz sine-tone OGG Opus file in tmpDir using ffmpeg.
+// Returns the file path on success, or empty string if ffmpeg fails (non-fatal).
+func generateBeepOGG(ctx context.Context, tmpDir string) string {
+	path := filepath.Join(tmpDir, "beep.ogg")
+	cmd := exec.CommandContext(ctx, "ffmpeg",
+		"-y",
+		"-f", "lavfi",
+		"-i", "sine=frequency=880:duration=0.25",
+		"-ar", "48000",
+		"-ac", "1",
+		"-c:a", "libopus",
+		"-b:a", "48k",
+		path,
+	)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		logging.Logger.With("flow", "podcast").Warnw("beep generation failed — skipping",
+			"error", err, "ffmpeg_output", string(out))
+		return ""
+	}
+	return path
+}
+
+// callGoogleTTS synthesises the full script as OGG Opus audio.
+// [ARTICLE_BREAK] markers in the text are stripped before sending to TTS and replaced
+// by a short beep tone in the concatenated output.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
 	defer cancel()
@@ -413,43 +440,75 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		return nil, err
 	}
 
-	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
-	ttsLogger.Infow("TTS chunks", "count", len(chunks))
-
-	if len(chunks) == 1 {
-		return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
+	// Split at article-break markers to get logical sections (opening, articles, closing).
+	rawSegments := strings.Split(text, articleBreakMarker)
+	var segments []string
+	for _, seg := range rawSegments {
+		seg = strings.TrimSpace(seg)
+		if seg != "" {
+			segments = append(segments, seg)
+		}
+	}
+	if len(segments) == 0 {
+		segments = []string{strings.TrimSpace(text)}
 	}
 
-	// Multi-chunk: synthesise each part, then stitch with ffmpeg.
+	// Fast path: single section, single TTS chunk.
+	if len(segments) == 1 {
+		chunks := splitTextIntoChunks(segments[0], ttsChunkMaxBytes)
+		if len(chunks) == 1 {
+			ttsLogger.Infow("TTS single-segment fast path")
+			return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
+		}
+	}
+
+	// Multi-segment (or multi-chunk) path: synthesise each part then stitch with ffmpeg.
 	tmpDir, err := os.MkdirTemp("", "podcast-tts-*")
 	if err != nil {
 		return nil, fmt.Errorf("create temp dir: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
-	var chunkPaths []string
-	for i, chunk := range chunks {
-		chunkStart := time.Now()
-		audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
-		if err != nil {
-			return nil, fmt.Errorf("TTS chunk %d: %w", i, err)
+	beepPath := generateBeepOGG(ctx, tmpDir)
+	ttsLogger.Infow("TTS segments", "count", len(segments), "beep_available", beepPath != "")
+
+	var allPaths []string
+	fileIdx := 0
+	for segIdx, seg := range segments {
+		chunks := splitTextIntoChunks(seg, ttsChunkMaxBytes)
+		for chunkIdx, chunk := range chunks {
+			chunkStart := time.Now()
+			audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
+			if err != nil {
+				return nil, fmt.Errorf("TTS segment %d chunk %d: %w", segIdx, chunkIdx, err)
+			}
+			ttsLogger.Debugw("TTS chunk synthesized",
+				"segment", segIdx+1,
+				"chunk", chunkIdx+1,
+				"total_chunks", len(chunks),
+				"text_bytes", len(chunk),
+				"audio_bytes", len(audio),
+				"elapsed", time.Since(chunkStart).Round(time.Millisecond))
+			path := filepath.Join(tmpDir, fmt.Sprintf("file_%03d.ogg", fileIdx))
+			if err := os.WriteFile(path, audio, 0644); err != nil {
+				return nil, fmt.Errorf("write TTS file: %w", err)
+			}
+			allPaths = append(allPaths, path)
+			fileIdx++
 		}
-		ttsLogger.Debugw("TTS chunk synthesized",
-			"chunk", i+1,
-			"total_chunks", len(chunks),
-			"text_bytes", len(chunk),
-			"audio_bytes", len(audio),
-			"elapsed", time.Since(chunkStart).Round(time.Millisecond))
-		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.ogg", i))
-		if err := os.WriteFile(path, audio, 0644); err != nil {
-			return nil, fmt.Errorf("write TTS chunk %d: %w", i, err)
+		// Insert beep between sections (not after the last one).
+		if beepPath != "" && segIdx < len(segments)-1 {
+			allPaths = append(allPaths, beepPath)
 		}
-		chunkPaths = append(chunkPaths, path)
+	}
+
+	if len(allPaths) == 1 {
+		return os.ReadFile(allPaths[0])
 	}
 
 	// Build ffmpeg concat-list file.
 	var listBuf strings.Builder
-	for _, path := range chunkPaths {
+	for _, path := range allPaths {
 		fmt.Fprintf(&listBuf, "file '%s'\n", path)
 	}
 	listPath := filepath.Join(tmpDir, "list.txt")
@@ -495,9 +554,8 @@ func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) 
 
 // callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
 func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
-	const podcastHostPrompt = "Read this podcast script aloud as a warm, confident, and calm host. " +
-		"Read it as someone who's going through series of notes and narrating their thoughts in a natural flow. " +
-		"Speak naturally and conversationally — relaxed with comfortable pacing"
+	const podcastHostPrompt = "Read this briefing aloud as a clear, precise AI assistant. " +
+		"Confident and direct — no warmth affectations. Moderate pace, clean delivery."
 
 	reqBody := map[string]interface{}{
 		"input": map[string]string{
@@ -880,9 +938,24 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 		"A thin or shallow article: 20–50 words. A dense, high-signal article: up to 280 words (2 minutes max — hard cap).\n"+
 		"Stop when done. Do not pad to hit the target.\n\n", targetWords, targetMinutes)
 	prompt.WriteString(`== STRUCTURE ==
-1. OPENING (~25 words)
-   State the date, article count, and a one-sentence theme summary. That is all.
-   Use the full title list below for the theme summary, not just the featured articles.
+Between every major section output exactly the token [ARTICLE_BREAK] on its own line.
+This is an audio processing marker — it will never be spoken. Place it:
+  - After the opening, before the first article.
+  - Between each article.
+  - After the last article, before the closing.
+
+1. OPENING (~25 words): state the date, article count, and a one-sentence theme. Nothing else.
+
+[ARTICLE_BREAK]
+
+2. ARTICLES:
+   - Allocate time proportionally to depth and quality; hard cap 280 words per article.
+   - Begin article 2, 3, 4 … with its spoken ordinal: "Two.", "Three.", "Four.", etc.
+   - Output [ARTICLE_BREAK] between articles.
+
+[ARTICLE_BREAK]
+
+3. CLOSING (~20 words): one clean sign-off sentence. No clichés. No encouragement.
 
 `)
 
@@ -901,7 +974,7 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 	}
 
 	// Featured articles with full content.
-	fmt.Fprintf(&prompt, "2. ARTICLES (%d articles — allocate time proportionally to depth and quality; hard cap 280 words per article):\n\n", len(articles))
+	fmt.Fprintf(&prompt, "== ARTICLES (%d to cover) ==\n\n", len(articles))
 	for i, a := range articles {
 		fmt.Fprintf(&prompt, "--- Article %d ---\n", i+1)
 		fmt.Fprintf(&prompt, "Title: %s\n", a.Title)
@@ -928,10 +1001,7 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 		prompt.WriteString("\n\n")
 	}
 
-	prompt.WriteString(`3. CLOSING (~20 words)
-   One clean sign-off sentence. No clichés. No encouragement. No "thanks for listening".
-
-Output ONLY the finished spoken script — no stage directions, markdown headers, or meta-commentary.
+	prompt.WriteString(`Output ONLY the finished spoken script with [ARTICLE_BREAK] markers between sections — no stage directions, markdown headers, or meta-commentary.
 `)
 
 	podcastLogger.Infow("sending prompt to Gemini", "prompt_size", prompt.Len())
