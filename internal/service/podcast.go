@@ -858,32 +858,31 @@ func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId
 
 	var prompt bytes.Buffer
 	epDate := time.Now().UTC().Format("Monday, January 2 2006")
-	fmt.Fprintf(&prompt, "You are writing the script for a personal podcast episode dated %s.\n", epDate)
-	fmt.Fprintf(&prompt, "This episode covers articles the listener saved %s.\n", periodLabel)
-	prompt.WriteString(`The listener uses Pensive to save articles they want to read later.
-This podcast is their personal reading companion — you have read everything they saved
-and you are walking them through the highlights.
+	fmt.Fprintf(&prompt, "You are generating a spoken audio briefing for %s.\n", epDate)
+	fmt.Fprintf(&prompt, "It covers articles the user saved %s via Pensive.\n\n", periodLabel)
+	prompt.WriteString(`== ROLE ==
+You are an AI assistant — not a podcast host, not a friend. Think Jarvis: precise, efficient, useful.
+You have read the articles. Your job is to extract and deliver what matters. Nothing more.
 
 == TONE & STYLE ==
-- Warm, witty, and direct. Like a smart friend catching you up over coffee.
-- Speak TO the listener personally: "you saved this one", "this is the one about...", "here's where it gets interesting".
-- Highlight what's genuinely interesting or surprising; point out important sections by name.
-- Add a line of context or "why this matters" where it genuinely helps — one thought at a time.
-- Dry humour is welcome; forced jokes are not.
-- No filler openers: never "Certainly!", "Absolutely!", "Great!", "Sure thing!".
+- Direct and information-dense. Every sentence earns its place.
+- You are AI. Do not pretend otherwise. No warmth theatre, no forced relatability.
+- No filler openers: never "Certainly!", "Absolutely!", "Great!", "Welcome back!".
+- No conversational padding: no "This is the one where...", no "Here's where it gets interesting".
+- Dry wit is acceptable if it arises naturally. Performed friendliness is not.
 - Do NOT narrate markdown syntax (#, **, -, etc.). Speak ideas, not formatting.
-- Never read content verbatim. Narrate and synthesis.
+- Never read content verbatim. Distil and deliver.
 
 `)
-	fmt.Fprintf(&prompt, "== LENGTH ==\nTarget for 10 articles: approximately %d words — roughly %d minutes of listening.\n"+
-		"In other words, each article suppose to take a minute or so. It's not about filling the time, "+
-		"but about giving a concise and engaging narrative that respects the listener's time and attention.\n"+
-		"Stop naturally after the closing; do not pad.\n\n", targetWords, targetMinutes)
+	fmt.Fprintf(&prompt, "== LENGTH ==\n"+
+		"Total target: approximately %d words (~%d minutes). "+
+		"Allocate time proportionally to article depth and quality — not equally.\n"+
+		"A thin or shallow article: 20–50 words. A dense, high-signal article: up to 280 words (2 minutes max — hard cap).\n"+
+		"Stop when done. Do not pad to hit the target.\n\n", targetWords, targetMinutes)
 	prompt.WriteString(`== STRUCTURE ==
-1. OPENING (~60 words)
-   Greet the listener, state today's date.
-   Give a one-sentence overview: how many articles they saved and the rough themes.
-   Use the full title list below for this overview, not just the featured articles.
+1. OPENING (~25 words)
+   State the date, article count, and a one-sentence theme summary. That is all.
+   Use the full title list below for the theme summary, not just the featured articles.
 
 `)
 
@@ -902,7 +901,7 @@ and you are walking them through the highlights.
 	}
 
 	// Featured articles with full content.
-	fmt.Fprintf(&prompt, "2. FEATURED ARTICLES (%d articles — cover each one in depth):\n\n", len(articles))
+	fmt.Fprintf(&prompt, "2. ARTICLES (%d articles — allocate time proportionally to depth and quality; hard cap 280 words per article):\n\n", len(articles))
 	for i, a := range articles {
 		fmt.Fprintf(&prompt, "--- Article %d ---\n", i+1)
 		fmt.Fprintf(&prompt, "Title: %s\n", a.Title)
@@ -929,9 +928,8 @@ and you are walking them through the highlights.
 		prompt.WriteString("\n\n")
 	}
 
-	prompt.WriteString(`3. CLOSING (~40 words)
-   Sign off naturally and personally. Encourage the listener to keep saving good reads.
-   No cliché sign-offs like "That's all for this week" or "Thanks for listening".
+	prompt.WriteString(`3. CLOSING (~20 words)
+   One clean sign-off sentence. No clichés. No encouragement. No "thanks for listening".
 
 Output ONLY the finished spoken script — no stage directions, markdown headers, or meta-commentary.
 `)
