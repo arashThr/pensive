@@ -21,9 +21,6 @@ func NewAdminMw(u string, p string) *AdminMiddleware {
 func (amw *AdminMiddleware) AuthAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()
-		fmt.Println("Admin auth attempt:", user)
-		fmt.Println("Admin auth pass:", pass)
-		fmt.Println("Admin auth success:", ok, user, amw.user, pass, amw.password)
 		if !ok ||
 			!strings.EqualFold(strings.TrimSpace(user), strings.TrimSpace(amw.user)) ||
 			!strings.EqualFold(strings.TrimSpace(pass), strings.TrimSpace(amw.password)) {
