@@ -532,7 +532,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		})
 	})
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		loggercontext.Logger(r.Context()).Debugw("not found", "path", r.URL.Path)
+		logging.Logger.Debugw("not found", "path", r.URL.Path)
 		http.Error(w, "Not found", http.StatusNotFound)
 	})
 	return r
