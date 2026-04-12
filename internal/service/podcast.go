@@ -395,33 +395,12 @@ func (p *Podcast) processDailySchedule(ctx context.Context, s models.PodcastSche
 const ttsChunkMaxBytes = 3500
 
 // articleBreakMarker is the token Gemini places between article sections in the script.
-// It is stripped before TTS and replaced with a short beep tone in the audio output.
+// It is replaced with a paragraph break before TTS so the voice pauses naturally.
 const articleBreakMarker = "[ARTICLE_BREAK]"
 
-// generateSilenceOGG creates a short OGG Opus silence file in tmpDir using ffmpeg.
-// Returns the file path on success, or empty string if ffmpeg fails (non-fatal).
-func generateSilenceOGG(ctx context.Context, tmpDir string) string {
-	path := filepath.Join(tmpDir, "silence.ogg")
-	cmd := exec.CommandContext(ctx, "ffmpeg",
-		"-y",
-		"-f", "lavfi",
-		"-i", "anullsrc=r=48000:cl=mono",
-		"-t", "0.8",
-		"-c:a", "libopus",
-		"-b:a", "48k",
-		path,
-	)
-	if out, err := cmd.CombinedOutput(); err != nil {
-		logging.Logger.With("flow", "podcast").Warnw("silence generation failed — skipping",
-			"error", err, "ffmpeg_output", string(out))
-		return ""
-	}
-	return path
-}
-
 // callGoogleTTS synthesises the full script as OGG Opus audio.
-// [ARTICLE_BREAK] markers in the text are stripped before sending to TTS and replaced
-// by a short silence gap in the concatenated output.
+// [ARTICLE_BREAK] markers are converted to paragraph breaks before chunking so the
+// TTS voice pauses naturally at section boundaries.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, gcpTTSTimeout)
 	defer cancel()
@@ -439,75 +418,46 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		return nil, err
 	}
 
-	// Split at article-break markers to get logical sections (opening, articles, closing).
-	rawSegments := strings.Split(text, articleBreakMarker)
-	var segments []string
-	for _, seg := range rawSegments {
-		seg = strings.TrimSpace(seg)
-		if seg != "" {
-			segments = append(segments, seg)
-		}
-	}
-	if len(segments) == 0 {
-		segments = []string{strings.TrimSpace(text)}
+	// Replace article-break markers with paragraph breaks for natural TTS pauses.
+	text = strings.ReplaceAll(text, articleBreakMarker, "\n\n")
+
+	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
+	ttsLogger.Infow("TTS chunks", "count", len(chunks))
+
+	if len(chunks) == 1 {
+		return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
 	}
 
-	// Fast path: single section, single TTS chunk.
-	if len(segments) == 1 {
-		chunks := splitTextIntoChunks(segments[0], ttsChunkMaxBytes)
-		if len(chunks) == 1 {
-			ttsLogger.Infow("TTS single-segment fast path")
-			return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
-		}
-	}
-
-	// Multi-segment (or multi-chunk) path: synthesise each part then stitch with ffmpeg.
+	// Multi-chunk: synthesise each part, then stitch with ffmpeg.
 	tmpDir, err := os.MkdirTemp("", "podcast-tts-*")
 	if err != nil {
 		return nil, fmt.Errorf("create temp dir: %w", err)
 	}
 	defer os.RemoveAll(tmpDir)
 
-	silencePath := generateSilenceOGG(ctx, tmpDir)
-	ttsLogger.Infow("TTS segments", "count", len(segments), "silence_available", silencePath != "")
-
-	var allPaths []string
-	fileIdx := 0
-	for segIdx, seg := range segments {
-		chunks := splitTextIntoChunks(seg, ttsChunkMaxBytes)
-		for chunkIdx, chunk := range chunks {
-			chunkStart := time.Now()
-			audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
-			if err != nil {
-				return nil, fmt.Errorf("TTS segment %d chunk %d: %w", segIdx, chunkIdx, err)
-			}
-			ttsLogger.Debugw("TTS chunk synthesized",
-				"segment", segIdx+1,
-				"chunk", chunkIdx+1,
-				"total_chunks", len(chunks),
-				"text_bytes", len(chunk),
-				"audio_bytes", len(audio),
-				"elapsed", time.Since(chunkStart).Round(time.Millisecond))
-			path := filepath.Join(tmpDir, fmt.Sprintf("file_%03d.ogg", fileIdx))
-			if err := os.WriteFile(path, audio, 0644); err != nil {
-				return nil, fmt.Errorf("write TTS file: %w", err)
-			}
-			allPaths = append(allPaths, path)
-			fileIdx++
+	var chunkPaths []string
+	for i, chunk := range chunks {
+		chunkStart := time.Now()
+		audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
+		if err != nil {
+			return nil, fmt.Errorf("TTS chunk %d: %w", i, err)
 		}
-		// Insert a brief silence between sections (not after the last one).
-		if silencePath != "" && segIdx < len(segments)-1 {
-			allPaths = append(allPaths, silencePath)
+		ttsLogger.Debugw("TTS chunk synthesized",
+			"chunk", i+1,
+			"total_chunks", len(chunks),
+			"text_bytes", len(chunk),
+			"audio_bytes", len(audio),
+			"elapsed", time.Since(chunkStart).Round(time.Millisecond))
+		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.ogg", i))
+		if err := os.WriteFile(path, audio, 0644); err != nil {
+			return nil, fmt.Errorf("write TTS chunk %d: %w", i, err)
 		}
-	}
-
-	if len(allPaths) == 1 {
-		return os.ReadFile(allPaths[0])
+		chunkPaths = append(chunkPaths, path)
 	}
 
 	// Build ffmpeg concat-list file.
 	var listBuf strings.Builder
-	for _, path := range allPaths {
+	for _, path := range chunkPaths {
 		fmt.Fprintf(&listBuf, "file '%s'\n", path)
 	}
 	listPath := filepath.Join(tmpDir, "list.txt")
