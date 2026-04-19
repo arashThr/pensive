@@ -21,6 +21,7 @@
 - [ ] Fix delete in library page
 - [ ] Make the podcast length proportional to the size of the article
 - [ ] Check if the integration is in place before creating the audio file
+- [ ] Fix the subject of the email and the name of the audio file
 - [x] Revert back to email for daily audio file when Telegram fails
 - [x] Wait for Turnstile verified
 - [x] Fix Telegram bot link parsing issue

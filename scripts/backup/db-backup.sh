@@ -3,12 +3,22 @@
 
 set -euo pipefail
 
+# Create a function to send a message to telegram
+function send_telegram_message {
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+    		-d "chat_id=$TELEGRAM_CHAT_ID" \
+            -d "text=$1" >/dev/null || {
+            echo "⚠️ WARNING: Failed to send Telegram message!" >&2
+        }
+}
+
 # Load environment variables
 ENV_FILE="$(dirname "$0")/.env"
 if [ -f "$ENV_FILE" ]; then
     source "$ENV_FILE"
 else
     echo "❌ ERROR: Environment file $ENV_FILE not found!" >&2
+    send_telegram_message "Environment file $ENV_FILE not found!"
     exit 1
 fi
 
@@ -17,6 +27,7 @@ REQUIRED_VARS=("TELEGRAM_BOT_TOKEN" "TELEGRAM_CHAT_ID")
 for var in "${REQUIRED_VARS[@]}"; do
     if [ -z "${!var}" ]; then
         echo "❌ ERROR: Required environment variable $var is not set!" >&2
+	send_telegram_message "Required environment variable $var is not set!"
         exit 1
     fi
 done
@@ -37,15 +48,6 @@ mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_FILE="db_${TIMESTAMP}.sql.gz"
 BACKUP_PATH="$BACKUP_DIR/$BACKUP_FILE"
-
-# Create a function to send a message to telegram
-function send_telegram_message {
-    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-    		-d "chat_id=$TELEGRAM_CHAT_ID" \
-            -d "text=$1" >/dev/null || {
-            echo "⚠️ WARNING: Failed to send Telegram message!" >&2
-        }
-}
 
 echo "🚀 Starting backup at $(date)"
 send_telegram_message "Backup started at $(date)"
