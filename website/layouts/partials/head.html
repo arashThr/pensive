@@ -1,0 +1,30 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ if .Title }}{{ .Title }} - {{ end }}Pensive</title>
+<link rel="icon" href="/assets/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: { sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'] } } }
+  }
+</script>
+<style type="text/tailwindcss">
+  @layer utilities {
+    .bg-main        { background-color: #000000; }
+    .bg-secondary   { background-color: #181818; }
+    .border-main    { border-color: #222222; }
+    .text-main      { color: #ffffff; }
+    .text-secondary { color: #b3b3b3; }
+    .accent         { color: #ffffff; }
+    .hover\:bg-main:hover        { background-color: #000000; }
+    .hover\:bg-secondary:hover   { background-color: #181818; }
+    .hover\:text-main:hover      { color: #ffffff; }
+    .hover\:text-secondary:hover { color: #b3b3b3; }
+  }
+</style>
+{{ if and .Site.Params.analytics .Site.Params.analyticsId }}
+<script defer src="https://cloud.umami.is/script.js" data-website-id="{{ .Site.Params.analyticsId }}"></script>
+{{ end }}

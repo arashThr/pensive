@@ -61,6 +61,9 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"isSubscriptionEnabled": func() (template.HTML, error) {
 			return "", fmt.Errorf("isSubscriptionEnabled not implemented")
 		},
+		"websiteURL": func() string {
+			return os.Getenv("WEBSITE_URL")
+		},
 		"split": func(s, sep string) []string {
 			return strings.Split(s, sep)
 		},

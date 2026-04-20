@@ -1,0 +1,11 @@
+baseURL = "/"
+languageCode = "en-us"
+title = "Pensive"
+
+# When app and website are deployed to separate domains, set this to the app URL.
+# e.g., appURL = "https://app.pensive.im"
+# Leave empty while both are on the same domain.
+[params]
+  appURL = ""
+  analyticsId = "b95d62c9-9449-42d7-bea2-de799514d330"
+  analytics = true

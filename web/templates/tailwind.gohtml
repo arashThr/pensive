@@ -22,7 +22,7 @@
         
         <!-- Logo -->
         <div class="flex items-center gap-3 relative z-10">
-          <a href="/start" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          <a href="/home" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/assets/title-logo.png" class="h-6" />
             <div class="font-bold text-lg text-main">
               Pensive <span class="text-xs font-medium accent bg-secondary px-2 py-1 rounded-full border border-main">Beta</span>
@@ -140,16 +140,7 @@
         </div>
         
         <!-- Links -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 text-sm w-full lg:w-auto">
-          <div>
-            <h4 class="font-semibold text-main mb-3">Resources</h4>
-            <div class="space-y-2">
-              <a href="/faq" class="block text-secondary hover:text-main transition-colors">FAQ</a>
-              <a href="/contact" class="block text-secondary hover:text-main transition-colors">Contact</a>
-              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Blog</a>
-            </div>
-          </div>
-
+        <div class="grid grid-cols-2 gap-6 sm:gap-10 text-sm w-full lg:w-auto">
           <div>
             <h4 class="font-semibold text-main mb-3">Extensions</h4>
             <div class="space-y-2">
@@ -158,12 +149,11 @@
               <a href="https://t.me/GetPensiveBot" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
             </div>
           </div>
-
           <div>
             <h4 class="font-semibold text-main mb-3">Project</h4>
             <div class="space-y-2">
               <a href="https://github.com/arashThr/pensive" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">GitHub</a>
-              <a href="/privacy" class="block text-secondary hover:text-main transition-colors">Privacy</a>
+              {{if websiteURL}}<a href="{{websiteURL}}/privacy" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Privacy</a>{{end}}
             </div>
           </div>
         </div>

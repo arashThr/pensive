@@ -15,7 +15,7 @@
       <ul class="list-disc list-inside space-y-1 text-left">
         <li>Check your spam folder</li>
         <li>Make sure you entered the correct email</li>
-        <li><a href="/forgot-pw" class="text-secondary hover:text-main underline font-medium transition-colors">Try again</a> or <a href="/contact" class="text-secondary hover:text-main underline font-medium transition-colors">contact support</a></li>
+        <li><a href="/forgot-pw" class="text-secondary hover:text-main underline font-medium transition-colors">Try again</a>{{if websiteURL}} or <a href="{{websiteURL}}/contact" class="text-secondary hover:text-main underline font-medium transition-colors" target="_blank" rel="noopener">contact support</a>{{end}}</li>
       </ul>
     </div>
     <div class="pt-6 border-t border-main">
