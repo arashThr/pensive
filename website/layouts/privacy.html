@@ -1,0 +1,106 @@
+{{ define "main" }}
+<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+  <div class="max-w-4xl mx-auto">
+  <div class="prose max-w-none">
+    <h1 class="text-4xl font-bold text-main mb-8">Privacy Policy</h1>
+    <p class="text-secondary mb-8"><strong>Last updated:</strong> August 2025</p>
+    <div class="space-y-8">
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Overview</h2>
+        <p class="text-secondary leading-relaxed">Pensive is a personal knowledge indexing service that helps you save, organize, and search content you've read online. This privacy policy explains how we collect, use, and protect your information when you use our web application and browser extension.</p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Information We Collect</h2>
+        <h3 class="text-xl font-semibold text-main mb-3">Account Information</h3>
+        <ul class="list-disc list-inside space-y-2 text-secondary mb-4">
+          <li>Email address (for account creation and authentication)</li>
+          <li>Password (encrypted and stored securely)</li>
+          <li>Subscription status and billing information (processed through Stripe)</li>
+        </ul>
+        <h3 class="text-xl font-semibold text-main mb-3">Content You Save</h3>
+        <ul class="list-disc list-inside space-y-2 text-secondary mb-4">
+          <li>URLs of web pages you bookmark</li>
+          <li>Page titles and metadata</li>
+          <li>Extracted text content from saved pages</li>
+          <li>Clean HTML content (with ads and tracking removed)</li>
+          <li>Generated summaries and tags (premium feature using Google Gemini)</li>
+        </ul>
+        <h3 class="text-xl font-semibold text-main mb-3">Technical Information</h3>
+        <ul class="list-disc list-inside space-y-2 text-secondary">
+          <li>Authentication tokens for browser extension</li>
+          <li>Session data for maintaining login state</li>
+          <li>Basic analytics (page views, feature usage) via Umami Analytics</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">How We Use Your Information</h2>
+        <ul class="list-disc list-inside space-y-2 text-secondary">
+          <li><strong>Core Service:</strong> Store and index your saved content for personal searchability</li>
+          <li><strong>Content Enhancement:</strong> Generate summaries and tags using AI (available for all users)</li>
+          <li><strong>Account Management:</strong> Authenticate users and manage subscriptions</li>
+          <li><strong>Service Improvement:</strong> Analyze usage patterns to improve features</li>
+          <li><strong>Communication:</strong> Send important service updates (rare, no marketing)</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Browser Extension Privacy</h2>
+        <p class="text-secondary leading-relaxed mb-4">Our browser extension only processes data when you explicitly save a page by clicking the extension icon.</p>
+        <h3 class="text-xl font-semibold text-main mb-3">Content Extraction Methods</h3>
+        <ul class="list-disc list-inside space-y-2 text-secondary mb-4">
+          <li><strong>Full Page Content Capture (Default):</strong> The extension extracts the main article. Needed for sites like Reddit and Stack Overflow.</li>
+          <li><strong>Server-Side Capture Only:</strong> Extension sends only the URL; server fetches the content. Won't work on paywalled sites.</li>
+        </ul>
+        <ul class="list-disc list-inside space-y-2 text-secondary">
+          <li>Only accesses the current tab when you click "save"</li>
+          <li>Never tracks your browsing or collects data from pages you don't save</li>
+          <li>Stores only your authentication token and capture method preference locally</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Data Sharing</h2>
+        <p class="text-secondary leading-relaxed mb-4">We do not sell, rent, or share your personal information with third parties, except:</p>
+        <ul class="list-disc list-inside space-y-2 text-secondary">
+          <li><strong>Service Providers:</strong> Google Gemini for AI features</li>
+          <li><strong>Payment Processing:</strong> Stripe for subscription billing</li>
+          <li><strong>Analytics:</strong> Umami Analytics (privacy-focused, no personal data)</li>
+          <li><strong>Legal Requirements:</strong> When required by law</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Data Management and Your Rights</h2>
+        <p class="text-secondary leading-relaxed mb-4">You have full control over your data through your account settings:</p>
+        <ul class="list-disc list-inside space-y-2 text-secondary mb-4">
+          <li><strong>Export:</strong> Download your saved content in standard formats</li>
+          <li><strong>Delete All Content:</strong> Permanently removes all bookmarks while keeping your account</li>
+          <li><strong>Delete Account:</strong> Permanently deletes your entire account and all data</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Beta Service Notice</h2>
+        <div class="p-4 bg-amber-900/20 border border-amber-500/30 rounded-lg mb-6">
+          <p class="text-sm leading-relaxed text-amber-200"><strong>Important:</strong> Pensive is currently in beta. While we strive to protect your data, there is a possibility that data may be lost or wiped during updates, migrations, or unexpected issues. We strongly recommend regularly exporting your bookmarks.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Legal Jurisdiction and GDPR</h2>
+        <p class="text-secondary leading-relaxed mb-4">Pensive is operated from Stockholm, Sweden, governed by Swedish data protection laws and GDPR. Under GDPR, EU/EEA users have the right to access, correct, export, and delete their data.</p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-main mb-4">Contact</h2>
+        <p class="text-secondary leading-relaxed">Questions about this privacy policy? Contact us at <a href="mailto:arash.thr@live.com" class="text-secondary hover:text-main underline transition-colors">arash.thr@live.com</a></p>
+      </section>
+
+    </div>
+  </div>
+  </div>
+</div>
+{{ end }}

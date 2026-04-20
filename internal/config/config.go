@@ -68,6 +68,7 @@ type LoggerConfig struct {
 type AppConfig struct {
 	Environment AppEnv
 	Domain      string
+	WebsiteURL  string // URL of the marketing website; empty = same domain
 	PSQL        PostgresConfig
 	SMTP        SMTPConfig
 	CSRF        struct {
@@ -98,6 +99,7 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	}
 
 	cfg.Domain = GetEnvOrDie("DOMAIN")
+	cfg.WebsiteURL = GetEnvWithDefault("WEBSITE_URL", "")
 	if strings.EqualFold(GetEnvOrDie("ENVIRONMENT"), "production") {
 		cfg.Environment = EnvProduction
 	} else {

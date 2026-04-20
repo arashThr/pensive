@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+  {{ partial "head.html" . }}
+</head>
+<body class="min-h-screen flex flex-col font-sans relative overflow-x-hidden" style="background-color:#000;color:#fff;background-image:radial-gradient(circle,#2a2a2a 1px,transparent 1px);background-size:28px 28px;">
+  {{ partial "header.html" . }}
+  <main class="flex-1 relative z-10">
+    {{ block "main" . }}{{ end }}
+  </main>
+  {{ partial "footer.html" . }}
+  {{ block "scripts" . }}{{ end }}
+  <script src="/assets/htmx.min.js" defer></script>
+</body>
+</html>

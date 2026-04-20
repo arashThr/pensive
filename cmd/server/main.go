@@ -34,7 +34,6 @@ import (
 	"github.com/arashthr/pensive/internal/models"
 	"github.com/arashthr/pensive/internal/service"
 	"github.com/arashthr/pensive/internal/service/importer"
-	"github.com/arashthr/pensive/web"
 	"github.com/arashthr/pensive/web/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -393,29 +392,11 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			if usercontext.User(r.Context()) != nil {
 				http.Redirect(w, r, "/home", http.StatusSeeOther)
 			} else {
-				http.Redirect(w, r, "/start", http.StatusSeeOther)
+				http.Redirect(w, r, "/signin", http.StatusSeeOther)
 			}
 		})
-		r.Get("/start", web.StaticHandler(
-			"Welcome to Pensive",
-			views.Must(views.ParseTemplate("home.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/contact", web.StaticHandler(
-			"Contact",
-			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/faq", web.FAQ(
-			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
-		))
-		r.Get("/privacy", web.StaticHandler(
-			"Privacy",
-			views.Must(views.ParseTemplate("privacy.gohtml", "tailwind.gohtml")),
-		))
+
 		r.Get("/integrations", c.UsersService.Integrations)
-		r.Get("/pocket", web.StaticHandler(
-			"Pocket import",
-			views.Must(views.ParseTemplate("pocket-intro.gohtml", "tailwind.gohtml")),
-		))
 		r.Get("/signup", c.UsersService.New)
 		r.Get("/signin", c.UsersService.SignIn)
 		r.Post("/signin", c.UsersService.ProcessSignIn)
