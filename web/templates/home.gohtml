@@ -5,26 +5,37 @@
   <!-- Hero -->
   <section class="grid lg:grid-cols-2 gap-12 lg:gap-14 items-center">
     <div>
+      <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
+        class="inline-flex items-center gap-2 rounded-full border border-main bg-secondary px-3 py-1 text-xs font-medium text-secondary hover:text-main transition-colors mb-5">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+        </svg>
+        Open Source on GitHub
+      </a>
       <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-main">
         Your searchable <span class="accent">memory</span> of the web
       </h1>
       <p class="mt-4 text-lg text-secondary max-w-prose">
-        Smart bookmarking with full-content capture and fast search.
+        Smart bookmarking with full-content capture and fast search. Free and open source.
       </p>
 
       <div class="mt-8 hidden md:flex flex-col sm:flex-row gap-3">
         <a href="/signup" class="inline-flex justify-center items-center gap-2 rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
           Start saving for free
         </a>
-        <a href="/signin" class="inline-flex justify-center items-center gap-2 rounded-lg px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
-          Sign in →
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
+          class="inline-flex justify-center items-center gap-2 rounded-lg border border-main px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+          </svg>
+          View on GitHub
         </a>
       </div>
 
       <ul class="mt-8 space-y-2 text-sm text-secondary">
         <li>— Full content capture (not just titles)</li>
         <li>— Search across everything you saved</li>
-        <li>— Save from browser + Telegram</li>
+        <li>— Use the hosted version or self-host</li>
       </ul>
     </div>
 
@@ -250,12 +261,12 @@
       </div>
 
       <div class="rounded-xl border border-main bg-secondary p-6">
-        <h3 class="text-base font-semibold text-main">Data ownership and privacy</h3>
-        <p class="mt-2 text-sm text-secondary">Your bookmarks are yours. Export anytime, no lock-in.</p>
+        <h3 class="text-base font-semibold text-main">Open source and self-hostable</h3>
+        <p class="mt-2 text-sm text-secondary">Run it yourself, audit the code, or contribute. No lock-in, ever.</p>
         <ul class="mt-4 space-y-1 text-sm text-secondary">
-          <li>— Secure cloud storage</li>
+          <li>— MIT licensed, audit the code</li>
+          <li>— Self-host with Docker</li>
           <li>— Import and export anytime</li>
-          <li>— Your content, your control</li>
         </ul>
       </div>
     </div>
@@ -276,6 +287,7 @@
         </p>
         <p>
           So I built Pensive to solve this problem. Your bookmarks shouldn't depend on a service that can change direction.
+          That's also why the code is <a class="text-main underline hover:no-underline transition-all" href="https://github.com/arashthr/pensive" target="_blank" rel="noopener">open source</a> — run it yourself, fork it, or just trust that you can.
           Read the longer story <a class="text-main underline hover:no-underline transition-all" href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a class="text-main underline hover:no-underline transition-all" href="/contact">tell me</a> what you think.
         </p>
       </div>
@@ -285,9 +297,9 @@
   <!-- Pricing -->
   <section class="mt-16 sm:mt-20">
     <h2 class="text-xl font-semibold text-main text-center">Simple, transparent pricing</h2>
-    <p class="mt-2 text-sm text-secondary text-center">Start free, upgrade when you need more.</p>
+    <p class="mt-2 text-sm text-secondary text-center">Use the hosted service or run it yourself — it's open source.</p>
 
-    <div class="mt-8 grid lg:grid-cols-2 gap-4 max-w-4xl mx-auto">
+    <div class="mt-8 grid lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
       <!-- Free -->
       <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
         <div class="text-sm text-secondary uppercase tracking-wider">Free</div>
@@ -324,6 +336,28 @@
           Upgrade
         </a>
       </div>
+
+      <!-- Self-hosted -->
+      <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
+        <div class="text-sm text-secondary uppercase tracking-wider">Self-hosted</div>
+        <div class="mt-2 text-4xl font-bold text-main">Free</div>
+        <div class="mt-1 text-sm text-secondary">Run it on your own server, full control.</div>
+
+        <ul class="mt-5 space-y-2 text-sm text-secondary">
+          <li>✓ All features unlocked</li>
+          <li>✓ Your infrastructure, your data</li>
+          <li>✓ Docker Compose deploy</li>
+          <li>✓ MIT licensed</li>
+        </ul>
+
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
+          class="mt-6 inline-flex w-full justify-center items-center gap-2 rounded-lg border border-main bg-main px-4 py-2.5 font-semibold text-main hover:bg-secondary transition-colors">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
     </div>
   </section>
 
@@ -331,13 +365,17 @@
   <section class="mt-16 sm:mt-20">
     <div class="rounded-xl border border-main bg-secondary p-8 sm:p-10 text-center">
       <h2 class="text-2xl sm:text-3xl font-bold text-main">Ready to build your searchable memory of the web?</h2>
-      <p class="mt-3 text-sm text-secondary">Get started in minutes with a free account.</p>
+      <p class="mt-3 text-sm text-secondary">Use the hosted version for free, or self-host the open source code.</p>
       <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
         <a href="/signup" class="inline-flex justify-center rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
           Sign up for free
         </a>
-        <a href="/signin" class="inline-flex justify-center rounded-lg px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
-          Sign in
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
+          class="inline-flex justify-center items-center gap-2 rounded-lg border border-main px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+          </svg>
+          Star on GitHub
         </a>
       </div>
     </div>
