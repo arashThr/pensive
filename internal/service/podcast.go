@@ -856,10 +856,10 @@ func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId
 	var targetWords int
 	if days == 1 {
 		periodLabel = "today"
-		targetWords = 700
+		targetWords = 450
 	} else {
 		periodLabel = fmt.Sprintf("the past %d days", days)
-		targetWords = 1400
+		targetWords = 900
 	}
 	targetMinutes := targetWords / 140 // ~140 wpm
 
@@ -885,21 +885,22 @@ You have read the articles. Your job is to extract and deliver what matters. Not
 	fmt.Fprintf(&prompt, "== LENGTH ==\n"+
 		"Total target: approximately %d words (~%d minutes). "+
 		"Allocate time proportionally to article depth and quality — not equally.\n"+
-		"A thin or shallow article: 20–50 words. A dense, high-signal article: up to 280 words (2 minutes max — hard cap).\n"+
+		"A thin or shallow article: 20-40 words. A dense, high-signal article: up to 150 words (30 seconds max).\n"+
 		"Stop when done. Do not pad to hit the target.\n\n", targetWords, targetMinutes)
 	prompt.WriteString(`== STRUCTURE ==
+Tell the name of the article before giving its summary.
 Between every major section output exactly the token [ARTICLE_BREAK] on its own line.
 This is an audio processing marker — it will never be spoken. Place it:
   - After the opening, before the first article.
   - Between each article.
   - After the last article, before the closing.
 
-1. OPENING (~25 words): state the date, article count, and a one-sentence theme. Nothing else.
+1. OPENING (~25 words): article count, and a one-sentence theme. Nothing else.
 
 [ARTICLE_BREAK]
 
 2. ARTICLES:
-   - Allocate time proportionally to depth and quality; hard cap 280 words per article.
+   - Allocate time proportionally to depth and quality; hard cap: 150 words per article.
    - Begin article 2, 3, 4 … with its spoken ordinal: "Two.", "Three.", "Four.", etc.
    - Output [ARTICLE_BREAK] between articles.
 
