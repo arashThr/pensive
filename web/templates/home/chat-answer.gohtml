@@ -27,7 +27,15 @@
       </div>
       <div class="flex-1">
         <h4 class="font-semibold text-main mb-2">AI Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed whitespace-pre-wrap">{{.Answer}}</div>
+        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer | safe}}</div>
+        <style>
+          .ai-html-content p { margin-bottom: 0.5rem; }
+          .ai-html-content a { color: inherit; text-decoration: underline; }
+          .ai-html-content strong { font-weight: 600; color: var(--main-color); }
+          .ai-html-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+          .ai-html-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+          .ai-html-content code { background-color: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+        </style>
       </div>
     </div>
   </div>

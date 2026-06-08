@@ -1120,6 +1120,8 @@ Instructions:
 - Cite your sources by mentioning the bookmark titles
 - If multiple bookmarks provide relevant information, synthesize them into a coherent answer
 - Keep your answer under 300 words
+- Format your answer in HTML using tags like <p>, <strong>, <em>, <ul>, <ol>, <li>, <code>.
+- Do NOT use Markdown formatting. Do not include any HTML head or body tags.
 
 Answer:`, question, strings.Join(contexts, "\n---\n"))
 
