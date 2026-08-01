@@ -298,8 +298,9 @@ func (p *Podcast) runDailySchedulerTick(ctx context.Context) {
 			logger.Errorw("MarkProcessing failed", "error", err, "scheduleId", schedule.ID)
 			continue
 		}
-		s := schedule
-		go p.processDailySchedule(ctx, s)
+		// TODO: Add condigs to disable daily podcasts
+		// s := schedule
+		// go p.processDailySchedule(ctx, s)
 	}
 }
 
@@ -844,7 +845,7 @@ func (p *Podcast) generatePodcastScript(ctx context.Context, userID types.UserId
 	podcastLogger.Infow("generating podcast script",
 		"article_count", len(articles),
 		"days", days,
-		)
+	)
 	if p.GenAIClient == nil {
 		return "", fmt.Errorf("GenAI client not initialised")
 	}
