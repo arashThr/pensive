@@ -32,7 +32,7 @@
                 {{unescapeHTML .Title}}
               </h3>
               {{if .Excerpt}}
-                <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Excerpt}}</p>
+                <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{unescapeHTML .Excerpt}}</p>
               {{end}}
               <span class="text-xs text-secondary">{{.CreatedAt}}</span>
             </div>

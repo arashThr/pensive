@@ -106,7 +106,7 @@
               <h3 class="text-lg font-semibold text-main">Key insights</h3>
             </div>
             <div id="aiSummaryContent" class="text-base leading-relaxed text-secondary markdown-content"></div>
-            <script>document.getElementById('aiSummaryContent').innerHTML = marked.parse({{.AISummary | js}});</script>
+            <script>document.getElementById('aiSummaryContent').innerHTML = marked.parse({{.AISummary}});</script>
           </div>
         {{end}}
         
