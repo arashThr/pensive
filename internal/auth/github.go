@@ -96,7 +96,13 @@ func (g *GitHub) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	// Verify state parameter
 	stateCookie, err := r.Cookie("oauth_state")
 	if err != nil {
-		logger.Errorw("missing oauth state cookie", "error", err)
+		logger.Errorw("missing oauth state cookie",
+			"error", err,
+			"user_agent", r.UserAgent(),
+			"referer", r.Referer(),
+			"has_cookie_header", r.Header.Get("Cookie") != "",
+			"remote_addr", r.RemoteAddr,
+		)
 		http.Error(w, "Invalid OAuth state", http.StatusBadRequest)
 		return
 	}
