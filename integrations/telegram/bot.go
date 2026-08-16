@@ -193,13 +193,19 @@ func handleMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	reqBody, _ := json.Marshal(map[string]string{"link": link})
-	req, err := http.NewRequest("POST", apiEndpoint+"/api/v1/bookmarks", bytes.NewBuffer(reqBody))
+	endpoint, err := url.JoinPath(apiEndpoint, "api/v1/bookmarks")
+	if err != nil {
+		logging.Logger.Errorw("failed to create save url", "error", err)
+		return
+	}
+	req, err := http.NewRequest("POST", endpoint, bytes.NewBuffer(reqBody))
 	if err != nil {
 		logging.Logger.Errorw("failed to create save request", "error", err, "link", link, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Pensive-Telegram-Bot/1.0")
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -220,6 +226,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 		if resp.StatusCode == http.StatusTooManyRequests {
 			errorMessage = "❌ <b>Daily limit exceeded</b>\n\nYou've reached your daily bookmark limit. Upgrade to premium for 100 bookmarks/day."
 		} else {
+			// TODO: Are you logged in?
 			errorMessage = "❌ <b>Save failed</b>\n\nServer error: " + resp.Status
 		}
 
@@ -257,12 +264,18 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 }
 
 func searchBookmarks(ctx context.Context, b *bot.Bot, chatID int64, query string) {
-	req, err := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/search?query="+urlQueryEscape(query), nil)
+	endpoint, err := url.JoinPath(apiEndpoint, "api/v1/bookmarks/search")
+	if err != nil {
+		logging.Logger.Errorw("failed to create search url", "error", err)
+		return
+	}
+	req, err := http.NewRequest("GET", endpoint+"?query="+urlQueryEscape(query), nil)
 	if err != nil {
 		logging.Logger.Errorw("failed to create search request", "error", err, "query", query, "chatID", chatID)
 		return
 	}
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[chatID])
+	req.Header.Set("User-Agent", "Pensive-Telegram-Bot/1.0")
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -369,8 +382,14 @@ func handleCallbackQuery(ctx context.Context, b *bot.Bot, update *models.Update)
 func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
 	logging.Logger.Debugw("Deleting bookmark", "id", bookmarkID, "user_id", userId)
-	req, _ := http.NewRequest("DELETE", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
+	endpoint, err := url.JoinPath(apiEndpoint, "api/v1/bookmarks", bookmarkID)
+	if err != nil {
+		logging.Logger.Errorw("failed to create delete url", "error", err)
+		return
+	}
+	req, _ := http.NewRequest("DELETE", endpoint, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
+	req.Header.Set("User-Agent", "Pensive-Telegram-Bot/1.0")
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
@@ -399,8 +418,14 @@ func deleteBookmark(ctx context.Context, b *bot.Bot, update *models.Update, book
 func getSummary(ctx context.Context, b *bot.Bot, update *models.Update, bookmarkID string) {
 	userId := update.CallbackQuery.From.ID
 	logging.Logger.Debugw("Getting bookmark summary", "id", bookmarkID, "user_id", userId)
-	req, _ := http.NewRequest("GET", apiEndpoint+"/api/v1/bookmarks/"+bookmarkID, nil)
+	endpoint, err := url.JoinPath(apiEndpoint, "api/v1/bookmarks", bookmarkID)
+	if err != nil {
+		logging.Logger.Errorw("failed to create summary url", "error", err)
+		return
+	}
+	req, _ := http.NewRequest("GET", endpoint, nil)
 	req.Header.Set("Authorization", "Bearer "+userAPITokens[userId])
+	req.Header.Set("User-Agent", "Pensive-Telegram-Bot/1.0")
 
 	resp, err := httpClient.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
