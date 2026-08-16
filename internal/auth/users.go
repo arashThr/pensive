@@ -655,21 +655,24 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
+			logging.Logger.Debugw("[ApiMiddleware.SetUser] No Authorization header found", "path", r.URL.Path)
 			next.ServeHTTP(w, r)
 			return
 		}
 		tokenParts := strings.Split(authHeader, " ")
 		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			logging.Logger.Debugw("[ApiMiddleware.SetUser] Invalid Authorization header format", "header", authHeader)
 			next.ServeHTTP(w, r)
 			return
 		}
 		token := tokenParts[1]
 		user, err := amw.TokenModel.User(token)
 		if err != nil {
-			logging.Logger.Errorw("setting user for api", "error", err)
+			logging.Logger.Errorw("[ApiMiddleware.SetUser] Failed to authenticate token", "error", err, "tokenLength", len(token))
 			next.ServeHTTP(w, r)
 			return
 		}
+		logging.Logger.Infow("[ApiMiddleware.SetUser] Successfully authenticated user", "user_id", user.ID)
 		ctx := r.Context()
 		ctx = usercontext.WithUser(ctx, user)
 		r = r.WithContext(ctx)
@@ -681,10 +684,11 @@ func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := usercontext.User(r.Context())
 		if user == nil {
-			logging.Logger.Infow("unauthorized request", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
+			logging.Logger.Infow("[ApiMiddleware.RequireUser] Unauthorized request (user is nil)", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		logging.Logger.Infow("[ApiMiddleware.RequireUser] Authorized request", "user_id", user.ID, "path", r.URL.Path)
 		next.ServeHTTP(w, r)
 	})
 }
