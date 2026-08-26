@@ -12,6 +12,10 @@ function send_telegram_message {
         }
 }
 
+# Trim the backup log file which is output is redirected to from cronjob
+BACKUP_LOG="$HOME/backups/postgres-backups/backup.log"
+tail -n 1000 $BACKUP_LOG > /tmp/backup.log && mv /tmp/backup.log $BACKUP_LOG
+
 # Load environment variables
 ENV_FILE="$(dirname "$0")/.env"
 if [ -f "$ENV_FILE" ]; then
@@ -50,7 +54,6 @@ BACKUP_FILE="db_${TIMESTAMP}.sql.gz"
 BACKUP_PATH="$BACKUP_DIR/$BACKUP_FILE"
 
 echo "🚀 Starting backup at $(date)"
-send_telegram_message "Backup started at $(date)"
 echo "📦 Container: $POSTGRES_CONTAINER"
 
 # Create database dump
@@ -78,5 +81,3 @@ echo "📊 Total backups stored: $BACKUP_COUNT"
 echo "🎉 Backup completed successfully at $(date) - Backup location: $BACKUP_PATH"
 
 rclone copy "$BACKUP_PATH" "r2_backup_server:pensive"
-
-send_telegram_message "Backup completed successfully at $(date)"
