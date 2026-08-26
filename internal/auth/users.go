@@ -653,6 +653,7 @@ type ApiMiddleware struct {
 
 func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logging.Logger.Debugw("[ApiMiddleware.SetUser] Incoming request", "path", r.URL.Path, "method", r.Method, "remoteAddr", r.RemoteAddr)
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			logging.Logger.Debugw("[ApiMiddleware.SetUser] No Authorization header found", "path", r.URL.Path)
@@ -682,6 +683,7 @@ func (amw ApiMiddleware) SetUser(next http.Handler) http.Handler {
 
 func (amw ApiMiddleware) RequireUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		logging.Logger.Infow("[ApiMiddleware.RequireUser] Incoming require user request", "path", r.URL.Path, "method", r.Method, "remoteAddr", r.RemoteAddr)
 		user := usercontext.User(r.Context())
 		if user == nil {
 			logging.Logger.Infow("[ApiMiddleware.RequireUser] Unauthorized request (user is nil)", "remoteAddr", r.RemoteAddr, "path", r.URL.Path, "method", r.Method)

@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -209,7 +210,7 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		logging.Logger.Errorw("failed to send request", "error", err, "link", link, "chatID", chatID)
+		logging.Logger.Errorw("failed to save bookmark request", "error", err, "link", link, "chatID", chatID)
 		b.SendMessage(ctx, &bot.SendMessageParams{
 			ChatID:    chatID,
 			Text:      "❌ <b>Save failed</b>\n\nNetwork error: " + err.Error(),
@@ -220,7 +221,8 @@ func saveBookmark(ctx context.Context, b *bot.Bot, chatID int64, link string) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		logging.Logger.Errorw("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID)
+		respBody, _ := io.ReadAll(resp.Body)
+		logging.Logger.Errorw("failed to save bookmark", "status", resp.Status, "link", link, "chatID", chatID, "endpoint", apiEndpoint+"/api/v1/bookmarks", "responseBody", string(respBody))
 
 		var errorMessage string
 		if resp.StatusCode == http.StatusTooManyRequests {
