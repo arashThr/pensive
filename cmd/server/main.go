@@ -404,7 +404,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			"Contact",
 			views.Must(views.ParseTemplate("contact.gohtml", "tailwind.gohtml")),
 		))
-		r.Get("/faq", web.FAQ(
+		r.Get("/{faq|about}", web.FAQ(
 			views.Must(views.ParseTemplate("faq.gohtml", "tailwind.gohtml")),
 		))
 		r.Get("/privacy", web.StaticHandler(
