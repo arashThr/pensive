@@ -60,7 +60,7 @@
           </div>
           {{end}}
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-main truncate">{{.Title}}</div>
+            <div class="text-sm font-medium text-main truncate">{{.Title | safeHTML}}</div>
             <div class="text-xs text-secondary truncate">{{.Hostname}}</div>
           </div>
         </div>
