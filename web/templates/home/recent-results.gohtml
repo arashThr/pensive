@@ -27,10 +27,10 @@
         <!-- Content -->
         <div class="flex-1 min-w-0">
           <h3 class="font-semibold mb-2 text-main hover:text-main transition-colors line-clamp-2 wrap-break-word">
-            {{unescapeHTML .Title}}
+            {{.Title}}
           </h3>
           {{if .Excerpt}}
-          <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{unescapeHTML .Excerpt}}</p>
+          <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Excerpt}}</p>
           {{end}}
           <span class="text-xs text-secondary">{{.CreatedAt}}</span>
         </div>
