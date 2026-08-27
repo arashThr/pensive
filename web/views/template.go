@@ -41,8 +41,8 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"csrfToken": func() (string, error) {
 			return "", fmt.Errorf("csrfToken not implemented")
 		},
-		"currentUser": func() (template.HTML, error) {
-			return "", fmt.Errorf("current user not implemented")
+		"currentUser": func() (*models.User, error) {
+			return nil, fmt.Errorf("current user not implemented")
 		},
 		"messages": func() []web.NavbarMessage {
 			return nil
@@ -53,14 +53,14 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"unescapeHTML": func(v any) string {
 			return ""
 		},
-		"isProduction": func() (template.HTML, error) {
-			return "", fmt.Errorf("isProduction not implemented")
+		"isProduction": func() (bool, error) {
+			return false, fmt.Errorf("isProduction not implemented")
 		},
-		"shouldUseAnalytics": func() (template.HTML, error) {
-			return "", fmt.Errorf("shouldUseAnalytics not implemented")
+		"shouldUseAnalytics": func() (bool, error) {
+			return false, fmt.Errorf("shouldUseAnalytics not implemented")
 		},
-		"isSubscriptionEnabled": func() (template.HTML, error) {
-			return "", fmt.Errorf("isSubscriptionEnabled not implemented")
+		"isSubscriptionEnabled": func() (bool, error) {
+			return false, fmt.Errorf("isSubscriptionEnabled not implemented")
 		},
 		"split": func(s, sep string) []string {
 			return strings.Split(s, sep)
