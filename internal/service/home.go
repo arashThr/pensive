@@ -251,13 +251,12 @@ func (h Home) getPaginatedBookmarksData(user *models.User, page int) (types.Pagi
 		if b.AIExcerpt != nil {
 			excerpt = *b.AIExcerpt
 		}
-		cleanedExcerpt := validations.CleanUpText(excerpt)
 		data.Bookmarks = append(data.Bookmarks, types.BookmarkListItem{
 			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
 			CreatedAt: b.CreatedAt.Format("Jan 02"),
-			Excerpt:   cleanedExcerpt,
+			Excerpt:   strings.TrimSpace(excerpt),
 		})
 	}
 

@@ -47,9 +47,6 @@ func ParseTemplate(filePaths ...string) (Template, error) {
 		"messages": func() []web.NavbarMessage {
 			return nil
 		},
-		"safe": func(s string) template.HTML {
-			return template.HTML(s) // Trust ts_headline output
-		},
 		"safeHTML": func(_ any) (template.HTML, error) {
 			return "", fmt.Errorf("safeHTML not implemented")
 		},

@@ -189,9 +189,9 @@ func (model *BookmarkRepo) CreateWithContent(
 	inputBookmark := Bookmark{
 		Id:               types.BookmarkId(bookmarkId),
 		UserId:           user.ID,
-		Title:            validations.CleanUpText(article.Title),
+		Title:            strings.TrimSpace(article.Title),
 		Link:             canonicalizedLink,
-		Excerpt:          validations.CleanUpText(article.Excerpt),
+		Excerpt:          strings.TrimSpace(article.Excerpt),
 		ImageUrl:         article.Image,
 		PublishedTime:    article.PublishedTime,
 		ArticleLang:      article.Language,

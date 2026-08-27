@@ -35,7 +35,7 @@
               </h3>
               <p class="text-xs mb-2 text-secondary">{{.Hostname}}</p>
               {{if .Headline}}
-                <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Headline | safe}}</p>
+                <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Headline | safeHTML}}</p>
               {{end}}
               <span class="text-xs text-secondary">{{.CreatedAt.Format "Jan 02, 2006"}}</span>
             </div>

@@ -27,7 +27,7 @@
       </div>
       <div class="flex-1">
         <h4 class="font-semibold text-main mb-2">AI Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer | safe}}</div>
+        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer | safeHTML}}</div>
         <style>
           .ai-html-content p { margin-bottom: 0.5rem; }
           .ai-html-content a { color: inherit; text-decoration: underline; }
