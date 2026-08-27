@@ -7,7 +7,8 @@
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-secondary border border-main rounded-lg flex items-center justify-center">
         <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
       </div>
       <div class="flex-1">
@@ -22,19 +23,45 @@
     <div class="flex items-start gap-3 mb-2">
       <div class="flex-shrink-0 w-8 h-8 bg-secondary border border-main rounded-lg flex items-center justify-center">
         <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
       <div class="flex-1">
         <h4 class="font-semibold text-main mb-2">AI Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer | safeHTML}}</div>
+        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer }}</div>
         <style>
-          .ai-html-content p { margin-bottom: 0.5rem; }
-          .ai-html-content a { color: inherit; text-decoration: underline; }
-          .ai-html-content strong { font-weight: 600; color: var(--main-color); }
-          .ai-html-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-          .ai-html-content ol { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.5rem; }
-          .ai-html-content code { background-color: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+          .ai-html-content p {
+            margin-bottom: 0.5rem;
+          }
+
+          .ai-html-content a {
+            color: inherit;
+            text-decoration: underline;
+          }
+
+          .ai-html-content strong {
+            font-weight: 600;
+            color: var(--main-color);
+          }
+
+          .ai-html-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .ai-html-content ol {
+            list-style-type: decimal;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+          }
+
+          .ai-html-content code {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+          }
         </style>
       </div>
     </div>
@@ -48,19 +75,21 @@
     <div class="space-y-2">
       {{range .Sources}}
       <a href="/bookmarks/{{.Id}}"
-         class="block p-3 bg-secondary/80 rounded-lg border border-secondary/50 hover:border-main transition-colors">
+        class="block p-3 bg-secondary/80 rounded-lg border border-secondary/50 hover:border-main transition-colors">
         <div class="flex items-start gap-3">
           {{if .Thumbnail}}
           <img src="{{.Thumbnail}}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
           {{else}}
-          <div class="w-12 h-12 bg-secondary border border-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+          <div
+            class="w-12 h-12 bg-secondary border border-secondary rounded-lg flex items-center justify-center flex-shrink-0">
             <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
           </div>
           {{end}}
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-main truncate">{{.Title | safeHTML}}</div>
+            <div class="text-sm font-medium text-main truncate">{{unescapeHTML .Title}}</div>
             <div class="text-xs text-secondary truncate">{{.Hostname}}</div>
           </div>
         </div>
