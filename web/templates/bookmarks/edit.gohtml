@@ -99,9 +99,9 @@
           <h3 class="text-base font-semibold text-main">Opening paragraph</h3>
         </div>
         {{if .AIExcerpt}}
-        <div class="text-base leading-relaxed text-secondary">{{.AIExcerpt}}</div>
+        <div class="text-base leading-relaxed text-secondary">{{safeHTML .AIExcerpt}}</div>
         {{else}}
-        <div class="text-base leading-relaxed text-secondary">{{.Excerpt}}</div>
+        <div class="text-base leading-relaxed text-secondary">{{safeHTML .Excerpt}}</div>
         {{end}}
       </div>
 

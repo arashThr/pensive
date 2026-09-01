@@ -13,7 +13,7 @@
       </div>
       <div class="flex-1">
         <h4 class="font-semibold text-main mb-2">Unable to Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed">{{.Answer}}</div>
+        <div class="text-sm text-secondary leading-relaxed">{{safeHTML .Answer}}</div>
       </div>
     </div>
   </div>
@@ -29,7 +29,7 @@
       </div>
       <div class="flex-1">
         <h4 class="font-semibold text-main mb-2">AI Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{.Answer }}</div>
+        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{safeHTML .Answer }}</div>
         <style>
           .ai-html-content p {
             margin-bottom: 0.5rem;
@@ -89,7 +89,7 @@
           </div>
           {{end}}
           <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-main truncate">{{unescapeHTML .Title}}</div>
+            <div class="text-sm font-medium text-main truncate">{{.Title}}</div>
             <div class="text-xs text-secondary truncate">{{.Hostname}}</div>
           </div>
         </div>
