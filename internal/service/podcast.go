@@ -505,19 +505,19 @@ func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) 
 // callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
 func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
 	const podcastHostPrompt = "Read this briefing aloud as a clear, precise AI assistant. " +
-		"Confident and direct — no warmth affectations. Moderate pace, clean delivery."
+		"Confident and direct, with a little bit of friendliness. Moderate pace, clean delivery."
 
-	reqBody := map[string]interface{}{
+	reqBody := map[string]any{
 		"input": map[string]string{
 			"prompt": podcastHostPrompt,
 			"text":   text,
 		},
-		"voice": map[string]interface{}{
+		"voice": map[string]any{
 			"languageCode": "en-us",
 			"name":         "Iapetus",
-			"model_name":   "gemini-2.5-flash-tts",
+			"model_name":   "gemini-3.8-flash-tts",
 		},
-		"audioConfig": map[string]interface{}{
+		"audioConfig": map[string]any{
 			"audioEncoding":   "OGG_OPUS",
 			"sampleRateHertz": 24000,
 		},
