@@ -515,7 +515,7 @@ func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Clien
 		"voice": map[string]any{
 			"languageCode": "en-us",
 			"name":         "Iapetus",
-			"model_name":   "gemini-3.8-flash-tts",
+			"model_name":   "gemini-2.5-flash-tts",
 		},
 		"audioConfig": map[string]any{
 			"audioEncoding":   "OGG_OPUS",
