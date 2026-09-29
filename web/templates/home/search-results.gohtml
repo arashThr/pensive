@@ -25,17 +25,20 @@
   {{end}}
 </div>
 {{else}}
-<!-- Empty Search Results -->
-<div class="card px-6 py-14 text-center">
+<!-- Empty Search Results: Enter in the search box (or the button) asks AI instead -->
+<div class="card px-6 py-14 text-center" data-no-results>
   <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl">
     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
   </div>
-  <h3 class="headline-md text-ink">Nothing found for “{{.Query}}”</h3>
+  <h3 class="headline-md text-ink">No bookmarks match “{{.Query}}”</h3>
   <p class="mx-auto mt-2 mb-7 max-w-sm text-ink-muted">
-    Try different keywords, or switch to Ask AI to search by meaning.
+    Press <kbd class="rounded border border-line bg-canvas px-1 font-mono text-xs">Enter</kbd> to ask AI instead. It searches by meaning, not exact words.
   </p>
-  <a href="/bookmarks/new" class="btn btn-secondary">Add a bookmark</a>
+  <div class="flex flex-col justify-center gap-3 sm:flex-row">
+    <button type="button" class="btn btn-primary" data-ask>Ask AI about “{{.Query}}”</button>
+    <a href="/bookmarks/new" class="btn btn-secondary">Add a bookmark</a>
+  </div>
 </div>
 {{end}}
