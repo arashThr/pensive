@@ -795,8 +795,12 @@ func (model *BookmarkRepo) generateQueryEmbedding(ctx context.Context, query str
 }
 
 func (model *BookmarkRepo) Update(bookmark *Bookmark) error {
-	_, err := model.Pool.Exec(context.Background(),
-		`UPDATE library_items SET link = $1, title = $2 WHERE id = $3`,
+	// The title is also stored in library_contents, where it feeds full-text search.
+	_, err := model.Pool.Exec(context.Background(), `
+		WITH item AS (
+			UPDATE library_items SET link = $1, title = $2 WHERE id = $3
+		)
+		UPDATE library_contents SET title = $2 WHERE id = $3`,
 		bookmark.Link, bookmark.Title, bookmark.Id,
 	)
 	if err != nil {
@@ -815,14 +819,16 @@ func (model *BookmarkRepo) Delete(id types.BookmarkId) error {
 }
 
 type SearchResult struct {
-	Headline  string
-	Id        types.BookmarkId
-	Title     string
-	Link      string
-	Excerpt   string
-	ImageUrl  string
-	CreatedAt time.Time
-	Rank      float32
+	Headline string
+	// Title with matches wrapped in validations.HighlightStart/Stop markers
+	TitleHeadline string
+	Id            types.BookmarkId
+	Title         string
+	Link          string
+	Excerpt       string
+	ImageUrl      string
+	CreatedAt     time.Time
+	Rank          float32
 	// AI-generated fields for premium users
 	AISummary *string
 	AIExcerpt *string
@@ -912,6 +918,7 @@ func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]Se
 					ts_headline('english', lc.content, sq.query, 'MaxFragments=2, StartSel=<strong>, StopSel=</strong>')
 				ELSE lc.excerpt
 			END AS headline,
+			ts_headline('english', li.title, sq.query, 'HighlightAll=true, StartSel=' || $3::text || ', StopSel=' || $4::text) AS title_headline,
 			li.id AS id,
 			li.title AS title,
 			li.link AS link,
@@ -933,7 +940,7 @@ func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]Se
 			AND lc.search_vector IS NOT NULL
 			AND lc.search_vector @@ sq.query
 		ORDER BY rank DESC, li.created_at DESC
-		LIMIT 10`, query, user.ID)
+		LIMIT 10`, query, user.ID, validations.HighlightStart, validations.HighlightStop)
 
 	if err != nil {
 		return nil, fmt.Errorf("full-text search failed: %w", err)
@@ -955,6 +962,7 @@ func (model *BookmarkRepo) performFallbackSearch(user *User, query string) ([]Se
 	rows, err := model.Pool.Query(context.Background(), `
 		SELECT
 			COALESCE(li.excerpt, '(No excerpt available)') AS headline,
+			li.title AS title_headline,
 			li.id AS id,
 			li.title AS title,
 			li.link AS link,

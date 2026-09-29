@@ -17,7 +17,7 @@
       <span aria-hidden="true">·</span>
       <span>{{.CreatedAt.Format "Jan 02, 2006"}}</span>
     </div>
-    <h3 class="title line-clamp-2 wrap-break-word">{{.Title}}</h3>
+    <h3 class="search-snippet title line-clamp-2 wrap-break-word">{{.TitleHTML}}</h3>
     {{if .Headline}}
     <p class="search-snippet mt-1 line-clamp-2 text-ink-muted">{{safeHTML .Headline}}</p>
     {{end}}

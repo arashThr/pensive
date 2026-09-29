@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"html/template"
+	"time"
+)
 
 type BookmarkId string
 
@@ -15,8 +18,10 @@ const (
 )
 
 type BookmarkSearchResult struct {
-	Id        BookmarkId
-	Title     string
+	Id    BookmarkId
+	Title string
+	// Escaped title with search matches in <strong>; web UI only
+	TitleHTML template.HTML `json:"-"`
 	Link      string
 	Hostname  string
 	Headline  string
