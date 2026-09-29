@@ -23,9 +23,9 @@
     <p class="mt-1 text-ink-muted">One click saves any page with its full text. Works on Chrome and Firefox.</p>
 
     <ol class="mt-6 space-y-3 text-sm text-ink-muted">
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">1</span> Install the extension from your browser's store.</li>
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">2</span> Create an API token in your account settings.</li>
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">3</span> Click the extension icon on any page to save it.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">1</span> Install the extension from your browser's store.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">2</span> Create an API token in your account settings.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">3</span> Click the extension icon on any page to save it.</li>
     </ol>
 
     <div class="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -42,14 +42,14 @@
       {{if .TelegramLinked}}
         <span class="badge badge-ok">Connected</span>
       {{else}}
-        <span class="badge bg-kraft text-ink-muted">Not connected</span>
+        <span class="badge bg-surface-strong text-ink-muted">Not connected</span>
       {{end}}
     </div>
     <p class="mt-1 text-ink-muted">Save links from your phone and search your library right in the chat.</p>
 
     <ul class="mt-6 space-y-2 text-sm text-ink-muted">
-      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Forward any link and it's saved instantly</li>
-      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Search your whole library from Telegram</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Forward any link and it's saved instantly</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Search your whole library from Telegram</li>
     </ul>
 
     <a href="/telegram/auth" class="btn btn-primary mt-8">{{if .TelegramLinked}}Reconnect Telegram{{else}}Connect Telegram{{end}}</a>
@@ -62,9 +62,9 @@
     <p class="mt-1 text-ink-muted">Bring over your Pocket bookmarks with their tags and dates.</p>
 
     <ol class="mt-6 space-y-3 text-sm text-ink-muted">
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">1</span> Export your archive from your Pocket account.</li>
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">2</span> Upload the ZIP file on the import page.</li>
-      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-clay-wash text-xs font-bold text-clay">3</span> Processing runs in the background.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">1</span> Export your archive from your Pocket account.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">2</span> Upload the ZIP file on the import page.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">3</span> Processing runs in the background.</li>
     </ol>
 
     <a href="/pocket" class="btn btn-primary mt-8">Start Pocket import</a>
@@ -74,13 +74,13 @@
   <section id="content-api" class="card hidden p-6 sm:p-8" data-panel>
     <div class="flex flex-wrap items-center gap-3">
       <h2 class="headline-md text-ink">API access</h2>
-      {{if .LoggedIn}}<span class="badge bg-kraft text-ink-muted">{{.TokensCount}} active tokens</span>{{end}}
+      {{if .LoggedIn}}<span class="badge bg-surface-strong text-ink-muted">{{.TokensCount}} active tokens</span>{{end}}
     </div>
     <p class="mt-1 text-ink-muted">Build your own workflows and connect external tools.</p>
 
     <ul class="mt-6 space-y-2 text-sm text-ink-muted">
-      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> REST API for saving and searching bookmarks</li>
-      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Token-based auth for extensions and scripts</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> REST API for saving and searching bookmarks</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Token-based auth for extensions and scripts</li>
       <li class="flex items-center gap-2"><svg class="h-4 w-4 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Webhooks coming soon</li>
     </ul>
 

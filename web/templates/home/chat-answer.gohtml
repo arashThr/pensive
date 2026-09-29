@@ -1,7 +1,7 @@
 {{if .Answer}}
   {{if .IsError}}
   <div class="callout callout-warn">
-    <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg class="mt-0.5 h-5 w-5 shrink-0 text-notice" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
@@ -13,10 +13,10 @@
   {{else}}
   <div class="ai-panel">
     <div class="mb-3 flex items-center gap-2">
-      <svg class="h-5 w-5 text-amber" fill="currentColor" viewBox="0 0 24 24">
+      <svg class="h-5 w-5 text-notice" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
       </svg>
-      <h3 class="font-serif text-xl font-semibold text-ink">From your library</h3>
+      <h3 class="font-display text-xl font-semibold text-ink">From your library</h3>
     </div>
     <div class="prose-archive prose-compact">{{safeHTML .Answer}}</div>
 
@@ -26,7 +26,7 @@
       <div class="flex flex-wrap gap-2">
         {{range .Sources}}
         <a href="/bookmarks/{{.Id}}" title="{{.Title}}"
-          class="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-paper py-1.5 pr-3.5 pl-2 text-[13px] font-medium text-ink transition-colors hover:border-line-strong hover:bg-linen">
+          class="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-paper py-1.5 pr-3.5 pl-2 text-[13px] font-medium text-ink transition-colors hover:border-line-strong hover:bg-surface">
           <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 shrink-0 rounded-sm" loading="lazy" onerror="this.remove()" />
           <span class="max-w-[16rem] truncate">{{.Title}}</span>
           <span class="hidden shrink-0 text-ink-faint sm:inline">{{.Hostname}}</span>

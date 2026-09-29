@@ -11,10 +11,10 @@
   {{range .Bookmarks}}
   <a href="/bookmarks/{{.Id}}" class="card-link px-5 py-4 sm:px-6 sm:py-5">
     <div class="meta mb-2">
-      <span class="flex size-6 items-center justify-center rounded-md bg-kraft">
+      <span class="flex size-6 items-center justify-center rounded-md bg-surface-strong">
         <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 rounded-sm" loading="lazy" onerror="this.remove()" />
       </span>
-      <span class="eyebrow text-ink-muted">{{.Hostname}}</span>
+      <span class="text-ink-muted">{{.Hostname}}</span>
       <span aria-hidden="true">·</span>
       <span>{{.CreatedAt}}</span>
     </div>
@@ -31,7 +31,7 @@
 <!-- Empty State -->
 <div class="card px-6 py-14 text-center">
   <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl">
-    <svg class="h-7 w-7 text-clay" fill="currentColor" viewBox="0 0 24 24">
+    <svg class="h-7 w-7 text-accent" fill="currentColor" viewBox="0 0 24 24">
       <path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/>
     </svg>
   </div>

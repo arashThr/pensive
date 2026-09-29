@@ -10,10 +10,10 @@
   {{range .Bookmarks}}
   <a href="/bookmarks/{{.Id}}" class="card-link px-5 py-4 sm:px-6 sm:py-5">
     <div class="meta mb-2">
-      <span class="flex size-6 items-center justify-center rounded-md bg-kraft">
+      <span class="flex size-6 items-center justify-center rounded-md bg-surface-strong">
         <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 rounded-sm" loading="lazy" onerror="this.remove()" />
       </span>
-      <span class="eyebrow text-ink-muted">{{.Hostname}}</span>
+      <span class="text-ink-muted">{{.Hostname}}</span>
       <span aria-hidden="true">·</span>
       <span>{{.CreatedAt.Format "Jan 02, 2006"}}</span>
     </div>

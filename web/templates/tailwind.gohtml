@@ -1,5 +1,5 @@
 {{define "logo"}}
-<svg class="h-6 w-6 text-clay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+<svg class="h-6 w-6 text-accent" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
   <path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/>
 </svg>
 {{end}}
@@ -37,18 +37,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#faf8f5">
+  <meta name="theme-color" content="#f5f7fa">
   <title>{{if .Title}}{{.Title}} - {{end}}Pensive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css" />
-  {{block "head" .}}{{end}}
   {{if shouldUseAnalytics}}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{end}}
 </head>
-<body class="flex min-h-screen flex-col {{block "body-class" .}}{{end}}">
+<body class="flex min-h-screen flex-col">
 
   <!-- Header -->
   <header class="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
@@ -57,7 +56,7 @@
 
         <a href="{{if currentUser}}/home{{else}}/start{{end}}" class="flex items-center gap-2">
           {{template "logo"}}
-          <span class="font-serif text-[22px] font-bold tracking-tight text-ink">Pensive</span>
+          <span class="font-display text-[22px] font-bold tracking-tight text-ink">Pensive</span>
           <span class="badge badge-ai">Beta</span>
         </a>
 
@@ -124,7 +123,7 @@
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
             </svg>
           {{else}}
-            <svg class="h-5 w-5 shrink-0 text-clay" fill="currentColor" viewBox="0 0 20 20">
+            <svg class="h-5 w-5 shrink-0 text-accent" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>
           {{end}}
@@ -145,13 +144,13 @@
 {{define "footer"}}
   </main>
 
-  <footer class="mt-20 border-t border-line bg-linen">
+  <footer class="mt-20 border-t border-line bg-surface">
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
       <div class="flex flex-col justify-between gap-10 lg:flex-row">
         <div class="max-w-xs">
           <div class="flex items-center gap-2">
             {{template "logo"}}
-            <span class="font-serif text-xl font-bold text-ink">Pensive</span>
+            <span class="font-display text-xl font-bold text-ink">Pensive</span>
           </div>
           <p class="mt-2 text-sm text-ink-muted">Your searchable memory of the web.</p>
         </div>
@@ -160,24 +159,24 @@
           <div>
             <h4 class="eyebrow mb-3 text-ink-faint">Resources</h4>
             <div class="space-y-2">
-              <a href="/faq" class="block text-ink-muted transition-colors hover:text-clay">FAQ</a>
-              <a href="/contact" class="block text-ink-muted transition-colors hover:text-clay">Contact</a>
-              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Blog</a>
+              <a href="/faq" class="block text-ink-muted transition-colors hover:text-accent">FAQ</a>
+              <a href="/contact" class="block text-ink-muted transition-colors hover:text-accent">Contact</a>
+              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-ink-muted transition-colors hover:text-accent" target="_blank" rel="noopener">Blog</a>
             </div>
           </div>
           <div>
             <h4 class="eyebrow mb-3 text-ink-faint">Extensions</h4>
             <div class="space-y-2">
-              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Chrome</a>
-              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Firefox</a>
-              <a href="https://t.me/GetPensiveBot" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Telegram Bot</a>
+              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-ink-muted transition-colors hover:text-accent" target="_blank" rel="noopener">Chrome</a>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-ink-muted transition-colors hover:text-accent" target="_blank" rel="noopener">Firefox</a>
+              <a href="https://t.me/GetPensiveBot" class="block text-ink-muted transition-colors hover:text-accent" target="_blank" rel="noopener">Telegram Bot</a>
             </div>
           </div>
           <div>
             <h4 class="eyebrow mb-3 text-ink-faint">Project</h4>
             <div class="space-y-2">
-              <a href="https://github.com/arashThr/pensive" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">GitHub</a>
-              <a href="/privacy" class="block text-ink-muted transition-colors hover:text-clay">Privacy</a>
+              <a href="https://github.com/arashThr/pensive" class="block text-ink-muted transition-colors hover:text-accent" target="_blank" rel="noopener">GitHub</a>
+              <a href="/privacy" class="block text-ink-muted transition-colors hover:text-accent">Privacy</a>
             </div>
           </div>
         </div>

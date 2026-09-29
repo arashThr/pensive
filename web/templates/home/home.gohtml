@@ -16,7 +16,7 @@
         Search
       </button>
       <button id="ask-tab" class="segmented-item" role="tab" aria-selected="false" onclick="switchTab('ask')">
-        <svg class="h-4 w-4 text-amber" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="h-4 w-4 text-notice" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
         </svg>
         Ask AI
@@ -55,7 +55,7 @@
 
     <!-- Ask mode -->
     <div id="ask-mode" class="hidden">
-      <div class="card-raised p-2 focus-within:border-clay focus-within:ring-3 focus-within:ring-clay/12">
+      <div class="card-raised p-2 focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/12">
         <textarea
           name="question"
           id="question-input"
@@ -90,7 +90,7 @@
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}
     <div class="callout callout-warn mt-6">
-      <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber" fill="currentColor" viewBox="0 0 20 20">
+      <svg class="mt-0.5 h-5 w-5 shrink-0 text-notice" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
       </svg>
       <div class="flex-1">

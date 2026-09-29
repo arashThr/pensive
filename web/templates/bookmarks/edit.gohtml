@@ -15,16 +15,16 @@
   <header class="flex items-start gap-4">
     <div class="min-w-0 flex-1">
       <div class="meta mb-3">
-        <span class="flex size-6 items-center justify-center rounded-md bg-kraft">
+        <span class="flex size-6 items-center justify-center rounded-md bg-surface-strong">
           <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 rounded-sm" onerror="this.remove()" />
         </span>
-        <span class="eyebrow text-ink-muted">{{.Host}}</span>
+        <span class="text-ink-muted">{{.Host}}</span>
         <span aria-hidden="true">·</span>
         <span>Saved {{.CreatedAt.Format "Jan 2, 2006"}}</span>
       </div>
       <h1 class="headline wrap-break-word text-ink">{{.Title}}</h1>
       <a href="{{.Link}}" target="_blank" rel="noopener"
-        class="mt-3 inline-flex max-w-full items-center gap-1.5 text-sm font-medium text-clay hover:underline">
+        class="mt-3 inline-flex max-w-full items-center gap-1.5 text-sm font-medium text-accent hover:underline">
         <span class="truncate">{{.Link}}</span>
         <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -73,10 +73,10 @@
     {{if .AISummary}}
     <section class="ai-panel">
       <div class="mb-3 flex items-center gap-2">
-        <svg class="h-5 w-5 text-amber" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="h-5 w-5 text-notice" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
         </svg>
-        <h2 class="font-serif text-xl font-semibold text-ink">Key insights</h2>
+        <h2 class="font-display text-xl font-semibold text-ink">Key insights</h2>
       </div>
       <div id="aiSummaryContent" class="prose-archive prose-compact"></div>
       <script>document.getElementById('aiSummaryContent').innerHTML = marked.parse({{.AISummary}});</script>

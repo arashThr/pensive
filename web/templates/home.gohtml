@@ -1,19 +1,14 @@
-{{define "body-class"}}theme-index{{end}}
-{{define "head"}}
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-{{end}}
-
 {{template "header" .}}
 
 <!-- Hero -->
 <section class="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-20 sm:px-6 sm:pt-20 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8">
   <div>
     <p class="font-mono text-xs tracking-wide text-ink-faint uppercase">
-      <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener" class="hover:text-clay">Open source</a>
+      <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener" class="hover:text-accent">Open source</a>
       <span class="mx-1.5 text-line-strong">/</span> Self-hostable
       <span class="mx-1.5 text-line-strong">/</span> Free
     </p>
-    <h1 class="mt-5 font-serif text-[44px] leading-[1.02] font-bold tracking-[-0.04em] text-ink sm:text-[64px]">
+    <h1 class="mt-5 font-display text-[44px] leading-[1.02] font-bold tracking-[-0.04em] text-ink sm:text-[64px]">
       Your searchable <span class="hl">memory</span> of the web
     </h1>
     <p class="lede mt-6 max-w-md">
@@ -33,7 +28,7 @@
     <div class="absolute inset-0 translate-x-4 translate-y-4 rotate-[2.5deg] rounded-2xl border border-line bg-paper"></div>
     <div class="absolute inset-0 translate-x-2 translate-y-2 rotate-[1.2deg] rounded-2xl border border-line bg-paper"></div>
     <div class="relative rounded-2xl border border-line-strong bg-paper p-4 shadow-lift sm:p-5">
-      <svg class="absolute -top-2 right-8 h-16 w-9 text-clay drop-shadow-sm" viewBox="0 0 18 32" fill="currentColor"><path d="M0 0h18v30.5a.8.8 0 0 1-1.3.62L9 25l-7.7 6.12A.8.8 0 0 1 0 30.5z"/></svg>
+      <svg class="absolute -top-2 right-8 h-16 w-9 text-accent drop-shadow-sm" viewBox="0 0 18 32" fill="currentColor"><path d="M0 0h18v30.5a.8.8 0 0 1-1.3.62L9 25l-7.7 6.12A.8.8 0 0 1 0 30.5z"/></svg>
 
       <div class="mr-12 flex h-12 items-center gap-3 rounded-xl border border-line bg-canvas px-4">
         <svg class="h-5 w-5 shrink-0 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -69,8 +64,8 @@
 
     <ol class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
       <li>
-        <p class="font-mono text-sm text-clay">01 — Save</p>
-        <h3 class="mt-3 font-serif text-2xl font-bold tracking-tight text-ink">From anywhere</h3>
+        <p class="font-mono text-sm text-accent">01 — Save</p>
+        <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink">From anywhere</h3>
         <p class="mt-2 text-ink-muted">One click in Chrome or Firefox, or forward a link to the Telegram bot from your phone.</p>
         <div class="mt-5 flex gap-2">
           <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="flex size-11 items-center justify-center rounded-xl border border-line bg-canvas transition hover:border-line-strong hover:bg-paper" title="Chrome extension"><img src="/assets/icons/chrome.svg" alt="Chrome" class="size-6"></a>
@@ -79,8 +74,8 @@
         </div>
       </li>
       <li>
-        <p class="font-mono text-sm text-clay">02 — Keep</p>
-        <h3 class="mt-3 font-serif text-2xl font-bold tracking-tight text-ink">The whole page</h3>
+        <p class="font-mono text-sm text-accent">02 — Keep</p>
+        <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink">The whole page</h3>
         <p class="mt-2 text-ink-muted">Full content capture, not just titles. Clean text, plus an optional AI summary and topic tags.</p>
         <div class="mt-5 flex flex-wrap gap-2 font-mono text-xs">
           <span class="rounded-md border border-line bg-canvas px-2 py-1 text-ink-muted">full text</span>
@@ -89,8 +84,8 @@
         </div>
       </li>
       <li>
-        <p class="font-mono text-sm text-clay">03 — Find</p>
-        <h3 class="mt-3 font-serif text-2xl font-bold tracking-tight text-ink">Every word, instantly</h3>
+        <p class="font-mono text-sm text-accent">03 — Find</p>
+        <h3 class="mt-3 font-display text-2xl font-bold tracking-tight text-ink">Every word, instantly</h3>
         <p class="mt-2 text-ink-muted">Search across everything you saved, or ask a question and get an answer with its sources.</p>
         <p class="mt-5 text-sm text-ink-muted">“…the <mark>exact phrase</mark> you half remember…”</p>
       </li>
@@ -127,7 +122,7 @@
 
       <div class="mt-6 rounded-xl border border-line bg-canvas p-4 sm:p-5" aria-hidden="true">
         <div class="flex items-center gap-4">
-          <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-clay text-white">
+          <span class="flex size-12 shrink-0 items-center justify-center rounded-full bg-accent text-white">
             <svg class="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 001.52.85l10.4-6.86a1 1 0 000-1.7L9.52 4.29A1 1 0 008 5.14z"/></svg>
           </span>
           <div class="min-w-0">
@@ -197,7 +192,7 @@
     <div class="mt-10 grid gap-4 md:grid-cols-3">
       <div class="flex flex-col rounded-2xl border border-line bg-canvas p-6 sm:p-8">
         <p class="font-mono text-xs text-ink-faint uppercase">Free</p>
-        <p class="mt-3 font-serif text-5xl font-bold tracking-tight text-ink">$0</p>
+        <p class="mt-3 font-display text-5xl font-bold tracking-tight text-ink">$0</p>
         <p class="mt-2 text-sm text-ink-muted">Try it out with generous daily limits.</p>
         <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
           <li>All core features (capture, search, tags)</li>
@@ -209,9 +204,9 @@
       </div>
 
       <div class="relative flex flex-col rounded-2xl border border-ink bg-paper p-6 shadow-lift sm:p-8">
-        <svg class="absolute -top-1.5 right-6 h-10 w-6 text-clay" viewBox="0 0 18 32" fill="currentColor" aria-hidden="true"><path d="M0 0h18v30.5a.8.8 0 0 1-1.3.62L9 25l-7.7 6.12A.8.8 0 0 1 0 30.5z"/></svg>
-        <p class="font-mono text-xs text-clay uppercase">Premium</p>
-        <p class="mt-3 font-serif text-5xl font-bold tracking-tight text-ink">$5<span class="font-sans text-base font-normal tracking-normal text-ink-muted"> / month</span></p>
+        <svg class="absolute -top-1.5 right-6 h-10 w-6 text-accent" viewBox="0 0 18 32" fill="currentColor" aria-hidden="true"><path d="M0 0h18v30.5a.8.8 0 0 1-1.3.62L9 25l-7.7 6.12A.8.8 0 0 1 0 30.5z"/></svg>
+        <p class="font-mono text-xs text-accent uppercase">Premium</p>
+        <p class="mt-3 font-display text-5xl font-bold tracking-tight text-ink">$5<span class="font-sans text-base font-normal tracking-normal text-ink-muted"> / month</span></p>
         <p class="mt-2 text-sm text-ink-muted">More headroom for daily saving and AI.</p>
         <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
           <li>Everything in Free</li>
@@ -225,7 +220,7 @@
 
       <div class="flex flex-col rounded-2xl border border-line bg-canvas p-6 sm:p-8">
         <p class="font-mono text-xs text-ink-faint uppercase">Self-hosted</p>
-        <p class="mt-3 font-serif text-5xl font-bold tracking-tight text-ink">Free</p>
+        <p class="mt-3 font-display text-5xl font-bold tracking-tight text-ink">Free</p>
         <p class="mt-2 text-sm text-ink-muted">Run it on your own server, full control.</p>
         <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
           <li>All features unlocked</li>
@@ -242,7 +237,7 @@
 <!-- Final CTA -->
 <section class="mx-auto max-w-6xl px-4 pt-20 sm:px-6 lg:px-8">
   <div class="rounded-3xl bg-ink-deep px-6 py-16 text-center sm:px-10 sm:py-20">
-    <h2 class="mx-auto max-w-3xl font-serif text-4xl leading-tight font-bold tracking-[-0.035em] text-white sm:text-5xl">
+    <h2 class="mx-auto max-w-3xl font-display text-4xl leading-tight font-bold tracking-[-0.035em] text-white sm:text-5xl">
       Ready to build your searchable <span class="rounded-md bg-highlight px-2 text-ink-deep">memory</span> of the web?
     </h2>
     <p class="mt-4 text-white/70">Use the hosted version for free, or self-host the open source code.</p>
