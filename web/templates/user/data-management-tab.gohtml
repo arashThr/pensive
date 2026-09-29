@@ -33,7 +33,6 @@
     <div class="flex justify-end gap-3">
       <button class="btn btn-secondary" onclick="toggleModal('delete-content-modal', false)">Cancel</button>
       <form action="/users/delete-content" method="POST">
-        {{csrfField}}
         <button type="submit" class="btn btn-danger">Delete all content</button>
       </form>
     </div>
@@ -48,7 +47,6 @@
     <div class="flex justify-end gap-3">
       <button class="btn btn-secondary" onclick="toggleModal('delete-account-modal', false)">Cancel</button>
       <form action="/users/delete-account" method="POST">
-        {{csrfField}}
         <button type="submit" class="btn btn-danger">Delete my account</button>
       </form>
     </div>

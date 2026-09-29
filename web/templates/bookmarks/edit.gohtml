@@ -54,7 +54,6 @@
         <hr class="my-1 border-line">
         <form action="/bookmarks/{{.Id}}/delete" method="post"
           onsubmit="return confirm('Are you sure you want to delete this bookmark?');">
-          {{csrfField}}
           <button type="submit" class="menu-item text-danger hover:bg-danger-wash hover:text-danger">Delete bookmark</button>
         </form>
       </div>
@@ -125,7 +124,6 @@
       <button id="submitReportBtn" class="btn btn-primary"
         hx-post="/bookmarks/{{.Id}}/report"
         hx-target="#reportStatus"
-        hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
         hx-on:htmx:after-request="handleReportResponse(event)">
         Send report
       </button>

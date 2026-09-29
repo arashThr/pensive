@@ -6,7 +6,6 @@
     <p class="mb-7 text-center text-sm text-ink-muted">Enter your email and we'll send you a link to reset it.</p>
 
     <form action="/forgot-pw" method="post" class="space-y-4">
-      {{csrfField}}
       <div>
         <label class="label" for="email">Email address</label>
         <input class="input" name="email" id="email" type="email" placeholder="you@example.com" required autocomplete="email" value="{{.Email}}" autofocus />

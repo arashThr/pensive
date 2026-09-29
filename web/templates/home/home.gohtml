@@ -7,43 +7,29 @@
       <p class="lede mt-1">Search what you've saved, or ask a question across all of it.</p>
     </div>
 
-    <!-- Search / Ask tabs -->
-    <div class="segmented mb-4 max-w-xs" role="tablist">
-      <button id="search-tab" class="segmented-item" role="tab" aria-selected="true" onclick="switchTab('search')">
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        Search
-      </button>
-      <button id="ask-tab" class="segmented-item" role="tab" aria-selected="false" onclick="switchTab('ask')">
-        <svg class="h-4 w-4 text-notice" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
-        </svg>
-        Ask AI
-      </button>
-    </div>
-
-    <!-- Search mode -->
-    <div id="search-mode" class="flex items-center gap-3">
-      <div class="relative flex-1">
+    <!-- One box: typing searches; Enter with no matches (or the Ask AI button) asks AI -->
+    <div class="flex items-center gap-3">
+      <div id="search-box" class="relative flex-1">
         <svg class="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
           type="search"
-          placeholder="Search your collection…"
-          class="input h-[52px] rounded-2xl border-[1.5px] bg-paper pr-12 pl-12"
           id="search-input"
-          name="query"
+          placeholder="Search your library, or ask a question…"
+          class="input h-[52px] rounded-2xl border-[1.5px] bg-paper pr-32 pl-12"
           autocomplete="off"
-          hx-get="/home/search"
-          hx-target="#results"
-          hx-trigger="input changed delay:300ms, search"
-          hx-indicator="#search-loading"
+          aria-describedby="search-hint"
         />
-        <span id="search-loading" class="htmx-indicator absolute top-1/2 right-4 -translate-y-1/2">
-          <span class="spinner"></span>
-        </span>
+        <div class="absolute top-1/2 right-2 flex -translate-y-1/2 items-center gap-2">
+          <span id="search-loading" class="spinner hidden size-4"></span>
+          <button type="button" id="ask-button" class="btn btn-sm btn-ghost hidden" title="Ask AI about this">
+            <svg class="h-4 w-4 text-notice" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
+            </svg>
+            Ask AI
+          </button>
+        </div>
       </div>
       <a href="/bookmarks/new" class="btn btn-primary h-[52px] rounded-2xl" title="Add bookmark manually">
         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,40 +38,19 @@
         <span class="hidden sm:inline">Add</span>
       </a>
     </div>
+    <p id="search-hint" class="mt-2 px-1 text-[13px] text-ink-faint">
+      No matches? Press <kbd class="rounded border border-line bg-paper px-1 font-mono text-[11px]">Enter</kbd> to ask AI<span class="mx-1.5" aria-hidden="true">·</span>{{.RemainingAIQuestions}} AI questions left today
+    </p>
 
-    <!-- Ask mode -->
-    <div id="ask-mode" class="hidden">
-      <div class="card-raised p-2 focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/12">
-        <textarea
-          name="question"
-          id="question-input"
-          rows="3"
-          placeholder="Ask anything about what you've saved…"
-          class="block w-full resize-none bg-transparent px-3 py-2 text-[15px] text-ink outline-none placeholder:text-ink-faint"
-        ></textarea>
-        <div class="flex items-center justify-between gap-3 px-2 pb-1">
-          <span class="text-[13px] text-ink-faint">{{.RemainingAIQuestions}} questions left today</span>
-          <button
-            type="button"
-            id="ask-button"
-            class="btn btn-sm btn-primary"
-            hx-post="/home/ask"
-            hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
-            hx-include="[name='question']"
-            hx-target="#results"
-            hx-swap="innerHTML"
-            hx-indicator="#ask-loading"
-            hx-disabled-elt="this"
-          >
-            Ask
-          </button>
-        </div>
-      </div>
-      <div id="ask-loading" class="htmx-indicator mt-4 flex items-center justify-center gap-2 text-sm text-ink-muted">
+    <template id="ask-loading">
+      <div class="flex items-center justify-center gap-2 py-10 text-sm text-ink-muted">
         <span class="spinner size-4"></span>
         Reading through your library…
       </div>
-    </div>
+    </template>
+    <template id="load-error">
+      <div class="callout callout-danger">Something went wrong. Please try again.</div>
+    </template>
 
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}
@@ -100,7 +65,6 @@
           id="resend-btn"
           class="btn btn-sm btn-secondary"
           hx-post="/auth/resend-verification"
-          hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
           hx-swap="outerHTML"
           hx-disabled-elt="this"
         >
@@ -118,43 +82,66 @@
 </div>
 
 <script>
-  function switchTab(mode) {
-    const isSearch = mode === 'search';
-    document.getElementById('search-tab').setAttribute('aria-selected', isSearch);
-    document.getElementById('ask-tab').setAttribute('aria-selected', !isSearch);
-    document.getElementById('search-mode').classList.toggle('hidden', !isSearch);
-    document.getElementById('ask-mode').classList.toggle('hidden', isSearch);
-
-    const results = document.getElementById('results');
-    if (isSearch) {
-      // Search endpoint with no query returns recent bookmarks
-      document.getElementById('search-input').value = '';
-      results.classList.remove('hidden');
-      htmx.ajax('GET', '/home/search', {target: '#results', swap: 'innerHTML'});
-    } else {
-      // Recent bookmarks aren't shown in Ask AI mode until an answer arrives
-      results.classList.add('hidden');
-      const question = document.getElementById('question-input');
-      question.value = '';
-      question.focus();
-    }
-  }
-
   document.addEventListener('DOMContentLoaded', function () {
-    const questionInput = document.getElementById('question-input');
+    const input = document.getElementById('search-input');
     const askButton = document.getElementById('ask-button');
+    const spinner = document.getElementById('search-loading');
     const results = document.getElementById('results');
+    let timer;
+    let latest = 0;        // id of the most recent request; older responses are dropped
+    let searched = null;   // query whose results are currently shown
 
-    // Enter submits, Shift+Enter adds a new line
-    questionInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        askButton.click();
+    async function load(url, options) {
+      const id = ++latest;
+      let html;
+      try {
+        const res = await fetch(url, options);
+        html = res.ok ? await res.text() : document.getElementById('load-error').innerHTML;
+      } catch {
+        html = document.getElementById('load-error').innerHTML;
       }
+      if (id !== latest) return false;
+      results.innerHTML = html;
+      htmx.process(results);
+      return true;
+    }
+
+    async function search() {
+      clearTimeout(timer);
+      const query = input.value.trim();
+      searched = query;
+      spinner.classList.remove('hidden');
+      const shown = await load('/home/search?query=' + encodeURIComponent(query));
+      spinner.classList.add('hidden');
+      return shown;
+    }
+
+    function ask(question) {
+      if (!question) return;
+      clearTimeout(timer);
+      results.innerHTML = document.getElementById('ask-loading').innerHTML;
+      return load('/home/ask', {method: 'POST', body: new URLSearchParams({question})});
+    }
+
+    input.addEventListener('input', function () {
+      askButton.classList.toggle('hidden', !input.value.trim());
+      clearTimeout(timer);
+      timer = setTimeout(search, 300);
     });
 
-    results.addEventListener('htmx:afterSwap', function () {
-      results.classList.remove('hidden');
+    // Enter: make sure results are for the current text, then ask AI if nothing matched
+    input.addEventListener('keydown', async function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const query = input.value.trim();
+      if (!query) return;
+      if (searched !== query && !(await search())) return;
+      if (results.querySelector('[data-no-results]')) ask(query);
+    });
+
+    askButton.addEventListener('click', () => ask(input.value.trim()));
+    results.addEventListener('click', function (e) {
+      if (e.target.closest('[data-ask]')) ask(input.value.trim());
     });
   });
 </script>

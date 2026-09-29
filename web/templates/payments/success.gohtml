@@ -17,7 +17,6 @@
     <div class="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
       <a href="/home" class="btn btn-primary">Go to your library</a>
       <form action="/payments/create-portal-session" method="POST">
-        {{csrfField}}
         <input type="hidden" name="session_id" value="{{.SessionId}}" />
         <button type="submit" class="btn btn-secondary w-full">Manage billing</button>
       </form>

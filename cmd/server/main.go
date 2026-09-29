@@ -38,7 +38,6 @@ import (
 	"github.com/arashthr/pensive/web/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/genai"
 )
@@ -329,11 +328,9 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 		TokenModel: c.TokenRepo,
 	}
 	adminMw := auth.NewAdminMw(cfg.Admin.User, cfg.Admin.Pass)
-	csrfMw := csrf.Protect(
-		[]byte(cfg.CSRF.Key),
-		csrf.Secure(cfg.CSRF.Secure),
-		csrf.Path("/"),
-	)
+	// Rejects cross-origin state-changing requests using the browser's
+	// Sec-Fetch-Site / Origin headers; no tokens needed in forms.
+	csrfProtection := http.NewCrossOriginProtection()
 
 	r := chi.NewRouter()
 	r.Use(PanicRecoveryMiddleware)
@@ -387,7 +384,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 	r.Group(func(r chi.Router) {
 		r.Use(umw.SetUser)
 		r.Use(LoggerMiddleware(cfg.Environment == "production", "web"))
-		r.Use(csrfMw)
+		r.Use(csrfProtection.Handler)
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			if usercontext.User(r.Context()) != nil {

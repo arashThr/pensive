@@ -6,7 +6,6 @@
     <p class="lede mt-1">Upload your Pocket export to bring your saved articles into Pensive.</p>
 
     <form action="/users/pocket-import" method="post" enctype="multipart/form-data" class="card-raised mt-8 p-6">
-      {{csrfField}}
       <input type="hidden" name="source" value="pocket">
       <label for="import-file" class="label">Pocket export (.zip)</label>
       <input id="import-file" name="import-file" type="file" accept=".zip" required
