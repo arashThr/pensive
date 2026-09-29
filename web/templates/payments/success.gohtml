@@ -1,42 +1,31 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-secondary border border-main rounded-xl p-6 sm:p-8 text-center">
-      <h1 class="text-2xl font-bold text-main mb-4">Welcome to premium!</h1>
-      <p class="text-secondary leading-relaxed mb-2">Your subscription to the Starter plan has been successfully activated.</p>
-      <p class="text-sm text-secondary mb-8">You'll receive an email confirmation shortly with all the details.</p>
-
-      <!-- Success Actions -->
-      <div class="bg-secondary border border-main rounded-lg p-6 mb-6 text-left">
-        <div class="flex items-center gap-2 mb-3">
-          <span class="font-semibold text-main">Premium features now active</span>
-        </div>
-        <p class="text-sm text-main">You now have access to AI summaries, enhanced search, and all premium integrations.</p>
-      </div>
-
-    <!-- Billing Management -->
-      <div class="space-y-4">
-        <form action="/payments/create-portal-session" method="POST">
-          {{csrfField}}
-          <input type="hidden" name="session_id" value="{{.SessionId}}" />
-          <button type="submit" class="w-full bg-main border border-main hover:bg-secondary text-main font-semibold py-3 px-6 rounded-lg transition-colors">
-            Manage billing & subscription
-          </button>
-        </form>
-        
-        <a href="/home" class="inline-block text-secondary hover:text-main font-medium transition-colors">
-          Start exploring premium features →
-        </a>
-      </div>
-
-      <!-- Support -->
-      <div class="mt-8 pt-6 border-t border-main">
-        <p class="text-sm text-secondary">
-          Need help? <a href="/contact" class="text-secondary hover:text-main font-medium transition-colors underline">Contact our support team</a>
-        </p>
-      </div>
+<div class="page-narrow">
+  <div class="card-raised mx-auto max-w-xl p-8 text-center">
+    <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-forest-wash text-forest">
+      <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
     </div>
+    <h1 class="headline-md text-ink">Welcome to premium</h1>
+    <p class="mt-2 text-ink-muted">Your subscription is active. A confirmation email is on its way.</p>
+
+    <div class="callout callout-ok mt-6 text-left">
+      <p>You now have 100 bookmarks and 10 AI questions per day.</p>
+    </div>
+
+    <div class="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="/home" class="btn btn-primary">Go to your library</a>
+      <form action="/payments/create-portal-session" method="POST">
+        {{csrfField}}
+        <input type="hidden" name="session_id" value="{{.SessionId}}" />
+        <button type="submit" class="btn btn-secondary w-full">Manage billing</button>
+      </form>
+    </div>
+
+    <p class="mt-8 border-t border-line pt-6 text-sm text-ink-muted">
+      Need help? <a href="/contact" class="link">Get in touch</a>
+    </p>
   </div>
 </div>
 

@@ -1,94 +1,113 @@
+{{define "logo"}}
+<svg class="h-6 w-6 text-clay" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/>
+</svg>
+{{end}}
+
+{{define "oauth-buttons"}}
+<div class="space-y-3">
+  <a href="/oauth/google" class="btn btn-secondary w-full">
+    <svg class="h-5 w-5" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
+    Continue with Google
+  </a>
+  <a href="/oauth/github" class="btn btn-secondary w-full">
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+    </svg>
+    Continue with GitHub
+  </a>
+</div>
+{{end}}
+
+{{define "beta-notice"}}
+<div class="callout callout-warn mb-6">
+  <span class="badge badge-ai mt-0.5">Beta</span>
+  <p>Pensive is in beta and data may be lost during updates. <a href="/privacy" class="font-semibold underline underline-offset-2">Learn more</a></p>
+</div>
+{{end}}
+
 {{define "header"}}
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#faf8f5">
   <title>{{if .Title}}{{.Title}} - {{end}}Pensive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css" />
   {{if shouldUseAnalytics}}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{end}}
 </head>
-<body class="min-h-screen bg-main flex flex-col font-sans relative overflow-x-hidden">
+<body class="flex min-h-screen flex-col">
 
   <!-- Header -->
-  <header class="bg-main border-b border-main sticky top-0 z-50">
-    <div class="px-4 sm:px-6 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between h-16">
-        
-        <!-- Logo -->
-        <div class="flex items-center gap-3 relative z-10">
-          <a href="/start" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <img src="/assets/title-logo.png" class="h-6" />
-            <div class="font-bold text-lg text-main">
-              Pensive <span class="text-xs font-medium accent bg-secondary px-2 py-1 rounded-full border border-main">Beta</span>
-            </div>
-          </a>
-        </div>
+  <header class="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-14 items-center justify-between sm:h-16">
+
+        <a href="{{if currentUser}}/home{{else}}/start{{end}}" class="flex items-center gap-2">
+          {{template "logo"}}
+          <span class="font-serif text-[22px] font-bold tracking-tight text-ink">Pensive</span>
+          <span class="badge badge-ai">Beta</span>
+        </a>
 
         {{if currentUser}}
           <!-- Desktop Navigation -->
-          <div class="hidden md:flex items-center gap-6 relative z-10">
-            <a href="/home" class="text-secondary hover:text-main font-medium transition-colors">Home</a>
-            <a href="/integrations" class="text-secondary hover:text-main font-medium transition-colors">Extensions</a>
-            
-            <!-- Account Menu -->
-            <div class="relative">
-              <button id="account-menu" class="flex items-center gap-1 border border-main text-main px-4 py-2 font-semibold rounded-lg hover:bg-secondary transition-colors text-sm">
+          <nav class="hidden items-center gap-1 md:flex">
+            <a href="/home" class="btn btn-sm btn-ghost">Library</a>
+            <a href="/integrations" class="btn btn-sm btn-ghost">Extensions</a>
+
+            <div class="relative ml-2">
+              <button id="account-menu" class="btn btn-sm btn-secondary" aria-haspopup="true">
                 Account
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
               </button>
-
-              <div id="account-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-main border border-main rounded-lg shadow-lg z-50">
-                <a href="/users/me" class="block px-4 py-3 text-main hover:bg-secondary transition-colors rounded-t-lg">Settings</a>
-                <hr class="border-main">
-                <form action="/signout" method="post" class="block">
+              <div id="account-dropdown" class="menu hidden">
+                <a href="/users/me" class="menu-item">Settings</a>
+                <hr class="my-1 border-line">
+                <form action="/signout" method="post">
                   {{csrfField}}
-                  <button type="submit" class="w-full text-left px-4 py-3 text-main hover:bg-secondary transition-colors rounded-b-lg">
-                    Sign out
-                  </button>
+                  <button type="submit" class="menu-item">Sign out</button>
                 </form>
               </div>
             </div>
-          </div>
+          </nav>
 
-          <!-- Mobile Menu Button -->
-          <button id="mobile-menu-button" class="md:hidden p-2 text-secondary hover:text-main transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button id="mobile-menu-button" class="btn-icon md:hidden" aria-label="Open menu">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           </button>
-
         {{else}}
-          <!-- Logged Out Navigation -->
-          <div class="flex items-center gap-4">
-            <a href="/signin" class="text-secondary hover:text-main font-medium transition-colors text-sm">Sign in</a>
-            <a href="/signup" class="border border-main text-main px-4 py-2 font-semibold rounded-lg hover:bg-secondary transition-colors text-sm">Sign up</a>
-          </div>
+          <nav class="flex items-center gap-2">
+            <a href="/signin" class="btn btn-sm btn-ghost">Sign in</a>
+            <a href="/signup" class="btn btn-sm btn-primary">Sign up</a>
+          </nav>
         {{end}}
       </div>
 
       {{if currentUser}}
-        <!-- Mobile Navigation Menu -->
-        <div id="mobile-menu" class="hidden md:hidden border-t border-main bg-main">
-          <div class="py-2 space-y-1 px-4 sm:px-6">
-            <a href="/home" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Home</a>
-            <a href="/integrations" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Extensions</a>
-            <a href="/users/me" class="block py-3 px-4 text-main hover:bg-secondary transition-colors rounded-lg">Settings</a>
-            <hr class="border-main my-2">
-            <form action="/signout" method="post">
-              {{csrfField}}
-              <button type="submit" class="block py-3 px-4 text-main hover:bg-secondary transition-colors w-full text-left rounded-lg">
-                Sign out
-              </button>
-            </form>
-          </div>
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden space-y-1 border-t border-line py-3 md:hidden">
+          <a href="/home" class="menu-item">Library</a>
+          <a href="/integrations" class="menu-item">Extensions</a>
+          <a href="/users/me" class="menu-item">Settings</a>
+          <hr class="my-2 border-line">
+          <form action="/signout" method="post">
+            {{csrfField}}
+            <button type="submit" class="menu-item">Sign out</button>
+          </form>
         </div>
       {{end}}
     </div>
@@ -96,23 +115,21 @@
 
   <!-- Alerts -->
   {{if messages}}
-    <div class="px-6 py-4 max-w-4xl mx-auto">
+    <div class="mx-auto box-content max-w-3xl space-y-3 px-4 pt-6 sm:px-6 lg:px-8">
       {{range messages}}
-        <div class="bg-secondary border border-main text-main p-4 mb-4 rounded-lg flex items-start justify-between">
-          <div class="flex items-start gap-3">
-            {{if .IsError}}
-              <svg class="w-5 h-5 text-secondary mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-              </svg>
-            {{else}}
-              <svg class="w-5 h-5 text-secondary mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-              </svg>
-            {{end}}
-            <span class="font-medium">{{.Message}}</span>
-          </div>
-          <button onclick="closeAlert(event)" class="text-secondary hover:text-main transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div data-alert class="callout {{if .IsError}}callout-danger{{else}}callout-info{{end}} items-center">
+          {{if .IsError}}
+            <svg class="h-5 w-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+          {{else}}
+            <svg class="h-5 w-5 shrink-0 text-clay" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+          {{end}}
+          <span class="flex-1 font-medium">{{.Message}}</span>
+          <button onclick="this.closest('[data-alert]').remove()" class="btn-icon size-7" aria-label="Dismiss">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
             </svg>
           </button>
@@ -121,94 +138,71 @@
     </div>
   {{end}}
 
-  <main class="flex-1 relative z-10">
+  <main class="flex-1">
 {{end}}
 
 {{define "footer"}}
   </main>
 
-  <footer class="border-t border-main bg-main py-8 sm:py-12 mt-20 relative z-10">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
-        <!-- Brand -->
-        <div class="flex items-center gap-3">
-          <img src="/assets/title-logo.png" class="h-6" />
-          <div>
-            <div class="font-bold text-lg text-main">Pensive</div>
-            <div class="text-sm text-secondary">Your searchable memory of the web</div>
+  <footer class="mt-20 border-t border-line bg-linen">
+    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+      <div class="flex flex-col justify-between gap-10 lg:flex-row">
+        <div class="max-w-xs">
+          <div class="flex items-center gap-2">
+            {{template "logo"}}
+            <span class="font-serif text-xl font-bold text-ink">Pensive</span>
           </div>
+          <p class="mt-2 text-sm text-ink-muted">Your searchable memory of the web.</p>
         </div>
-        
-        <!-- Links -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-10 text-sm w-full lg:w-auto">
+
+        <div class="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3 sm:gap-14">
           <div>
-            <h4 class="font-semibold text-main mb-3">Resources</h4>
+            <h4 class="eyebrow mb-3 text-ink-faint">Resources</h4>
             <div class="space-y-2">
-              <a href="/faq" class="block text-secondary hover:text-main transition-colors">FAQ</a>
-              <a href="/contact" class="block text-secondary hover:text-main transition-colors">Contact</a>
-              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Blog</a>
+              <a href="/faq" class="block text-ink-muted transition-colors hover:text-clay">FAQ</a>
+              <a href="/contact" class="block text-ink-muted transition-colors hover:text-clay">Contact</a>
+              <a href="https://arashtaher.com/blog/introducing-pensive/" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Blog</a>
             </div>
           </div>
-
           <div>
-            <h4 class="font-semibold text-main mb-3">Extensions</h4>
+            <h4 class="eyebrow mb-3 text-ink-faint">Extensions</h4>
             <div class="space-y-2">
-              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Chrome</a>
-              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Firefox</a>
-              <a href="https://t.me/GetPensiveBot" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">Telegram Bot</a>
+              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Chrome</a>
+              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Firefox</a>
+              <a href="https://t.me/GetPensiveBot" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">Telegram Bot</a>
             </div>
           </div>
-
           <div>
-            <h4 class="font-semibold text-main mb-3">Project</h4>
+            <h4 class="eyebrow mb-3 text-ink-faint">Project</h4>
             <div class="space-y-2">
-              <a href="https://github.com/arashThr/pensive" class="block text-secondary hover:text-main transition-colors" target="_blank" rel="noopener">GitHub</a>
-              <a href="/privacy" class="block text-secondary hover:text-main transition-colors">Privacy</a>
+              <a href="https://github.com/arashThr/pensive" class="block text-ink-muted transition-colors hover:text-clay" target="_blank" rel="noopener">GitHub</a>
+              <a href="/privacy" class="block text-ink-muted transition-colors hover:text-clay">Privacy</a>
             </div>
           </div>
         </div>
       </div>
-      
-      <hr class="border-main my-6 sm:my-8">
 
-      <div class="text-sm text-secondary text-center sm:text-left">
-        © 2026 Pensive. Built with care for developers and researchers.
+      <div class="mt-10 border-t border-line pt-6 text-[13px] text-ink-faint">
+        © 2026 Pensive. Built with care for readers and researchers.
       </div>
     </div>
   </footer>
 
-  <!-- JavaScript -->
   <script>
-    // Mobile menu toggle
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    
-    if (mobileMenuButton && mobileMenu) {
-      mobileMenuButton.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-      });
-    }
-
-    // Account dropdown toggle
-    const accountMenu = document.getElementById('account-menu');
-    const accountDropdown = document.getElementById('account-dropdown');
-    
-    if (accountMenu && accountDropdown) {
-      accountMenu.addEventListener('click', (e) => {
+    // Toggle a menu open/closed; clicking anywhere else closes it.
+    function bindMenu(buttonId, menuId) {
+      const button = document.getElementById(buttonId);
+      const menu = document.getElementById(menuId);
+      if (!button || !menu) return;
+      button.addEventListener('click', (e) => {
         e.stopPropagation();
-        accountDropdown.classList.toggle('hidden');
+        menu.classList.toggle('hidden');
       });
-      
-      document.addEventListener('click', () => {
-        accountDropdown.classList.add('hidden');
-      });
+      menu.addEventListener('click', (e) => e.stopPropagation());
+      document.addEventListener('click', () => menu.classList.add('hidden'));
     }
-
-    // Alert close function
-    function closeAlert(event) {
-      const el = event?.target?.closest('div');
-      if (el) el.remove();
-    }
+    bindMenu('account-menu', 'account-dropdown');
+    bindMenu('mobile-menu-button', 'mobile-menu');
   </script>
   <script src="/assets/htmx.min.js"></script>
 </body>
@@ -217,31 +211,29 @@
 
 <!-- Pagination -->
 {{define "pagination"}}
-  <div class="mt-12 flex justify-between items-center">
+  <div class="mt-10 grid grid-cols-3 items-center">
     {{if gt .Pages.Current 1}}
-      <a href="?page={{.Pages.Previous}}"
-       class="inline-flex items-center gap-2 py-2 px-4 border border-main bg-main rounded-lg text-sm font-medium text-secondary hover:bg-secondary hover:text-main transition-colors">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      Previous
+      <a href="?page={{.Pages.Previous}}" class="btn btn-sm btn-secondary justify-self-start">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Previous
       </a>
     {{else}}
-      <span class="invisible py-2 px-4"></span>
+      <span></span>
     {{end}}
 
-    <span class="text-sm font-medium text-secondary">Page {{.Pages.Current}}</span>
+    <span class="text-center text-[13px] font-medium text-ink-faint">Page {{.Pages.Current}}</span>
 
     {{if .MorePages}}
-      <a href="?page={{.Pages.Next}}"
-       class="inline-flex items-center gap-2 py-2 px-4 border border-main bg-main rounded-lg text-sm font-medium text-secondary hover:bg-secondary hover:text-main transition-colors">
-      Next
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
+      <a href="?page={{.Pages.Next}}" class="btn btn-sm btn-secondary justify-self-end">
+        Next
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
       </a>
     {{else}}
-      <span class="invisible py-2 px-4"></span>
+      <span></span>
     {{end}}
   </div>
 {{end}}

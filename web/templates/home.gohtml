@@ -1,389 +1,292 @@
 {{template "header" .}}
 
-<div class="px-4 sm:px-6 lg:px-8 py-16 sm:py-20 max-w-6xl mx-auto bg-main text-main">
+<div class="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
 
   <!-- Hero -->
-  <section class="grid lg:grid-cols-2 gap-12 lg:gap-14 items-center">
+  <section class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
     <div>
       <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
-        class="inline-flex items-center gap-2 rounded-full border border-main bg-secondary px-3 py-1 text-xs font-medium text-secondary hover:text-main transition-colors mb-5">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        class="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-1 text-[13px] font-medium text-ink-muted transition-colors hover:border-line-strong hover:text-ink">
+        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
         </svg>
-        Open Source on GitHub
+        Open source on GitHub
       </a>
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-main">
-        Your searchable <span class="accent">memory</span> of the web
+      <h1 class="display text-ink sm:text-6xl sm:leading-[64px]">
+        Your searchable <em class="text-clay">memory</em> of the web
       </h1>
-      <p class="mt-4 text-lg text-secondary max-w-prose">
+      <p class="lede mt-5 max-w-lg">
         Smart bookmarking with full-content capture and fast search. Free and open source.
       </p>
 
-      <div class="mt-8 hidden md:flex flex-col sm:flex-row gap-3">
-        <a href="/signup" class="inline-flex justify-center items-center gap-2 rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
-          Start saving for free
-        </a>
-        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
-          class="inline-flex justify-center items-center gap-2 rounded-lg border border-main px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-          </svg>
-          View on GitHub
-        </a>
+      <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <a href="/signup" class="btn btn-primary">Start saving for free</a>
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
       </div>
 
-      <ul class="mt-8 space-y-2 text-sm text-secondary">
-        <li>— Full content capture (not just titles)</li>
-        <li>— Search across everything you saved</li>
-        <li>— Use the hosted version or self-host</li>
+      <ul class="mt-8 space-y-2 text-ink-muted">
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Full content capture, not just titles</li>
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Search across everything you saved</li>
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Use the hosted version or self-host</li>
       </ul>
     </div>
 
-    <div class="relative">
-      <!-- Subtle glow effect -->
-      <div class="absolute -inset-1 bg-secondary rounded-xl blur-xl"></div>
-      <div class="relative rounded-xl overflow-hidden border border-main bg-main">
-        <div class="aspect-video">
-          <iframe
-            class="w-full h-full"
-            src="https://www.youtube.com/embed/N7tQpBjNMck"
-            title="Pensive Demo"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen>
-          </iframe>
-        </div>
+    <div class="card-raised overflow-hidden p-2">
+      <div class="aspect-video overflow-hidden rounded-xl">
+        <iframe
+          class="h-full w-full"
+          src="https://www.youtube.com/embed/N7tQpBjNMck"
+          title="Pensive Demo"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
       </div>
     </div>
   </section>
 
-  <!-- Save from anywhere (Integrations) -->
-  <section id="integrations" class="mt-16 sm:mt-20">
-    <div class="text-center max-w-2xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-bold text-main">Save from anywhere</h2>
-      <p class="mt-3 text-secondary">One-click saving on desktop browsers, or forward links from your phone via Telegram.</p>
+  <!-- Save from anywhere -->
+  <section id="integrations" class="mt-24">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="headline text-ink">Save from anywhere</h2>
+      <p class="lede mt-2">One-click saving on desktop browsers, or forward links from your phone via Telegram.</p>
     </div>
 
-    <div class="mt-10 grid sm:grid-cols-3 gap-4">
-      <!-- Chrome -->
-      <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" 
-        target="_blank" rel="noopener"
-        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
-        <div class="w-14 h-14 mb-4 flex items-center justify-center">
-          <img src="/assets/icons/chrome.svg" class="w-full h-full"/>
-        </div>
-        <h3 class="text-base font-semibold text-main">Chrome</h3>
-        <p class="mt-1 text-sm text-secondary text-center">Save with one click</p>
-        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Install →</span>
+    <div class="mt-10 grid gap-4 sm:grid-cols-3">
+      <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="card-link group p-6 text-center">
+        <img src="/assets/icons/chrome.svg" alt="" class="mx-auto mb-4 size-12"/>
+        <h3 class="title">Chrome</h3>
+        <p class="mt-1 text-sm text-ink-muted">Save with one click</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-clay">Install →</span>
       </a>
-
-      <!-- Firefox -->
-      <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" 
-        target="_blank" rel="noopener"
-        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
-        <div class="w-14 h-14 mb-4 flex items-center justify-center">
-          <img src="/assets/icons/firefox.svg" class="w-full h-full"/>
-        </div>
-        <h3 class="text-base font-semibold text-main">Firefox</h3>
-        <p class="mt-1 text-sm text-secondary text-center">Works seamlessly</p>
-        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Get add-on →</span>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" target="_blank" rel="noopener" class="card-link group p-6 text-center">
+        <img src="/assets/icons/firefox.svg" alt="" class="mx-auto mb-4 size-12"/>
+        <h3 class="title">Firefox</h3>
+        <p class="mt-1 text-sm text-ink-muted">Works seamlessly</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-clay">Get add-on →</span>
       </a>
-
-      <!-- Telegram -->
-      <a href="https://t.me/GetPensiveBot" 
-        target="_blank" rel="noopener"
-        class="group flex flex-col items-center p-6 rounded-xl border border-main bg-secondary hover:bg-main transition-colors">
-        <div class="w-14 h-14 mb-4 flex items-center justify-center">
-          <img src="/assets/icons/telegram.svg" class="w-full h-full"/>
-        </div>
-        <h3 class="text-base font-semibold text-main">Telegram</h3>
-        <p class="mt-1 text-sm text-secondary text-center">Forward links from mobile</p>
-        <span class="mt-4 text-sm text-secondary group-hover:text-main transition-colors">Open bot →</span>
-      </a>
-    </div>
-
-    <div class="mt-6 text-center">
-      <a href="/integrations" class="inline-flex items-center gap-2 text-sm text-secondary hover:text-main transition-colors">
-        Learn more about integrations
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-        </svg>
+      <a href="https://t.me/GetPensiveBot" target="_blank" rel="noopener" class="card-link group p-6 text-center">
+        <img src="/assets/icons/telegram.svg" alt="" class="mx-auto mb-4 size-12"/>
+        <h3 class="title">Telegram</h3>
+        <p class="mt-1 text-sm text-ink-muted">Forward links from mobile</p>
+        <span class="mt-4 inline-block text-sm font-semibold text-clay">Open bot →</span>
       </a>
     </div>
   </section>
 
-  <!-- Weekly Podcast -->
-  <section class="mt-16 sm:mt-20">
-    <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
-      <div class="grid md:grid-cols-2 gap-8 items-center">
-        <div>
-          <div class="inline-flex items-center gap-2 rounded-full bg-secondary border border-main px-3 py-1 text-sm font-medium accent mb-4">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-            </svg>
-            New feature
-          </div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-main">Your bookmarks, as a podcast</h2>
-          <p class="mt-3 text-secondary">
-            Get a weekly audio summary of your saved articles. AI reads through your bookmarks and creates a podcast you can listen to anywhere.
-          </p>
-          <ul class="mt-4 space-y-2 text-sm text-secondary">
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 accent shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              AI-generated summaries of your saved content
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-main shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Delivered via email or Telegram
-            </li>
-            <li class="flex items-center gap-2">
-              <svg class="w-4 h-4 text-main shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              Choose your delivery day
-            </li>
-          </ul>
-          <div class="mt-6">
-            <a href="/signup" class="inline-flex items-center gap-2 rounded-lg border border-main bg-main px-5 py-3 font-semibold text-main hover:bg-secondary transition-colors">
-              Try it free
-            </a>
+  <!-- Podcast -->
+  <section class="mt-24 grid items-center gap-10 md:grid-cols-2 md:gap-16">
+    <div>
+      <span class="badge badge-ai">New feature</span>
+      <h2 class="headline mt-4 text-ink">Your bookmarks, as a podcast</h2>
+      <p class="lede mt-3">
+        Get a weekly audio summary of your saved articles. AI reads through your bookmarks and creates a podcast you can listen to anywhere.
+      </p>
+      <ul class="mt-6 space-y-2 text-ink-muted">
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> AI-generated summaries of your saved content</li>
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Delivered via email or Telegram</li>
+        <li class="flex items-center gap-2"><svg class="h-4 w-4 shrink-0 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Choose your delivery day</li>
+      </ul>
+      <a href="/signup" class="btn btn-primary mt-8">Try it free</a>
+    </div>
+
+    <!-- Audio briefing widget (illustrative) -->
+    <div class="audio-widget" aria-hidden="true">
+      <div class="audio-widget-inner">
+        <div class="flex items-center gap-4">
+          <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-clay text-white shadow-[0_4px_12px_rgba(194,94,52,0.35)]">
+            <svg class="ml-1 h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5.14v13.72a1 1 0 001.52.85l10.4-6.86a1 1 0 000-1.7L9.52 4.29A1 1 0 008 5.14z"/></svg>
+          </span>
+          <div class="min-w-0">
+            <p class="eyebrow text-ink-faint">Weekly briefing</p>
+            <p class="truncate font-serif text-xl font-semibold text-ink">Seven things you saved this week</p>
           </div>
         </div>
-        
-        <!-- Audio Wave Visualization -->
-        <div class="flex items-center justify-center">
-          <div class="relative w-full max-w-xs aspect-square">
-            <div class="wrap relative w-full h-full">
-              <canvas id="audio-viz" width="320" height="320" class="absolute inset-0"></canvas>
-              <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-20 h-20 rounded-full border border-main flex items-center justify-center">
-                  <!-- Podcast icon: mic with radiating arcs -->
-                  <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" class="text-secondary">
-                    <!-- mic capsule -->
-                    <rect x="9" y="2" width="6" height="11" rx="3"/>
-                    <!-- mic stand + base -->
-                    <path d="M12 19v3M8 23h8"/>
-                    <!-- left arc -->
-                    <path d="M5 10a7 7 0 0 0 14 0"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="waveform mt-6">
+          <span style="--h:40%"></span><span style="--h:62%"></span><span style="--h:78%"></span><span style="--h:54%"></span><span style="--h:90%"></span><span style="--h:70%"></span><span style="--h:46%"></span><span style="--h:84%"></span><span style="--h:100%"></span><span style="--h:66%"></span><span style="--h:52%"></span><span style="--h:74%"></span><span style="--h:88%"></span><span style="--h:58%"></span><span style="--h:42%"></span><span style="--h:68%"></span><span style="--h:92%"></span><span style="--h:76%"></span><span style="--h:50%"></span><span style="--h:64%"></span><span style="--h:86%"></span><span style="--h:60%"></span><span style="--h:44%"></span><span style="--h:72%"></span><span style="--h:96%"></span><span style="--h:80%"></span><span style="--h:56%"></span><span style="--h:38%"></span><span style="--h:70%"></span><span style="--h:58%"></span><span style="--h:46%"></span><span style="--h:34%"></span>
+        </div>
+        <div class="mt-4 h-1 overflow-hidden rounded-full bg-kraft">
+          <div class="h-full w-1/3 rounded-full bg-amber"></div>
+        </div>
+        <div class="mt-2 flex justify-between text-[13px] text-ink-faint">
+          <span>4:12</span>
+          <span>12:30</span>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Screenshots -->
-  <section class="mt-16 sm:mt-20">
-    <div class="flex items-end justify-center gap-6">
-      <div>
-        <h2 class="text-xl font-semibold text-main">Save and search with the help of AI</h2>
-      </div>
-    </div>
+  <section class="mt-24">
+    <h2 class="headline text-center text-ink">Save and search with the help of AI</h2>
 
-    <div id="slider" class="relative mt-8 max-w-2xl mx-auto">
-      <div class="overflow-hidden rounded-xl border border-main bg-main">
-        <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
-          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/library.jpg" alt="Library view" class="w-full h-auto"></div>
-          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/search.jpg" alt="Search" class="w-full h-auto"></div>
-          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/link-page.jpg" alt="Link page" class="w-full h-auto"></div>
-          <div class="w-full shrink-0"><img src="/assets/promo/screenshots/extension-saved.jpg" alt="Saved from extension" class="w-full h-auto"></div>
+    <div id="slider" class="relative mx-auto mt-10 max-w-3xl">
+      <div class="card-raised overflow-hidden p-2">
+        <div class="overflow-hidden rounded-xl">
+          <div id="slider-track" class="flex transition-transform duration-300 ease-in-out">
+            <div class="w-full shrink-0"><img src="/assets/promo/screenshots/library.jpg" alt="Library view" class="h-auto w-full"></div>
+            <div class="w-full shrink-0"><img src="/assets/promo/screenshots/search.jpg" alt="Search" class="h-auto w-full"></div>
+            <div class="w-full shrink-0"><img src="/assets/promo/screenshots/link-page.jpg" alt="Link page" class="h-auto w-full"></div>
+            <div class="w-full shrink-0"><img src="/assets/promo/screenshots/extension-saved.jpg" alt="Saved from extension" class="h-auto w-full"></div>
+          </div>
         </div>
       </div>
 
-      <button id="prev-btn" type="button" class="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-secondary border border-main p-2 text-main hover:bg-main hover:text-secondary transition-colors" aria-label="Previous slide">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      <button id="prev-btn" type="button" class="btn-icon absolute top-1/2 left-4 -translate-y-1/2 border border-line bg-paper shadow-soft" aria-label="Previous slide">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </button>
-      <button id="next-btn" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-secondary border border-main p-2 text-main hover:bg-main hover:text-secondary transition-colors" aria-label="Next slide">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <button id="next-btn" type="button" class="btn-icon absolute top-1/2 right-4 -translate-y-1/2 border border-line bg-paper shadow-soft" aria-label="Next slide">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
       </button>
 
       <div class="mt-4 flex items-center justify-between gap-4">
-        <div id="slide-caption" class="text-sm text-secondary">
+        <div id="slide-caption" class="text-sm font-medium text-ink-muted">
           <span data-slide="0">Library</span>
           <span data-slide="1" class="hidden">Search</span>
           <span data-slide="2" class="hidden">Link</span>
           <span data-slide="3" class="hidden">Extension</span>
         </div>
-
         <div class="flex gap-2">
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="0" aria-label="Go to slide 1"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="1" aria-label="Go to slide 2"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="2" aria-label="Go to slide 3"></button>
-          <button class="slider-dot h-2.5 w-2.5 rounded-full bg-secondary hover:bg-main" data-slide="3" aria-label="Go to slide 4"></button>
+          <button class="slider-dot h-2 w-2 cursor-pointer rounded-full bg-line-strong transition-all aria-[current=true]:w-6 aria-[current=true]:bg-clay" data-slide="0" aria-label="Go to slide 1"></button>
+          <button class="slider-dot h-2 w-2 cursor-pointer rounded-full bg-line-strong transition-all aria-[current=true]:w-6 aria-[current=true]:bg-clay" data-slide="1" aria-label="Go to slide 2"></button>
+          <button class="slider-dot h-2 w-2 cursor-pointer rounded-full bg-line-strong transition-all aria-[current=true]:w-6 aria-[current=true]:bg-clay" data-slide="2" aria-label="Go to slide 3"></button>
+          <button class="slider-dot h-2 w-2 cursor-pointer rounded-full bg-line-strong transition-all aria-[current=true]:w-6 aria-[current=true]:bg-clay" data-slide="3" aria-label="Go to slide 4"></button>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Everything you need -->
-  <section class="mt-16 sm:mt-20">
-    <div class="max-w-3xl">
-      <h2 class="text-xl font-semibold text-main">Everything you need to build your knowledge base</h2>
-      <p class="mt-2 text-sm text-secondary">Capture what you read, keep it searchable, and own it long-term.</p>
+  <section class="mt-24">
+    <div class="max-w-2xl">
+      <h2 class="headline text-ink">Everything you need to build your knowledge base</h2>
+      <p class="lede mt-2">Capture what you read, keep it searchable, and own it long-term.</p>
     </div>
 
-    <div class="mt-8 grid md:grid-cols-2 gap-4">
-      <div class="rounded-xl border border-main bg-secondary p-6">
-        <h3 class="text-base font-semibold text-main">Designed for search</h3>
-        <p class="mt-2 text-sm text-secondary">Full content capture so you can search inside what you saved, not just titles.</p>
-        <ul class="mt-4 space-y-1 text-sm text-secondary">
-          <li>— Full-text indexing</li>
-          <li>— Tags, domains, and dates</li>
-          <li>— Ask questions with AI</li>
-        </ul>
+    <div class="mt-10 grid gap-4 md:grid-cols-2">
+      <div class="card p-6">
+        <h3 class="title">Designed for search</h3>
+        <p class="mt-1 text-ink-muted">Full content capture so you can search inside what you saved, not just titles.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="chip">Full-text indexing</span>
+          <span class="chip">Tags, domains, dates</span>
+          <span class="chip">Ask with AI</span>
+        </div>
       </div>
-
-      <div class="rounded-xl border border-main bg-secondary p-6">
-        <h3 class="text-base font-semibold text-main">Save from anywhere</h3>
-        <p class="mt-2 text-sm text-secondary">Browser extensions and Telegram make saving fast on desktop and mobile.</p>
-        <ul class="mt-4 space-y-1 text-sm text-secondary">
-          <li>— Chrome + Firefox extensions</li>
-          <li>— Telegram bot forwarding</li>
-          <li>— One-click capture</li>
-        </ul>
+      <div class="card p-6">
+        <h3 class="title">Save from anywhere</h3>
+        <p class="mt-1 text-ink-muted">Browser extensions and Telegram make saving fast on desktop and mobile.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="chip">Chrome + Firefox</span>
+          <span class="chip">Telegram bot</span>
+          <span class="chip">One-click capture</span>
+        </div>
       </div>
-
-      <div class="rounded-xl border border-main bg-secondary p-6">
-        <h3 class="text-base font-semibold text-main">AI summaries and tags</h3>
-        <p class="mt-2 text-sm text-secondary">Optional AI helps you skim, organize, and revisit later.</p>
-        <ul class="mt-4 space-y-1 text-sm text-secondary">
-          <li>— Automatic summaries</li>
-          <li>— Smart topic tags</li>
-          <li>— Clean text extraction</li>
-        </ul>
+      <div class="card p-6">
+        <h3 class="title">AI summaries and tags</h3>
+        <p class="mt-1 text-ink-muted">Optional AI helps you skim, organize, and revisit later.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="chip">Automatic summaries</span>
+          <span class="chip">Smart topic tags</span>
+          <span class="chip">Clean text extraction</span>
+        </div>
       </div>
-
-      <div class="rounded-xl border border-main bg-secondary p-6">
-        <h3 class="text-base font-semibold text-main">Open source and self-hostable</h3>
-        <p class="mt-2 text-sm text-secondary">Run it yourself, audit the code, or contribute. No lock-in, ever.</p>
-        <ul class="mt-4 space-y-1 text-sm text-secondary">
-          <li>— MIT licensed, audit the code</li>
-          <li>— Self-host with Docker</li>
-          <li>— Import and export anytime</li>
-        </ul>
+      <div class="card p-6">
+        <h3 class="title">Open source and self-hostable</h3>
+        <p class="mt-1 text-ink-muted">Run it yourself, audit the code, or contribute. No lock-in, ever.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="chip">Audit the code</span>
+          <span class="chip">Self-host with Docker</span>
+          <span class="chip">Import & export anytime</span>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Why I built this -->
-  <section class="mt-16 sm:mt-20">
-    <div class="max-w-3xl mx-auto text-center">
-      <h2 class="text-xl font-semibold text-main">Why I built this</h2>
-      <div class="mt-3 space-y-4 text-sm text-secondary">
-        <p>
-          Years ago I found Gordon Bell's <a class="text-main underline hover:no-underline transition-all" href="https://en.wikipedia.org/wiki/MyLifeBits" target="_blank" rel="noopener">MyLifeBits</a> research project.
-          The idea stuck: can we preserve what we read and make it searchable?
-        </p>
-        <p>
-          I read and share a lot of links (Hacker News, blogs, docs). The good stuff gets lost in browser bookmarks and buried by SEO.
-          Pocket was the closest fit for me for a while, until it shut down.
-        </p>
-        <p>
-          So I built Pensive to solve this problem. Your bookmarks shouldn't depend on a service that can change direction.
-          That's also why the code is <a class="text-main underline hover:no-underline transition-all" href="https://github.com/arashthr/pensive" target="_blank" rel="noopener">open source</a> — run it yourself, fork it, or just trust that you can.
-          Read the longer story <a class="text-main underline hover:no-underline transition-all" href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a class="text-main underline hover:no-underline transition-all" href="/contact">tell me</a> what you think.
-        </p>
-      </div>
+  <section class="mx-auto mt-24 max-w-2xl">
+    <h2 class="headline text-center text-ink">Why I built this</h2>
+    <div class="prose-archive mx-auto mt-6 font-serif text-[19px]">
+      <p>
+        Years ago I found Gordon Bell's <a href="https://en.wikipedia.org/wiki/MyLifeBits" target="_blank" rel="noopener">MyLifeBits</a> research project.
+        The idea stuck: can we preserve what we read and make it searchable?
+      </p>
+      <p>
+        I read and share a lot of links (Hacker News, blogs, docs). The good stuff gets lost in browser bookmarks and buried by SEO.
+        Pocket was the closest fit for me for a while, until it shut down.
+      </p>
+      <p>
+        So I built Pensive to solve this problem. Your bookmarks shouldn't depend on a service that can change direction.
+        That's also why the code is <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener">open source</a> — run it yourself, fork it, or just trust that you can.
+        Read the longer story <a href="https://arashtaher.com/blog/introducing-pensive/" target="_blank" rel="noopener">here</a>, or <a href="/contact">tell me</a> what you think.
+      </p>
     </div>
   </section>
 
   <!-- Pricing -->
-  <section class="mt-16 sm:mt-20">
-    <h2 class="text-xl font-semibold text-main text-center">Simple, transparent pricing</h2>
-    <p class="mt-2 text-sm text-secondary text-center">Use the hosted service or run it yourself — it's open source.</p>
+  <section class="mt-24">
+    <div class="text-center">
+      <h2 class="headline text-ink">Simple, transparent pricing</h2>
+      <p class="lede mt-2">Use the hosted service or run it yourself — it's open source.</p>
+    </div>
 
-    <div class="mt-8 grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-      <!-- Free -->
-      <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
-        <div class="text-sm text-secondary uppercase tracking-wider">Free</div>
-        <div class="mt-2 text-4xl font-bold text-main">$0</div>
-        <div class="mt-1 text-sm text-secondary">Try it out with generous daily limits.</div>
-
-        <ul class="mt-5 space-y-2 text-sm text-secondary">
-          <li>✓ All core features (capture, search, tags)</li>
-          <li>✓ Browser extension + Telegram saving</li>
-          <li class="text-secondary">· 10 bookmarks/day</li>
-          <li class="text-secondary">· 1 AI question/day</li>
+    <div class="mx-auto mt-10 grid max-w-5xl gap-4 md:grid-cols-3">
+      <div class="card flex flex-col p-6 sm:p-8">
+        <p class="eyebrow text-ink-faint">Free</p>
+        <p class="mt-2 font-serif text-4xl font-bold text-ink">$0</p>
+        <p class="mt-1 text-sm text-ink-muted">Try it out with generous daily limits.</p>
+        <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
+          <li>All core features (capture, search, tags)</li>
+          <li>Browser extension + Telegram saving</li>
+          <li><strong class="text-ink">10</strong> bookmarks/day</li>
+          <li><strong class="text-ink">1</strong> AI question/day</li>
         </ul>
-
-        <a href="/signup" class="mt-6 inline-flex w-full justify-center rounded-lg border border-main bg-main px-4 py-2.5 font-semibold text-main hover:bg-secondary transition-colors">
-          Get started
-        </a>
+        <a href="/signup" class="btn btn-secondary mt-8 w-full">Get started</a>
       </div>
 
-      <!-- Hosted Premium -->
-      <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
-        <div class="text-sm text-secondary uppercase tracking-wider">Premium</div>
-        <div class="mt-2 text-4xl font-bold text-main">$5 <span class="text-base font-normal text-secondary">/month</span></div>
-        <div class="mt-1 text-sm text-secondary">More headroom for daily saving and AI.</div>
-
-        <ul class="mt-5 space-y-2 text-sm text-secondary">
-          <li>✓ Everything in Free</li>
-          <li>✓ 100 bookmarks/day</li>
-          <li>✓ 10 AI questions/day</li>
-          <li>✓ AI summaries and smart tags</li>
-          <li>✓ Support ongoing development</li>
+      <div class="card-raised flex flex-col border-clay/40 p-6 sm:p-8">
+        <p class="eyebrow text-clay">Premium</p>
+        <p class="mt-2 font-serif text-4xl font-bold text-ink">$5 <span class="font-sans text-base font-normal text-ink-muted">/ month</span></p>
+        <p class="mt-1 text-sm text-ink-muted">More headroom for daily saving and AI.</p>
+        <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
+          <li>Everything in Free</li>
+          <li><strong class="text-ink">100</strong> bookmarks/day</li>
+          <li><strong class="text-ink">10</strong> AI questions/day</li>
+          <li>AI summaries and smart tags</li>
+          <li>Support ongoing development</li>
         </ul>
-
-        <a href="/users/subscribe" class="mt-6 inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-4 py-2.5 font-semibold text-main hover:bg-main transition-colors">
-          Upgrade
-        </a>
+        <a href="/users/subscribe" class="btn btn-primary mt-8 w-full">Upgrade</a>
       </div>
 
-      <!-- Self-hosted -->
-      <div class="rounded-xl border border-main bg-secondary p-6 sm:p-8">
-        <div class="text-sm text-secondary uppercase tracking-wider">Self-hosted</div>
-        <div class="mt-2 text-4xl font-bold text-main">Free</div>
-        <div class="mt-1 text-sm text-secondary">Run it on your own server, full control.</div>
-
-        <ul class="mt-5 space-y-2 text-sm text-secondary">
-          <li>✓ All features unlocked</li>
-          <li>✓ Your infrastructure, your data</li>
-          <li>✓ Docker Compose deploy</li>
-          <li>✓ MIT licensed</li>
+      <div class="card flex flex-col p-6 sm:p-8">
+        <p class="eyebrow text-ink-faint">Self-hosted</p>
+        <p class="mt-2 font-serif text-4xl font-bold text-ink">Free</p>
+        <p class="mt-1 text-sm text-ink-muted">Run it on your own server, full control.</p>
+        <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
+          <li>All features unlocked</li>
+          <li>Your infrastructure, your data</li>
+          <li>Docker Compose deploy</li>
+          <li>MIT licensed</li>
         </ul>
-
-        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
-          class="mt-6 inline-flex w-full justify-center items-center gap-2 rounded-lg border border-main bg-main px-4 py-2.5 font-semibold text-main hover:bg-secondary transition-colors">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-          </svg>
-          View on GitHub
-        </a>
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener" class="btn btn-secondary mt-8 w-full">View on GitHub</a>
       </div>
     </div>
   </section>
 
   <!-- Final CTA -->
-  <section class="mt-16 sm:mt-20">
-    <div class="rounded-xl border border-main bg-secondary p-8 sm:p-10 text-center">
-      <h2 class="text-2xl sm:text-3xl font-bold text-main">Ready to build your searchable memory of the web?</h2>
-      <p class="mt-3 text-sm text-secondary">Use the hosted version for free, or self-host the open source code.</p>
-      <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/signup" class="inline-flex justify-center rounded-lg border border-main bg-main px-6 py-3 font-semibold text-main hover:bg-secondary transition-colors">
-          Sign up for free
-        </a>
-        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener"
-          class="inline-flex justify-center items-center gap-2 rounded-lg border border-main px-6 py-3 font-medium text-secondary hover:text-main transition-colors">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
-          </svg>
-          Star on GitHub
-        </a>
+  <section class="mt-24">
+    <div class="rounded-3xl border border-line bg-linear-to-b from-linen to-canvas px-6 py-14 text-center sm:px-10">
+      <h2 class="headline mx-auto max-w-2xl text-ink">Ready to build your searchable memory of the web?</h2>
+      <p class="lede mt-3">Use the hosted version for free, or self-host the open source code.</p>
+      <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+        <a href="/signup" class="btn btn-primary">Sign up for free</a>
+        <a href="https://github.com/arashthr/pensive" target="_blank" rel="noopener" class="btn btn-secondary">Star on GitHub</a>
       </div>
     </div>
   </section>
 
 </div>
 
-<script src="/assets/scripts/animation.js"></script>
 <script src="/assets/scripts/slider.js"></script>
 
 {{template "footer" .}}

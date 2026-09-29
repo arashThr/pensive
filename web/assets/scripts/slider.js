@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const render = () => {
         track.style.transform = `translateX(${-index * 100}%)`;
-        dots.forEach((d, i) => d.classList.toggle('bg-white/60', i === index));
-        dots.forEach((d, i) => d.classList.toggle('bg-white/20', i !== index));
+        dots.forEach((d, i) => d.setAttribute('aria-current', i === index));
         captions.forEach((c, i) => c.classList.toggle('hidden', i !== index));
     };
 

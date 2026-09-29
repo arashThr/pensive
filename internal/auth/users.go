@@ -1076,9 +1076,8 @@ func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 		// Return HTML for HTMX
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`<div class="p-6 bg-white border-2 border-black">
-			<p class="font-bold">FAILED TO SEND EMAIL</p>
-			<p class="text-sm">Please try again or contact support.</p>
+		w.Write([]byte(`<div class="callout callout-danger">
+			Failed to send the email. Please try again or contact support.
 		</div>`))
 		return
 	}
@@ -1087,9 +1086,8 @@ func (u Users) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	// Return success HTML for HTMX
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`<div class="p-6 bg-white border-2 border-black">
-		<p class="font-bold">VERIFICATION EMAIL SENT</p>
-		<p class="text-sm">Check your inbox and click the verification link.</p>
+	w.Write([]byte(`<div class="callout callout-ok">
+		Verification email sent. Check your inbox and click the link.
 	</div>`))
 }
 

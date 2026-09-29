@@ -1,92 +1,62 @@
 {{template "header" .}}
 
-<div class="min-h-screen max-w-4xl mx-auto px-6 py-12">
-  <!-- Header Section -->
-  <div class="text-center mb-16">
+<div class="page">
+  <div class="mx-auto mb-10 max-w-xl text-center">
     {{if .IsSubscribed}}
-      <h1 class="text-3xl font-semibold tracking-tight text-main">Your premium plan</h1>
-      <p class="mt-2 text-secondary">You have full access to all premium features.</p>
+      <h1 class="headline text-ink">Your premium plan</h1>
+      <p class="lede mt-2">Thank you for supporting Pensive. You have the full set of daily limits.</p>
     {{else}}
-      <h1 class="text-3xl font-semibold tracking-tight text-main">Choose your plan</h1>
-      <p class="mt-2 text-secondary">Build your searchable memory of the web. Everything you read should be indexed and findable.</p>
+      <h1 class="headline text-ink">Choose your plan</h1>
+      <p class="lede mt-2">Every feature is free. Premium raises your daily limits and supports development.</p>
     {{end}}
   </div>
 
-  <!-- Comparison Table -->
-  <div class="mb-16 overflow-hidden rounded-xl border border-main bg-secondary">
-    <div class="grid grid-cols-1 md:grid-cols-2">
-      <!-- Free Plan -->
-      <div class="p-8 md:border-r border-main {{if .IsSubscribed}}opacity-75{{end}}">
-        <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-main mb-2">Free</h2>
-          <div class="text-3xl font-bold text-main mb-1">$0</div>
-          <p class="text-sm text-secondary">Forever free</p>
-        </div>
-        <ul class="space-y-3 text-secondary">
-          <li class="font-semibold text-main">• 10 bookmarks/day</li>
-          <li class="font-semibold text-main">• 1 AI question/day</li>
-          <li>• Full-text search</li>
-          <li>• Browser extension</li>
-          <li>• AI summaries & tags</li>
-          <li>• Telegram bot</li>
-        </ul>
-        {{if not .IsSubscribed}}
-        <div class="mt-8">
-          <a href="/signup" class="inline-flex w-full justify-center rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary">Get started free</a>
-        </div>
-        {{end}}
+  <div class="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+    <!-- Free -->
+    <div class="card flex flex-col p-6 sm:p-8">
+      <p class="eyebrow text-ink-faint">Free</p>
+      <p class="mt-2 font-serif text-4xl font-bold text-ink">$0</p>
+      <p class="mt-1 text-sm text-ink-muted">Forever free</p>
+      <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
+        <li><strong class="text-ink">10</strong> bookmarks/day</li>
+        <li><strong class="text-ink">1</strong> AI question/day</li>
+        <li>Full-text search</li>
+        <li>Browser extension & Telegram bot</li>
+        <li>AI summaries & tags</li>
+      </ul>
+      {{if not .IsSubscribed}}
+        <a href="/home" class="btn btn-secondary mt-8 w-full">Continue free</a>
+      {{end}}
+    </div>
+
+    <!-- Premium -->
+    <div class="card-raised flex flex-col border-clay/40 p-6 sm:p-8">
+      <div class="flex items-center justify-between">
+        <p class="eyebrow text-clay">Premium</p>
+        {{if .IsSubscribed}}<span class="badge badge-ok">Your plan</span>{{end}}
       </div>
-      <!-- Premium Plan -->
-      <div class="p-8 {{if .IsSubscribed}}bg-violet-500/5{{end}}">
-        <div class="text-center mb-6">
-          <h2 class="text-2xl font-bold text-main mb-2">Premium</h2>
-          <div class="text-3xl font-bold text-main mb-1">$5</div>
-          <p class="text-sm text-secondary">Per month</p>
-        </div>
-        <ul class="space-y-3 text-secondary">
-          <li class="font-semibold text-main">• 100 bookmarks/day</li>
-          <li class="font-semibold text-main">• 10 AI questions/day</li>
-          <li>• All free features</li>
-          <li>• Priority support</li>
-          <li>• Early access to new features</li>
-        </ul>
+      <p class="mt-2 font-serif text-4xl font-bold text-ink">$5 <span class="font-sans text-base font-normal text-ink-muted">/ month</span></p>
+      <p class="mt-1 text-sm text-ink-muted">More headroom for saving and asking</p>
+      <ul class="mt-6 flex-1 space-y-2.5 text-sm text-ink-muted">
+        <li><strong class="text-ink">100</strong> bookmarks/day</li>
+        <li><strong class="text-ink">10</strong> AI questions/day</li>
+        <li>Everything in Free</li>
+        <li>Priority support</li>
+        <li>Early access to new features</li>
+      </ul>
+      <div class="mt-8">
         {{if .IsSubscribed}}
-        <div class="mt-8">
-          <a href="/payments/portal-session" class="inline-flex w-full justify-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Manage subscription</a>
-        </div>
+          <a href="/payments/portal-session" class="btn btn-secondary w-full">Manage subscription</a>
+        {{else if isSubscriptionEnabled}}
+          <form action="/payments/create-checkout-session" method="post">
+            {{csrfField}}
+            <button type="submit" class="btn btn-primary w-full">Subscribe</button>
+          </form>
         {{else}}
-          {{if isSubscriptionEnabled}}
-          <div class="mt-8">
-            <form action="/payments/create-checkout-session" method="post">
-              {{csrfField}}
-              <button type="submit" class="inline-flex w-full justify-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Subscribe now</button>
-            </form>
-          </div>
-          {{else}}
-          <div class="mt-8">
-            <button type="button" class="inline-flex w-full cursor-not-allowed justify-center rounded-lg bg-secondary px-6 py-3 font-semibold text-secondary opacity-75" disabled>Subscribe (coming soon)</button>
-          </div>
-          {{end}}
+          <button type="button" class="btn btn-primary w-full" disabled>Coming soon</button>
         {{end}}
       </div>
     </div>
-  </div>
-
-  <!-- Already Subscribed Notice -->
-  {{if .IsSubscribed}}
-    <div class="mb-8 rounded-lg border border-main bg-secondary p-8 text-center">
-      <h3 class="font-semibold mb-2 text-green-300">You're all set with premium!</h3>
-      <p class="mb-6 text-green-200">Enjoy 100 bookmarks per day, 10 AI questions per day, and priority support.</p>
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/payments/portal-session" class="rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Manage billing</a>
-        <a href="/home" class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary">Start exploring</a>
-      </div>
-    </div>
-  {{end}}
-
-  <!-- Navigation -->
-  <div class="mt-8 text-center">
-    <a href="/home" class="font-medium text-secondary transition-colors hover:text-main">← Back to search</a>
   </div>
 </div>
 

@@ -79,6 +79,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Payments**: Stripe for subscription management
 - **Logging**: Zap for structured logging
 - **CSS**: TailwindCSS (built in separate container)
+- **Design system**: "Warm Archival Editorial" — tokens (colors, fonts, shadows) and component classes (`.btn`, `.card`, `.input`, `.callout`, `.ai-panel`, `.prose-archive`, …) live in `tailwind/style.css`; templates should use these rather than raw colors. Newsreader (serif) for headings, Plus Jakarta Sans for UI.
 
 ### Semantic Search & RAG Features
 - **pgvector**: Vector similarity search using gemini-embedding-001 (768 dimensions) with HNSW index

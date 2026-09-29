@@ -1,132 +1,53 @@
-<div class="space-y-8">
-  <!-- Header Section -->
-  <div class="mb-8">
-    <h2 class="text-xl font-bold mb-4 text-main">API tokens</h2>
-    <p class="text-secondary">Apps and services connected to your account.</p>
+<div class="space-y-6">
+  <div>
+    <h2 class="headline-md text-ink">API tokens</h2>
+    <p class="mt-1 text-ink-muted">Apps and services connected to your account.</p>
   </div>
 
-  <!-- Integrations List -->
-  <div id="token-container">
-    {{if .Tokens}}
-      <div class="overflow-hidden rounded-xl border border-main bg-secondary">
-        <!-- Desktop Table -->
-        <div class="hidden md:block">
-          <table class="w-full">
-            <thead class="border-b border-main bg-secondary">
-              <tr>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Integration</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Connected</th>
-                <th class="px-6 py-4 text-left text-sm font-semibold text-main">Last used</th>
-                <th class="w-16 px-6 py-4"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-white/10">
-              {{range $index, $token := .Tokens}}
-                <tr id="token-{{$index}}" class="transition-colors hover:bg-secondary">
-                  <td class="px-6 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-                        <svg class="h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                      </div>
-                      <div class="font-semibold text-main">{{$token.TokenSource}}</div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 text-sm text-secondary">{{$token.CreatedAt.Format "Jan 2, 2006"}}</td>
-                  <td class="px-6 py-4 text-sm text-secondary">
-                    {{if $token.LastUsedAt}}
-                      {{$token.LastUsedAt.Format "Jan 2, 2006"}}
-                    {{else}}
-                      <span class="text-secondary">Never</span>
-                    {{end}}
-                  </td>
-                  <td class="px-6 py-4 text-right">
-                    <form id="delete-form-{{$index}}">
-                      {{csrfField}}
-                      <input type="hidden" name="token_id" value="{{$token.ID}}">
-                      <button 
-                        type="button"
-                        class="px-3 py-2 bg-red-600 text-main font-medium rounded-lg hover:bg-red-700 transition-colors"
-                        hx-post="/users/delete-token" 
-                        hx-confirm="Are you sure?" 
-                        hx-target="#token-{{$index}}" 
-                        hx-swap="outerHTML"
-                        title="Disconnect integration">
-                        Remove
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              {{end}}
-            </tbody>
-          </table>
-        </div>
-        <!-- Mobile Cards -->
-        <div class="divide-y md:hidden divide-white/10">
-          {{range $index, $token := .Tokens}}
-            <div id="token-{{$index}}" class="p-6">
-              <div class="flex items-start justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-3 mb-2">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-                      <svg class="h-4 w-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                      </svg>
-                    </div>
-                    <p class="font-semibold text-main">{{$token.TokenSource}}</p>
-                  </div>
-                  <div class="text-sm space-y-1 pl-11">
-                    <div class="text-secondary">Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</div>
-                    <div class="text-secondary">
-                      Last used: {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}<span class="text-secondary">Never</span>{{end}}
-                    </div>
-                  </div>
-                </div>
-                <form id="delete-form-{{$index}}" class="ml-4 shrink-0">
-                  {{csrfField}}
-                  <input type="hidden" name="token_id" value="{{$token.ID}}">
-                  <button 
-                    type="button"
-                    class="px-3 py-2 bg-red-600 text-main font-medium rounded-lg hover:bg-red-700 transition-colors"
-                    hx-post="/users/delete-token" 
-                    hx-confirm="Are you sure?" 
-                    hx-target="#token-{{$index}}" 
-                    hx-swap="outerHTML"
-                    title="Disconnect integration">
-                    Remove
-                  </button>
-                </form>
-              </div>
-            </div>
-          {{end}}
-        </div>
-      </div>
-      <div class="mt-4 rounded-lg border border-amber-400/20 bg-amber-500/10 p-4">
-        <div class="flex items-start gap-3">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <p class="text-sm text-amber-200">Disconnecting tokens will stop integrations from working. This cannot be undone.</p>
-        </div>
-      </div>
-    {{else}}
-      <!-- Empty State -->
-      <div class="rounded-xl border border-main bg-secondary p-12 text-center">
-        <div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary">
-          <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold mb-3 text-main">No tokens connected</h3>
-        <p class="mx-auto mb-8 max-w-sm text-secondary">Connect apps and services to save and access your bookmarks.</p>
-        <a href="/integrations" class="inline-flex items-center gap-2 rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-          </svg>
-          View integrations
-        </a>
-      </div>
-    {{end}}
-  </div>
-</div> 
+  {{if .Tokens}}
+    <ul class="card divide-y divide-line">
+      {{range $index, $token := .Tokens}}
+        <li id="token-{{$index}}" class="flex items-center gap-4 p-5">
+          <div class="icon-tile">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="title truncate">{{$token.TokenSource}}</p>
+            <p class="meta mt-0.5">
+              <span>Connected {{$token.CreatedAt.Format "Jan 2, 2006"}}</span>
+              <span aria-hidden="true">·</span>
+              <span>Last used {{if $token.LastUsedAt}}{{$token.LastUsedAt.Format "Jan 2, 2006"}}{{else}}never{{end}}</span>
+            </p>
+          </div>
+          <form>
+            {{csrfField}}
+            <input type="hidden" name="token_id" value="{{$token.ID}}">
+            <button
+              type="button"
+              class="btn btn-sm btn-ghost text-danger hover:bg-danger-wash hover:text-danger"
+              hx-post="/users/delete-token"
+              hx-confirm="Disconnect this integration? It will stop working immediately."
+              hx-target="#token-{{$index}}"
+              hx-swap="outerHTML">
+              Remove
+            </button>
+          </form>
+        </li>
+      {{end}}
+    </ul>
+    <div class="callout callout-warn">
+      <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+      <p>Removing a token stops that integration from working. This cannot be undone.</p>
+    </div>
+  {{else}}
+    <div class="card px-6 py-12 text-center">
+      <h3 class="title">No tokens yet</h3>
+      <p class="mx-auto mt-1 mb-6 max-w-sm text-ink-muted">Install the browser extension or Telegram bot to connect them to your library.</p>
+      <a href="/integrations" class="btn btn-primary">View integrations</a>
+    </div>
+  {{end}}
+</div>

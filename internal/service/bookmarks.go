@@ -303,7 +303,7 @@ func (b Bookmarks) GetBookmarkMarkdownHTMX(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		if errors.Is(err, errors.ErrNotFound) {
 			w.Header().Set("Content-Type", "text/html")
-			w.Write([]byte(`<div class="p-4 text-center text-gray-500">
+			w.Write([]byte(`<div class="p-4 text-center text-ink-faint">
 				<p>No markdown content available for this bookmark.</p>
 			</div>`))
 			return

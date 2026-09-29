@@ -255,6 +255,7 @@ func (h Home) getPaginatedBookmarksData(user *models.User, page int) (types.Pagi
 			Id:        b.Id,
 			Title:     b.Title,
 			Link:      b.Link,
+			Hostname:  validations.ExtractHostname(b.Link),
 			CreatedAt: b.CreatedAt.Format("Jan 02"),
 			Excerpt:   strings.TrimSpace(excerpt),
 		})

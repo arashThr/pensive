@@ -1,53 +1,24 @@
 {{template "header" .}}
 
-<div class="min-h-screen max-w-2xl mx-auto px-6 py-12">
-
-  <!-- Not Available Card -->
-  <div class="rounded-xl border border-main bg-secondary p-6 text-center">
-    <div class="mb-6">
-      <svg class="w-16 h-16 mx-auto mb-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+<div class="page-narrow">
+  <div class="card mx-auto max-w-xl p-8 text-center">
+    <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     </div>
-    
-    <h1 class="text-3xl font-bold text-main mb-4">Markdown Content Not Available</h1>
-    <p class="mb-6 text-secondary">The AI-powered markdown version of this bookmark isn't ready yet.</p>
-    
-    <!-- Possible Reasons -->
-    <div class="mb-6 rounded-lg border border-main bg-secondary p-6 text-left">
-      <h3 class="text-xl font-semibold text-main mb-4">Possible Reasons:</h3>
-      <ul class="space-y-2 text-sm text-secondary">
-        <li class="flex items-start gap-2">
-          <span class="font-bold text-main">
-            
-          </span>
-          <span><strong>Processing in Progress:</strong> Our AI is still working on this bookmark</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="font-bold text-main">
-            
-          </span>
-          <span><strong>Imported:</strong> We don't provide AI summaries for imported items</span>
-        </li>
-        <li class="flex items-start gap-2">
-          <span class="font-bold text-main">
-            
-          </span>
-          <span><strong>Processing Failed:</strong> The content couldn't be converted to markdown</span>
-        </li>
-      </ul>
-    </div>
-    
-    <!-- Action Buttons -->
-    <div class="flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="/bookmarks/{{.Id}}"
-         class="rounded-lg bg-main border border-main px-4 py-2 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">
-        ← Back to bookmark
-      </a>
-      <a href="/bookmarks"
-         class="rounded-lg border border-main bg-secondary px-4 py-2 font-semibold text-secondary transition-colors hover:bg-secondary">
-        View All Bookmarks
-      </a>
+    <h1 class="headline-md text-ink">Markdown isn't ready</h1>
+    <p class="mt-2 text-ink-muted">There's no markdown version of this bookmark yet.</p>
+
+    <ul class="mt-6 space-y-2 rounded-xl border border-line bg-paper p-5 text-left text-sm text-ink-muted">
+      <li><strong class="text-ink">Still processing</strong> — the AI is still working on it.</li>
+      <li><strong class="text-ink">Imported</strong> — imported items don't get AI summaries.</li>
+      <li><strong class="text-ink">Processing failed</strong> — the content couldn't be converted.</li>
+    </ul>
+
+    <div class="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="/bookmarks/{{.Id}}" class="btn btn-primary">Back to bookmark</a>
+      <a href="/home" class="btn btn-secondary">Go to library</a>
     </div>
   </div>
 </div>

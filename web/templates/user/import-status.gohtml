@@ -1,115 +1,43 @@
 {{template "header" .}}
 
-<div class="min-h-screen max-w-2xl mx-auto px-6 py-12">
-  <div class="text-center">
+<div class="page-narrow">
+  <div class="card-raised mx-auto max-w-xl p-8 text-center">
     {{if .ImportComplete}}
-      <!-- Success State -->
-      <div class="mb-8">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary">
-          <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-forest-wash text-forest">
+        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
       </div>
-
-      <h1 class="text-3xl font-bold text-main mb-4">Import Complete!</h1>
-      <p class="mb-8 text-secondary">
-        Successfully imported <strong>{{.ImportedCount}} bookmarks</strong> from {{.Source}} into your library.
+      <h1 class="headline-md text-ink">Import complete</h1>
+      <p class="mt-2 text-ink-muted">
+        Imported <strong class="text-ink">{{.ImportedCount}} bookmarks</strong> from {{.Source}}. They're searchable now.
       </p>
-
-      <!-- Success Actions -->
-      <div class="mb-6 rounded-lg border border-main bg-secondary p-6">
-        <p class="text-lg font-semibold text-main mb-4">Your bookmarks are now searchable and ready to explore.</p>
-        <a
-          href="/bookmarks"
-          class="inline-flex items-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none"
-        >
-          Browse Your Library
-        </a>
-      </div>
+      <a href="/home" class="btn btn-primary mt-7">Browse your library</a>
 
     {{else if .ImportFailed}}
-      <!-- Error State -->
-      <div class="mb-8">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary">
-          <svg class="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </div>
+      <div class="mx-auto mb-5 flex size-14 items-center justify-center rounded-full bg-danger-wash text-danger">
+        <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
       </div>
-
-      <h1 class="text-3xl font-bold text-main mb-4">Import Failed</h1>
-      <p class="mb-8 text-secondary">
-        We encountered an issue while importing your {{.Source}} data.
-      </p>
-
+      <h1 class="headline-md text-ink">Import failed</h1>
+      <p class="mt-2 text-ink-muted">Something went wrong while importing your {{.Source}} data.</p>
       {{if .ErrorMessage}}
-        <div class="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-left">
-          <div class="flex items-start gap-3">
-            <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <div>
-              <h3 class="text-lg font-semibold text-red-300 mb-1">Error Details</h3>
-              <p class="text-sm text-red-200">{{.ErrorMessage}}</p>
-            </div>
-          </div>
-        </div>
+        <div class="callout callout-danger mt-6 text-left">{{.ErrorMessage}}</div>
       {{end}}
-
-      <!-- Error Actions -->
-      <div class="space-y-4">
-        <a
-          href="/users/pocket-import"
-          class="inline-flex items-center rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none"
-        >
-          Try Again
-        </a>
-      </div>
+      <a href="/users/pocket-import" class="btn btn-primary mt-7">Try again</a>
 
     {{else}}
-      <!-- Still Processing State -->
-      <div class="mb-8">
-        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary">
-          <svg class="h-8 w-8 animate-spin text-secondary" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-      </div>
-
-      <h1 class="text-3xl font-bold text-main mb-4">Import in Progress</h1>
-      <p class="mb-8 text-secondary">
-        Your {{.Source}} import is still being processed. Please wait a moment while we add your bookmarks to the library.
-      </p>
-
-      <div class="mb-6 rounded-lg border border-main bg-secondary p-6">
-        <div class="flex items-center justify-center mb-3">
-          <svg class="w-5 h-5 text-secondary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span class="text-lg font-semibold text-main">This page will refresh automatically</span>
-        </div>
-        <p class="text-sm text-secondary">
-          Large imports may take several minutes to complete.
-        </p>
-      </div>
-
-      <!-- Auto-refresh notice -->
       <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
+      <span class="spinner mx-auto mb-6 size-10 border-[3px]"></span>
+      <h1 class="headline-md text-ink">Import in progress</h1>
+      <p class="mt-2 text-ink-muted">Your {{.Source}} import is still running. Large imports can take several minutes.</p>
+      <p class="mt-6 text-sm text-ink-faint">This page refreshes automatically.</p>
     {{end}}
 
-    <!-- Navigation -->
-    <div class="mt-8 border-t border-main pt-6">
-      <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/home" class="text-sm font-medium text-secondary underline transition-colors hover:text-main">
-          ← Back to Search
-        </a>
-        <span class="hidden sm:inline text-secondary">|</span>
-        <a href="/users/me" class="text-sm font-medium text-secondary underline transition-colors hover:text-main">
-          Account Settings
-        </a>
-      </div>
+    <div class="mt-8 flex justify-center gap-2 border-t border-line pt-6">
+      <a href="/home" class="btn btn-sm btn-ghost">Library</a>
+      <a href="/users/me" class="btn btn-sm btn-ghost">Settings</a>
     </div>
   </div>
 </div>
