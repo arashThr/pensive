@@ -118,6 +118,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		data.Bookmarks = append(data.Bookmarks, types.BookmarkSearchResult{
 			Id:        r.Id,
 			Title:     r.Title,
+			TitleHTML: validations.HighlightedHTML(r.TitleHeadline),
 			Link:      r.Link,
 			Hostname:  validations.ExtractHostname(r.Link),
 			Headline:  r.Headline,

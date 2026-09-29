@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/arashthr/pensive/internal/logging"
 	"github.com/microcosm-cc/bluemonday"
@@ -57,4 +58,20 @@ func GetString(v any) string {
 		raw = fmt.Sprint(v)
 	}
 	return raw
+}
+
+// Markers wrapped around search matches by Postgres ts_headline. They are
+// Unicode private-use characters, so they never occur in real page text.
+const (
+	HighlightStart = ""
+	HighlightStop  = ""
+)
+
+// HighlightedHTML escapes plain text and turns match markers into <strong>
+// tags, so untrusted text (like page titles) can be shown with highlights.
+func HighlightedHTML(text string) template.HTML {
+	escaped := html.EscapeString(text)
+	escaped = strings.ReplaceAll(escaped, HighlightStart, "<strong>")
+	escaped = strings.ReplaceAll(escaped, HighlightStop, "</strong>")
+	return template.HTML(escaped)
 }
