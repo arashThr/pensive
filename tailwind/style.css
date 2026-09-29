@@ -76,11 +76,17 @@
     color: var(--color-ink);
   }
 
-  mark {
+  /* Search matches: <mark>, and the <strong> that Postgres ts_headline emits */
+  mark,
+  .search-snippet strong {
     background: color-mix(in srgb, var(--color-highlight) 70%, white);
     color: inherit;
     border-radius: 2px;
     padding: 0 2px;
+  }
+  .search-snippet strong {
+    font-weight: 600;
+    color: var(--color-ink);
   }
 
   input[type="checkbox"],

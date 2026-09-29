@@ -19,7 +19,7 @@
     </div>
     <h3 class="title line-clamp-2 wrap-break-word">{{.Title}}</h3>
     {{if .Headline}}
-    <p class="mt-1 line-clamp-2 text-ink-muted">{{.Headline}}</p>
+    <p class="search-snippet mt-1 line-clamp-2 text-ink-muted">{{safeHTML .Headline}}</p>
     {{end}}
   </a>
   {{end}}
