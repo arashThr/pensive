@@ -43,11 +43,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css" />
+  {{block "head" .}}{{end}}
   {{if shouldUseAnalytics}}
     <script defer src="https://cloud.umami.is/script.js" data-website-id="b95d62c9-9449-42d7-bea2-de799514d330"></script>
   {{end}}
 </head>
-<body class="flex min-h-screen flex-col">
+<body class="flex min-h-screen flex-col {{block "body-class" .}}{{end}}">
 
   <!-- Header -->
   <header class="sticky top-0 z-40 border-b border-line bg-canvas/85 backdrop-blur-md">

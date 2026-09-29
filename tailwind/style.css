@@ -40,6 +40,11 @@
   --color-danger-ink: #93000a;
   --color-danger-wash: #fdeceb;
 
+  /* Index-card theme extras (see .theme-index) */
+  --color-highlight: #ffe45c;
+  --color-rule: #d3def0;
+  --color-ink-deep: #0e1a33;
+
   /* Warm, espresso-tinted elevation */
   --shadow-soft: 0 4px 16px rgba(44, 39, 36, 0.05);
   --shadow-lift: 0 8px 20px rgba(44, 39, 36, 0.08);
@@ -383,3 +388,93 @@
 }
 .prose-archive th { background: var(--color-linen); color: var(--color-ink); font-weight: 600; }
 .prose-archive hr { border: 0; border-top: 1px solid var(--color-line); margin: 2em 0; }
+
+/*
+ * Index theme (prototype, landing page only).
+ * Cool index-card paper, ribbon red from the logo, highlighter yellow for
+ * search matches. Re-points the shared tokens so header, footer and
+ * components follow along on any page with body.theme-index.
+ */
+.theme-index {
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-canvas: #f5f7fa;
+  --color-linen: #eef2f7;
+  --color-kraft: #e5eaf2;
+  --color-paper: #ffffff;
+  --color-parchment: #ffffff;
+  --color-line: #dce3ee;
+  --color-line-strong: #c2ccdb;
+
+  --color-ink: #10182b;
+  --color-ink-muted: #4a5468;
+  --color-ink-faint: #7a8497;
+
+  --color-clay: #d62839;
+  --color-clay-dark: #b81d2e;
+  --color-clay-wash: #fdebed;
+
+  --color-forest: #16794f;
+  --color-forest-wash: #e3f4ec;
+  --color-forest-ink: #0b3b27;
+
+  --color-amber: #e0a800;
+  --color-amber-wash: #fff3a8;
+  --color-amber-ink: #4d3d00;
+
+  --shadow-soft: 0 1px 2px rgba(16, 24, 43, 0.05), 0 4px 14px rgba(16, 24, 43, 0.05);
+  --shadow-lift: 0 2px 4px rgba(16, 24, 43, 0.05), 0 16px 40px -8px rgba(16, 24, 43, 0.14);
+}
+.theme-index .display,
+.theme-index .headline,
+.theme-index .headline-md {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+/* Highlighter swash behind a word, like a search hit */
+.hl {
+  background: linear-gradient(transparent 58%, var(--color-highlight) 58%, var(--color-highlight) 92%, transparent 92%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.theme-index mark {
+  background: color-mix(in srgb, var(--color-highlight) 70%, white);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+/* Ruled index card: red header rule, pale blue lines */
+.index-card {
+  background-color: var(--color-paper);
+  background-image:
+    linear-gradient(var(--color-clay), var(--color-clay)),
+    repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--color-rule) 31px, var(--color-rule) 32px);
+  background-size: 100% 2px, 100% 100%;
+  background-position: 0 72px, 0 72px;
+  background-repeat: no-repeat, repeat;
+  line-height: 32px;
+}
+
+/* Blinking text caret */
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.15em;
+  margin-left: 1px;
+  vertical-align: -0.2em;
+  background: var(--color-clay);
+  animation: blink 1.1s steps(1) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caret { animation: none; }
+}
+
+.theme-index .waveform > span { background: var(--color-rule); opacity: 1; }
+.theme-index .waveform > span:nth-child(-n + 11) { background: var(--color-ink); }
