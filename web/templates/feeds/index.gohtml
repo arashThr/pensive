@@ -1,0 +1,86 @@
+{{template "header" .}}
+
+<div class="page">
+  <div class="mx-auto max-w-3xl">
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="headline text-ink">Feeds</h1>
+        <p class="lede mt-1">Posts from people you follow, searchable next to your library.</p>
+      </div>
+      {{if .Subscriptions}}
+        <a href="/feeds/export" class="btn btn-sm btn-ghost">Export OPML</a>
+      {{end}}
+    </div>
+
+    {{if .Subscriptions}}
+    <p class="mb-8 font-mono text-xs text-ink-faint">
+      {{.Stats.Posts}} posts from {{.Stats.Feeds}} feeds{{if .Stats.Since}} · collecting since {{.Stats.Since.Format "Jan 2, 2006"}}{{end}}
+      <span class="mt-1 block font-sans text-[13px]">Feeds only include recent posts, so this archive grows from the day you follow them.</span>
+    </p>
+    {{end}}
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <form action="/feeds/import" method="post" enctype="multipart/form-data" class="card p-5">
+        <h2 class="title">Sync from your reader</h2>
+        <p class="mt-1 mb-4 text-sm text-ink-muted">
+          Upload an OPML export. Re-upload any time: new feeds are added, feeds no longer in the file stop updating, and posts already collected stay searchable.
+        </p>
+        <input type="file" name="opml" accept=".opml,.xml,text/xml,text/x-opml" required
+          class="input cursor-pointer py-2 text-sm file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-surface-strong file:px-3 file:py-1 file:text-sm file:font-semibold file:text-ink hover:file:bg-line">
+        <button type="submit" class="btn btn-primary mt-3 w-full">Sync OPML</button>
+      </form>
+
+      <form action="/feeds" method="post" class="card p-5">
+        <h2 class="title">Follow a feed</h2>
+        <p class="mt-1 mb-4 text-sm text-ink-muted">Paste a feed URL, or a blog's address and Pensive will find its feed.</p>
+        <label class="label sr-only" for="feed-url">Feed or site URL</label>
+        <input class="input" id="feed-url" name="url" type="url" placeholder="https://example.com/blog" required />
+        <button type="submit" class="btn btn-secondary mt-3 w-full">Follow</button>
+      </form>
+    </div>
+
+    {{if .Recent}}
+    <section class="mt-12">
+      <h2 class="eyebrow mb-4 text-ink-faint">Recent posts</h2>
+      <div class="space-y-3">
+        {{range .Recent}}
+          {{template "feed-entry" .}}
+        {{end}}
+      </div>
+    </section>
+    {{else if .Subscriptions}}
+    <div class="callout callout-info mt-12">
+      <span class="spinner size-4 shrink-0"></span>
+      <p>Fetching your feeds. Posts will appear here within a few minutes.</p>
+    </div>
+    {{end}}
+
+    {{if .Subscriptions}}
+    <section class="mt-12">
+      <h2 class="eyebrow mb-4 text-ink-faint">Your feeds · {{len .Subscriptions}}</h2>
+      <ul class="card divide-y divide-line">
+        {{range .Subscriptions}}
+        <li class="flex items-center gap-4 px-5 py-3.5">
+          <div class="min-w-0 flex-1">
+            <p class="truncate font-medium text-ink">{{.Title}}</p>
+            <p class="truncate font-mono text-xs text-ink-faint">{{.URL}}</p>
+          </div>
+          {{if ge .ErrorCount 3}}
+            <span class="badge bg-danger-wash text-danger-ink" title="{{.LastError}}">Failing</span>
+          {{else if not .LastFetchedAt}}
+            <span class="text-[13px] whitespace-nowrap text-ink-faint">Waiting</span>
+          {{else}}
+            <span class="text-[13px] whitespace-nowrap text-ink-faint">{{.EntryCount}} posts</span>
+          {{end}}
+          <form action="/feeds/{{.FeedID}}/unsubscribe" method="post" onsubmit="return confirm('Stop following this feed? Posts already collected stay searchable.');">
+            <button type="submit" class="btn btn-sm btn-ghost">Remove</button>
+          </form>
+        </li>
+        {{end}}
+      </ul>
+    </section>
+    {{end}}
+  </div>
+</div>
+
+{{template "footer" .}}

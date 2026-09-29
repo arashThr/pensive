@@ -45,6 +45,7 @@ const (
 	TelegramSource
 	Api
 	Pocket
+	FeedSource
 )
 
 var sourceMapping = map[BookmarkSource]string{
@@ -52,6 +53,7 @@ var sourceMapping = map[BookmarkSource]string{
 	TelegramSource: "telegram",
 	Api:            "api",
 	Pocket:         "pocket",
+	FeedSource:     "feed",
 }
 
 type Bookmark struct {
@@ -890,9 +892,9 @@ func sanitizeSearchQuery(query string) string {
 	return query
 }
 
-// performFullTextSearch executes the full-text search using PostgreSQL's search capabilities
-func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]SearchResult, error) {
-	rows, err := model.Pool.Query(context.Background(), `
+// searchQueryCTE turns the sanitized query in $1 into a prefix-matching
+// tsquery ("term:* & term:*"), exposed as search_query.query (NULL if empty).
+const searchQueryCTE = `
 		WITH search_terms AS (
 			SELECT string_agg(
 				CASE 
@@ -911,7 +913,11 @@ func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]Se
 					ELSE to_tsquery('english', st.tsquery_string)
 				END AS query
 			FROM search_terms st
-		)
+		)`
+
+// performFullTextSearch executes the full-text search using PostgreSQL's search capabilities
+func (model *BookmarkRepo) performFullTextSearch(user *User, query string) ([]SearchResult, error) {
+	rows, err := model.Pool.Query(context.Background(), searchQueryCTE+`
 		SELECT
 			CASE 
 				WHEN sq.query IS NOT NULL THEN 

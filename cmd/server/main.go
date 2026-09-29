@@ -90,6 +90,7 @@ type ServiceContainer struct {
 	ImportJobRepo       *models.ImportJobRepo
 	AuthTokenRepo       *models.AuthTokenService
 	PodcastScheduleRepo *models.PodcastScheduleRepo
+	FeedRepo            *models.FeedRepo
 
 	// Services
 	EmailService     *service.EmailService
@@ -104,6 +105,7 @@ type ServiceContainer struct {
 	ExtensionService auth.Extension
 	TelegramService  auth.Telegram
 	PodcastService   service.Podcast
+	FeedsService     *service.Feeds
 
 	// Import processor
 	ImportProcessor importer.ImportProcessor
@@ -189,11 +191,20 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	bookmarksService.Templates.Markdown = views.Must(views.ParseTemplate("bookmarks/markdown.gohtml", "tailwind.gohtml"))
 	bookmarksService.Templates.MarkdownNotAvailable = views.Must(views.ParseTemplate("bookmarks/markdown-not-available.gohtml", "tailwind.gohtml"))
 
+	feedRepo := &models.FeedRepo{
+		Pool: pool,
+	}
+
 	homeService := service.Home{
 		BookmarkModel: bookmarkRepo,
+		FeedModel:     feedRepo,
 	}
 	homeService.Templates.Home = views.Must(views.ParseTemplate("home/home.gohtml", "tailwind.gohtml", "home/recent-results.gohtml"))
-	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml", "tailwind.gohtml"))
+	homeService.Templates.SearchResults = views.Must(views.ParseTemplate("home/search-results.gohtml", "tailwind.gohtml", "feeds/entry.gohtml"))
+
+	feedsService := service.NewFeeds(feedRepo, bookmarkRepo)
+	feedsService.Templates.Index = views.Must(views.ParseTemplate("feeds/index.gohtml", "tailwind.gohtml", "feeds/entry.gohtml"))
+	feedsService.Templates.Saved = views.Must(views.ParseTemplate("feeds/saved.gohtml"))
 	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml", "tailwind.gohtml"))
 	homeService.Templates.ChatAnswer = views.Must(views.ParseTemplate("home/chat-answer.gohtml"))
 
@@ -272,6 +283,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		ImportJobRepo:       importJobRepo,
 		AuthTokenRepo:       authTokenRepo,
 		PodcastScheduleRepo: podcastScheduleRepo,
+		FeedRepo:            feedRepo,
 
 		// Services
 		EmailService:     emailService,
@@ -286,6 +298,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		ExtensionService: extensionService,
 		TelegramService:  telegramService,
 		PodcastService:   podcastService,
+		FeedsService:     feedsService,
 
 		// Import processor
 		ImportProcessor: importProcessor,
@@ -308,6 +321,9 @@ func run(cfg *config.AppConfig, pool *pgxpool.Pool) error {
 	// Start podcast schedulers in background
 	go container.PodcastService.StartScheduler(ctx)
 	go container.PodcastService.StartDailyScheduler(ctx)
+
+	// Start feed refresher in background
+	go container.FeedsService.StartScheduler(ctx)
 
 	// Create routes with the service container
 	r := Routes(cfg, container)
@@ -444,6 +460,15 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			r.Get("/", c.HomeService.Index)
 			r.Get("/search", c.HomeService.Search)
 			r.Post("/ask", c.HomeService.AskQuestion)
+		})
+		r.Route("/feeds", func(r chi.Router) {
+			r.Use(umw.RequireUser)
+			r.Get("/", c.FeedsService.Index)
+			r.Post("/", c.FeedsService.Add)
+			r.Post("/import", c.FeedsService.Import)
+			r.Get("/export", c.FeedsService.Export)
+			r.Post("/{id}/unsubscribe", c.FeedsService.Unsubscribe)
+			r.Post("/entries/{id}/save", c.FeedsService.SaveEntry)
 		})
 		r.Route("/users", func(r chi.Router) {
 			r.Post("/", c.UsersService.Create)

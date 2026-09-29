@@ -17,6 +17,17 @@ const (
 	ExtractionMethodHTML            ExtractionMethod = "client-html"
 )
 
+// FeedSearchResult is a post from a followed feed, ready to render.
+type FeedSearchResult struct {
+	ID           int64
+	FeedTitle    string
+	URL          string
+	TitleHTML    template.HTML
+	HeadlineHTML template.HTML
+	PublishedAt  time.Time
+	Saved        bool
+}
+
 type BookmarkSearchResult struct {
 	Id    BookmarkId
 	Title string

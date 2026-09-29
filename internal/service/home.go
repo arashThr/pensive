@@ -20,7 +20,11 @@ type Home struct {
 		ChatAnswer    web.Template
 	}
 	BookmarkModel *models.BookmarkRepo
+	FeedModel     *models.FeedRepo
 }
+
+// feedResultsLimit caps the "From people you follow" section of search.
+const feedResultsLimit = 10
 
 func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 	user := usercontext.User(r.Context())
@@ -108,9 +112,10 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data struct {
-		Bookmarks  []types.BookmarkSearchResult
-		Query      string
-		HasResults bool
+		Bookmarks   []types.BookmarkSearchResult
+		Query       string
+		HasResults  bool
+		FeedResults []types.FeedSearchResult
 	}
 
 	data.Query = query
@@ -128,6 +133,15 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.HasResults = len(data.Bookmarks) > 0
+
+	// Posts from followed feeds; a failure here shouldn't hide library results.
+	if h.FeedModel != nil {
+		entries, err := h.FeedModel.Search(r.Context(), user.ID, query, feedResultsLimit)
+		if err != nil {
+			logger.Errorw("failed to search feed entries", "error", err, "user_id", user.ID)
+		}
+		data.FeedResults = feedSearchResults(entries)
+	}
 	logger.Debugw("search results", "user_id", user.ID, "query", query, "count", len(data.Bookmarks))
 
 	h.Templates.SearchResults.Execute(w, r, data)

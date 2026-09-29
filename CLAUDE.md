@@ -13,6 +13,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - Email verification system for password signups with usage limitations
 - Browser extensions (Chrome/Firefox) for easy bookmark saving
 - Telegram bot integration
+- **RSS/Atom feeds**: follow feeds (OPML sync or single URL) so posts from people you follow are searchable next to the library
 - Stripe payment processing for premium features
 - PostgreSQL database with pgvector extension and migrations
 - Docker containerization
@@ -37,7 +38,7 @@ This is a Go web application for bookmarking and content management, featuring:
 ### Building and Testing
 - `go build -o server_binary ./cmd/server/` - Build the server binary
 - `make run` - Use Makefile to run the application
-- No test files found in this codebase
+- `go test ./internal/service/` - Unit tests for feed parsing, OPML and fetch safety (`feeds_test.go`)
 
 ### Additional Services
 - Telegram bot: `go run integrations/telegram/bot.go`
@@ -97,6 +98,15 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Settings Page** (`/users/me`): User profile, tokens, import/export, data management
   - Preferences tab: weekly podcast (day, email/Telegram delivery) + daily briefing (hour, timezone, Telegram-only)
 
+### Feeds Feature
+- **Purpose**: search-first, not a reader. Posts from followed feeds show up in `/home` search under "From people you follow"; `/feeds` manages subscriptions and lists recent posts with Save/Open
+- **Storage**: `feeds` (one row per URL, shared across users), `feed_subscriptions` (user ↔ feed), `feed_entries` (kept indefinitely, plain-text content, weighted `search_vector`)
+- **Unsubscribing** sets `feed_subscriptions.unsubscribed_at`; posts collected before that stay searchable for that user
+- **OPML sync** (`POST /feeds/import`): diff against active subscriptions — follow new, unfollow missing; an empty file changes nothing. Export at `/feeds/export`
+- **Fetcher**: `Feeds.StartScheduler` in `internal/service/feeds.go` ticks every minute, refreshes due feeds (hourly, conditional GET via ETag/Last-Modified, exponential backoff on errors up to 24h). The HTTP client in `feedfetch.go` refuses loopback/private/link-local addresses
+- **Saving** a post calls `BookmarkModel.Create` with `FeedSource`, so limits, capture and AI processing are the same as any bookmark
+- **Limits**: 300 active feeds per user (`models.MaxFeedsPerUser`)
+
 ### Podcast Feature
 - **Script generation**: Gemini generates a full markdown podcast script from recent bookmarks, then a second Gemini call strips it to plain narration text
 - **TTS**: `callGoogleTTS` in `internal/service/podcast.go` splits the script into ≤3500-byte chunks (paragraph → sentence boundaries), calls Google Cloud TTS sequentially per chunk, writes temp OGG files, and concatenates with `ffmpeg -f concat -c copy`
@@ -121,6 +131,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - Import job tracking for Pocket imports
 - Telegram authentication tables
 - `summaries_pref` — per-user podcast preferences (enabled, day, email, telegram, daily_enabled, daily_hour, daily_timezone)
+- `feeds`, `feed_subscriptions`, `feed_entries` — shared RSS feeds, per-user subscriptions, searchable posts
 - `podcast_schedules` — unified schedule table for both weekly and daily episodes; `schedule_type` column (`weekly`/`daily`); UNIQUE on `(user_id, schedule_type)`; uses `podcast_schedule_status` enum
 
 ### User Account System

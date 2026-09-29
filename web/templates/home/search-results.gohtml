@@ -1,6 +1,6 @@
 {{if .HasResults}}
 <div class="mb-4 flex items-baseline justify-between gap-4">
-  <h2 class="eyebrow text-ink-faint">Search results</h2>
+  <h2 class="eyebrow text-ink-faint">Your library</h2>
   <span class="truncate text-[13px] text-ink-faint">
     {{len .Bookmarks}} result{{if ne (len .Bookmarks) 1}}s{{end}} for “{{.Query}}”
   </span>
@@ -24,8 +24,13 @@
   </a>
   {{end}}
 </div>
+{{else if .FeedResults}}
+<p class="text-sm text-ink-muted" data-no-results>
+  No bookmarks match “{{.Query}}”. Press <kbd class="rounded border border-line bg-paper px-1 font-mono text-[11px]">Enter</kbd> or
+  <button type="button" class="link" data-ask>ask AI</button> to search your library by meaning.
+</p>
 {{else}}
-<!-- Empty Search Results: Enter in the search box (or the button) asks AI instead -->
+<!-- Nothing anywhere: Enter in the search box (or the button) asks AI instead -->
 <div class="card px-6 py-14 text-center" data-no-results>
   <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl">
     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,4 +46,18 @@
     <a href="/bookmarks/new" class="btn btn-secondary">Add a bookmark</a>
   </div>
 </div>
+{{end}}
+
+{{if .FeedResults}}
+<section class="mt-10">
+  <div class="mb-4 flex items-baseline justify-between gap-4">
+    <h2 class="eyebrow text-ink-faint">From people you follow</h2>
+    <a href="/feeds" class="text-[13px] text-ink-faint hover:text-accent">Manage feeds</a>
+  </div>
+  <div class="space-y-3">
+    {{range .FeedResults}}
+      {{template "feed-entry" .}}
+    {{end}}
+  </div>
+</section>
 {{end}}

@@ -1,0 +1,5 @@
+{{if .Error}}
+<span class="text-sm font-medium text-danger">{{.Error}}</span>
+{{else}}
+<a href="/bookmarks/{{.BookmarkID}}" class="badge badge-ok">In your library · view</a>
+{{end}}
