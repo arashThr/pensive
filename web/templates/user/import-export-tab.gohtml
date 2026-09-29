@@ -1,35 +1,31 @@
-<div class="space-y-8">
-  <!-- Header -->
+<div class="space-y-6">
   <div>
-    <h2 class="text-xl font-bold mb-6 text-main">Import / Export</h2>
-    <p class="text-secondary leading-relaxed">Manage your bookmark data by importing from other services or exporting your current collection.</p>
-    <div class="mt-6 rounded-lg border border-amber-400/20 bg-amber-500/10 p-6">
-      <p class="mb-2 font-semibold text-amber-200">Beta reminder</p>
-      <p class="text-sm text-amber-200/90">During beta, export your data regularly as backup. Data may be lost during updates.</p>
-    </div>
+    <h2 class="headline-md text-ink">Import / export</h2>
+    <p class="mt-1 text-ink-muted">Bring your bookmarks in from other services, or take them with you.</p>
   </div>
 
-  <!-- Export Section -->
-  <div class="rounded-xl border border-main bg-secondary p-6">
-    <h3 class="text-xl font-semibold text-main mb-4">Export your data</h3>
-    <p class="mb-4 text-secondary leading-relaxed">Download all your bookmarks and metadata in a portable format. <strong class="text-main">During beta, use this regularly as backup.</strong></p>
-    <ul class="mb-6 space-y-1 text-secondary">
-      <li>• All bookmarks with metadata</li>
-      <li>• Tags and categories</li>
-      <li>• Creation dates and notes</li>
-    </ul>
+  <div class="callout callout-warn">
+    <span class="badge badge-ai mt-0.5">Beta</span>
+    <p>During beta, export your data regularly as a backup. Data may be lost during updates.</p>
+  </div>
+
+  <div class="card p-6">
+    <h3 class="title">Export your data</h3>
+    <p class="mt-1 mb-5 text-ink-muted">Download every bookmark with its tags, dates, and notes in a portable format.</p>
     <form action="/users/export" method="post">
       {{csrfField}}
-      <button type="submit" class="rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Export data</button>
+      <button type="submit" class="btn btn-primary">Export data</button>
     </form>
   </div>
 
-  <!-- Import Section -->
-  <div class="rounded-xl border border-main bg-secondary p-6">
-    <h3 class="text-xl font-semibold text-main mb-4">Import from Pocket</h3>
-    <p class="mb-6 text-secondary leading-relaxed">Migrate all your saved articles from Pocket to your personal library.</p>
-    <a href="/users/pocket-import" class="rounded-lg bg-main border border-main px-6 py-3 font-semibold text-main transition-colors hover:bg-secondary focus:outline-none">Import from Pocket</a>
+  <div class="card p-6">
+    <div class="flex items-start gap-4">
+      <img src="/assets/icons/pocket.png" alt="" class="size-10 shrink-0" />
+      <div>
+        <h3 class="title">Import from Pocket</h3>
+        <p class="mt-1 mb-5 text-ink-muted">Move all your saved articles from Pocket into your library.</p>
+        <a href="/users/pocket-import" class="btn btn-secondary">Import from Pocket</a>
+      </div>
+    </div>
   </div>
 </div>
-
- 

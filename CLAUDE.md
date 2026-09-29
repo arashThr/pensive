@@ -79,6 +79,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Payments**: Stripe for subscription management
 - **Logging**: Zap for structured logging
 - **CSS**: TailwindCSS (built in separate container)
+- **Design system**: "Index card" theme. All colors, fonts and shadows are defined once in the `@theme` block at the top of `tailwind/style.css` (semantic names: `canvas`, `surface`, `paper`, `ink`, `accent`, `highlight`, `notice`, `success`, `danger`, `font-display`, …); component classes (`.btn`, `.card`, `.input`, `.callout`, `.ai-panel`, `.prose-archive`, …) are built only from those tokens. To retheme, edit `@theme` — templates should never use raw colors. Fonts are loaded in `web/templates/tailwind.gohtml`.
 
 ### Semantic Search & RAG Features
 - **pgvector**: Vector similarity search using gemini-embedding-001 (768 dimensions) with HNSW index

@@ -1,26 +1,27 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16 flex justify-center">
-  <div class="w-full max-w-md bg-secondary border border-main rounded-2xl p-6 sm:p-8 text-center">
-    <h1 class="text-4xl font-bold text-main mb-4">Check your email</h1>
-    <p class="text-secondary leading-relaxed mb-8">
-      We've sent a password reset link to <span class="font-medium text-main">{{.Email}}</span>
-    </p>
-    <div class="bg-secondary border border-main rounded-lg p-6 mb-6 text-left">
-      <p class="text-sm font-semibold text-main mb-1">Next steps:</p>
-      <p class="text-sm text-secondary">Check your inbox and click the reset link to create a new password.</p>
+<div class="page-auth">
+  <div class="card-raised p-6 text-center sm:p-8">
+    <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl text-accent">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
     </div>
-    <div class="text-sm text-secondary mb-6">
-      <p class="mb-2">Didn't receive an email?</p>
-      <ul class="list-disc list-inside space-y-1 text-left">
+    <h1 class="headline-md text-ink">Check your email</h1>
+    <p class="mt-2 text-ink-muted">
+      We've sent a password reset link to <span class="font-semibold text-ink">{{.Email}}</span>.
+    </p>
+
+    <div class="mt-6 rounded-xl border border-line bg-surface p-4 text-left text-sm text-ink-muted">
+      <p class="mb-1 font-semibold text-ink">Didn't get it?</p>
+      <ul class="list-inside list-disc space-y-1">
         <li>Check your spam folder</li>
-        <li>Make sure you entered the correct email</li>
-        <li><a href="/forgot-pw" class="text-secondary hover:text-main underline font-medium transition-colors">Try again</a> or <a href="/contact" class="text-secondary hover:text-main underline font-medium transition-colors">contact support</a></li>
+        <li>Make sure the email address is correct</li>
+        <li><a href="/forgot-pw" class="link">Try again</a> or <a href="/contact" class="link">contact support</a></li>
       </ul>
     </div>
-    <div class="pt-6 border-t border-main">
-      <a href="/signin" class="text-sm text-secondary hover:text-main font-medium underline transition-colors">← Back to sign in</a>
-    </div>
+
+    <a href="/signin" class="btn btn-ghost mt-6">← Back to sign in</a>
   </div>
 </div>
 

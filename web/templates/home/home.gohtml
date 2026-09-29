@@ -1,223 +1,162 @@
 {{template "header" .}}
 
-<div class="px-6 py-12 max-w-5xl mx-auto">
-    <!-- Unified Search/Ask Section with Tabs -->
-    <div class="mb-8 max-w-2xl mx-auto">
-      <!-- Tabs -->
-      <div class="flex gap-2 mb-4">
-        <button
-          id="search-tab"
-          class="flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-secondary border border-main text-main"
-          onclick="switchTab('search')"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Search
-        </button>
-        <button
-          id="ask-tab"
-          class="flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-main border border-main text-secondary hover:bg-secondary hover:text-main"
-          onclick="switchTab('ask')"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-          </svg>
-          Ask AI
-        </button>
+<div class="page">
+  <div class="mx-auto max-w-3xl">
+    <div class="mb-8">
+      <h1 class="headline text-ink">Your library</h1>
+      <p class="lede mt-1">Search what you've saved, or ask a question across all of it.</p>
+    </div>
+
+    <!-- Search / Ask tabs -->
+    <div class="segmented mb-4 max-w-xs" role="tablist">
+      <button id="search-tab" class="segmented-item" role="tab" aria-selected="true" onclick="switchTab('search')">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        Search
+      </button>
+      <button id="ask-tab" class="segmented-item" role="tab" aria-selected="false" onclick="switchTab('ask')">
+        <svg class="h-4 w-4 text-notice" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
+        </svg>
+        Ask AI
+      </button>
+    </div>
+
+    <!-- Search mode -->
+    <div id="search-mode" class="flex items-center gap-3">
+      <div class="relative flex-1">
+        <svg class="pointer-events-none absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-ink-faint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Search your collection…"
+          class="input h-[52px] rounded-2xl border-[1.5px] bg-paper pr-12 pl-12"
+          id="search-input"
+          name="query"
+          autocomplete="off"
+          hx-get="/home/search"
+          hx-target="#results"
+          hx-trigger="input changed delay:300ms, search"
+          hx-indicator="#search-loading"
+        />
+        <span id="search-loading" class="htmx-indicator absolute top-1/2 right-4 -translate-y-1/2">
+          <span class="spinner"></span>
+        </span>
       </div>
+      <a href="/bookmarks/new" class="btn btn-primary h-[52px] rounded-2xl" title="Add bookmark manually">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span class="hidden sm:inline">Add</span>
+      </a>
+    </div>
 
-      <!-- Input Container -->
-      <div class="flex items-start gap-4">
-        <div class="relative flex-1">
-          <!-- Hidden CSRF token for Ask mode -->
-          <input type="hidden" name="gorilla.csrf.Token" value="{{csrfToken}}" id="csrf-token" />
-
-          <!-- Search Mode Input -->
-          <div id="search-mode">
-            <input
-              type="text"
-              placeholder="Search through your collection..."
-              class="w-full p-4 pr-12 border border-main rounded-lg outline-none bg-secondary text-main placeholder:text-secondary focus:border-main transition-colors"
-              id="search-input"
-              hx-get="/home/search"
-              hx-target="#results"
-              hx-trigger="input delay:300ms"
-              hx-indicator="#search-loading"
-              name="query"
-            />
-            <div class="absolute right-4 top-1/2 -translate-y-1/2">
-              <svg class="w-5 h-5 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" id="search-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <div id="search-loading" class="htmx-indicator hidden">
-                <div class="w-5 h-5 border-2 border-main border-t-secondary rounded-full animate-spin"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Ask Mode Input -->
-          <div id="ask-mode" class="hidden">
-            <textarea
-              name="question"
-              placeholder="Ask me anything about your bookmarked content..."
-              class="w-full p-4 border border-main rounded-lg outline-none bg-secondary text-main placeholder:text-secondary focus:border-main transition-colors resize-none"
-              rows="2"
-              id="question-input"
-            ></textarea>
-            <button
-              type="button"
-              class="mt-3 w-full px-6 py-3 border border-main bg-main text-main font-semibold rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
-              hx-post="/home/ask"
-              hx-target="#results"
-              hx-swap="innerHTML"
-              hx-indicator="#ask-loading"
-              hx-include="[name='question']"
-              id="ask-button"
-            >
-              Ask Question
-            </button>
-            <div id="ask-loading" class="htmx-indicator mt-3 text-center">
-              <div class="inline-flex items-center gap-2 px-4 py-2 bg-secondary border border-main rounded-lg">
-                <div class="w-4 h-4 border-2 border-main border-t-secondary rounded-full animate-spin"></div>
-                <span class="text-sm text-secondary font-medium">Thinking...</span>
-              </div>
-            </div>
-            <p class="mt-2 text-xs text-secondary text-center">
-              {{.RemainingAIQuestions}} questions remaining today
-            </p>
-          </div>
+    <!-- Ask mode -->
+    <div id="ask-mode" class="hidden">
+      <div class="card-raised p-2 focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/12">
+        <textarea
+          name="question"
+          id="question-input"
+          rows="3"
+          placeholder="Ask anything about what you've saved…"
+          class="block w-full resize-none bg-transparent px-3 py-2 text-[15px] text-ink outline-none placeholder:text-ink-faint"
+        ></textarea>
+        <div class="flex items-center justify-between gap-3 px-2 pb-1">
+          <span class="text-[13px] text-ink-faint">{{.RemainingAIQuestions}} questions left today</span>
+          <button
+            type="button"
+            id="ask-button"
+            class="btn btn-sm btn-primary"
+            hx-post="/home/ask"
+            hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
+            hx-include="[name='question']"
+            hx-target="#results"
+            hx-swap="innerHTML"
+            hx-indicator="#ask-loading"
+            hx-disabled-elt="this"
+          >
+            Ask
+          </button>
         </div>
-
-        <!-- Add bookmark button -->
-        <a href="/bookmarks/new"
-           id="add-bookmark-button"
-           class="shrink-0 w-14 h-14 border border-main bg-secondary hover:bg-main rounded-lg flex items-center justify-center transition-colors"
-           title="Add bookmark manually">
-          <svg class="w-6 h-6 text-main transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-        </a>
+      </div>
+      <div id="ask-loading" class="htmx-indicator mt-4 flex items-center justify-center gap-2 text-sm text-ink-muted">
+        <span class="spinner size-4"></span>
+        Reading through your library…
       </div>
     </div>
 
-    <script>
-      function switchTab(mode) {
-        const searchTab = document.getElementById('search-tab');
-        const askTab = document.getElementById('ask-tab');
-        const searchMode = document.getElementById('search-mode');
-        const askMode = document.getElementById('ask-mode');
-        const results = document.getElementById('results');
-        const addButton = document.getElementById('add-bookmark-button');
-
-        if (mode === 'search') {
-          // Update tab styles
-          searchTab.className = 'flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-secondary border border-main text-main';
-          askTab.className = 'flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-main border border-main text-secondary hover:bg-secondary hover:text-main';
-
-          // Show/hide inputs
-          searchMode.classList.remove('hidden');
-          askMode.classList.add('hidden');
-
-          // Show results area and reload recent bookmarks
-          results.classList.remove('hidden');
-
-          // Reload recent bookmarks (search endpoint with no query returns recent bookmarks)
-          htmx.ajax('GET', '/home/search', {target: '#results', swap: 'innerHTML'});
-
-          // Show add bookmark button
-          if (addButton) addButton.classList.remove('hidden');
-
-          // Clear input
-          document.getElementById('search-input').value = '';
-        } else {
-          // Update tab styles
-          askTab.className = 'flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-secondary border border-main text-main';
-          searchTab.className = 'flex-1 px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 bg-main border border-main text-secondary hover:bg-secondary hover:text-main';
-
-          // Show/hide inputs
-          askMode.classList.remove('hidden');
-          searchMode.classList.add('hidden');
-
-          // Hide results area (don't show recent bookmarks in Ask AI mode)
-          results.classList.add('hidden');
-
-          // Hide add bookmark button in Ask AI mode
-          if (addButton) addButton.classList.add('hidden');
-
-          // Clear question input
-          document.getElementById('question-input').value = '';
-        }
-      }
-
-      // Enable Enter key to submit question in Ask AI mode
-      document.addEventListener('DOMContentLoaded', function() {
-        const questionInput = document.getElementById('question-input');
-        const askButton = document.querySelector('#ask-mode button[type="button"]');
-
-        if (questionInput && askButton) {
-          questionInput.addEventListener('keydown', function(e) {
-            // Submit on Enter, but allow Shift+Enter for new lines
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              askButton.click();
-            }
-          });
-        }
-
-        // Listen for HTMX afterSwap event to show results after Ask AI response
-        const results = document.getElementById('results');
-        if (results) {
-          results.addEventListener('htmx:afterSwap', function(event) {
-            // Only show results if the swap came from the Ask button
-            if (event.detail.target.id === 'results') {
-              results.classList.remove('hidden');
-            }
-          });
-        }
-      });
-    </script>
-
     <!-- Email Verification Notice -->
     {{if not .EmailVerified}}
-    <div class="mb-8 max-w-2xl mx-auto">
-      <div class="rounded-xl border border-main bg-secondary p-6">
-        <div class="flex items-start gap-4">
-          <div class="shrink-0">
-            <div class="w-10 h-10 bg-secondary border border-main rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-              </svg>
-            </div>
-          </div>
-          <div class="flex-1">
-            <h3 class="font-semibold text-main mb-1">Email verification required</h3>
-            <p class="text-sm text-secondary mb-4">Your collection is limited to {{.RemainingBookmarks}} bookmarks until you verify your email address.</p>
-            <button
-              id="resend-btn"
-              class="border border-main bg-main px-5 py-2.5 text-main text-sm font-semibold rounded-lg hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              hx-post="/auth/resend-verification"
-              hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
-              hx-indicator="#resend-indicator"
-              hx-swap="outerHTML"
-              onclick="this.disabled=true"
-            >
-              Resend verification email
-            </button>
-            <span id="resend-indicator" class="htmx-indicator ml-2 text-sm text-secondary">Sending...</span>
-          </div>
-        </div>
+    <div class="callout callout-warn mt-6">
+      <svg class="mt-0.5 h-5 w-5 shrink-0 text-notice" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      <div class="flex-1">
+        <p class="font-semibold">Verify your email</p>
+        <p class="mt-0.5 mb-3">Your collection is limited to {{.RemainingBookmarks}} bookmarks until you verify your email address.</p>
+        <button
+          id="resend-btn"
+          class="btn btn-sm btn-secondary"
+          hx-post="/auth/resend-verification"
+          hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
+          hx-swap="outerHTML"
+          hx-disabled-elt="this"
+        >
+          Resend verification email
+        </button>
       </div>
     </div>
     {{end}}
 
-
-    <!-- Results Area -->
-    <div id="results">
+    <!-- Results -->
+    <div id="results" class="mt-8">
       {{template "recent-results" .}}
     </div>
   </div>
 </div>
+
+<script>
+  function switchTab(mode) {
+    const isSearch = mode === 'search';
+    document.getElementById('search-tab').setAttribute('aria-selected', isSearch);
+    document.getElementById('ask-tab').setAttribute('aria-selected', !isSearch);
+    document.getElementById('search-mode').classList.toggle('hidden', !isSearch);
+    document.getElementById('ask-mode').classList.toggle('hidden', isSearch);
+
+    const results = document.getElementById('results');
+    if (isSearch) {
+      // Search endpoint with no query returns recent bookmarks
+      document.getElementById('search-input').value = '';
+      results.classList.remove('hidden');
+      htmx.ajax('GET', '/home/search', {target: '#results', swap: 'innerHTML'});
+    } else {
+      // Recent bookmarks aren't shown in Ask AI mode until an answer arrives
+      results.classList.add('hidden');
+      const question = document.getElementById('question-input');
+      question.value = '';
+      question.focus();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const questionInput = document.getElementById('question-input');
+    const askButton = document.getElementById('ask-button');
+    const results = document.getElementById('results');
+
+    // Enter submits, Shift+Enter adds a new line
+    questionInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        askButton.click();
+      }
+    });
+
+    results.addEventListener('htmx:afterSwap', function () {
+      results.classList.remove('hidden');
+    });
+  });
+</script>
 
 {{template "footer" .}}

@@ -1,115 +1,64 @@
-<div class="space-y-8">
+<div class="space-y-6">
   <div>
-    <h2 class="text-xl font-bold mb-6 text-main">Data management</h2>
-    <p class="text-secondary leading-relaxed">Manage your data with options to delete content or your entire account. These actions are irreversible, so please proceed with caution.</p>
+    <h2 class="headline-md text-ink">Data management</h2>
+    <p class="mt-1 text-ink-muted">These actions are permanent. Consider exporting your data first.</p>
   </div>
 
-  <!-- Delete All Content -->
-  <div class="rounded-xl border border-red-400/20 bg-red-500/10 p-6">
-    <h3 class="text-xl font-semibold mb-2 text-red-200">Delete all content</h3>
-    <p class="mb-4 text-red-100">This will permanently delete all your saved bookmarks and their content. Your account will remain active and you can continue using Pensive.</p>
-    <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Consider exporting your data first from the Import/Export tab.</p>
-    <button 
-      id="delete-content-btn"
-      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-      onclick="showDeleteContentModal()"
-    >
-      Delete all content
+  <div class="card flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h3 class="title">Delete all content</h3>
+      <p class="mt-1 text-sm text-ink-muted">Permanently removes every saved bookmark. Your account stays active.</p>
+    </div>
+    <button class="btn btn-secondary text-danger hover:border-danger/30 hover:bg-danger-wash" onclick="toggleModal('delete-content-modal', true)">
+      Delete content
     </button>
   </div>
 
-  <!-- Delete Account -->
-  <div class="rounded-xl border border-red-400/20 bg-red-500/10 p-6">
-    <h3 class="text-xl font-semibold mb-2 text-red-200">Delete account</h3>
-    <p class="mb-4 text-red-100">This will permanently delete your entire account, including all content, settings, subscription information, and API tokens.</p>
-    <p class="text-sm mb-4 text-red-200 font-semibold">⚠️ This action cannot be undone. Make sure to cancel any active subscriptions and backup your data first.</p>
-    <button 
-      id="delete-account-btn"
-      class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-      onclick="showDeleteAccountModal()"
-    >
+  <div class="card flex flex-col gap-4 border-danger/20 p-6 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h3 class="title">Delete account</h3>
+      <p class="mt-1 text-sm text-ink-muted">Removes your account, content, settings, subscription and API tokens. Cancel any active subscription first.</p>
+    </div>
+    <button class="btn btn-danger" onclick="toggleModal('delete-account-modal', true)">
       Delete account
     </button>
   </div>
 </div>
 
-<!-- Delete Content Modal -->
-<div id="delete-content-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-main bg-main p-8 max-w-md mx-4">
-    <h3 class="text-xl font-semibold text-main mb-4">Confirm content deletion</h3>
-    <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete all your bookmarks and content?</p>
-    <p class="text-sm mb-6 text-red-200 font-semibold">This action cannot be undone. Have you backed up your data?</p>
-    
-    <div class="flex gap-4">
-      <button
-        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary"
-        onclick="hideDeleteContentModal()"
-      >
-        Cancel
-      </button>
-      <form action="/users/delete-content" method="POST" style="display: inline;">
+<div id="delete-content-modal" class="modal-backdrop" onclick="if (event.target === this) toggleModal(this.id, false)">
+  <div class="modal">
+    <h3 class="headline-md text-ink">Delete all content?</h3>
+    <p class="mt-3 text-ink-muted">Every bookmark and its content will be permanently deleted.</p>
+    <p class="mt-2 mb-6 text-sm font-semibold text-danger">This cannot be undone. Have you backed up your data?</p>
+    <div class="flex justify-end gap-3">
+      <button class="btn btn-secondary" onclick="toggleModal('delete-content-modal', false)">Cancel</button>
+      <form action="/users/delete-content" method="POST">
         {{csrfField}}
-        <button 
-          type="submit"
-          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-        >
-          Yes, delete all content
-        </button>
+        <button type="submit" class="btn btn-danger">Delete all content</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Delete Account Modal -->
-<div id="delete-account-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
-  <div class="rounded-xl border border-main bg-main p-8 max-w-md mx-4">
-    <h3 class="text-xl font-semibold text-main mb-4">Confirm account deletion</h3>
-    <p class="text-secondary leading-relaxed mb-4">Are you absolutely sure you want to delete your entire account?</p>
-    <p class="text-sm mb-6 text-red-200 font-semibold">This will permanently delete everything associated with your account. This action cannot be undone.</p>
-    
-    <div class="flex gap-4">
-      <button
-        class="rounded-lg border border-main bg-secondary px-6 py-3 font-semibold text-secondary transition-colors hover:bg-secondary"
-        onclick="hideDeleteAccountModal()"
-      >
-        Cancel
-      </button>
-      <form action="/users/delete-account" method="POST" style="display: inline;">
+<div id="delete-account-modal" class="modal-backdrop" onclick="if (event.target === this) toggleModal(this.id, false)">
+  <div class="modal">
+    <h3 class="headline-md text-ink">Delete your account?</h3>
+    <p class="mt-3 text-ink-muted">Everything associated with your account will be permanently deleted.</p>
+    <p class="mt-2 mb-6 text-sm font-semibold text-danger">This cannot be undone.</p>
+    <div class="flex justify-end gap-3">
+      <button class="btn btn-secondary" onclick="toggleModal('delete-account-modal', false)">Cancel</button>
+      <form action="/users/delete-account" method="POST">
         {{csrfField}}
-        <button 
-          type="submit"
-          class="rounded-lg bg-red-600 px-6 py-3 font-semibold text-main transition-colors hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
-        >
-          Yes, delete my account
-        </button>
+        <button type="submit" class="btn btn-danger">Delete my account</button>
       </form>
     </div>
   </div>
 </div>
-
 
 <script>
-function showDeleteContentModal() {
-  const modal = document.getElementById('delete-content-modal');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-function hideDeleteContentModal() {
-  const modal = document.getElementById('delete-content-modal');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-}
-
-function showDeleteAccountModal() {
-  const modal = document.getElementById('delete-account-modal');
-  modal.classList.remove('hidden');
-  modal.classList.add('flex');
-}
-
-function hideDeleteAccountModal() {
-  const modal = document.getElementById('delete-account-modal');
-  modal.classList.add('hidden');
-  modal.classList.remove('flex');
-}
+  function toggleModal(id, open) {
+    const modal = document.getElementById(id);
+    modal.classList.toggle('hidden', !open);
+    modal.classList.toggle('flex', open);
+  }
 </script>

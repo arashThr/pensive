@@ -1,176 +1,108 @@
 {{template "header" .}}
 
-<div class="min-h-screen px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-  <div class="mx-auto max-w-4xl space-y-8">
-    <div class="mb-10 text-center">
-      <h1 class="text-4xl font-bold text-main">Integrations</h1>
-      <p class="mt-3 text-secondary">Connect tools, import data, and extend functionality.</p>
-    </div>
-
-    <div class="w-full">
-      <!-- Tab Navigation -->
-      <div class="flex overflow-x-auto gap-2 mb-8 border-b border-main pb-[-1px] scrollbar-hide">
-        <button onclick="openTab('browser')" id="tab-browser" class="whitespace-nowrap px-4 py-3 font-medium text-main border-b-2 border-main transition-colors tab-button">Browser Extension</button>
-        <button onclick="openTab('telegram')" id="tab-telegram" class="whitespace-nowrap px-4 py-3 font-medium text-secondary hover:text-main border-b-2 border-transparent hover:border-secondary/50 transition-colors tab-button">Telegram Bot</button>
-        <button onclick="openTab('pocket')" id="tab-pocket" class="whitespace-nowrap px-4 py-3 font-medium text-secondary hover:text-main border-b-2 border-transparent hover:border-secondary/50 transition-colors tab-button">Pocket Import</button>
-        <button onclick="openTab('api')" id="tab-api" class="whitespace-nowrap px-4 py-3 font-medium text-secondary hover:text-main border-b-2 border-transparent hover:border-secondary/50 transition-colors tab-button">API Access</button>
-      </div>
-
-      <!-- Tab Contents -->
-      <div id="content-browser" class="tab-content block transition-opacity duration-300">
-        <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
-          <h2 class="text-2xl font-bold text-main">Browser extension</h2>
-          <p class="mt-2 text-secondary">One click to save any webpage. Works on Chrome and Firefox.</p>
-
-          <div class="mt-6 rounded-lg border border-main bg-secondary p-5">
-            <h3 class="font-semibold text-main">Setup Guide</h3>
-            <div class="mt-3 space-y-2 text-secondary text-sm">
-              <div class="flex gap-2"><span class="font-medium text-main">1.</span> Install extension from your preferred browser store.</div>
-              <div class="flex gap-2"><span class="font-medium text-main">2.</span> Create an API token in your account settings.</div>
-              <div class="flex gap-2"><span class="font-medium text-main">3.</span> Click the extension icon on any page to save it instantly.</div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
-              <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="transition-transform hover:scale-105">
-                <img src="/assets/promo/google-store.png" alt="Install for Chrome" class="h-12 w-auto">
-              </a>
-              <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" target="_blank" rel="noopener" class="transition-transform hover:scale-105">
-                <img src="/assets/promo/get-the-addon.png" alt="Install for Firefox" class="h-12 w-auto">
-              </a>
-            </div>
-            {{if .LoggedIn}}
-            <a href="/users/me?tab=tokens" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Manage tokens</a>
-            {{else}}
-            <a href="/signin" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Sign in to manage</a>
-            {{end}}
-          </div>
-        </div>
-      </div>
-
-      <div id="content-telegram" class="tab-content hidden transition-opacity duration-300">
-        <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
-          <div class="flex items-center gap-4 mb-2">
-            <img src="/assets/icons/telegram.svg" alt="Telegram" class="h-10 w-10">
-            <h2 class="text-2xl font-bold text-main">Telegram bot</h2>
-          </div>
-          <p class="text-secondary">Save links from mobile and search your library directly in chat.</p>
-
-          <div class="mt-6 rounded-lg border border-main bg-secondary p-5">
-            <h3 class="font-semibold text-main">Features</h3>
-            <div class="mt-3 space-y-2 text-secondary text-sm">
-              <div class="flex items-center gap-2"><svg class="w-4 h-4 text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Forward any link and it is saved instantly.</div>
-              <div class="flex items-center gap-2"><svg class="w-4 h-4 text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Search your complete library directly within Telegram.</div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="rounded-lg border border-main bg-main px-4 py-2 inline-flex items-center gap-3 w-fit">
-              <span class="text-sm text-secondary">Status:</span>
-              <span class="font-medium text-main flex items-center gap-2">
-                {{if .TelegramLinked}}
-                  <span class="w-2 h-2 rounded-full bg-green-500"></span> Connected
-                {{else}}
-                  <span class="w-2 h-2 rounded-full bg-yellow-500"></span> Not connected
-                {{end}}
-              </span>
-            </div>
-            <a href="/telegram/auth" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">
-              {{if .TelegramLinked}}Reconnect Telegram{{else}}Connect Telegram{{end}}
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div id="content-pocket" class="tab-content hidden transition-opacity duration-300">
-        <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
-          <div class="flex items-center gap-4 mb-2">
-            <img src="/assets/icons/pocket.png" alt="Pocket" class="h-10 w-10">
-            <h2 class="text-2xl font-bold text-main">Pocket import</h2>
-          </div>
-          <p class="text-secondary">Migrate your Pocket bookmarks with tags and dates preserved.</p>
-
-          <div class="mt-6 rounded-lg border border-main bg-secondary p-5">
-            <h3 class="font-semibold text-main">Import Flow</h3>
-            <div class="mt-3 space-y-2 text-secondary text-sm">
-              <div class="flex gap-2"><span class="font-medium text-main">1.</span> Export your archive from your Pocket account settings.</div>
-              <div class="flex gap-2"><span class="font-medium text-main">2.</span> Upload the ZIP or HTML file in the import page.</div>
-              <div class="flex gap-2"><span class="font-medium text-main">3.</span> Processing will run in the background seamlessly.</div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex justify-end">
-            <a href="/pocket" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Start Pocket import</a>
-          </div>
-        </div>
-      </div>
-
-      <div id="content-api" class="tab-content hidden transition-opacity duration-300">
-        <div class="rounded-xl border border-main bg-main p-6 sm:p-8">
-          <h2 class="text-2xl font-bold text-main">API access</h2>
-          <p class="mt-2 text-secondary">Build custom workflows and connect external tools.</p>
-
-          <div class="mt-6 rounded-lg border border-main bg-secondary p-5">
-            <h3 class="font-semibold text-main">Developer notes</h3>
-            <div class="mt-3 space-y-2 text-secondary text-sm">
-              <div class="flex items-center gap-2"><svg class="w-4 h-4 text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg> REST API for saving and searching bookmarks.</div>
-              <div class="flex items-center gap-2"><svg class="w-4 h-4 text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg> Token-based auth for browser extensions and scripts.</div>
-              <div class="flex items-center gap-2"><svg class="w-4 h-4 text-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg> Webhook support coming soon.</div>
-            </div>
-          </div>
-
-          <div class="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="rounded-lg border border-main bg-main px-4 py-2 inline-flex items-center gap-3 w-fit">
-              <span class="text-sm text-secondary">Active tokens:</span>
-              <span class="font-medium text-main">{{if .LoggedIn}}{{.TokensCount}}{{else}}-{{end}}</span>
-            </div>
-            
-            {{if .LoggedIn}}
-            <a href="/users/me?tab=tokens" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Manage API tokens</a>
-            {{else}}
-            <a href="/signin" class="inline-flex items-center justify-center rounded-lg border border-main bg-main px-5 py-2.5 font-medium text-main hover:bg-secondary transition-colors">Sign in for API access</a>
-            {{end}}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <section class="mt-12 rounded-xl border border-main bg-secondary p-8 text-center">
-      <h3 class="text-xl font-semibold text-main">More integrations coming</h3>
-      <p class="mt-2 text-secondary max-w-lg mx-auto">IFTTT, Zapier, RSS feeds, and more. <br class="sm:hidden" /><a href="/contact" class="font-medium text-main underline decoration-secondary underline-offset-4 hover:decoration-main transition-colors">Suggest an integration</a>.</p>
-    </section>
+<div class="page-narrow">
+  <div class="mb-8">
+    <h1 class="headline text-ink">Integrations</h1>
+    <p class="lede mt-1">Save from anywhere, bring your old library, or build your own tools.</p>
   </div>
+
+  <div class="mb-8 flex gap-6 overflow-x-auto border-b border-line" role="tablist">
+    <button class="tab-underline" role="tab" data-tab="browser" aria-selected="true">Browser extension</button>
+    <button class="tab-underline" role="tab" data-tab="telegram" aria-selected="false">Telegram bot</button>
+    <button class="tab-underline" role="tab" data-tab="pocket" aria-selected="false">Pocket import</button>
+    <button class="tab-underline" role="tab" data-tab="api" aria-selected="false">API access</button>
+  </div>
+
+  <!-- Browser -->
+  <section id="content-browser" class="card p-6 sm:p-8" data-panel>
+    <div class="flex items-center gap-3">
+      <img src="/assets/icons/chrome.svg" alt="" class="size-9">
+      <img src="/assets/icons/firefox.svg" alt="" class="size-9">
+    </div>
+    <h2 class="headline-md mt-4 text-ink">Browser extension</h2>
+    <p class="mt-1 text-ink-muted">One click saves any page with its full text. Works on Chrome and Firefox.</p>
+
+    <ol class="mt-6 space-y-3 text-sm text-ink-muted">
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">1</span> Install the extension from your browser's store.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">2</span> Create an API token in your account settings.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">3</span> Click the extension icon on any page to save it.</li>
+    </ol>
+
+    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+      <a href="https://chromewebstore.google.com/detail/pensive-save-search-what/klmginbbicjdpaodcbokdjbhnbaocomd" target="_blank" rel="noopener" class="btn btn-primary">Add to Chrome</a>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/pensive/" target="_blank" rel="noopener" class="btn btn-secondary">Add to Firefox</a>
+    </div>
+  </section>
+
+  <!-- Telegram -->
+  <section id="content-telegram" class="card hidden p-6 sm:p-8" data-panel>
+    <img src="/assets/icons/telegram.svg" alt="" class="size-9">
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <h2 class="headline-md text-ink">Telegram bot</h2>
+      {{if .TelegramLinked}}
+        <span class="badge badge-ok">Connected</span>
+      {{else}}
+        <span class="badge bg-surface-strong text-ink-muted">Not connected</span>
+      {{end}}
+    </div>
+    <p class="mt-1 text-ink-muted">Save links from your phone and search your library right in the chat.</p>
+
+    <ul class="mt-6 space-y-2 text-sm text-ink-muted">
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Forward any link and it's saved instantly</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Search your whole library from Telegram</li>
+    </ul>
+
+    <a href="/telegram/auth" class="btn btn-primary mt-8">{{if .TelegramLinked}}Reconnect Telegram{{else}}Connect Telegram{{end}}</a>
+  </section>
+
+  <!-- Pocket -->
+  <section id="content-pocket" class="card hidden p-6 sm:p-8" data-panel>
+    <img src="/assets/icons/pocket.png" alt="" class="size-9">
+    <h2 class="headline-md mt-4 text-ink">Pocket import</h2>
+    <p class="mt-1 text-ink-muted">Bring over your Pocket bookmarks with their tags and dates.</p>
+
+    <ol class="mt-6 space-y-3 text-sm text-ink-muted">
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">1</span> Export your archive from your Pocket account.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">2</span> Upload the ZIP file on the import page.</li>
+      <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-wash text-xs font-bold text-accent">3</span> Processing runs in the background.</li>
+    </ol>
+
+    <a href="/pocket" class="btn btn-primary mt-8">Start Pocket import</a>
+  </section>
+
+  <!-- API -->
+  <section id="content-api" class="card hidden p-6 sm:p-8" data-panel>
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 class="headline-md text-ink">API access</h2>
+      {{if .LoggedIn}}<span class="badge bg-surface-strong text-ink-muted">{{.TokensCount}} active tokens</span>{{end}}
+    </div>
+    <p class="mt-1 text-ink-muted">Build your own workflows and connect external tools.</p>
+
+    <ul class="mt-6 space-y-2 text-sm text-ink-muted">
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> REST API for saving and searching bookmarks</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Token-based auth for extensions and scripts</li>
+      <li class="flex items-center gap-2"><svg class="h-4 w-4 text-ink-faint" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Webhooks coming soon</li>
+    </ul>
+
+    {{if .LoggedIn}}
+      <a href="/users/me?tab=tokens" class="btn btn-primary mt-8">Manage API tokens</a>
+    {{else}}
+      <a href="/signin" class="btn btn-primary mt-8">Sign in for API access</a>
+    {{end}}
+  </section>
+
+  <p class="mt-10 text-center text-sm text-ink-muted">
+    IFTTT, Zapier, RSS and more are on the way. <a href="/contact" class="link">Suggest an integration</a>
+  </p>
 </div>
 
 <script>
-  function openTab(tabName) {
-    const contents = document.querySelectorAll('.tab-content');
-    contents.forEach(c => {
-        c.classList.add('hidden');
-        c.classList.remove('block');
+  document.querySelectorAll('[data-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('[data-tab]').forEach((t) => t.setAttribute('aria-selected', t === tab));
+      document.querySelectorAll('[data-panel]').forEach((p) => p.classList.toggle('hidden', p.id !== 'content-' + tab.dataset.tab));
     });
-
-    const buttons = document.querySelectorAll('.tab-button');
-    buttons.forEach(b => {
-        b.classList.remove('text-main', 'border-main');
-        b.classList.add('text-secondary', 'border-transparent');
-    });
-
-    const activeContent = document.getElementById('content-' + tabName);
-    activeContent.classList.remove('hidden');
-    activeContent.classList.add('block');
-    
-    // Quick fade-in effect
-    activeContent.style.opacity = 0;
-    setTimeout(() => {
-        activeContent.style.opacity = 1;
-    }, 10);
-
-    const activeButton = document.getElementById('tab-' + tabName);
-    activeButton.classList.remove('text-secondary', 'border-transparent');
-    activeButton.classList.add('text-main', 'border-main');
-  }
+  });
 </script>
 
 {{template "footer" .}}

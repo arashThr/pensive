@@ -1,41 +1,23 @@
 {{template "header" .}}
+<meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
 
-<div class="min-h-screen max-w-2xl mx-auto px-6 py-12">
-  <div class="text-center">
-    <!-- Processing Spinner -->
-    <div class="mb-8">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-main bg-secondary">
-        <svg class="h-8 w-8 animate-spin text-secondary" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </div>
-    </div>
+<div class="page-narrow">
+  <div class="card-raised mx-auto max-w-xl p-8 text-center">
+    <span class="spinner mx-auto mb-6 size-10 border-[3px]"></span>
+    <h1 class="headline-md text-ink">Importing your library</h1>
+    <p class="mt-2 text-ink-muted">We're bringing in your {{.Source}} data. Depending on how many bookmarks you have, this may take a few minutes.</p>
 
-    <h1 class="text-3xl font-bold text-main mb-4">Processing Your Import</h1>
-    <p class="mb-8 text-secondary">We're importing your {{.Source}} data into your library. This may take a few minutes depending on the number of bookmarks.</p>
-    <div class="mb-8 rounded-lg border border-main bg-secondary p-6">
-      <p class="text-lg font-semibold text-main mb-4">Import Progress</p>
-      <ul class="space-y-2 text-sm text-secondary">
-        <li>
-          <span class="font-medium text-secondary">•</span> File uploaded and validated
-        </li>
-        <li>
-          <span class="font-medium text-secondary">•</span> Processing bookmarks and metadata
-        </li>
-        <li>
-          <span class="font-medium text-secondary">•</span> Adding to your library
-        </li>
-      </ul>
+    <ul class="mx-auto mt-6 max-w-xs space-y-2 text-left text-sm text-ink-muted">
+      <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-success"></span> File uploaded and validated</li>
+      <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-accent"></span> Processing bookmarks and metadata</li>
+      <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-line-strong"></span> Adding them to your library</li>
+    </ul>
+
+    <p class="mt-8 text-sm text-ink-faint">This page refreshes automatically.</p>
+    <div class="mt-3 flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="/users/import-status?job_id={{.JobID}}" class="btn btn-secondary">View import status</a>
+      <a href="/home" class="btn btn-ghost">Go to library</a>
     </div>
-    <div class="rounded-lg border border-main bg-secondary p-6">
-      <p class="mb-4 text-secondary">You'll be automatically redirected when the import is complete.</p>
-      <p class="font-mono text-sm text-secondary">Or check back in a few minutes.</p>
-      <a href="/users/import-status?job_id={{.JobID}}" class="font-medium text-secondary underline transition-colors hover:text-main">View Import Status</a>
-      <span class="hidden sm:inline text-secondary"> | </span>
-      <a href="/bookmarks" class="font-medium text-secondary underline transition-colors hover:text-main">View Your Library</a>
-    </div>
-    <meta http-equiv="refresh" content="10;url=/users/import-status?job_id={{.JobID}}">
   </div>
 </div>
 

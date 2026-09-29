@@ -28,6 +28,7 @@ type BookmarkListItem struct {
 	Id        BookmarkId
 	Title     string
 	Link      string
+	Hostname  string
 	CreatedAt string
 	Excerpt   string
 }

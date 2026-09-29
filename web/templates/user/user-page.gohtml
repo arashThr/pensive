@@ -1,272 +1,53 @@
 {{template "header" .}}
 
-<div class="min-h-screen max-w-5xl mx-auto px-6 py-12">
-
-  <!-- Page Header -->
-  <div class="mb-10">
-    <h1 class="text-3xl font-semibold tracking-tight text-main">Account settings</h1>
-    <p class="mt-2 text-secondary">Manage your profile, integrations, and data.</p>
+<div class="page">
+  <div class="mb-8">
+    <h1 class="headline text-ink">Settings</h1>
+    <p class="lede mt-1">Manage your profile, integrations, and data.</p>
   </div>
-  
-  <div class="flex flex-col lg:flex-row gap-8">
-    
-    <!-- Mobile Tab Selector -->
-    <div class="lg:hidden">
-      <select 
-        id="mobile-tab-select"
-        name="tab"
-        class="w-full rounded-lg border border-main bg-secondary px-4 py-3 text-main outline-none focus:border-main"
-        hx-get="/users/tab-content"
-        hx-target="#tab-content"
-        hx-swap="innerHTML"
-        hx-trigger="change"
-      >
-        <option value="profile">Profile</option>
-        <option value="tokens">API Tokens</option>
-        <option value="import-export">Import / Export</option>
-        <option value="data-management">Data Management</option>
-      </select>
-    </div>
 
-    <!-- Desktop Sidebar -->
-    <div class="hidden lg:block lg:w-64 lg:shrink-0">
-      <nav class="rounded-xl border border-main bg-secondary p-2">
-        <ul class="space-y-1 p-2">
-          <li>
-            <button 
-              class="tab-button w-full rounded-lg px-4 py-3 text-left font-medium text-secondary transition-colors hover:bg-secondary active"
-              data-tab="profile"
-              hx-get="/users/tab-content?tab=profile"
-              hx-target="#tab-content"
-              hx-swap="innerHTML"
-            >
-              Profile
-            </button>
-          </li>
-          <li>
-            <button 
-              class="tab-button w-full rounded-lg px-4 py-3 text-left font-medium text-secondary transition-colors hover:bg-secondary"
-              data-tab="tokens"
-              hx-get="/users/tab-content?tab=tokens"
-              hx-target="#tab-content"
-              hx-swap="innerHTML"
-            >
-              API Tokens
-            </button>
-          </li>
-          <li>
-            <button 
-              class="tab-button w-full rounded-lg px-4 py-3 text-left font-medium text-secondary transition-colors hover:bg-secondary"
-              data-tab="import-export"
-              hx-get="/users/tab-content?tab=import-export"
-              hx-target="#tab-content"
-              hx-swap="innerHTML"
-            >
-              Import / Export
-            </button>
-          </li>
-          <li>
-            <button 
-              class="tab-button w-full rounded-lg px-4 py-3 text-left font-medium text-secondary transition-colors hover:bg-secondary"
-              data-tab="data-management"
-              hx-get="/users/tab-content?tab=data-management"
-              hx-target="#tab-content"
-              hx-swap="innerHTML"
-            >
-              Data Management
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
+  <div class="flex flex-col gap-6 lg:flex-row lg:gap-10">
+    <!-- Mobile tab selector -->
+    <select id="mobile-tab-select" class="input lg:hidden" aria-label="Settings section">
+      <option value="profile">Profile</option>
+      <option value="tokens">API tokens</option>
+      <option value="import-export">Import / export</option>
+      <option value="data-management">Data management</option>
+    </select>
 
-    <!-- Tab Content Area -->
-    <div class="flex-1">
-      <div id="tab-content" class="rounded-xl border border-main bg-secondary p-8"
-           hx-get="/users/tab-content?tab=profile"
-           hx-trigger="load"
-           hx-swap="innerHTML">
-        
-        <!-- Loading State -->
-        <div class="text-center py-16">
-          <div class="inline-block h-8 w-8 animate-spin rounded-full border-2 border-main border-t-secondary"></div>
-          <p class="mt-4 font-medium text-secondary">Loading...</p>
-        </div>
-        
+    <!-- Desktop sidebar -->
+    <nav class="hidden shrink-0 space-y-1 lg:block lg:w-56" role="tablist">
+      <button class="nav-item" role="tab" data-tab="profile">Profile</button>
+      <button class="nav-item" role="tab" data-tab="tokens">API tokens</button>
+      <button class="nav-item" role="tab" data-tab="import-export">Import / export</button>
+      <button class="nav-item" role="tab" data-tab="data-management">Data management</button>
+    </nav>
+
+    <div id="tab-content" class="min-w-0 flex-1">
+      <div class="flex items-center justify-center py-16">
+        <span class="spinner"></span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const tabButtons = document.querySelectorAll('.tab-button');
-  const mobileSelect = document.getElementById('mobile-tab-select');
+  document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('[data-tab]');
+    const mobileSelect = document.getElementById('mobile-tab-select');
 
-  const activeClasses = ['active', 'bg-main', 'text-main', 'ring-1'];
-  const inactiveRemoveClasses = ['active', 'bg-main', 'text-main', 'ring-1'];
-  const inactiveAddClasses = ['hover:bg-secondary', 'text-secondary'];
-  
-  // Desktop tab switching
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remove active styles from all buttons
-      tabButtons.forEach(btn => {
-        btn.classList.remove(...inactiveRemoveClasses);
-        btn.classList.add(...inactiveAddClasses);
-      });
-      
-      // Add active styles to clicked button
-      this.classList.add(...activeClasses);
-      this.classList.remove('hover:bg-secondary', 'text-secondary');
-      
-      // Update mobile select to match
-      const tab = this.getAttribute('data-tab');
+    function selectTab(tab) {
+      buttons.forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === tab));
       mobileSelect.value = tab;
-    });
-  });
-  
-  // Mobile tab switching
-  mobileSelect.addEventListener('change', function() {
-    const selectedTab = this.value;
-    
-    // Update desktop active state
-    tabButtons.forEach(btn => {
-      btn.classList.remove(...inactiveRemoveClasses);
-      btn.classList.add(...inactiveAddClasses);
-      
-      if (btn.getAttribute('data-tab') === selectedTab) {
-        btn.classList.add(...activeClasses);
-        btn.classList.remove('hover:bg-secondary', 'text-secondary');
-      }
-    });
-  });
-  
-  // Set initial active state
-  const profileButton = document.querySelector('[data-tab="profile"]');
-  if (profileButton) {
-    profileButton.classList.add(...activeClasses);
-    profileButton.classList.remove('hover:bg-secondary', 'text-secondary');
-  }
-  
-  // File upload utilities
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 BYTES';
-    const k = 1024;
-    const sizes = ['BYTES', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  function showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize) {
-    uploadArea.classList.remove('border-main', 'hover:bg-secondary');
-    uploadArea.classList.add('border-violet-400/30', 'bg-violet-500/10');
-    
-    uploadState.classList.add('hidden');
-    fileSelected.classList.remove('hidden');
-    
-    fileName.textContent = file.name;
-    fileSize.textContent = formatFileSize(file.size);
-  }
-
-  function resetUploadState(uploadArea, uploadState, fileSelected, fileInput) {
-    uploadArea.classList.remove('bg-violet-500/10', 'border-violet-400/30');
-    uploadArea.classList.add('border-main', 'hover:bg-secondary');
-    
-    uploadState.classList.remove('hidden');
-    fileSelected.classList.add('hidden');
-    
-    fileInput.value = '';
-  }
-
-  // File input change handler
-  document.addEventListener('change', function(e) {
-    if (e.target && e.target.id === 'import-file') {
-      const file = e.target.files[0];
-      if (file) {
-        const uploadArea = document.getElementById('file-upload-area');
-        const uploadState = document.getElementById('upload-state');
-        const fileSelected = document.getElementById('file-selected');
-        const fileName = document.getElementById('file-name');
-        const fileSize = document.getElementById('file-size');
-        
-        if (uploadArea && uploadState && fileSelected && fileName && fileSize) {
-          showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize);
-        }
-      }
+      htmx.ajax('GET', '/users/tab-content?tab=' + encodeURIComponent(tab), {target: '#tab-content', swap: 'innerHTML'});
+      history.replaceState(null, '', '?tab=' + tab);
     }
-  });
 
-  // Remove file button handler
-  document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'remove-file') {
-      const uploadArea = document.getElementById('file-upload-area');
-      const uploadState = document.getElementById('upload-state');
-      const fileSelected = document.getElementById('file-selected');
-      const fileInput = document.getElementById('import-file');
-      
-      if (uploadArea && uploadState && fileSelected && fileInput) {
-        resetUploadState(uploadArea, uploadState, fileSelected, fileInput);
-      }
-    }
-  });
+    buttons.forEach((b) => b.addEventListener('click', () => selectTab(b.dataset.tab)));
+    mobileSelect.addEventListener('change', () => selectTab(mobileSelect.value));
 
-  // Drag and drop handlers
-  document.addEventListener('dragover', function(e) {
-    if (e.target && e.target.closest('#file-upload-area')) {
-      e.preventDefault();
-      const uploadArea = document.getElementById('file-upload-area');
-      if (uploadArea) {
-        uploadArea.classList.add('bg-secondary');
-      }
-    }
+    selectTab(new URLSearchParams(location.search).get('tab') || 'profile');
   });
-
-  document.addEventListener('dragleave', function(e) {
-    if (e.target && e.target.closest('#file-upload-area')) {
-      e.preventDefault();
-      const uploadArea = document.getElementById('file-upload-area');
-      if (uploadArea) {
-        uploadArea.classList.remove('bg-secondary');
-      }
-    }
-  });
-
-  document.addEventListener('drop', function(e) {
-    if (e.target && e.target.closest('#file-upload-area')) {
-      e.preventDefault();
-      const uploadArea = document.getElementById('file-upload-area');
-      if (uploadArea) {
-        uploadArea.classList.remove('bg-secondary');
-      }
-      
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        const file = files[0];
-        if (file.name.toLowerCase().endsWith('.zip')) {
-          const fileInput = document.getElementById('import-file');
-          if (fileInput) {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
-            
-            const uploadState = document.getElementById('upload-state');
-            const fileSelected = document.getElementById('file-selected');
-            const fileName = document.getElementById('file-name');
-            const fileSize = document.getElementById('file-size');
-            
-            if (uploadState && fileSelected && fileName && fileSize) {
-              showFileSelected(file, uploadArea, uploadState, fileSelected, fileName, fileSize);
-            }
-          }
-        } else {
-          alert('ZIP FILES ONLY');
-        }
-      }
-    }
-  });
-});
 </script>
 
 {{template "footer" .}}

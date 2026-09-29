@@ -2,62 +2,45 @@
 
 {{define "recent-results"}}
 {{if .HasBookmarksAtAll}}
-<div class="bg-main border rounded-xl">
-  <div class="p-6 border-b border-secondary/50">
-    <h2 class="text-lg font-semibold text-main">Your bookmarks ({{.Count}} total)</h2>
-  </div>
-
-  <div class="divide-y divide-secondary/50 border-main">
-    {{range .Bookmarks}}
-    <a href="/bookmarks/{{.Id}}" class="block hover:bg-secondary transition-colors border-main">
-      <div class="flex items-start gap-4 p-6">
-        <!-- Favicon -->
-        <div class="w-6 h-6 shrink-0 mt-1">
-          <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="{{.Title}}"
-            class="w-full h-full rounded"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-          <div class="w-full h-full bg-secondary rounded flex items-center justify-center hidden">
-            <svg class="w-3 h-3 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div class="flex-1 min-w-0">
-          <h3 class="font-semibold mb-2 text-main hover:text-main transition-colors line-clamp-2 wrap-break-word">
-            {{.Title}}
-          </h3>
-          {{if .Excerpt}}
-          <p class="text-sm leading-relaxed mb-2 text-secondary line-clamp-2">{{.Excerpt}}</p>
-          {{end}}
-          <span class="text-xs text-secondary">{{.CreatedAt}}</span>
-        </div>
-      </div>
-    </a>
-    {{end}}
-  </div>
+<div class="mb-4 flex items-baseline justify-between">
+  <h2 class="eyebrow text-ink-faint">Recently saved</h2>
+  <span class="text-[13px] text-ink-faint">{{.Count}} bookmarks</span>
 </div>
 
-<!-- Pagination -->
+<div class="space-y-3">
+  {{range .Bookmarks}}
+  <a href="/bookmarks/{{.Id}}" class="card-link px-5 py-4 sm:px-6 sm:py-5">
+    <div class="meta mb-2">
+      <span class="flex size-6 items-center justify-center rounded-md bg-surface-strong">
+        <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 rounded-sm" loading="lazy" onerror="this.remove()" />
+      </span>
+      <span class="text-ink-muted">{{.Hostname}}</span>
+      <span aria-hidden="true">·</span>
+      <span>{{.CreatedAt}}</span>
+    </div>
+    <h3 class="title line-clamp-2 wrap-break-word">{{.Title}}</h3>
+    {{if .Excerpt}}
+    <p class="mt-1 line-clamp-2 text-ink-muted">{{.Excerpt}}</p>
+    {{end}}
+  </a>
+  {{end}}
+</div>
+
 {{template "pagination" .}}
 {{else}}
 <!-- Empty State -->
-<div class="bg-secondary/80 border border-secondary/50 rounded-xl p-12 text-center">
-  <div class="w-16 h-16 bg-secondary border border-secondary rounded-lg flex items-center justify-center mx-auto mb-6">
-    <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+<div class="card px-6 py-14 text-center">
+  <div class="icon-tile mx-auto mb-5 size-14 rounded-2xl">
+    <svg class="h-7 w-7 text-accent" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/>
     </svg>
   </div>
-  <h3 class="text-xl font-bold mb-3 text-main">Your knowledge collection awaits</h3>
-  <p class="mb-8 max-w-sm mx-auto text-secondary leading-relaxed">
-    Start building your personal searchable library by adding your first bookmark.
+  <h3 class="headline-md text-ink">Your shelves are empty</h3>
+  <p class="mx-auto mt-2 mb-7 max-w-sm text-ink-muted">
+    Save your first article and it becomes searchable, word for word.
   </p>
-  <a href="/bookmarks/new"
-    class="inline-flex items-center gap-2 border border-main bg-main text-main font-semibold py-3 px-6 rounded-lg hover:bg-secondary transition-colors">
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <a href="/bookmarks/new" class="btn btn-primary">
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
     </svg>
     Add your first bookmark

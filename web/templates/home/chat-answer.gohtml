@@ -1,106 +1,44 @@
 {{if .Answer}}
-<div class="max-w-2xl mx-auto space-y-4">
-  <!-- Answer -->
   {{if .IsError}}
-  <!-- Error State -->
-  <div class="p-6 bg-secondary/80 rounded-lg border border-secondary/50">
-    <div class="flex items-start gap-3 mb-2">
-      <div class="flex-shrink-0 w-8 h-8 bg-secondary border border-main rounded-lg flex items-center justify-center">
-        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h4 class="font-semibold text-main mb-2">Unable to Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed">{{safeHTML .Answer}}</div>
-      </div>
+  <div class="callout callout-warn">
+    <svg class="mt-0.5 h-5 w-5 shrink-0 text-notice" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+    </svg>
+    <div>
+      <p class="font-semibold">Unable to answer</p>
+      <div class="mt-0.5">{{safeHTML .Answer}}</div>
     </div>
   </div>
   {{else}}
-  <!-- Success State -->
-  <div class="p-6 bg-secondary/80 rounded-lg border border-secondary/50">
-    <div class="flex items-start gap-3 mb-2">
-      <div class="flex-shrink-0 w-8 h-8 bg-secondary border border-main rounded-lg flex items-center justify-center">
-        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div class="flex-1">
-        <h4 class="font-semibold text-main mb-2">AI Answer</h4>
-        <div class="text-sm text-secondary leading-relaxed ai-html-content">{{safeHTML .Answer }}</div>
-        <style>
-          .ai-html-content p {
-            margin-bottom: 0.5rem;
-          }
+  <div class="ai-panel">
+    <div class="mb-3 flex items-center gap-2">
+      <svg class="h-5 w-5 text-notice" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 11l.95 2.55L22.5 16.5l-2.55.95L19 20l-.95-2.55L15.5 16.5l2.55-.95L19 13z"/>
+      </svg>
+      <h3 class="font-display text-xl font-semibold text-ink">From your library</h3>
+    </div>
+    <div class="prose-archive prose-compact">{{safeHTML .Answer}}</div>
 
-          .ai-html-content a {
-            color: inherit;
-            text-decoration: underline;
-          }
-
-          .ai-html-content strong {
-            font-weight: 600;
-            color: var(--main-color);
-          }
-
-          .ai-html-content ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-            margin-bottom: 0.5rem;
-          }
-
-          .ai-html-content ol {
-            list-style-type: decimal;
-            padding-left: 1.5rem;
-            margin-bottom: 0.5rem;
-          }
-
-          .ai-html-content code {
-            background-color: rgba(0, 0, 0, 0.05);
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-          }
-        </style>
+    {{if .Sources}}
+    <div class="mt-6 border-t border-line pt-4">
+      <h4 class="eyebrow mb-3 text-ink-faint">Sources · {{len .Sources}}</h4>
+      <div class="flex flex-wrap gap-2">
+        {{range .Sources}}
+        <a href="/bookmarks/{{.Id}}" title="{{.Title}}"
+          class="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-paper py-1.5 pr-3.5 pl-2 text-[13px] font-medium text-ink transition-colors hover:border-line-strong hover:bg-surface">
+          <img src="https://www.google.com/s2/favicons?domain={{.Link}}&sz=64" alt="" class="size-4 shrink-0 rounded-sm" loading="lazy" onerror="this.remove()" />
+          <span class="max-w-[16rem] truncate">{{.Title}}</span>
+          <span class="hidden shrink-0 text-ink-faint sm:inline">{{.Hostname}}</span>
+        </a>
+        {{end}}
       </div>
     </div>
+    {{end}}
   </div>
   {{end}}
-
-  <!-- Sources -->
-  {{if .Sources}}
-  <div class="space-y-2">
-    <h4 class="text-sm font-semibold text-secondary px-2">Sources ({{len .Sources}})</h4>
-    <div class="space-y-2">
-      {{range .Sources}}
-      <a href="/bookmarks/{{.Id}}"
-        class="block p-3 bg-secondary/80 rounded-lg border border-secondary/50 hover:border-main transition-colors">
-        <div class="flex items-start gap-3">
-          {{if .Thumbnail}}
-          <img src="{{.Thumbnail}}" alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
-          {{else}}
-          <div
-            class="w-12 h-12 bg-secondary border border-secondary rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </div>
-          {{end}}
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium text-main truncate">{{.Title}}</div>
-            <div class="text-xs text-secondary truncate">{{.Hostname}}</div>
-          </div>
-        </div>
-      </a>
-      {{end}}
-    </div>
-  </div>
-  {{end}}
-</div>
 {{else}}
-<div class="p-4 bg-secondary/80 rounded-lg border border-secondary/50 text-center">
-  <p class="text-sm text-secondary">No answer available. Try asking a different question.</p>
+<div class="card p-5 text-center text-sm text-ink-muted">
+  No answer available. Try asking a different question.
 </div>
 {{end}}
