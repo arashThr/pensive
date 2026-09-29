@@ -109,7 +109,7 @@ This is a Go web application for bookmarking and content management, featuring:
 - Environment variables loaded via `godotenv`
 - Configuration centralized in `internal/config/config.go`
 - Uses PostgreSQL connection pooling
-- CSRF protection with gorilla/csrf
+- CSRF protection with Go's built-in `http.CrossOriginProtection` (Sec-Fetch-Site / Origin checks, no tokens in forms)
 
 ### Database Schema
 - Users, sessions, and password reset tables

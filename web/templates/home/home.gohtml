@@ -70,7 +70,6 @@
             id="ask-button"
             class="btn btn-sm btn-primary"
             hx-post="/home/ask"
-            hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
             hx-include="[name='question']"
             hx-target="#results"
             hx-swap="innerHTML"
@@ -100,7 +99,6 @@
           id="resend-btn"
           class="btn btn-sm btn-secondary"
           hx-post="/auth/resend-verification"
-          hx-vals='{"gorilla.csrf.Token": "{{csrfToken}}"}'
           hx-swap="outerHTML"
           hx-disabled-elt="this"
         >

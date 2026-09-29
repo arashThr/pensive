@@ -167,7 +167,7 @@
     - [ ] Updating extension/bot should overwrite previous token
 - [ ] Optional host permission + explicit user permission
 - [ ] Write down about tech stack in FAQ
-- [ ] Use Sec-Fetch-Site header and remove Gorilla's CSRF protection - [Ref](https://medium.com/@rahulreza920/go-1-25-is-released-faster-smarter-and-safer-9c97ff8b493d)
+- [x] Use Sec-Fetch-Site header and remove Gorilla's CSRF protection - [Ref](https://medium.com/@rahulreza920/go-1-25-is-released-faster-smarter-and-safer-9c97ff8b493d)
 - [ ] Update the embeddings based on [this](https://ai.google.dev/gemini-api/docs/embeddings)
     - RETRIEVAL_DOCUMENT
     - `gemini-embedding-001`

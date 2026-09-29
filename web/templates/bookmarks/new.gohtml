@@ -6,7 +6,6 @@
     <p class="lede mt-1">Paste a link and Pensive keeps the full text, searchable forever.</p>
 
     <form action="/bookmarks" method="post" class="card-raised mt-8 p-6">
-      {{csrfField}}
       <label class="label" for="link">Web page URL</label>
       <input class="input" name="link" id="link" type="url" placeholder="https://example.com/article" required autofocus value="{{.Link}}" />
       <button class="btn btn-primary mt-5 w-full" type="submit">Save to library</button>

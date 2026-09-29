@@ -70,11 +70,7 @@ type AppConfig struct {
 	Domain      string
 	PSQL        PostgresConfig
 	SMTP        SMTPConfig
-	CSRF        struct {
-		Key    string
-		Secure bool
-	}
-	Server struct {
+	Server      struct {
 		Address string
 	}
 	Admin struct {
@@ -118,10 +114,6 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 		Username: GetEnvOrDie("SMTP_USER"),
 		Password: GetEnvOrDie("SMTP_PASS"),
 	}
-
-	// CSRF
-	cfg.CSRF.Key = GetEnvOrDie("CSRF_TOKEN")
-	cfg.CSRF.Secure = GetEnvOrDie("CSRF_SECURE") == "true"
 
 	// Server
 	cfg.Server.Address = GetEnvOrDie("SERVER_ADDRESS")

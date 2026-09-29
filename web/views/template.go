@@ -18,7 +18,6 @@ import (
 	"github.com/arashthr/pensive/internal/validations"
 	"github.com/arashthr/pensive/web"
 	"github.com/arashthr/pensive/web/templates"
-	"github.com/gorilla/csrf"
 )
 
 type Template struct {
@@ -35,12 +34,6 @@ func Must(tpl Template, err error) Template {
 func ParseTemplate(filePaths ...string) (Template, error) {
 	tpl := template.New(path.Base(filePaths[0]))
 	tpl.Funcs(template.FuncMap{
-		"csrfField": func() (template.HTML, error) {
-			return "", fmt.Errorf("csrfField not implemented")
-		},
-		"csrfToken": func() (string, error) {
-			return "", fmt.Errorf("csrfToken not implemented")
-		},
 		"currentUser": func() (*models.User, error) {
 			return nil, fmt.Errorf("current user not implemented")
 		},
@@ -95,12 +88,6 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any, navM
 
 	tpl = tpl.Funcs(
 		template.FuncMap{
-			"csrfField": func() template.HTML {
-				return csrf.TemplateField(r)
-			},
-			"csrfToken": func() string {
-				return csrf.Token(r)
-			},
 			"currentUser": func() *models.User {
 				return usercontext.User(r.Context())
 			},
