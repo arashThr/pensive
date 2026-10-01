@@ -25,7 +25,8 @@ type FeedSearchResult struct {
 	TitleHTML    template.HTML
 	HeadlineHTML template.HTML
 	PublishedAt  time.Time
-	Saved        bool
+	// Library bookmark with the same link; empty if not saved
+	SavedBookmarkID string
 }
 
 type BookmarkSearchResult struct {

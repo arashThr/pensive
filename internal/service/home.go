@@ -115,6 +115,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		Bookmarks   []types.BookmarkSearchResult
 		Query       string
 		HasResults  bool
+		Everything  bool // scope=all: also search posts from followed feeds
 		FeedResults []types.FeedSearchResult
 	}
 
@@ -135,7 +136,8 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	data.HasResults = len(data.Bookmarks) > 0
 
 	// Posts from followed feeds; a failure here shouldn't hide library results.
-	if h.FeedModel != nil {
+	data.Everything = r.FormValue("scope") == "all"
+	if data.Everything && h.FeedModel != nil {
 		entries, err := h.FeedModel.Search(r.Context(), user.ID, query, feedResultsLimit)
 		if err != nil {
 			logger.Errorw("failed to search feed entries", "error", err, "user_id", user.ID)

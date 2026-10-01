@@ -204,6 +204,7 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 
 	feedsService := service.NewFeeds(feedRepo, bookmarkRepo)
 	feedsService.Templates.Index = views.Must(views.ParseTemplate("feeds/index.gohtml", "tailwind.gohtml", "feeds/entry.gohtml"))
+	feedsService.Templates.Entry = views.Must(views.ParseTemplate("feeds/post.gohtml", "tailwind.gohtml", "feeds/entry.gohtml"))
 	feedsService.Templates.Saved = views.Must(views.ParseTemplate("feeds/saved.gohtml"))
 	homeService.Templates.RecentResults = views.Must(views.ParseTemplate("home/recent-results.gohtml", "tailwind.gohtml"))
 	homeService.Templates.ChatAnswer = views.Must(views.ParseTemplate("home/chat-answer.gohtml"))
@@ -468,6 +469,7 @@ func Routes(cfg *config.AppConfig, c *ServiceContainer) *chi.Mux {
 			r.Post("/import", c.FeedsService.Import)
 			r.Get("/export", c.FeedsService.Export)
 			r.Post("/{id}/unsubscribe", c.FeedsService.Unsubscribe)
+			r.Get("/entries/{id}", c.FeedsService.ShowEntry)
 			r.Post("/entries/{id}/save", c.FeedsService.SaveEntry)
 		})
 		r.Route("/users", func(r chi.Router) {

@@ -20,6 +20,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/mmcdole/gofeed"
 	xhtml "golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 	feedMaxBodyBytes    = 5 << 20
 	feedMaxEntries      = 200
 	feedMaxContentRunes = 20000
+	feedMaxHTMLBytes    = 300 << 10
 	feedUserAgent       = "Pensive/1.0 (+https://getpensive.com) feed fetcher"
 )
 
@@ -200,10 +202,12 @@ func entriesFromFeed(feed *gofeed.Feed, base *url.URL) []models.FeedEntry {
 			author = item.Author.Name
 		}
 		parsedLink, _ := url.Parse(link)
+		canonical := *parsedLink // CanonicalURL modifies the URL it's given
 		entries = append(entries, models.FeedEntry{
 			GUID:         guid,
 			URL:          link,
-			CanonicalURL: validations.CanonicalURL(parsedLink),
+			CanonicalURL: validations.CanonicalURL(&canonical),
+			ContentHTML:  feedHTML(content, parsedLink),
 			Title:        title,
 			Author:       strings.TrimSpace(author),
 			Content:      truncateRunes(text, feedMaxContentRunes),
@@ -214,6 +218,52 @@ func entriesFromFeed(feed *gofeed.Feed, base *url.URL) []models.FeedEntry {
 }
 
 var stripTags = bluemonday.StrictPolicy()
+
+// readablePolicy keeps a post's formatting, links and images, and drops
+// scripts, styles, iframes and event handlers.
+var readablePolicy = func() *bluemonday.Policy {
+	p := bluemonday.UGCPolicy()
+	p.AddTargetBlankToFullyQualifiedLinks(true)
+	return p
+}()
+
+// feedHTML prepares a post's HTML for the reading view: relative links and
+// images are resolved against the post URL, then the markup is sanitized.
+// Oversized posts are skipped; the reading view falls back to plain text.
+func feedHTML(raw string, base *url.URL) string {
+	if strings.TrimSpace(raw) == "" || len(raw) > feedMaxHTMLBytes {
+		return ""
+	}
+	return readablePolicy.Sanitize(absolutizeURLs(raw, base))
+}
+
+func absolutizeURLs(raw string, base *url.URL) string {
+	nodes, err := xhtml.ParseFragment(strings.NewReader(raw), &xhtml.Node{Type: xhtml.ElementNode, Data: "div", DataAtom: atom.Div})
+	if err != nil {
+		return raw
+	}
+	var fix func(*xhtml.Node)
+	fix = func(n *xhtml.Node) {
+		for i, a := range n.Attr {
+			if a.Key == "href" || a.Key == "src" {
+				if u, err := url.Parse(strings.TrimSpace(a.Val)); err == nil {
+					n.Attr[i].Val = base.ResolveReference(u).String()
+				}
+			}
+		}
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			fix(c)
+		}
+	}
+	var b strings.Builder
+	for _, n := range nodes {
+		fix(n)
+		if err := xhtml.Render(&b, n); err != nil {
+			return raw
+		}
+	}
+	return b.String()
+}
 
 // htmlToText reduces feed HTML to plain text for indexing and snippets.
 func htmlToText(s string) string {

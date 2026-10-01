@@ -1,5 +1,6 @@
 {{define "feed-entry"}}
-<article class="card px-5 py-4 sm:px-6 sm:py-5">
+<!-- The title link stretches over the whole card; buttons sit above it -->
+<article class="card-link relative px-5 py-4 sm:px-6 sm:py-5">
   <div class="meta mb-2">
     <span class="flex size-6 items-center justify-center rounded-md bg-surface-strong">
       <img src="https://www.google.com/s2/favicons?domain={{.URL}}&sz=64" alt="" class="size-4 rounded-sm" loading="lazy" onerror="this.remove()" />
@@ -8,20 +9,24 @@
     <span aria-hidden="true">·</span>
     <span>{{.PublishedAt.Format "Jan 02, 2006"}}</span>
   </div>
-  <a href="{{.URL}}" target="_blank" rel="noopener" class="search-snippet title line-clamp-2 wrap-break-word hover:text-accent">{{.TitleHTML}}</a>
+  <a href="/feeds/entries/{{.ID}}" class="search-snippet title line-clamp-2 wrap-break-word after:absolute after:inset-0 after:rounded-2xl">{{.TitleHTML}}</a>
   {{if .HeadlineHTML}}
   <p class="search-snippet mt-1 line-clamp-2 text-ink-muted">{{.HeadlineHTML}}</p>
   {{end}}
-  <div class="mt-3 flex items-center gap-2">
-    {{if .Saved}}
-      <span class="badge badge-ok">In your library</span>
-    {{else}}
-      <button type="button" class="btn btn-sm btn-secondary" hx-post="/feeds/entries/{{.ID}}/save" hx-swap="outerHTML" hx-disabled-elt="this">
-        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/></svg>
-        Save to library
-      </button>
-    {{end}}
-    <a href="{{.URL}}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">Open</a>
+  <div class="relative z-10 mt-3 flex items-center gap-2">
+    {{template "feed-save" .}}
+    <a href="{{.URL}}" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">Open original</a>
   </div>
 </article>
+{{end}}
+
+{{define "feed-save"}}
+{{if .SavedBookmarkID}}
+  <a href="/bookmarks/{{.SavedBookmarkID}}" class="badge badge-ok">In your library · view</a>
+{{else}}
+  <button type="button" class="btn btn-sm btn-secondary" hx-post="/feeds/entries/{{.ID}}/save" hx-swap="outerHTML" hx-disabled-elt="this">
+    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/></svg>
+    Save to library
+  </button>
+{{end}}
 {{end}}

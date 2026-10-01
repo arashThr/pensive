@@ -99,7 +99,8 @@ This is a Go web application for bookmarking and content management, featuring:
   - Preferences tab: weekly podcast (day, email/Telegram delivery) + daily briefing (hour, timezone, Telegram-only)
 
 ### Feeds Feature
-- **Purpose**: search-first, not a reader. Posts from followed feeds show up in `/home` search under "From people you follow"; `/feeds` manages subscriptions and lists recent posts with Save/Open
+- **Purpose**: search-first, not a reader. `/home` search has a scope toggle: **Library** (saved bookmarks only, default) and **Everything** (`scope=all`, adds "From feeds you follow"). `/feeds` manages subscriptions and lists recent posts
+- **Reading view** (`/feeds/entries/{id}`): shows the post as the feed provides it (`feed_entries.content_html`, sanitized with bluemonday UGC at fetch time, relative URLs made absolute), with Save to library / Open original
 - **Storage**: `feeds` (one row per URL, shared across users), `feed_subscriptions` (user ↔ feed), `feed_entries` (kept indefinitely, plain-text content, weighted `search_vector`)
 - **Unsubscribing** sets `feed_subscriptions.unsubscribed_at`; posts collected before that stay searchable for that user
 - **OPML sync** (`POST /feeds/import`): diff against active subscriptions — follow new, unfollow missing; an empty file changes nothing. Export at `/feeds/export`

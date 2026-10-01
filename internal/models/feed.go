@@ -42,6 +42,7 @@ type FeedEntry struct {
 	Title        string
 	Author       string
 	Content      string
+	ContentHTML  string
 	PublishedAt  time.Time
 }
 
@@ -55,7 +56,21 @@ type FeedEntryItem struct {
 	TitleHeadline string
 	Headline      string
 	PublishedAt   time.Time
-	Saved         bool
+	// Library bookmark with the same link; empty if not saved
+	SavedBookmarkID string
+}
+
+// FeedEntryDetail is a single post for the reading view.
+type FeedEntryDetail struct {
+	ID              int64
+	FeedTitle       string
+	URL             string
+	Title           string
+	Author          string
+	Content         string
+	ContentHTML     string
+	PublishedAt     time.Time
+	SavedBookmarkID string
 }
 
 // FeedStats summarises what a user's feeds have collected.
@@ -167,7 +182,7 @@ func (r *FeedRepo) Search(ctx context.Context, userID types.UserId, query string
 			ts_headline('english', e.title, sq.query, 'HighlightAll=true, StartSel=' || $3::text || ', StopSel=' || $4::text) AS title_headline,
 			ts_headline('english', e.content, sq.query, 'MaxFragments=2, StartSel=' || $3::text || ', StopSel=' || $4::text) AS headline,
 			e.published_at,
-			EXISTS (SELECT 1 FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url) AS saved
+			COALESCE((SELECT li.id FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url LIMIT 1), '') AS saved_bookmark_id
 		FROM feed_entries e`+visibleEntries+`
 		CROSS JOIN search_query sq
 		WHERE sq.query IS NOT NULL AND e.search_vector @@ sq.query
@@ -194,7 +209,7 @@ func (r *FeedRepo) Recent(ctx context.Context, userID types.UserId, limit int) (
 			e.title AS title_headline,
 			left(e.content, 300) AS headline,
 			e.published_at,
-			EXISTS (SELECT 1 FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url) AS saved
+			COALESCE((SELECT li.id FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url LIMIT 1), '') AS saved_bookmark_id
 		FROM feed_entries e`+visibleEntries+`
 		WHERE s.unsubscribed_at IS NULL
 		ORDER BY e.published_at DESC
@@ -207,6 +222,31 @@ func (r *FeedRepo) Recent(ctx context.Context, userID types.UserId, limit int) (
 		return nil, fmt.Errorf("collect recent feed entries: %w", err)
 	}
 	return items, nil
+}
+
+// Entry returns a post for the reading view if the user can see it.
+func (r *FeedRepo) Entry(ctx context.Context, userID types.UserId, entryID int64) (FeedEntryDetail, error) {
+	rows, err := r.Pool.Query(ctx, `
+		SELECT
+			e.id,
+			COALESCE(NULLIF(s.title, ''), NULLIF(f.title, ''), f.url) AS feed_title,
+			e.url,
+			e.title,
+			e.author,
+			e.content,
+			e.content_html,
+			e.published_at,
+			COALESCE((SELECT li.id FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url LIMIT 1), '') AS saved_bookmark_id
+		FROM feed_entries e`+visibleEntries+`
+		WHERE e.id = $1`, entryID, userID)
+	if err != nil {
+		return FeedEntryDetail{}, fmt.Errorf("get feed entry: %w", err)
+	}
+	entry, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[FeedEntryDetail])
+	if err != nil {
+		return FeedEntryDetail{}, fmt.Errorf("collect feed entry: %w", err)
+	}
+	return entry, nil
 }
 
 // EntryURL returns a post's link if the user can see it.
@@ -263,10 +303,11 @@ func (r *FeedRepo) SaveFetch(ctx context.Context, feedID int64, res FetchResult,
 		batch := &pgx.Batch{}
 		for _, e := range res.Entries {
 			batch.Queue(`
-				INSERT INTO feed_entries (feed_id, guid, url, canonical_url, title, author, content, published_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-				ON CONFLICT (feed_id, guid) DO NOTHING`,
-				feedID, e.GUID, e.URL, e.CanonicalURL, e.Title, e.Author, e.Content, e.PublishedAt)
+				INSERT INTO feed_entries (feed_id, guid, url, canonical_url, title, author, content, content_html, published_at)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+				ON CONFLICT (feed_id, guid) DO UPDATE SET content_html = EXCLUDED.content_html
+				WHERE feed_entries.content_html = '' AND EXCLUDED.content_html <> ''`,
+				feedID, e.GUID, e.URL, e.CanonicalURL, e.Title, e.Author, e.Content, e.ContentHTML, e.PublishedAt)
 		}
 		if err := tx.SendBatch(ctx, batch).Close(); err != nil {
 			return fmt.Errorf("insert feed entries: %w", err)

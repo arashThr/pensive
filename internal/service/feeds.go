@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
@@ -37,6 +38,7 @@ type Feeds struct {
 	HTTPClient *http.Client
 	Templates  struct {
 		Index web.Template
+		Entry web.Template
 		Saved web.Template
 	}
 	wake chan struct{}
@@ -327,6 +329,36 @@ func (f *Feeds) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/feeds", http.StatusSeeOther)
 }
 
+// ShowEntry shows a post as its feed provides it, with Save and Open actions.
+func (f *Feeds) ShowEntry(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	user := usercontext.User(ctx)
+	entryID, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+	entry, err := f.FeedModel.Entry(ctx, user.ID, entryID)
+	if err != nil {
+		loggercontext.Logger(ctx).Infow("feed entry not found", "entry_id", entryID, "error", err)
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	data := struct {
+		Title string
+		models.FeedEntryDetail
+		// Sanitized when the feed was fetched (see feedHTML); empty for
+		// posts stored before HTML was kept, which show Content instead
+		HTML template.HTML
+	}{
+		Title:           entry.Title,
+		FeedEntryDetail: entry,
+		HTML:            template.HTML(entry.ContentHTML),
+	}
+	f.Templates.Entry.Execute(w, r, data)
+}
+
 // SaveEntry adds a feed post to the library (htmx; returns the saved state).
 func (f *Feeds) SaveEntry(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -370,13 +402,13 @@ func feedSearchResults(entries []models.FeedEntryItem) []types.FeedSearchResult 
 	results := make([]types.FeedSearchResult, len(entries))
 	for i, e := range entries {
 		results[i] = types.FeedSearchResult{
-			ID:           e.ID,
-			FeedTitle:    e.FeedTitle,
-			URL:          e.URL,
-			TitleHTML:    validations.HighlightedHTML(e.TitleHeadline),
-			HeadlineHTML: validations.HighlightedHTML(e.Headline),
-			PublishedAt:  e.PublishedAt,
-			Saved:        e.Saved,
+			ID:              e.ID,
+			FeedTitle:       e.FeedTitle,
+			URL:             e.URL,
+			TitleHTML:       validations.HighlightedHTML(e.TitleHeadline),
+			HeadlineHTML:    validations.HighlightedHTML(e.Headline),
+			PublishedAt:     e.PublishedAt,
+			SavedBookmarkID: e.SavedBookmarkID,
 		}
 	}
 	return results

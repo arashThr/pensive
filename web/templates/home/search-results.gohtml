@@ -25,9 +25,9 @@
   {{end}}
 </div>
 {{else if .FeedResults}}
-<p class="text-sm text-ink-muted" data-no-results>
-  No bookmarks match “{{.Query}}”. Press <kbd class="rounded border border-line bg-paper px-1 font-mono text-[11px]">Enter</kbd> or
-  <button type="button" class="link" data-ask>ask AI</button> to search your library by meaning.
+<!-- Feed posts matched, so Enter keeps them on screen; asking AI is one click away -->
+<p class="text-sm text-ink-muted">
+  Nothing in your library matches “{{.Query}}”. <button type="button" class="link" data-ask>Ask AI</button> to search it by meaning.
 </p>
 {{else}}
 <!-- Nothing anywhere: Enter in the search box (or the button) asks AI instead -->
@@ -37,7 +37,7 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
     </svg>
   </div>
-  <h3 class="headline-md text-ink">No bookmarks match “{{.Query}}”</h3>
+  <h3 class="headline-md text-ink">{{if .Everything}}Nothing in your library or feeds matches{{else}}No bookmarks match{{end}} “{{.Query}}”</h3>
   <p class="mx-auto mt-2 mb-7 max-w-sm text-ink-muted">
     Press <kbd class="rounded border border-line bg-canvas px-1 font-mono text-xs">Enter</kbd> to ask AI instead. It searches by meaning, not exact words.
   </p>
@@ -51,7 +51,7 @@
 {{if .FeedResults}}
 <section class="mt-10">
   <div class="mb-4 flex items-baseline justify-between gap-4">
-    <h2 class="eyebrow text-ink-faint">From people you follow</h2>
+    <h2 class="eyebrow text-ink-faint">From feeds you follow</h2>
     <a href="/feeds" class="text-[13px] text-ink-faint hover:text-accent">Manage feeds</a>
   </div>
   <div class="space-y-3">

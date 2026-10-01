@@ -38,9 +38,16 @@
         <span class="hidden sm:inline">Add</span>
       </a>
     </div>
-    <p id="search-hint" class="mt-2 px-1 text-[13px] text-ink-faint">
-      No matches? Press <kbd class="rounded border border-line bg-paper px-1 font-mono text-[11px]">Enter</kbd> to ask AI<span class="mx-1.5" aria-hidden="true">·</span>{{.RemainingAIQuestions}} AI questions left today
-    </p>
+    <div class="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-1">
+      <!-- Search scope: what you've saved, or that plus posts from feeds you follow -->
+      <div class="toggle-group" role="radiogroup" aria-label="Search in">
+        <button type="button" class="toggle-option" role="radio" aria-checked="true" data-scope="library">Library</button>
+        <button type="button" class="toggle-option" role="radio" aria-checked="false" data-scope="all" title="Your library plus posts from feeds you follow">Everything</button>
+      </div>
+      <p id="search-hint" class="text-[13px] text-ink-faint">
+        No matches? Press <kbd class="rounded border border-line bg-paper px-1 font-mono text-[11px]">Enter</kbd> to ask AI<span class="mx-1.5" aria-hidden="true">·</span>{{.RemainingAIQuestions}} left today
+      </p>
+    </div>
 
     <template id="ask-loading">
       <div class="flex items-center justify-center gap-2 py-10 text-sm text-ink-muted">
@@ -89,7 +96,28 @@
     const results = document.getElementById('results');
     let timer;
     let latest = 0;        // id of the most recent request; older responses are dropped
-    let searched = null;   // query whose results are currently shown
+    let searched = null;   // scope|query whose results are currently shown
+    const scopeButtons = document.querySelectorAll('[data-scope]');
+    const placeholders = {
+      library: 'Search your library, or ask a question…',
+      all: 'Search your library and the feeds you follow…',
+    };
+    let scope = 'library';
+    try { scope = localStorage.getItem('pensive.searchScope') === 'all' ? 'all' : 'library'; } catch {}
+
+    function setScope(next) {
+      scope = next;
+      scopeButtons.forEach((b) => b.setAttribute('aria-checked', b.dataset.scope === scope));
+      input.placeholder = placeholders[scope];
+      try { localStorage.setItem('pensive.searchScope', scope); } catch {}
+    }
+    setScope(scope);
+    scopeButtons.forEach((b) => b.addEventListener('click', function () {
+      if (b.dataset.scope === scope) return;
+      setScope(b.dataset.scope);
+      if (input.value.trim()) search();
+      input.focus();
+    }));
 
     async function load(url, options) {
       const id = ++latest;
@@ -109,9 +137,9 @@
     async function search() {
       clearTimeout(timer);
       const query = input.value.trim();
-      searched = query;
+      searched = scope + '|' + query;
       spinner.classList.remove('hidden');
-      const shown = await load('/home/search?query=' + encodeURIComponent(query));
+      const shown = await load('/home/search?scope=' + scope + '&query=' + encodeURIComponent(query));
       spinner.classList.add('hidden');
       return shown;
     }
@@ -135,7 +163,7 @@
       e.preventDefault();
       const query = input.value.trim();
       if (!query) return;
-      if (searched !== query && !(await search())) return;
+      if (searched !== scope + '|' + query && !(await search())) return;
       if (results.querySelector('[data-no-results]')) ask(query);
     });
 

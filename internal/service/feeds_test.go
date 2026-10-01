@@ -119,3 +119,33 @@ func TestFeedClientBlocksInternalAddresses(t *testing.T) {
 		}
 	}
 }
+
+func TestFeedHTML(t *testing.T) {
+	base, _ := url.Parse("https://blog.example/posts/1")
+	got := feedHTML(`<p>Hi <a href="/about">me</a></p><img src="img/a.png" onerror="alert(1)"><script>alert(1)</script><iframe src="https://evil.example"></iframe>`, base)
+	for _, want := range []string{`href="https://blog.example/about"`, `target="_blank"`, `src="https://blog.example/posts/img/a.png"`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("feedHTML missing %s in %s", want, got)
+		}
+	}
+	for _, bad := range []string{"<script", "onerror", "<iframe"} {
+		if strings.Contains(got, bad) {
+			t.Errorf("feedHTML kept %s: %s", bad, got)
+		}
+	}
+	if feedHTML("   ", base) != "" {
+		t.Error("blank content should produce no HTML")
+	}
+}
+
+func TestEntriesFromFeedKeepsLinkScheme(t *testing.T) {
+	rss := `<rss version="2.0"><channel><item><title>Post</title><link>http://old.example/p</link><description>&lt;a href="/about"&gt;me&lt;/a&gt;</description></item></channel></rss>`
+	feed, err := gofeed.NewParser().Parse(strings.NewReader(rss))
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := entriesFromFeed(feed, nil)[0]
+	if e.CanonicalURL != "https://old.example/p" || !strings.Contains(e.ContentHTML, `href="http://old.example/about"`) {
+		t.Errorf("canonical %q, html %q: canonicalizing must not change the base used for links", e.CanonicalURL, e.ContentHTML)
+	}
+}
