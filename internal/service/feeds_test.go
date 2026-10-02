@@ -69,7 +69,7 @@ func TestDiffSubscriptions(t *testing.T) {
 	}
 	file := []OPMLFeed{{URL: "https://keep.example/feed"}, {URL: "https://new.example/feed"}}
 	diff := diffSubscriptions(current, file)
-	if diff.unchanged != 1 || len(diff.remove) != 1 || diff.remove[0] != 2 ||
+	if diff.unchanged != 1 || len(diff.remove) != 1 || diff.remove[0].FeedID != 2 ||
 		len(diff.add) != 1 || diff.add[0].URL != "https://new.example/feed" {
 		t.Errorf("unexpected diff: %+v", diff)
 	}
@@ -147,5 +147,26 @@ func TestEntriesFromFeedKeepsLinkScheme(t *testing.T) {
 	e := entriesFromFeed(feed, nil)[0]
 	if e.CanonicalURL != "https://old.example/p" || !strings.Contains(e.ContentHTML, `href="http://old.example/about"`) {
 		t.Errorf("canonical %q, html %q: canonicalizing must not change the base used for links", e.CanonicalURL, e.ContentHTML)
+	}
+}
+
+func TestDiffSubscriptionsMatchesURLVariants(t *testing.T) {
+	current := []models.FeedSubscription{{FeedID: 1, URL: "https://www.blog.example/feed/"}}
+	file := []OPMLFeed{{URL: "http://blog.example/feed"}, {URL: "HTTPS://blog.example/feed#top"}}
+	diff := diffSubscriptions(current, file)
+	if diff.unchanged != 1 || len(diff.remove) != 0 || len(diff.add) != 0 {
+		t.Errorf("URL variants of a followed feed should be unchanged, got %+v", diff)
+	}
+}
+
+func TestFeedURLKey(t *testing.T) {
+	same := []string{"https://blog.example/feed", "http://www.blog.example/feed/", "HTTPS://Blog.Example/feed#x", " https://blog.example/feed// "}
+	for _, u := range same {
+		if got := models.FeedURLKey(u); got != "blog.example/feed" {
+			t.Errorf("FeedURLKey(%q) = %q", u, got)
+		}
+	}
+	if models.FeedURLKey("https://blog.example/feed/?tag=go") != "blog.example/feed?tag=go" {
+		t.Error("query string should be kept")
 	}
 }

@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/arashthr/pensive/internal/types"
@@ -80,6 +82,22 @@ type FeedStats struct {
 	Since *time.Time
 }
 
+var (
+	feedKeyFragment      = regexp.MustCompile(`#.*$`)
+	feedKeyScheme        = regexp.MustCompile(`^[a-z][a-z0-9+.-]*://(www\.)?`)
+	feedKeyTrailingSlash = regexp.MustCompile(`/+(\?|$)`)
+)
+
+// FeedURLKey normalizes a feed URL so variants of the same feed (http vs
+// https, "www.", trailing slash, fragment, case) map to one feed. Keep in
+// sync with the expression in migration 000024.
+func FeedURLKey(url string) string {
+	key := strings.ToLower(strings.TrimSpace(url))
+	key = feedKeyFragment.ReplaceAllString(key, "")
+	key = feedKeyScheme.ReplaceAllString(key, "")
+	return feedKeyTrailingSlash.ReplaceAllString(key, "$1")
+}
+
 type FeedRepo struct {
 	Pool *pgxpool.Pool
 }
@@ -91,14 +109,15 @@ const visibleEntries = `
 			AND (s.unsubscribed_at IS NULL OR e.created_at <= s.unsubscribed_at)
 		JOIN feeds f ON f.id = e.feed_id`
 
-// Subscribe follows a feed, creating it if nobody follows it yet. Following a
-// previously removed feed reactivates it.
+// Subscribe follows a feed, creating it if nobody follows it yet (matched by
+// FeedURLKey, so URL variants share one feed). Following a previously
+// removed feed reactivates it.
 func (r *FeedRepo) Subscribe(ctx context.Context, userID types.UserId, url, title string) (int64, error) {
 	var feedID int64
 	err := r.Pool.QueryRow(ctx, `
 		WITH feed AS (
-			INSERT INTO feeds (url) VALUES ($1)
-			ON CONFLICT (url) DO UPDATE SET url = EXCLUDED.url
+			INSERT INTO feeds (url, url_key) VALUES ($1, $4)
+			ON CONFLICT (url_key) DO UPDATE SET url_key = EXCLUDED.url_key
 			RETURNING id
 		)
 		INSERT INTO feed_subscriptions (user_id, feed_id, title)
@@ -106,7 +125,7 @@ func (r *FeedRepo) Subscribe(ctx context.Context, userID types.UserId, url, titl
 		ON CONFLICT (user_id, feed_id) DO UPDATE SET
 			unsubscribed_at = NULL,
 			title = COALESCE(NULLIF(EXCLUDED.title, ''), feed_subscriptions.title)
-		RETURNING feed_id`, url, userID, title).Scan(&feedID)
+		RETURNING feed_id`, url, userID, title, FeedURLKey(url)).Scan(&feedID)
 	if err != nil {
 		return 0, fmt.Errorf("subscribe to feed: %w", err)
 	}
@@ -148,6 +167,18 @@ func (r *FeedRepo) Subscriptions(ctx context.Context, userID types.UserId) ([]Fe
 		return nil, fmt.Errorf("collect subscriptions: %w", err)
 	}
 	return subs, nil
+}
+
+// HasSubscriptions reports whether the user follows any feed.
+func (r *FeedRepo) HasSubscriptions(ctx context.Context, userID types.UserId) (bool, error) {
+	var has bool
+	err := r.Pool.QueryRow(ctx, `
+		SELECT EXISTS (SELECT 1 FROM feed_subscriptions WHERE user_id = $1 AND unsubscribed_at IS NULL)`,
+		userID).Scan(&has)
+	if err != nil {
+		return false, fmt.Errorf("check feed subscriptions: %w", err)
+	}
+	return has, nil
 }
 
 // Stats counts active feeds and every post the user can search.
@@ -198,8 +229,9 @@ func (r *FeedRepo) Search(ctx context.Context, userID types.UserId, query string
 	return items, nil
 }
 
-// Recent lists the newest posts from feeds the user follows.
-func (r *FeedRepo) Recent(ctx context.Context, userID types.UserId, limit int) ([]FeedEntryItem, error) {
+// Recent lists the newest posts from feeds the user follows, optionally from
+// one feed only (feedID 0 means all), skipping the first offset posts.
+func (r *FeedRepo) Recent(ctx context.Context, userID types.UserId, feedID int64, limit, offset int) ([]FeedEntryItem, error) {
 	rows, err := r.Pool.Query(ctx, `
 		SELECT
 			e.id,
@@ -211,9 +243,9 @@ func (r *FeedRepo) Recent(ctx context.Context, userID types.UserId, limit int) (
 			e.published_at,
 			COALESCE((SELECT li.id FROM library_items li WHERE li.user_id = $2 AND li.link = e.canonical_url LIMIT 1), '') AS saved_bookmark_id
 		FROM feed_entries e`+visibleEntries+`
-		WHERE s.unsubscribed_at IS NULL
-		ORDER BY e.published_at DESC
-		LIMIT $1`, limit, userID)
+		WHERE s.unsubscribed_at IS NULL AND ($3::bigint = 0 OR e.feed_id = $3)
+		ORDER BY e.published_at DESC, e.id DESC
+		LIMIT $1 OFFSET $4`, limit, userID, feedID, offset)
 	if err != nil {
 		return nil, fmt.Errorf("recent feed entries: %w", err)
 	}

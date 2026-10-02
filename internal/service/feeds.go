@@ -135,6 +135,13 @@ func (f *Feeds) renderIndex(w http.ResponseWriter, r *http.Request, msgs ...web.
 		Subscriptions []models.FeedSubscription
 		Recent        []types.FeedSearchResult
 		Stats         models.FeedStats
+		// Set when viewing a single feed (?feed=ID)
+		Feed       *models.FeedSubscription
+		Page       int
+		PrevPage   int
+		NextPage   int
+		HasMore    bool
+		PageParams string // query string for page links, minus page
 	}
 	data.Title = "Feeds"
 	var err error
@@ -143,11 +150,31 @@ func (f *Feeds) renderIndex(w http.ResponseWriter, r *http.Request, msgs ...web.
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
-	recent, err := f.FeedModel.Recent(ctx, user.ID, feedRecentLimit)
+
+	var feedID int64
+	if id, err := strconv.ParseInt(r.URL.Query().Get("feed"), 10, 64); err == nil {
+		for i := range data.Subscriptions {
+			if data.Subscriptions[i].FeedID == id {
+				data.Feed = &data.Subscriptions[i]
+				data.Title = data.Feed.Title
+				data.PageParams = fmt.Sprintf("feed=%d&", id)
+				feedID = id
+			}
+		}
+	}
+	data.Page = validations.GetPageOffset(r.URL.Query().Get("page"))
+	data.PrevPage, data.NextPage = data.Page-1, data.Page+1
+
+	// Fetch one extra post to know whether there's an older page.
+	recent, err := f.FeedModel.Recent(ctx, user.ID, feedID, feedRecentLimit+1, (data.Page-1)*feedRecentLimit)
 	if err != nil {
 		logger.Errorw("list recent feed entries", "error", err)
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
+	}
+	if len(recent) > feedRecentLimit {
+		data.HasMore = true
+		recent = recent[:feedRecentLimit]
 	}
 	data.Recent = feedSearchResults(recent)
 	if data.Stats, err = f.FeedModel.Stats(ctx, user.ID); err != nil {
@@ -231,10 +258,13 @@ func (f *Feeds) Import(w http.ResponseWriter, r *http.Request) {
 	}
 	diff := diffSubscriptions(subs, fileFeeds)
 
-	for _, feedID := range diff.remove {
-		if err := f.FeedModel.Unsubscribe(ctx, user.ID, feedID); err != nil {
-			logger.Errorw("unsubscribe during import", "error", err, "feed_id", feedID)
+	var removedNames []string
+	for _, sub := range diff.remove {
+		if err := f.FeedModel.Unsubscribe(ctx, user.ID, sub.FeedID); err != nil {
+			logger.Errorw("unsubscribe during import", "error", err, "feed_id", sub.FeedID)
+			continue
 		}
+		removedNames = append(removedNames, sub.Title)
 	}
 	room := models.MaxFeedsPerUser - (len(subs) - len(diff.remove))
 	added, skipped := 0, 0
@@ -254,6 +284,9 @@ func (f *Feeds) Import(w http.ResponseWriter, r *http.Request) {
 	logger.Infow("OPML imported", "added", added, "removed", len(diff.remove), "unchanged", diff.unchanged, "skipped", skipped)
 
 	msg := fmt.Sprintf("Synced: %d added, %d removed, %d unchanged.", added, len(diff.remove), diff.unchanged)
+	if len(removedNames) > 0 {
+		msg += " No longer following: " + listNames(removedNames, 10) + "."
+	}
 	if added > 0 {
 		msg += " New posts will appear within a few minutes."
 	}
@@ -265,27 +298,32 @@ func (f *Feeds) Import(w http.ResponseWriter, r *http.Request) {
 
 type subscriptionDiff struct {
 	add       []OPMLFeed
-	remove    []int64
+	remove    []models.FeedSubscription
 	unchanged int
 }
 
 func diffSubscriptions(current []models.FeedSubscription, file []OPMLFeed) subscriptionDiff {
 	var diff subscriptionDiff
+	// Compare by FeedURLKey so http/https or trailing-slash differences between
+	// the reader's export and Pensive don't count as removed + added.
 	inFile := map[string]bool{}
 	for _, feed := range file {
-		inFile[feed.URL] = true
+		inFile[models.FeedURLKey(feed.URL)] = true
 	}
 	followed := map[string]bool{}
 	for _, sub := range current {
-		followed[sub.URL] = true
-		if inFile[sub.URL] {
+		key := models.FeedURLKey(sub.URL)
+		followed[key] = true
+		if inFile[key] {
 			diff.unchanged++
 		} else {
-			diff.remove = append(diff.remove, sub.FeedID)
+			diff.remove = append(diff.remove, sub)
 		}
 	}
 	for _, feed := range file {
-		if !followed[feed.URL] {
+		key := models.FeedURLKey(feed.URL)
+		if !followed[key] {
+			followed[key] = true // a file listing two variants adds one feed
 			diff.add = append(diff.add, feed)
 		}
 	}
@@ -412,6 +450,14 @@ func feedSearchResults(entries []models.FeedEntryItem) []types.FeedSearchResult 
 		}
 	}
 	return results
+}
+
+// listNames joins up to max names, summarizing the rest ("A, B and 3 more").
+func listNames(names []string, max int) string {
+	if len(names) <= max {
+		return strings.Join(names, ", ")
+	}
+	return fmt.Sprintf("%s and %d more", strings.Join(names[:max], ", "), len(names)-max)
 }
 
 func errorMessage(msg string) web.NavbarMessage {

@@ -123,7 +123,9 @@ func (model *BookmarkRepo) CreateWithContent(
 	}
 
 	// Check rate limit before creating new bookmark
-	if err := model.checkRateLimit(user); err != nil && source != Pocket {
+	// The daily limit exists to cap AI processing, which imports and feed saves skip.
+	if err := model.checkRateLimit(user); err != nil && source != Pocket &&
+		!(source == FeedSource && errors.Is(err, errors.ErrDailyLimitExceeded)) {
 		return nil, err
 	}
 
@@ -234,8 +236,8 @@ func (model *BookmarkRepo) CreateWithContent(
 		return nil, fmt.Errorf("bookmark create: %w", err)
 	}
 
-	// Generate AI content for all users except for imports (like Pocket)
-	if source != Pocket && model.GenAIClient != nil {
+	// Generate AI content for all users except imports (like Pocket) and feed saves
+	if source != Pocket && source != FeedSource && model.GenAIClient != nil {
 		// TODO: Should I also put content in db?
 		contentForMarkdown := article.TextContent
 		if article.Content != "" {
@@ -1333,10 +1335,11 @@ func (model *BookmarkRepo) checkRateLimit(user *User) error {
 	today := time.Now().Truncate(24 * time.Hour)
 	tomorrow := today.Add(24 * time.Hour)
 
+	// Feed saves get no AI processing, so they don't count towards the limit.
 	row := model.Pool.QueryRow(context.Background(), `
-		SELECT COUNT(*) FROM library_items 
-		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3
-	`, user.ID, today, tomorrow)
+		SELECT COUNT(*) FROM library_items
+		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND source <> $4
+	`, user.ID, today, tomorrow, sourceMapping[FeedSource])
 
 	var count int
 	if err := row.Scan(&count); err != nil {
@@ -1378,10 +1381,11 @@ func (model *BookmarkRepo) GetRemainingBookmarks(user *User) (int, error) {
 	today := time.Now().Truncate(24 * time.Hour)
 	tomorrow := today.Add(24 * time.Hour)
 
+	// Feed saves get no AI processing, so they don't count towards the limit.
 	row := model.Pool.QueryRow(context.Background(), `
-		SELECT COUNT(*) FROM library_items 
-		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3
-	`, user.ID, today, tomorrow)
+		SELECT COUNT(*) FROM library_items
+		WHERE user_id = $1 AND created_at >= $2 AND created_at < $3 AND source <> $4
+	`, user.ID, today, tomorrow, sourceMapping[FeedSource])
 
 	var count int
 	if err := row.Scan(&count); err != nil {

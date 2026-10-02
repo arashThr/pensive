@@ -1,3 +1,9 @@
+{{if .NoFeeds}}
+<div class="callout callout-info mb-6">
+  <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"/></svg>
+  <p>You don't follow any feeds yet, so Everything only searches your library. <a href="/feeds" class="link">Follow feeds</a> to search the posts of people you follow here too.</p>
+</div>
+{{end}}
 {{if .HasResults}}
 <div class="mb-4 flex items-baseline justify-between gap-4">
   <h2 class="eyebrow text-ink-faint">Your library</h2>

@@ -116,6 +116,7 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 		Query       string
 		HasResults  bool
 		Everything  bool // scope=all: also search posts from followed feeds
+		NoFeeds     bool // Everything was asked for, but the user follows no feeds
 		FeedResults []types.FeedSearchResult
 	}
 
@@ -138,11 +139,26 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	// Posts from followed feeds; a failure here shouldn't hide library results.
 	data.Everything = r.FormValue("scope") == "all"
 	if data.Everything && h.FeedModel != nil {
+		hasFeeds, err := h.FeedModel.HasSubscriptions(r.Context(), user.ID)
+		if err != nil {
+			logger.Errorw("failed to check feed subscriptions", "error", err, "user_id", user.ID)
+		}
+		data.NoFeeds = err == nil && !hasFeeds
+
 		entries, err := h.FeedModel.Search(r.Context(), user.ID, query, feedResultsLimit)
 		if err != nil {
 			logger.Errorw("failed to search feed entries", "error", err, "user_id", user.ID)
 		}
-		data.FeedResults = feedSearchResults(entries)
+		// Posts already saved show up under the library results; don't repeat them.
+		inLibrary := map[string]bool{}
+		for _, b := range data.Bookmarks {
+			inLibrary[string(b.Id)] = true
+		}
+		for _, result := range feedSearchResults(entries) {
+			if !inLibrary[result.SavedBookmarkID] {
+				data.FeedResults = append(data.FeedResults, result)
+			}
+		}
 	}
 	logger.Debugw("search results", "user_id", user.ID, "query", query, "count", len(data.Bookmarks))
 

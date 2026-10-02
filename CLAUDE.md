@@ -101,11 +101,12 @@ This is a Go web application for bookmarking and content management, featuring:
 ### Feeds Feature
 - **Purpose**: search-first, not a reader. `/home` search has a scope toggle: **Library** (saved bookmarks only, default) and **Everything** (`scope=all`, adds "From feeds you follow"). `/feeds` manages subscriptions and lists recent posts
 - **Reading view** (`/feeds/entries/{id}`): shows the post as the feed provides it (`feed_entries.content_html`, sanitized with bluemonday UGC at fetch time, relative URLs made absolute), with Save to library / Open original
-- **Storage**: `feeds` (one row per URL, shared across users), `feed_subscriptions` (user ↔ feed), `feed_entries` (kept indefinitely, plain-text content, weighted `search_vector`)
+- **Storage**: `feeds` (one row per normalized URL — `url_key` from `models.FeedURLKey` ignores scheme, `www.`, trailing slash, fragment and case — shared across users), `feed_subscriptions` (user ↔ feed), `feed_entries` (kept indefinitely, plain-text content, weighted `search_vector`)
 - **Unsubscribing** sets `feed_subscriptions.unsubscribed_at`; posts collected before that stay searchable for that user
-- **OPML sync** (`POST /feeds/import`): diff against active subscriptions — follow new, unfollow missing; an empty file changes nothing. Export at `/feeds/export`
+- **OPML sync** (`POST /feeds/import`): diff against active subscriptions by `url_key` — follow new, unfollow missing (named in the result message); an empty file changes nothing. Export at `/feeds/export`
 - **Fetcher**: `Feeds.StartScheduler` in `internal/service/feeds.go` ticks every minute, refreshes due feeds (hourly, conditional GET via ETag/Last-Modified, exponential backoff on errors up to 24h). The HTTP client in `feedfetch.go` refuses loopback/private/link-local addresses
-- **Saving** a post calls `BookmarkModel.Create` with `FeedSource`, so limits, capture and AI processing are the same as any bookmark
+- **Saving** a post calls `BookmarkModel.Create` with `FeedSource`: full page capture like any bookmark, but **no AI processing** (summary/tags/embedding) and **not counted towards the daily bookmark limit**, which exists to cap AI cost. Saved feed posts therefore don't appear in Ask AI. The unverified-account total cap still applies
+- **Browsing**: `/feeds?feed=ID` shows one feed's posts; recent posts page with `?page=N` (40 per page)
 - **Limits**: 300 active feeds per user (`models.MaxFeedsPerUser`)
 
 ### Podcast Feature
