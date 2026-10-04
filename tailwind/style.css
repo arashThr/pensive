@@ -239,7 +239,7 @@
     @apply h-7 cursor-pointer rounded-full px-3 text-[13px] font-medium text-ink-muted transition-colors hover:text-ink aria-checked:bg-ink aria-checked:text-paper aria-checked:hover:text-paper;
   }
   .nav-item {
-    @apply block w-full cursor-pointer rounded-lg px-3.5 py-2.5 text-left text-sm font-medium text-ink-muted transition-colors hover:bg-surface-strong hover:text-ink aria-selected:bg-accent-wash aria-selected:text-accent;
+    @apply block w-full cursor-pointer rounded-lg px-3.5 py-2.5 text-left text-sm font-medium text-ink-muted transition-colors hover:bg-surface-strong hover:text-ink aria-selected:bg-accent-wash aria-selected:text-accent aria-[current=page]:bg-accent-wash aria-[current=page]:text-accent;
   }
 
   /* Menus & modals */

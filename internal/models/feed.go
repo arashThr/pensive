@@ -169,16 +169,16 @@ func (r *FeedRepo) Subscriptions(ctx context.Context, userID types.UserId) ([]Fe
 	return subs, nil
 }
 
-// HasSubscriptions reports whether the user follows any feed.
-func (r *FeedRepo) HasSubscriptions(ctx context.Context, userID types.UserId) (bool, error) {
-	var has bool
+// SubscriptionCount returns how many feeds the user currently follows.
+func (r *FeedRepo) SubscriptionCount(ctx context.Context, userID types.UserId) (int, error) {
+	var n int
 	err := r.Pool.QueryRow(ctx, `
-		SELECT EXISTS (SELECT 1 FROM feed_subscriptions WHERE user_id = $1 AND unsubscribed_at IS NULL)`,
-		userID).Scan(&has)
+		SELECT COUNT(*) FROM feed_subscriptions WHERE user_id = $1 AND unsubscribed_at IS NULL`,
+		userID).Scan(&n)
 	if err != nil {
-		return false, fmt.Errorf("check feed subscriptions: %w", err)
+		return 0, fmt.Errorf("count feed subscriptions: %w", err)
 	}
-	return has, nil
+	return n, nil
 }
 
 // Stats counts active feeds and every post the user can search.

@@ -50,6 +50,7 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		HasBookmarksAtAll    bool
 		RemainingBookmarks   int
 		RemainingAIQuestions int
+		FeedCount            int
 	}{
 		Title:             "Home",
 		IsUserPremium:     user.IsSubscriptionPremium(),
@@ -77,6 +78,12 @@ func (h Home) Index(w http.ResponseWriter, r *http.Request) {
 		data.RemainingAIQuestions = 0
 	} else {
 		data.RemainingAIQuestions = remainingAI
+	}
+
+	if h.FeedModel != nil {
+		if data.FeedCount, err = h.FeedModel.SubscriptionCount(r.Context(), user.ID); err != nil {
+			logger.Warnw("failed to count feed subscriptions", "error", err, "user_id", user.ID)
+		}
 	}
 
 	logger.Debugw("home index loaded", "user_id", user.ID, "count", data.Count)
@@ -139,11 +146,11 @@ func (h Home) Search(w http.ResponseWriter, r *http.Request) {
 	// Posts from followed feeds; a failure here shouldn't hide library results.
 	data.Everything = r.FormValue("scope") == "all"
 	if data.Everything && h.FeedModel != nil {
-		hasFeeds, err := h.FeedModel.HasSubscriptions(r.Context(), user.ID)
+		feeds, err := h.FeedModel.SubscriptionCount(r.Context(), user.ID)
 		if err != nil {
-			logger.Errorw("failed to check feed subscriptions", "error", err, "user_id", user.ID)
+			logger.Errorw("failed to count feed subscriptions", "error", err, "user_id", user.ID)
 		}
-		data.NoFeeds = err == nil && !hasFeeds
+		data.NoFeeds = err == nil && feeds == 0
 
 		entries, err := h.FeedModel.Search(r.Context(), user.ID, query, feedResultsLimit)
 		if err != nil {

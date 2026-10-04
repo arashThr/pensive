@@ -22,11 +22,38 @@
 
 {{define "feed-save"}}
 {{if .SavedBookmarkID}}
-  <a href="/bookmarks/{{.SavedBookmarkID}}" class="badge badge-ok">In your library · view</a>
+  <a href="/bookmarks/{{.SavedBookmarkID}}" class="badge badge-ok" title="Open in your library">Saved</a>
 {{else}}
   <button type="button" class="btn btn-sm btn-secondary" hx-post="/feeds/entries/{{.ID}}/save" hx-swap="outerHTML" hx-disabled-elt="this">
     <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/></svg>
     Save to library
   </button>
 {{end}}
+{{end}}
+
+{{define "feed-row"}}
+<!-- Dense list row: the title link stretches over the row; icon actions sit above it -->
+<li class="relative flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface">
+  <img src="https://www.google.com/s2/favicons?domain={{.URL}}&sz=64" alt="" class="mt-0.5 size-4 shrink-0 rounded-sm" loading="lazy" onerror="this.style.visibility='hidden'" />
+  <div class="min-w-0 flex-1">
+    <a href="/feeds/entries/{{.ID}}" class="line-clamp-2 font-medium wrap-break-word text-ink after:absolute after:inset-0">{{.TitleHTML}}</a>
+    <p class="meta mt-0.5">
+      <span class="max-w-[70%] truncate">{{.FeedTitle}}</span>
+      <span aria-hidden="true">·</span>
+      <span>{{.PublishedAt.Format "Jan 2"}}</span>
+    </p>
+  </div>
+  <div class="relative z-10 flex shrink-0 items-center gap-1">
+    {{if .SavedBookmarkID}}
+      <a href="/bookmarks/{{.SavedBookmarkID}}" class="badge badge-ok" title="Open in your library">Saved</a>
+    {{else}}
+      <button type="button" class="btn-icon size-8" title="Save to library" aria-label="Save to library" hx-post="/feeds/entries/{{.ID}}/save" hx-swap="outerHTML" hx-disabled-elt="this">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linejoin="round" d="M6.5 2.5h11A1.5 1.5 0 0 1 19 4v16.2a.8.8 0 0 1-1.25.66L12 17l-5.75 3.86A.8.8 0 0 1 5 20.2V4a1.5 1.5 0 0 1 1.5-1.5z"/></svg>
+      </button>
+    {{end}}
+    <a href="{{.URL}}" target="_blank" rel="noopener" class="btn-icon size-8" title="Open original" aria-label="Open original">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+    </a>
+  </div>
+</li>
 {{end}}

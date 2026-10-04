@@ -84,16 +84,12 @@ This is a Go web application for bookmarking and content management, featuring:
 
 ### Semantic Search & RAG Features
 - **pgvector**: Vector similarity search using gemini-embedding-001 (768 dimensions) with HNSW index
-- **Dual Search Modes**:
-  - **Search Tab**: Traditional full-text search for instant results
-  - **Ask AI Tab**: RAG-based Q&A using vector search + Gemini to answer questions about bookmarks
+- **One search box**: typing runs full-text search; Enter with no matches (or the Ask AI button) runs RAG-based Q&A using vector search + Gemini
 - **Implementation**: `AskQuestion()` in `internal/models/bookmark.go` retrieves relevant bookmarks via vector search, then generates AI answers with source citations
-- **UI**: Tabbed HTMX interface with loading indicators and error handling for AI service failures
+- **UI**: `web/templates/home/home.gohtml` drives search/ask with a small fetch script (stale responses are dropped)
 
 ### Page Structure
-- **Home Page** (`/home`): Main interface with two tabs:
-  - Search tab: Full-text search and paginated bookmark list (default view)
-  - Ask AI tab: RAG-based Q&A about bookmarked content
+- **Home Page** (`/home`): search box with a Library / Everything scope toggle, dense "Recently saved" list, and a sidebar (save a link, counts, extensions)
 - **Individual Bookmark Pages** (`/bookmarks/{id}`): View and edit bookmarks
 - **Settings Page** (`/users/me`): User profile, tokens, import/export, data management
   - Preferences tab: weekly podcast (day, email/Telegram delivery) + daily briefing (hour, timezone, Telegram-only)

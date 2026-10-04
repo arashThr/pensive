@@ -1,7 +1,13 @@
 {{template "header" .}}
 
-<!-- Load marked.js for markdown rendering -->
+<!-- Markdown rendering; output is sanitized since the text comes from saved pages and AI -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<script>
+  function renderMarkdown(el, text, options) {
+    el.innerHTML = DOMPurify.sanitize(marked.parse(text, options));
+  }
+</script>
 
 <article class="page-narrow">
   <a href="/home" class="btn btn-sm btn-ghost -ml-3 mb-6">
@@ -64,9 +70,9 @@
     <!-- Opening paragraph -->
     <section>
       <h2 class="eyebrow mb-3 text-ink-faint">Opening paragraph</h2>
-      <div class="prose-archive">
-        {{if .AIExcerpt}}{{safeHTML .AIExcerpt}}{{else}}{{safeHTML .Excerpt}}{{end}}
-      </div>
+      <div id="excerptContent" class="prose-archive"></div>
+      <!-- Plain text: keep its line breaks -->
+      <script>renderMarkdown(document.getElementById('excerptContent'), {{if .AIExcerpt}}{{.AIExcerpt}}{{else}}{{.Excerpt}}{{end}}, {breaks: true});</script>
     </section>
 
     {{if .AISummary}}
@@ -78,7 +84,7 @@
         <h2 class="font-display text-xl font-semibold text-ink">Key insights</h2>
       </div>
       <div id="aiSummaryContent" class="prose-archive prose-compact"></div>
-      <script>document.getElementById('aiSummaryContent').innerHTML = marked.parse({{.AISummary}});</script>
+      <script>renderMarkdown(document.getElementById('aiSummaryContent'), {{.AISummary}});</script>
     </section>
     {{end}}
 
@@ -101,7 +107,7 @@
       </div>
       <div id="markdownContent" class="prose-archive"
         hx-get="/bookmarks/{{.Id}}/markdown-content" hx-trigger="load once"
-        hx-on:htmx:after-request="if(event.detail.xhr.status === 200) { this.innerHTML = marked.parse(event.detail.xhr.responseText); }">
+        hx-on:htmx:after-request="if(event.detail.xhr.status === 200) { renderMarkdown(this, event.detail.xhr.responseText); }">
         <div class="flex items-center justify-center gap-3 py-8 text-ink-muted">
           <span class="spinner"></span>
           Loading content…
