@@ -11,8 +11,6 @@ services:
       - app-network
     ports:
       - "127.0.0.1:8000:8000"
-    volumes:
-      - ~/credentials/service-account.json:/app/credentials/service-account.json:ro,z
     deploy:
       resources:
         limits:

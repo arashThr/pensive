@@ -55,11 +55,6 @@ type GeminiConfig struct {
 	TTSModel   string
 }
 
-type PodcastConfig struct {
-	GCPProjectID       string
-	ServiceAccountPath string // path to service-account.json; used in prod
-}
-
 type TelegramLoggerConfig struct {
 	Token  string
 	ChatID string
@@ -90,7 +85,6 @@ type AppConfig struct {
 	GitHub    GitHubOAuthConfig
 	Google    GoogleOAuthConfig
 	Gemini    GeminiConfig
-	Podcast   PodcastConfig
 }
 
 func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
@@ -169,11 +163,6 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 		FlashModel: GetEnvWithDefault("GEMINI_FLASH_MODEL", "gemini-3.5-flash-lite"),
 		ProModel:   GetEnvWithDefault("GEMINI_PRO_MODEL", "gemini-3.8-flash"),
 		TTSModel:   GetEnvWithDefault("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts"),
-	}
-
-	cfg.Podcast = PodcastConfig{
-		GCPProjectID:       GetEnvWithDefault("GCP_PROJECT_ID", ""),
-		ServiceAccountPath: GetEnvWithDefault("GCP_SERVICE_ACCOUNT_PATH", "/app/credentials/service-account.json"),
 	}
 
 	return &cfg, nil

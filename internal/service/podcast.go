@@ -63,8 +63,6 @@ type Podcast struct {
 	TTSModel            string
 	ScriptModel         string
 	VoiceName           string
-	GCPProjectID        string        // Deprecated: kept for backwards compatibility
-	ServiceAccountPath  string        // Deprecated: kept for backwards compatibility
 	TelegramToken       string
 	Environment         config.AppEnv
 	Domain              string

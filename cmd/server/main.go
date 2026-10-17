@@ -251,8 +251,6 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		GenAIClient:         genAIClient,
 		TTSModel:            cfg.Gemini.TTSModel,
 		ScriptModel:         cfg.Gemini.ProModel,
-		GCPProjectID:        cfg.Podcast.GCPProjectID,
-		ServiceAccountPath:  cfg.Podcast.ServiceAccountPath,
 		TelegramToken:       cfg.Telegram.Token,
 		Environment:         cfg.Environment,
 		Domain:              cfg.Domain,

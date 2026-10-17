@@ -45,7 +45,7 @@ This is a Go web application for bookmarking and content management, featuring:
 
 ### Podcast / TTS Testing (Local)
 - Admin trigger endpoint: `POST /admin/podcast/trigger` — manually fires a weekly episode for a user
-- `GCP_PROJECT_ID` and `GCP_SERVICE_ACCOUNT_PATH` must be set; ADC is used locally if `GCP_SERVICE_ACCOUNT_PATH` is empty
+- `GEMINI_API_KEY` must be set in `.env`
 - `ffmpeg` must be installed locally for multi-chunk audio concatenation
 
 ### Stripe Testing (Local)
@@ -133,7 +133,6 @@ This is a Go web application for bookmarking and content management, featuring:
 - Docker multi-stage build (Tailwind → Go build → Alpine runtime)
 - Alpine runtime image includes `ffmpeg` (`apk add --no-cache ffmpeg`) for podcast audio concatenation
 - `.env` is **not** baked into the image; it is mounted at runtime from `~/credentials/.env` on the server
-- GCP service account JSON is mounted from `~/credentials/service-account.json` into the container at the path defined by `GCP_SERVICE_ACCOUNT_PATH`
 - Production deployment via `post-receive-hook` script with `--env-file ~/credentials/.env`
 - Supports environment-specific compose files
 - Database migrations handled during startup
@@ -142,11 +141,10 @@ This is a Go web application for bookmarking and content management, featuring:
 - `modd.conf` - File watcher configuration for development
 - `go.mod` - Go module dependencies
 - `compose.yml` - Docker services configuration
-- `compose.production.yml` - Production overrides (volume mounts for credentials, resource limits)
+- `compose.production.yml` - Production overrides (resource limits)
 - `internal/db/migrations/` - Database schema migrations
 - `internal/models/podcast.go` - `PodcastScheduleRepo` — unified weekly+daily schedule repo
 - `internal/service/podcast.go` - Podcast generation, TTS chunking, scheduler goroutines
 - `web/templates/user/preferences-tab.gohtml` - Weekly + daily podcast preference UI
 - `web/templates/` - HTML templates
 - `Dockerfile` - Multi-stage container build
-- `credentials/google.md` - Notes on GCP service account setup (file itself is gitignored)
