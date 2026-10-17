@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -80,6 +81,22 @@ type BookmarkWithContent struct {
 type BookmarkRepo struct {
 	Pool        *pgxpool.Pool
 	GenAIClient *genai.Client
+	FlashModel  string
+	ProModel    string
+}
+
+func (model *BookmarkRepo) flashModel() string {
+	if model.FlashModel != "" {
+		return model.FlashModel
+	}
+	return "gemini-3.5-flash-lite"
+}
+
+func (model *BookmarkRepo) proModel() string {
+	if model.ProModel != "" {
+		return model.ProModel
+	}
+	return "gemini-3.8-flash"
 }
 
 // TODO: Add validation of the db query inputs (Like Id)
@@ -594,105 +611,69 @@ func (model *BookmarkRepo) promptToGetAIData(htmlContent string) (*aiDataRespons
 		htmlContent = htmlContent[:8000] + "... [SKIPPED CONTENT] ..." + htmlContent[len(htmlContent)-2000:]
 	}
 
-	prompt := `You are an expert at analyzing HTML content and converting it to clean, well-formatted Markdown. Your task is to process the provided HTML content and return FOUR separate outputs using the following structured format:
-
-===MARKDOWN===
-[Convert the HTML to clean markdown here]
-===END MARKDOWN===
-
-===SUMMARY===
-[Write a concise one-paragraph summary here]
-===END SUMMARY===
-
-===EXCERPT===
-[Extract one representative paragraph from the article here]
-===END EXCERPT===
-
-===TAGS===
-[comma,separated,list,of,relevant,tags]
-===END TAGS===
-
-Instructions for each output:
-
-MARKDOWN:
-1. Convert HTML headings (h1-h6) to appropriate Markdown headings (# to ######)
-2. Convert HTML lists (ul, ol, li) to Markdown lists (-, *, 1.)
-3. Convert HTML links (<a>) to Markdown links [text](url)
-4. Convert HTML emphasis (<em>, <i>) to *italic*
-5. Convert HTML strong (<strong>, <b>) to **bold**
-6. Convert HTML code blocks (<pre>, <code>) to Markdown code blocks
-7. Convert HTML blockquotes to Markdown blockquotes (>)
-8. Convert HTML tables to Markdown tables when possible
-9. Convert HTML images to Markdown images ![alt](src)
-10. Remove all HTML tags that don't contribute to content structure
-11. Preserve paragraph breaks and line spacing for readability
-12. Remove navigation menus, sidebars, footers, and other non-content elements
-13. Focus on the main article/content body
-14. Ensure the output is clean and properly formatted Markdown
-15. Only keep the main content of the page and throw away all the meta content
-
-SUMMARY:
-- Write a concise one-paragraph summary (2-3 sentences) of the main content
-- Focus on the key points and main message of the article
-- Preferably present the key points in bullet points if possible
-- Use clear, professional language
-- Keep it under 200 words
-
-EXCERPT:
-- Look for what can be considered as the main content of the article
-- The main content is the content that is most relevant to the user
-- Pick the first paragraph of the main content
-- Use the exact text (without any formatting) as it appears in the article (verbatim)
-- Keep it under 200 words
-
-TAGS:
-- Generate 5-8 relevant tags that describe the content
-- Use lowercase, single words or short phrases
-- Separate with commas, no spaces after commas
-- Focus on topics, themes, and key concepts
-- Examples: technology,programming,web development,ai,machine learning
+	prompt := `You are an expert at analyzing HTML content and converting it to clean, well-formatted Markdown. Process the provided HTML content and return a JSON object with:
+1. markdown: Clean, well-formatted Markdown of the main article body. Remove non-content elements (navigation, headers, footers, sidebars). Convert headings (# to ######), lists, links, emphasis, code blocks, blockquotes, tables, and images. Preserve paragraph breaks. Throw away meta content and ads.
+2. summary: A concise one-paragraph summary (2-3 sentences, key points, under 200 words) of the main content.
+3. excerpt: The first representative paragraph of the main content verbatim (under 200 words).
+4. tags: 5-8 relevant lowercase tags describing the content, separated by commas without spaces (e.g. "technology,programming,web development").
 
 HTML content to process:
 ` + htmlContent
 
+	schema := &genai.Schema{
+		Type: genai.TypeObject,
+		Properties: map[string]*genai.Schema{
+			"markdown": {
+				Type:        genai.TypeString,
+				Description: "Clean, well-formatted Markdown converted from the main content of the HTML.",
+			},
+			"summary": {
+				Type:        genai.TypeString,
+				Description: "A concise one-paragraph summary (2-3 sentences, under 200 words) of the main content.",
+			},
+			"excerpt": {
+				Type:        genai.TypeString,
+				Description: "The first representative paragraph of the main content verbatim (under 200 words).",
+			},
+			"tags": {
+				Type:        genai.TypeString,
+				Description: "Comma-separated list of 5-8 relevant lowercase tags.",
+			},
+		},
+		Required: []string{"markdown", "summary", "excerpt", "tags"},
+	}
+
+	config := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+		ResponseSchema:   schema,
+	}
+
 	ctx := context.Background()
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-3-flash-preview",
+		model.flashModel(),
 		genai.Text(prompt),
-		nil,
+		config,
 	)
 	if err != nil {
 		logging.Telegram.SendMessage(fmt.Sprintf("Failed to generate content with Gemini: %v", err))
 		return nil, fmt.Errorf("generate content with Gemini: %w", err)
 	}
 
-	responseText := result.Text()
-
-	// Parse the structured response
-	aiDataResponse := &aiDataResponseType{}
-
-	// Extract markdown
-	if markdownMatch := regexp.MustCompile(`(?s)===MARKDOWN===\n(.*?)\n===END MARKDOWN===`).FindStringSubmatch(responseText); len(markdownMatch) > 1 {
-		aiDataResponse.Markdown = strings.TrimSpace(markdownMatch[1])
+	responseText := strings.TrimSpace(result.Text())
+	var aiDataResponse aiDataResponseType
+	if err := json.Unmarshal([]byte(responseText), &aiDataResponse); err != nil {
+		// Clean potential markdown code block fence if model wrapped the JSON
+		cleaned := strings.TrimPrefix(responseText, "```json")
+		cleaned = strings.TrimPrefix(cleaned, "```")
+		cleaned = strings.TrimSuffix(cleaned, "```")
+		cleaned = strings.TrimSpace(cleaned)
+		if fallbackErr := json.Unmarshal([]byte(cleaned), &aiDataResponse); fallbackErr != nil {
+			return nil, fmt.Errorf("unmarshal AI data JSON: %w (raw response: %s)", err, responseText)
+		}
 	}
 
-	// Extract summary
-	if summaryMatch := regexp.MustCompile(`(?s)===SUMMARY===\n(.*?)\n===END SUMMARY===`).FindStringSubmatch(responseText); len(summaryMatch) > 1 {
-		aiDataResponse.Summary = strings.TrimSpace(summaryMatch[1])
-	}
-
-	// Extract excerpt
-	if excerptMatch := regexp.MustCompile(`(?s)===EXCERPT===\n(.*?)\n===END EXCERPT===`).FindStringSubmatch(responseText); len(excerptMatch) > 1 {
-		aiDataResponse.Excerpt = strings.TrimSpace(excerptMatch[1])
-	}
-
-	// Extract tags
-	if tagsMatch := regexp.MustCompile(`(?s)===TAGS===\n(.*?)\n===END TAGS===`).FindStringSubmatch(responseText); len(tagsMatch) > 1 {
-		aiDataResponse.Tags = strings.TrimSpace(tagsMatch[1])
-	}
-
-	return aiDataResponse, nil
+	return &aiDataResponse, nil
 }
 
 // generateEmbedding generates a vector embedding for the given text using Google's embedding model
@@ -1022,6 +1003,7 @@ func (model *BookmarkRepo) performVectorSearch(ctx context.Context, user *User, 
 	rows, err := model.Pool.Query(ctx, `
 		SELECT
 			COALESCE(li.excerpt, lc.excerpt, '(No excerpt available)') AS headline,
+			li.title AS title_headline,
 			li.id AS id,
 			li.title AS title,
 			li.link AS link,
@@ -1135,7 +1117,7 @@ Answer:`, question, strings.Join(contexts, "\n---\n"))
 
 	logger.Infow("calling Gemini for RAG answer",
 		"question", question,
-		"model", "gemini-3-flash-preview",
+		"model", model.proModel(),
 		"num_sources", len(contexts),
 		"prompt_size", len(prompt))
 
@@ -1143,7 +1125,7 @@ Answer:`, question, strings.Join(contexts, "\n---\n"))
 	ragStart := time.Now()
 	result, err := model.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-3-flash-preview",
+		model.proModel(),
 		genai.Text(prompt),
 		nil,
 	)

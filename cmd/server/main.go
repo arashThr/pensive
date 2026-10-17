@@ -134,6 +134,8 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 	bookmarkRepo := &models.BookmarkRepo{
 		Pool:        pool,
 		GenAIClient: genAIClient,
+		FlashModel:  cfg.Gemini.FlashModel,
+		ProModel:    cfg.Gemini.ProModel,
 	}
 	telegramRepo := &models.TelegramRepo{
 		Pool: pool,
@@ -247,6 +249,8 @@ func newServiceContainer(cfg *config.AppConfig, pool *pgxpool.Pool, ctx context.
 		UserRepo:            userRepo,
 		EmailService:        emailService,
 		GenAIClient:         genAIClient,
+		TTSModel:            cfg.Gemini.TTSModel,
+		ScriptModel:         cfg.Gemini.ProModel,
 		GCPProjectID:        cfg.Podcast.GCPProjectID,
 		ServiceAccountPath:  cfg.Podcast.ServiceAccountPath,
 		TelegramToken:       cfg.Telegram.Token,

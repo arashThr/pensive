@@ -49,6 +49,12 @@ type GoogleOAuthConfig struct {
 	ClientSecret string
 }
 
+type GeminiConfig struct {
+	FlashModel string
+	ProModel   string
+	TTSModel   string
+}
+
 type PodcastConfig struct {
 	GCPProjectID       string
 	ServiceAccountPath string // path to service-account.json; used in prod
@@ -83,6 +89,7 @@ type AppConfig struct {
 	Turnstile TurnstileConfig
 	GitHub    GitHubOAuthConfig
 	Google    GoogleOAuthConfig
+	Gemini    GeminiConfig
 	Podcast   PodcastConfig
 }
 
@@ -156,6 +163,12 @@ func LoadEnvConfig(envFiles ...string) (*AppConfig, error) {
 	cfg.Google = GoogleOAuthConfig{
 		ClientID:     GetEnvOrDie("GOOGLE_CLIENT_ID"),
 		ClientSecret: GetEnvOrDie("GOOGLE_CLIENT_SECRET"),
+	}
+
+	cfg.Gemini = GeminiConfig{
+		FlashModel: GetEnvWithDefault("GEMINI_FLASH_MODEL", "gemini-3.5-flash-lite"),
+		ProModel:   GetEnvWithDefault("GEMINI_PRO_MODEL", "gemini-3.8-flash"),
+		TTSModel:   GetEnvWithDefault("GEMINI_TTS_MODEL", "gemini-3.8-flash-lite-tts"),
 	}
 
 	cfg.Podcast = PodcastConfig{
