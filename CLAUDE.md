@@ -74,9 +74,9 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Database**: PostgreSQL with pgx driver
 - **Templating**: Go templates with HTMX for dynamic content
 - **Auth**: Multiple OAuth providers + session-based auth + password-based auth with email verification
-- **AI**: Google Gemini for content summarization and podcast script generation
-- **TTS**: Google Cloud TTS (Gemini 2.5 Flash TTS) via HTTP API with oauth2 ADC / service account auth
-- **Audio**: `ffmpeg` (in Alpine runtime image) for concatenating OGG Opus chunks
+- **AI**: Google Gemini (`gemini-3.5-flash-lite` for content summarization/extraction, `gemini-3.8-flash` for RAG and podcast scripts)
+- **TTS**: Google AI Studio TTS (`gemini-3.8-flash-lite-tts`) via `google.golang.org/genai` SDK using `GEMINI_API_KEY`
+- **Audio**: `ffmpeg` (in Alpine runtime image) for concatenating and encoding OGG Opus chunks
 - **Payments**: Stripe for subscription management
 - **Logging**: Zap for structured logging
 - **CSS**: TailwindCSS (built in separate container)
@@ -108,8 +108,8 @@ This is a Go web application for bookmarking and content management, featuring:
 - **Limits**: 300 active feeds per user (`models.MaxFeedsPerUser`)
 
 ### Podcast Feature
-- **Script generation**: Gemini generates a full markdown podcast script from recent bookmarks, then a second Gemini call strips it to plain narration text
-- **TTS**: `callGoogleTTS` in `internal/service/podcast.go` splits the script into ≤3500-byte chunks (paragraph → sentence boundaries), calls Google Cloud TTS sequentially per chunk, writes temp OGG files, and concatenates with `ffmpeg -f concat -c copy`
+- **Script generation**: Gemini (`gemini-3.8-flash`) generates a full markdown podcast script from recent bookmarks
+- **TTS**: `callGoogleTTS` in `internal/service/podcast.go` splits the script into ≤3500-byte chunks, calls Google AI Studio TTS (`gemini-3.8-flash-lite-tts`) via GenAI SDK using `GEMINI_API_KEY`, and stitches/encodes with `ffmpeg` into OGG Opus
 - **Schedulers**: Two background goroutines — `StartScheduler` (weekly) and `StartDailyScheduler` (daily) — each tick every minute and call `GetDue(scheduleType)` on the unified `podcast_schedules` table
 - **State machine**: `pending → processing → sent/failed/timed_out`; `ReapTimedOut` reclaims stale processing rows across all types
 - **Delivery**: Completed audio is emailed as attachment and/or sent via Telegram bot depending on user preferences

@@ -1,45 +1,24 @@
 # How to setup Gemini TTS
-
-On local, we can use Google Cloud CLI for authentication.
-To authenticate on the server, you will need service acocunt key.
-
-## Create Service Account
-
-1. Go to **Google Cloud Console**
-2. IAM & Admin → Service Accounts
-3. Click **Create Service Account**
-
-## Add Required Roles
-
-Grant:
-
-* **Vertex AI Service Agent**
-* **Vertex AI User**
-
-(Optional but safe alternative: `Editor` if testing only)
-
-## Create JSON Key
-
-1. Open the service account
-2. Go to **Keys**
-3. Click **Add Key**
-4. Select **JSON**
-5. Download the file
-6. Upload it to your server as:
-
+ 
+Gemini Text-to-Speech (TTS) is powered directly by Google AI Studio through the official `google.golang.org/genai` Go SDK.
+ 
+## Requirements
+ 
+1. Obtain an API key from [Google AI Studio](https://aistudio.google.com/).
+2. Add your key to your `.env` file:
+ 
 ```bash
-service-account.json
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
-
-Secure it:
-
+ 
+## Configuration (Optional)
+ 
+You can customize the models and voices in your `.env` file:
+ 
 ```bash
-chmod 600 service-account.json
+GEMINI_FLASH_MODEL=gemini-3.5-flash-lite
+GEMINI_PRO_MODEL=gemini-3.8-flash
+GEMINI_TTS_MODEL=gemini-3.8-flash-lite-tts
 ```
-
-## Enable Required APIs
-
-Make sure these are enabled in your project:
-
-* Vertex AI API
-* Cloud Text-to-Speech API
+ 
+No Google Cloud service account or OAuth credentials are required. Audio generation is handled directly via `GEMINI_API_KEY`.

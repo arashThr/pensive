@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,8 +22,6 @@ import (
 	"github.com/arashthr/pensive/internal/models"
 	"github.com/arashthr/pensive/internal/types"
 	"github.com/go-chi/chi/v5"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/genai"
 )
 
@@ -34,7 +31,6 @@ const (
 	PodcastArticleLimit = 10 // Max 10 articles per podcast
 	PodcastUploadDir    = "uploads/podcasts"
 	PodcastSummaryDir   = "uploads/podcasts/summary"
-	gcpTTSEndpoint      = "https://texttospeech.googleapis.com/v1/text:synthesize"
 	gcpTTSTimeout       = 10 * time.Minute // generous timeout; TTS can be slow for long texts
 
 	// TODO: Increase it to an hour when testing it done
@@ -64,11 +60,35 @@ type Podcast struct {
 	UserRepo            *models.UserRepo
 	EmailService        *EmailService
 	GenAIClient         *genai.Client
-	GCPProjectID        string
-	ServiceAccountPath  string // path to service-account.json; used in prod
+	TTSModel            string
+	ScriptModel         string
+	VoiceName           string
+	GCPProjectID        string        // Deprecated: kept for backwards compatibility
+	ServiceAccountPath  string        // Deprecated: kept for backwards compatibility
 	TelegramToken       string
-	Environment         config.AppEnv // "production" uses service account; anything else uses ADC
+	Environment         config.AppEnv
 	Domain              string
+}
+
+func (p *Podcast) ttsModel() string {
+	if p.TTSModel != "" {
+		return p.TTSModel
+	}
+	return "gemini-3.8-flash-lite-tts"
+}
+
+func (p *Podcast) scriptModel() string {
+	if p.ScriptModel != "" {
+		return p.ScriptModel
+	}
+	return "gemini-3.8-flash"
+}
+
+func (p *Podcast) voiceName() string {
+	if p.VoiceName != "" {
+		return p.VoiceName
+	}
+	return "Iapetus"
 }
 
 // ServeEpisode serves a podcast audio file to its authenticated owner.
@@ -399,7 +419,7 @@ const ttsChunkMaxBytes = 3500
 // It is replaced with a paragraph break before TTS so the voice pauses naturally.
 const articleBreakMarker = "[ARTICLE_BREAK]"
 
-// callGoogleTTS synthesises the full script as OGG Opus audio.
+// callGoogleTTS synthesises the full script as OGG Opus audio using Google AI Studio Gemini TTS.
 // [ARTICLE_BREAK] markers are converted to paragraph breaks before chunking so the
 // TTS voice pauses naturally at section boundaries.
 func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error) {
@@ -408,16 +428,14 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 
 	start := time.Now()
 	ttsLogger := logging.Logger.With("flow", "podcast")
-	ttsLogger.Debugw("calling Google TTS", "script_len", len(text))
+	ttsLogger.Debugw("calling Google AI Studio TTS",
+		"script_len", len(text),
+		"model", p.ttsModel(),
+		"voice", p.voiceName())
 	defer func() {
 		ttsLogger.Infow("Google TTS completed",
 			"elapsed", time.Since(start).Round(time.Millisecond).String())
 	}()
-
-	httpClient, err := p.buildGCPHTTPClient(ctx)
-	if err != nil {
-		return nil, err
-	}
 
 	// Replace article-break markers with paragraph breaks for natural TTS pauses.
 	text = strings.ReplaceAll(text, articleBreakMarker, "\n\n")
@@ -425,11 +443,6 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	chunks := splitTextIntoChunks(text, ttsChunkMaxBytes)
 	ttsLogger.Infow("TTS chunks", "count", len(chunks))
 
-	if len(chunks) == 1 {
-		return p.callGoogleTTSChunk(ctx, httpClient, chunks[0])
-	}
-
-	// Multi-chunk: synthesise each part, then stitch with ffmpeg.
 	tmpDir, err := os.MkdirTemp("", "podcast-tts-*")
 	if err != nil {
 		return nil, fmt.Errorf("create temp dir: %w", err)
@@ -439,7 +452,7 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	var chunkPaths []string
 	for i, chunk := range chunks {
 		chunkStart := time.Now()
-		audio, err := p.callGoogleTTSChunk(ctx, httpClient, chunk)
+		audio, err := p.callGoogleTTSChunk(ctx, chunk)
 		if err != nil {
 			return nil, fmt.Errorf("TTS chunk %d: %w", i, err)
 		}
@@ -449,14 +462,43 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 			"text_bytes", len(chunk),
 			"audio_bytes", len(audio),
 			"elapsed", time.Since(chunkStart).Round(time.Millisecond))
-		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.ogg", i))
+
+		ext := "wav"
+		if len(audio) >= 4 {
+			switch {
+			case string(audio[:4]) == "OggS":
+				ext = "ogg"
+			case string(audio[:4]) == "RIFF":
+				ext = "wav"
+			case string(audio[:3]) == "ID3" || (audio[0] == 0xff && (audio[1]&0xe0) == 0xe0):
+				ext = "mp3"
+			}
+		}
+
+		path := filepath.Join(tmpDir, fmt.Sprintf("chunk_%03d.%s", i, ext))
 		if err := os.WriteFile(path, audio, 0644); err != nil {
 			return nil, fmt.Errorf("write TTS chunk %d: %w", i, err)
 		}
 		chunkPaths = append(chunkPaths, path)
 	}
 
-	// Build ffmpeg concat-list file.
+	outputPath := filepath.Join(tmpDir, "output.ogg")
+
+	if len(chunkPaths) == 1 {
+		cmd := exec.CommandContext(ctx, "ffmpeg",
+			"-y",
+			"-i", chunkPaths[0],
+			"-c:a", "libopus",
+			"-b:a", "64k",
+			outputPath,
+		)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			return nil, fmt.Errorf("ffmpeg encode: %w\noutput: %s", err, out)
+		}
+		return os.ReadFile(outputPath)
+	}
+
+	// Multi-chunk: build ffmpeg concat-list file.
 	var listBuf strings.Builder
 	for _, path := range chunkPaths {
 		fmt.Fprintf(&listBuf, "file '%s'\n", path)
@@ -466,13 +508,13 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 		return nil, fmt.Errorf("write ffmpeg list: %w", err)
 	}
 
-	outputPath := filepath.Join(tmpDir, "output.ogg")
 	cmd := exec.CommandContext(ctx, "ffmpeg",
 		"-y",
 		"-f", "concat",
 		"-safe", "0",
 		"-i", listPath,
-		"-c", "copy",
+		"-c:a", "libopus",
+		"-b:a", "64k",
 		outputPath,
 	)
 	if out, err := cmd.CombinedOutput(); err != nil {
@@ -482,83 +524,52 @@ func (p *Podcast) callGoogleTTS(ctx context.Context, text string) ([]byte, error
 	return os.ReadFile(outputPath)
 }
 
-// buildGCPHTTPClient returns an oauth2 HTTP client authenticated for Cloud TTS.
-func (p *Podcast) buildGCPHTTPClient(ctx context.Context) (*http.Client, error) {
-	if p.Environment == config.EnvProduction && p.ServiceAccountPath != "" {
-		credsJSON, err := os.ReadFile(p.ServiceAccountPath)
-		if err != nil {
-			return nil, fmt.Errorf("read service account: %w", err)
-		}
-		creds, err := google.CredentialsFromJSON(ctx, credsJSON, "https://www.googleapis.com/auth/cloud-platform")
-		if err != nil {
-			return nil, fmt.Errorf("parse service account credentials: %w", err)
-		}
-		return oauth2.NewClient(ctx, creds.TokenSource), nil
+// callGoogleTTSChunk sends a single text chunk to Google AI Studio TTS via GenAI SDK and returns audio bytes.
+func (p *Podcast) callGoogleTTSChunk(ctx context.Context, text string) ([]byte, error) {
+	if p.GenAIClient == nil {
+		return nil, fmt.Errorf("GenAI client not initialized")
 	}
-	creds, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/cloud-platform")
-	if err != nil {
-		return nil, fmt.Errorf("find default credentials (ADC): %w", err)
-	}
-	return oauth2.NewClient(ctx, creds.TokenSource), nil
-}
 
-// callGoogleTTSChunk sends a single text chunk to the TTS API and returns OGG bytes.
-func (p *Podcast) callGoogleTTSChunk(ctx context.Context, httpClient *http.Client, text string) ([]byte, error) {
 	const podcastHostPrompt = "Read this briefing aloud as a clear, precise AI assistant. " +
 		"Confident and direct, with a little bit of friendliness. Moderate pace, clean delivery."
 
-	reqBody := map[string]any{
-		"input": map[string]string{
-			"prompt": podcastHostPrompt,
-			"text":   text,
+	config := &genai.GenerateContentConfig{
+		ResponseModalities: []string{"AUDIO"},
+		SpeechConfig: &genai.SpeechConfig{
+			VoiceConfig: &genai.VoiceConfig{
+				PrebuiltVoiceConfig: &genai.PrebuiltVoiceConfig{
+					VoiceName: p.voiceName(),
+				},
+			},
 		},
-		"voice": map[string]any{
-			"languageCode": "en-us",
-			"name":         "Iapetus",
-			"model_name":   "gemini-2.5-flash-tts",
-		},
-		"audioConfig": map[string]any{
-			"audioEncoding":   "OGG_OPUS",
-			"sampleRateHertz": 24000,
+		SystemInstruction: &genai.Content{
+			Parts: []*genai.Part{
+				genai.NewPartFromText(podcastHostPrompt),
+			},
 		},
 	}
 
-	jsonData, err := json.Marshal(reqBody)
+	result, err := p.GenAIClient.Models.GenerateContent(
+		ctx,
+		p.ttsModel(),
+		genai.Text(text),
+		config,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("marshal TTS request: %w", err)
+		return nil, fmt.Errorf("generate audio with Gemini: %w", err)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, gcpTTSEndpoint, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return nil, fmt.Errorf("create TTS request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-goog-user-project", p.GCPProjectID)
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("call TTS API: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("TTS API returned %s: %s", resp.Status, body)
+	for _, cand := range result.Candidates {
+		if cand.Content != nil {
+			for _, part := range cand.Content.Parts {
+				if part.InlineData != nil && len(part.InlineData.Data) > 0 {
+					return part.InlineData.Data, nil
+				}
+			}
+		}
 	}
 
-	var result struct {
-		AudioContent string `json:"audioContent"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, fmt.Errorf("decode TTS response: %w", err)
-	}
-
-	audioBytes, err := base64.StdEncoding.DecodeString(result.AudioContent)
-	if err != nil {
-		return nil, fmt.Errorf("decode base64 audio: %w", err)
-	}
-
-	return audioBytes, nil
+	return nil, fmt.Errorf("no audio content returned from Gemini TTS")
 }
 
 // splitTextIntoChunks splits text at paragraph (\n\n) boundaries into chunks
@@ -960,7 +971,7 @@ This is an audio processing marker — it will never be spoken. Place it:
 	start := time.Now()
 	result, err := p.GenAIClient.Models.GenerateContent(
 		ctx,
-		"gemini-3-flash-preview",
+		p.scriptModel(),
 		genai.Text(prompt.String()),
 		nil,
 	)
