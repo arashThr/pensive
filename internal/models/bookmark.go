@@ -1243,8 +1243,9 @@ func getPage(link string) (*http.Response, error) {
 	}
 
 	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
-	req.Header.Set("User-Agent", "Mozilla/5.0")
-	req.Header.Set("Accept", "*/*")
+	// Some servers (e.g. mod_security rules) reject a bare "Mozilla/5.0" UA with 406, so send a full browser UA
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 Firefox/131.0")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
 
